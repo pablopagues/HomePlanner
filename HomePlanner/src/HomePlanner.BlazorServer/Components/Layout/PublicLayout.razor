@@ -1,0 +1,52 @@
+@inherits LayoutComponentBase
+@using HomePlanner.BlazorServer.Theme
+@using HomePlanner.BlazorServer.Services
+@using HomePlanner.BlazorServer.Components.Shared
+@inject IStringLocalizer<SharedResource> L
+@inject PublicLanguageService Lang
+
+<MudThemeProvider Theme="HomePlannerTheme.Tema" />
+<MudPopoverProvider />
+<MudSnackbarProvider />
+<MudDialogProvider />
+
+<div class="public-layout">
+    @Body
+
+    <footer class="public-layout-footer">
+        <MudContainer MaxWidth="MaxWidth.Large">
+            <MudGrid Class="align-center">
+                <MudItem xs="12" md="4">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                        © @DateTime.Now.Year HomePlanner · @L["Landing_BySideris"]
+                    </MudText>
+                </MudItem>
+                <MudItem xs="12" md="4" Class="text-center">
+                    <LanguageToggle />
+                </MudItem>
+                <MudItem xs="12" md="4" Class="text-md-right">
+                    <MudLink Href="@Lang.U("/privacidade")" Typo="Typo.caption" Class="mr-3">@L["Footer_Privacidade"]</MudLink>
+                    <MudLink Href="@Lang.U("/termos")" Typo="Typo.caption" Class="mr-3">@L["Footer_Termos"]</MudLink>
+                    <MudLink Href="@Lang.U("/contato")" Typo="Typo.caption">@L["Footer_Contato"]</MudLink>
+                </MudItem>
+            </MudGrid>
+        </MudContainer>
+    </footer>
+</div>
+
+<style>
+    .public-layout-footer {
+        margin-top: 48px;
+        padding: 24px 0;
+        border-top: 1px solid #E8DDD1;
+        background: #F5F0EA;
+    }
+    /* A landing tem footer próprio — esconde o do layout para não duplicar */
+    .landing-container ~ .public-layout-footer {
+        display: none;
+    }
+</style>
+
+@code {
+    protected override void OnInitialized() => Lang.SetLang(Lang.Lang);
+}

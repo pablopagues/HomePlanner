@@ -1,0 +1,84 @@
+@inherits LayoutComponentBase
+@using HomePlanner.BlazorServer.Theme
+@using HomePlanner.BlazorServer.Services
+@using HomePlanner.BlazorServer.Components.Shared
+@inject IStringLocalizer<SharedResource> L
+@inject PublicLanguageService Lang
+
+<MudThemeProvider Theme="HomePlannerTheme.Tema" />
+<MudSnackbarProvider />
+<MudDialogProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1" Color="Color.Surface" Dense="false">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit"
+                       Edge="Edge.Start" OnClick="ToggleDrawer" />
+        <MudText Typo="Typo.h6" Class="ml-3"
+                 Style="font-family: 'Fraunces', serif; font-weight: 400; color:#4A6B5C;">
+            HomePlanner
+        </MudText>
+        <MudSpacer />
+        <LanguageToggle />
+        <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" Class="ml-2" />
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="_drawerAberto" ClipMode="DrawerClipMode.Always"
+               Elevation="2" Variant="DrawerVariant.Responsive">
+        <MudNavMenu>
+            <MudNavLink Href="/dashboard" Match="NavLinkMatch.All"
+                        Icon="@Icons.Material.Filled.Dashboard">
+                @L["Nav_Dashboard"]
+            </MudNavLink>
+            <MudNavLink Href="@Lang.U("/cardapio")"
+                        Icon="@Icons.Material.Filled.CalendarMonth">
+                @L["Nav_Cardapio"]
+            </MudNavLink>
+            <MudNavLink Href="@Lang.U("/receitas")"
+                        Icon="@Icons.Material.Filled.MenuBook">
+                @L["Nav_Receitas"]
+            </MudNavLink>
+            <MudNavLink Href="@Lang.U("/modelos")"
+                        Icon="@Icons.Material.Filled.ContentCopy">
+                @L["Nav_Modelos"]
+            </MudNavLink>
+            <MudNavLink Href="@Lang.U("/compras")"
+                        Icon="@Icons.Material.Filled.ShoppingCart">
+                @L["Nav_ListaCompras"]
+            </MudNavLink>
+            <MudNavLink Href="@Lang.U("/planner")"
+                        Icon="@Icons.Material.Filled.CheckCircleOutline">
+                @L["Nav_Planner"]
+            </MudNavLink>
+            <MudNavLink Href="@Lang.U("/familia")"
+                        Icon="@Icons.Material.Filled.People">
+                @L["Nav_Familia"]
+            </MudNavLink>
+            <MudDivider Class="my-2" />
+            <AuthorizeView Roles="Owner">
+                <MudNavLink Href="@Lang.U("/assinatura")"
+                            Icon="@Icons.Material.Filled.CreditCard">
+                    @L["Nav_Assinatura"]
+                </MudNavLink>
+            </AuthorizeView>
+            <MudNavLink Href="@Lang.U("/configuracoes")"
+                        Icon="@Icons.Material.Filled.Settings">
+                @L["Nav_Configuracoes"]
+            </MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-4">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private bool _drawerAberto = true;
+
+    protected override void OnInitialized()
+        => Lang.SetLang(Lang.Lang);
+
+    private void ToggleDrawer() => _drawerAberto = !_drawerAberto;
+}

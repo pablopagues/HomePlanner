@@ -1,0 +1,178 @@
+@page "/receitas/importar"
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+<PageTitle>Importar Receita</PageTitle>
+
+<MudBreadcrumbs Items='[new("Receitas","/receitas"), new("Importar da URL",null,disabled:true)]'
+                Class="mb-4 pa-0" />
+
+<MudText Typo="Typo.h5" GutterBottom="true"
+         Style="font-family:'Fraunces',serif; font-weight:300;">
+    Importar receita de um site
+</MudText>
+<MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+    Cole a URL de qualquer site que use o formato schema.org/Recipe (Tudo Gostoso, AllRecipes, Tasty, etc.)
+</MudText>
+
+<MudPaper Class="pa-4 mb-4" Elevation="1" Style="border-radius:10px;">
+    <MudGrid Spacing="2" Class="align-end">
+        <MudItem xs="12" md="9">
+            <MudTextField @bind-Value="_url" Label="URL da receita"
+                          Placeholder="https://www.tudogostoso.com.br/receita/..."
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Link"
+                          Variant="Variant.Outlined" />
+        </MudItem>
+        <MudItem xs="12" md="3">
+            <MudButton Variant="Variant.Filled" Color="Color.Secondary"
+                       StartIcon="@Icons.Material.Filled.Download"
+                       OnClick="ImportarAsync" Disabled="_importando"
+                       FullWidth="true">
+                @(_importando ? "Importando..." : "Importar")
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@if (_erro is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="mb-4">@_erro</MudAlert>
+}
+
+@if (_preview is not null)
+{
+    <MudPaper Class="pa-4" Elevation="1" Style="border-radius:10px; border-left:4px solid #4A6B5C;">
+        <MudText Typo="Typo.h6" Class="mb-3">Preview da receita importada</MudText>
+
+        <MudGrid Spacing="3">
+            @if (!string.IsNullOrWhiteSpace(_preview.UrlImagem))
+            {
+                <MudItem xs="12" md="3">
+                    <MudImage Src="@_preview.UrlImagem" Alt="Imagem da receita"
+                              ObjectFit="ObjectFit.Cover" Style="border-radius:8px; width:100%; max-height:200px;" />
+                </MudItem>
+            }
+            <MudItem xs="12" md="@(_preview.UrlImagem != null ? 9 : 12)">
+                <MudTextField @bind-Value="_dto.Nome" Label="Nome" Variant="Variant.Outlined" />
+                <MudGrid Spacing="2" Class="mt-2">
+                    <MudItem xs="6">
+                        <MudNumericField @bind-Value="_dto.NumeroPorcoesBase" Label="Porções"
+                                         Variant="Variant.Outlined" Min="1" />
+                    </MudItem>
+                    <MudItem xs="6">
+                        <MudNumericField @bind-Value="_dto.TempoPreparoMinutos" Label="Tempo (min)"
+                                         Variant="Variant.Outlined" />
+                    </MudItem>
+                </MudGrid>
+            </MudItem>
+        </MudGrid>
+
+        @if (_preview.IngredientesTexto.Count > 0)
+        {
+            <MudDivider Class="my-3" />
+            <MudText Typo="Typo.subtitle2" Class="mb-2">Ingredientes importados</MudText>
+            <MudList T="string" Dense="true">
+                @foreach (var ing in _preview.IngredientesTexto)
+                {
+                    <MudListItem Icon="@Icons.Material.Filled.FiberManualRecord"
+                                 IconSize="Size.Small">
+                        @ing
+                    </MudListItem>
+                }
+            </MudList>
+            <MudAlert Severity="Severity.Info" Class="mt-2" Dense="true">
+                Os ingredientes serão salvos como texto. Você poderá vinculá-los
+                ao cadastro de ingredientes na edição da receita.
+            </MudAlert>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(_preview.ModoPreparo))
+        {
+            <MudDivider Class="my-3" />
+            <MudText Typo="Typo.subtitle2" Class="mb-2">Modo de preparo</MudText>
+            <MudTextField Value="@_preview.ModoPreparo" Lines="5" ReadOnly="true"
+                          Variant="Variant.Outlined" />
+        }
+
+        <MudStack Row="true" Spacing="2" Class="mt-4">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Save"
+                       OnClick="SalvarAsync" Disabled="_salvando">
+                @(_salvando ? "Salvando..." : "Salvar receita")
+            </MudButton>
+            <MudButton Variant="Variant.Text" OnClick="LimparPreview">Cancelar</MudButton>
+        </MudStack>
+    </MudPaper>
+}
+
+@code {
+    [Inject] IImportadorReceitaService Importador { get; set; } = null!;
+    [Inject] IReceitaService Service { get; set; } = null!;
+    [Inject] ISnackbar Snackbar { get; set; } = null!;
+    [Inject] NavigationManager Nav { get; set; } = null!;
+
+    private string _url = string.Empty;
+    private bool _importando;
+    private bool _salvando;
+    private string? _erro;
+    private ReceitaImportadaPreviewDTO? _preview;
+    private ReceitaPersistenciaDTO _dto = new();
+
+    private async Task ImportarAsync()
+    {
+        _erro = null;
+        _preview = null;
+
+        if (string.IsNullOrWhiteSpace(_url))
+        {
+            _erro = "Informe uma URL válida.";
+            return;
+        }
+
+        _importando = true;
+        var r = await Importador.ImportarDeUrlAsync(_url);
+        _importando = false;
+
+        if (!r.Sucesso || r.Valor is null)
+        {
+            _erro = r.Erros.FirstOrDefault() ?? "Falha ao importar.";
+            return;
+        }
+
+        _preview = r.Valor;
+        _dto = new ReceitaPersistenciaDTO
+        {
+            Nome               = _preview.Nome,
+            ModoPreparo        = _preview.ModoPreparo,
+            NumeroPorcoesBase  = _preview.NumeroPorcoesBase,
+            TempoPreparoMinutos = _preview.TempoPreparoMinutos,
+            UrlOrigem          = _preview.UrlOrigem,
+            UrlImagem          = _preview.UrlImagem,
+            Observacoes        = _preview.IngredientesTexto.Count > 0
+                ? "Ingredientes originais:\n" + string.Join("\n", _preview.IngredientesTexto)
+                : null,
+        };
+    }
+
+    private async Task SalvarAsync()
+    {
+        _salvando = true;
+        var r = await Service.SalvarAsync(_dto);
+        _salvando = false;
+
+        if (r.Sucesso)
+        {
+            Snackbar.Add("Receita importada e salva!", Severity.Success);
+            Nav.NavigateTo($"/receitas/editar/{r.Valor}");
+        }
+        else
+            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+    }
+
+    private void LimparPreview()
+    {
+        _preview = null;
+        _dto = new ReceitaPersistenciaDTO();
+        _url = string.Empty;
+    }
+}

@@ -1,0 +1,21 @@
+@page
+@model HomePlanner.BlazorServer.Areas.Identity.Pages.Account.VerificarEmailModel
+@{
+    ViewData["Title"] = "Verifique seu e-mail";
+}
+
+<h1 class="auth-title">Quase lá!</h1>
+
+<div class="alert-success">
+    Enviamos um e-mail de confirmação para <strong>@Model.Email</strong>.
+    Clique no link da mensagem para ativar sua conta.
+</div>
+
+<p style="font-size:13px; color:#7A8278;">
+    Não recebeu? Verifique a pasta de spam ou
+    <a asp-page="./Registro" style="color:#4A6B5C;">tente novamente</a>.
+</p>
+
+<div class="auth-links">
+    <a asp-page="./Login">Ir para o login</a>
+</div>

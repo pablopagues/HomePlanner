@@ -1,0 +1,234 @@
+@page "/compras"
+@page "/compras/{DataStr}"
+@page "/shopping"
+@page "/shopping/{DataStr}"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@using Application.HomePlanner.DTOs.ListaCompras
+@using Application.HomePlanner.Services.ListaCompras
+@inject IListaComprasService Service
+@inject IStringLocalizer<SharedResource> L
+@inject PublicLanguageService Lang
+@inject IJSRuntime JS
+@inject NavigationManager Nav
+
+<PageTitle>@L["Nav_ListaCompras"]</PageTitle>
+
+@* ── Cabeçalho de navegação semanal ────────────────────────────────────── *@
+<MudPaper Class="pa-4 mb-4" Elevation="1" Style="border-radius:10px;">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+        <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft" OnClick="SemanaAnterior" />
+
+        <MudStack AlignItems="AlignItems.Center" Spacing="0">
+            <MudText Typo="Typo.h6" Style="font-family:'Fraunces',serif; font-weight:300;">
+                @L["Compras_Semana"] @_dataInicio.ToString("dd/MM") — @_dataFim.ToString("dd/MM/yyyy")
+            </MudText>
+        </MudStack>
+
+        <MudStack Row="true" Spacing="1">
+            <MudButton Size="Size.Small" Variant="Variant.Outlined" OnClick="IrParaHoje">
+                @L["Cardapio_Hoje"]
+            </MudButton>
+            <MudIconButton Icon="@Icons.Material.Filled.ChevronRight" OnClick="ProximaSemana" />
+        </MudStack>
+    </MudStack>
+</MudPaper>
+
+@if (_carregando)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else if (_erro is not null)
+{
+    <MudAlert Severity="Severity.Warning" Class="mb-4">
+        @_erro
+        <MudLink Href="@($"/cardapio/{_dataInicio:yyyy-MM-dd}")">
+            @L["Compras_IrCardapio"]
+        </MudLink>
+    </MudAlert>
+}
+else if (_lista is not null)
+{
+    @* ── Barra de ações ──────────────────────────────────────────────────── *@
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-4">
+        <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
+            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                @_lista.TotalReceitas @L["Compras_Receitas"] ·
+                @_lista.Itens.Count @L["Compras_Itens"] ·
+                @_jaTenho.Count(kv => kv.Value) @L["Compras_JaTenho"]
+            </MudText>
+        </MudStack>
+        <MudStack Row="true" Spacing="2">
+            @if (_jaTenho.Any(kv => kv.Value))
+            {
+                <MudButton Size="Size.Small" Variant="Variant.Text"
+                           OnClick="LimparSelecao">
+                    @L["Compras_LimparSelecao"]
+                </MudButton>
+            }
+            <MudButton Size="Size.Small" Variant="Variant.Outlined"
+                       StartIcon="@Icons.Material.Filled.Refresh"
+                       OnClick="CarregarAsync">
+                @L["Compras_Atualizar"]
+            </MudButton>
+        </MudStack>
+    </MudStack>
+
+    @if (_lista.Vazia)
+    {
+        <MudAlert Severity="Severity.Info">
+            @L["Compras_SemItens"]
+            <MudLink Href="@($"/cardapio/{_dataInicio:yyyy-MM-dd}")">
+                @L["Compras_IrCardapio"]
+            </MudLink>
+        </MudAlert>
+    }
+    else
+    {
+        @* ── Lista de itens ──────────────────────────────────────────────── *@
+        <MudGrid Spacing="2">
+            @foreach (var item in _lista.Itens)
+            {
+                var jaTenho = _jaTenho.TryGetValue(item.IngredienteId, out var v) && v;
+
+                <MudItem xs="12" sm="6" md="4">
+                    <MudPaper Class="pa-3"
+                              Style="@($"border-radius:8px; border:1px solid {(jaTenho ? "#B5CFC0" : "#E8DDD1")}; background:{(jaTenho ? "#EEF5F1" : "#FDFAF7")}; transition:all 200ms;")"
+                              Elevation="0">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                            <MudCheckBox T="bool"
+                                         Value="@jaTenho"
+                                         ValueChanged="@(async (bool val) => await TrocarJaTenho(item.IngredienteId, val))"
+                                         Color="Color.Success" />
+                            <MudStack Spacing="0" Style="flex:1; min-width:0;">
+                                <MudText Typo="Typo.body2"
+                                         Style="@(jaTenho ? "text-decoration:line-through; opacity:0.55;" : "font-weight:500;")">
+                                    @item.NomeIngrediente
+                                </MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                    @item.QuantidadeFormatada
+                                </MudText>
+                            </MudStack>
+                        </MudStack>
+                    </MudPaper>
+                </MudItem>
+            }
+        </MudGrid>
+
+        @* ── Resumo do progresso ─────────────────────────────────────────── *@
+        <MudPaper Class="pa-4 mt-4" Elevation="0"
+                  Style="background:#F5F0EA; border-radius:10px;">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3">
+                <MudProgressLinear Color="Color.Success"
+                                   Value="@Progresso" Class="flex-grow-1"
+                                   Style="height:8px; border-radius:4px;" />
+                <MudText Typo="Typo.body2" Style="white-space:nowrap;">
+                    @_jaTenho.Count(kv => kv.Value) / @_lista.Itens.Count
+                </MudText>
+            </MudStack>
+        </MudPaper>
+    }
+}
+
+@code {
+    [Parameter] public string? DataStr { get; set; }
+
+    private DateOnly _dataInicio;
+    private DateOnly _dataFim;
+    private ListaComprasDTO? _lista;
+    private bool _carregando = true;
+    private string? _erro;
+
+    // Estado "já tenho" — carregado/persistido via localStorage
+    private Dictionary<int, bool> _jaTenho = new();
+
+    private double Progresso => _lista is null || _lista.Itens.Count == 0 ? 0
+        : (double)_jaTenho.Count(kv => kv.Value) / _lista.Itens.Count * 100;
+
+    private bool _precisaCarregarJaTenho;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _dataInicio = DataStr is not null && DateOnly.TryParse(DataStr, out var d)
+            ? d
+            : SegundaDeHoje();
+        _dataFim = _dataInicio.AddDays(6);
+        await CarregarAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_precisaCarregarJaTenho)
+        {
+            _precisaCarregarJaTenho = false;
+            await CarregarJaTenhoAsync();
+        }
+    }
+
+    private async Task CarregarAsync()
+    {
+        _carregando = true;
+        _erro = null;
+        _lista = null;
+
+        var r = await Service.CalcularDaSemanaAsync(_dataInicio);
+        if (r.Sucesso)
+            _lista = r.Valor;
+        else
+            _erro = r.Erros.FirstOrDefault();
+
+        _carregando = false;
+
+        if (_lista is not null && !_lista.Vazia)
+            _precisaCarregarJaTenho = true;
+    }
+
+    private async Task CarregarJaTenhoAsync()
+    {
+        if (_lista is null) return;
+        _jaTenho.Clear();
+
+        foreach (var item in _lista.Itens)
+        {
+            var val = await JS.InvokeAsync<string?>("appStorage.get",
+                ChaveStorage(item.IngredienteId));
+            _jaTenho[item.IngredienteId] = val == "1";
+        }
+        StateHasChanged();
+    }
+
+    private async Task TrocarJaTenho(int ingredienteId, bool valor)
+    {
+        _jaTenho[ingredienteId] = valor;
+        await JS.InvokeVoidAsync("appStorage.set",
+            ChaveStorage(ingredienteId), valor ? "1" : "0");
+    }
+
+    private async Task LimparSelecao()
+    {
+        foreach (var key in _jaTenho.Keys.ToList())
+            _jaTenho[key] = false;
+
+        await JS.InvokeVoidAsync("appStorage.clearPrefix",
+            $"hp_tenho_{_dataInicio:yyyyMMdd}_");
+    }
+
+    private string ChaveStorage(int ingredienteId)
+        => $"hp_tenho_{_dataInicio:yyyyMMdd}_{ingredienteId}";
+
+    private void SemanaAnterior()
+        => Nav.NavigateTo(Lang.U("/compras") + $"/{_dataInicio.AddDays(-7):yyyy-MM-dd}");
+
+    private void ProximaSemana()
+        => Nav.NavigateTo(Lang.U("/compras") + $"/{_dataInicio.AddDays(7):yyyy-MM-dd}");
+
+    private void IrParaHoje()
+        => Nav.NavigateTo(Lang.U("/compras") + $"/{SegundaDeHoje():yyyy-MM-dd}");
+
+    private static DateOnly SegundaDeHoje()
+    {
+        var hoje = DateOnly.FromDateTime(DateTime.Today);
+        var diasAteSegunda = ((int)hoje.DayOfWeek - 1 + 7) % 7;
+        return hoje.AddDays(-diasAteSegunda);
+    }
+}

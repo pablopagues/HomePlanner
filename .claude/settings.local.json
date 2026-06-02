@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(\\(Select-String -Path \"d:\\\\_MeuCodigoDotNet\\\\__HomePlannerV1\\\\HomePlanner\\\\src\\\\HomePlanner.BlazorServer\\\\obj\\\\project.assets.json\" -Pattern '\"MudBlazor/[\\\\d.]+'\\) | Select-Object -First 1 | ForEach-Object { $_.Line })"
+    ]
+  }
+}

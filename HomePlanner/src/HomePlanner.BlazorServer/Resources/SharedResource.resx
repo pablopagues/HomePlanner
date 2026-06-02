@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="xml:space" use="optional" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter</value></resheader>
+
+  <!-- ── Botões genéricos ── -->
+  <data name="Btn_Salvar" xml:space="preserve"><value>Salvar</value></data>
+  <data name="Btn_Cancelar" xml:space="preserve"><value>Cancelar</value></data>
+  <data name="Btn_Excluir" xml:space="preserve"><value>Excluir</value></data>
+  <data name="Btn_Editar" xml:space="preserve"><value>Editar</value></data>
+  <data name="Btn_Duplicar" xml:space="preserve"><value>Duplicar</value></data>
+  <data name="Btn_Importar" xml:space="preserve"><value>Importar</value></data>
+  <data name="Btn_Adicionar" xml:space="preserve"><value>Adicionar</value></data>
+  <data name="Btn_Confirmar" xml:space="preserve"><value>Confirmar</value></data>
+  <data name="Btn_Salvando" xml:space="preserve"><value>Salvando...</value></data>
+  <data name="Btn_Importando" xml:space="preserve"><value>Importando...</value></data>
+  <data name="Btn_Aplicar" xml:space="preserve"><value>Aplicar</value></data>
+  <data name="Btn_Voltar" xml:space="preserve"><value>Voltar</value></data>
+
+  <!-- ── Mensagens ── -->
+  <data name="Msg_SalvoOk" xml:space="preserve"><value>Salvo com sucesso!</value></data>
+  <data name="Msg_ExcluidoOk" xml:space="preserve"><value>Excluído com sucesso.</value></data>
+  <data name="Msg_ErroGenerico" xml:space="preserve"><value>Ocorreu um erro. Tente novamente.</value></data>
+  <data name="Msg_CampoObrigatorio" xml:space="preserve"><value>Campo obrigatório.</value></data>
+  <data name="Msg_NaoEncontrado" xml:space="preserve"><value>Item não encontrado.</value></data>
+  <data name="Confirmacao_Titulo" xml:space="preserve"><value>Confirmar exclusão</value></data>
+
+  <!-- ── Navegação ── -->
+  <data name="Nav_Dashboard" xml:space="preserve"><value>Dashboard</value></data>
+  <data name="Nav_Cardapio" xml:space="preserve"><value>Cardápio</value></data>
+  <data name="Nav_Receitas" xml:space="preserve"><value>Receitas</value></data>
+  <data name="Nav_ListaCompras" xml:space="preserve"><value>Lista de Compras</value></data>
+  <data name="Nav_Familia" xml:space="preserve"><value>Família</value></data>
+  <data name="Nav_Configuracoes" xml:space="preserve"><value>Configurações</value></data>
+  <data name="Nav_Modelos" xml:space="preserve"><value>Modelos</value></data>
+  <data name="Nav_Planner" xml:space="preserve"><value>Tarefas</value></data>
+  <data name="Nav_Assinatura" xml:space="preserve"><value>Assinatura</value></data>
+
+  <!-- ── Assinatura ── -->
+  <data name="Assin_Titulo" xml:space="preserve"><value>Sua assinatura</value></data>
+  <data name="Assin_Subtitulo" xml:space="preserve"><value>Gerencie seu plano e forma de pagamento.</value></data>
+  <data name="Assin_PlanoAtual" xml:space="preserve"><value>Plano atual</value></data>
+  <data name="Assin_Membros" xml:space="preserve"><value>membros</value></data>
+  <data name="Assin_Gerenciar" xml:space="preserve"><value>Gerenciar pagamento</value></data>
+  <data name="Assin_DiasTrial" xml:space="preserve"><value>Dias restantes (teste)</value></data>
+  <data name="Assin_ProximaCobranca" xml:space="preserve"><value>Próxima cobrança</value></data>
+  <data name="Assin_Cartao" xml:space="preserve"><value>Cartão</value></data>
+  <data name="Assin_CancelamentoAgendado" xml:space="preserve"><value>Sua assinatura será cancelada ao fim do período atual.</value></data>
+  <data name="Assin_PlanosDisponiveis" xml:space="preserve"><value>Planos disponíveis</value></data>
+  <data name="Assin_SeuPlano" xml:space="preserve"><value>Seu plano</value></data>
+  <data name="Assin_Assinar" xml:space="preserve"><value>Assinar</value></data>
+  <data name="Assin_PagamentoOk" xml:space="preserve"><value>Pagamento confirmado! Sua assinatura está ativa.</value></data>
+  <data name="Assin_PagamentoCancelado" xml:space="preserve"><value>Checkout cancelado. Nenhuma cobrança foi feita.</value></data>
+  <data name="Assin_Mes" xml:space="preserve"><value>mês</value></data>
+  <data name="Assin_Ano" xml:space="preserve"><value>ano</value></data>
+  <data name="Assin_Mensal" xml:space="preserve"><value>mensal</value></data>
+  <data name="Assin_Anual" xml:space="preserve"><value>anual</value></data>
+  <data name="Assin_PlanoGratis" xml:space="preserve"><value>Grátis</value></data>
+  <data name="Assin_StatusTrial" xml:space="preserve"><value>Período de teste</value></data>
+  <data name="Assin_StatusAtivo" xml:space="preserve"><value>Ativo</value></data>
+  <data name="Assin_StatusSuspenso" xml:space="preserve"><value>Suspenso</value></data>
+  <data name="Assin_StatusCancelado" xml:space="preserve"><value>Cancelado</value></data>
+
+  <!-- ── Footer público ── -->
+  <data name="Footer_Privacidade" xml:space="preserve"><value>Privacidade</value></data>
+  <data name="Footer_Termos" xml:space="preserve"><value>Termos</value></data>
+  <data name="Footer_Contato" xml:space="preserve"><value>Contato</value></data>
+
+  <!-- ── Landing ── -->
+  <data name="Landing_NavSobre" xml:space="preserve"><value>Sobre</value></data>
+  <data name="Landing_HeroTitulo" xml:space="preserve"><value>A semana da sua família, organizada com calma.</value></data>
+  <data name="Landing_HeroSubtitulo" xml:space="preserve"><value>Cardápio, lista de compras e tarefas — tudo em um só lugar, simples e bonito.</value></data>
+  <data name="Landing_HeroCta" xml:space="preserve"><value>Começar grátis</value></data>
+  <data name="Landing_HeroLegenda" xml:space="preserve"><value>30 dias grátis · sem cartão de crédito</value></data>
+  <data name="Landing_Feat1Titulo" xml:space="preserve"><value>Cardápio semanal</value></data>
+  <data name="Landing_Feat1Desc" xml:space="preserve"><value>Planeje as refeições da semana numa grade que respira — nada de planilhas confusas.</value></data>
+  <data name="Landing_Feat2Titulo" xml:space="preserve"><value>Lista de compras automática</value></data>
+  <data name="Landing_Feat2Desc" xml:space="preserve"><value>A lista nasce do cardápio, somando ingredientes e ajustando porções automaticamente.</value></data>
+  <data name="Landing_Feat3Titulo" xml:space="preserve"><value>Importe receitas de qualquer site</value></data>
+  <data name="Landing_Feat3Desc" xml:space="preserve"><value>Cole o link, veja o preview e salve. Sem fricção, sem digitar tudo de novo.</value></data>
+  <data name="Landing_PrecosTitulo" xml:space="preserve"><value>Planos simples</value></data>
+  <data name="Landing_PrecosSubtitulo" xml:space="preserve"><value>Comece grátis. Faça upgrade quando a família crescer.</value></data>
+  <data name="Landing_StdPreco" xml:space="preserve"><value>R$25</value></data>
+  <data name="Landing_StdItem1" xml:space="preserve"><value>Até 5 membros</value></data>
+  <data name="Landing_StdItem2" xml:space="preserve"><value>Cardápio + lista de compras</value></data>
+  <data name="Landing_StdItem3" xml:space="preserve"><value>Importação de receitas</value></data>
+  <data name="Landing_ProPreco" xml:space="preserve"><value>R$45</value></data>
+  <data name="Landing_ProItem1" xml:space="preserve"><value>Até 10 membros</value></data>
+  <data name="Landing_ProItem2" xml:space="preserve"><value>Tudo do Standard</value></data>
+  <data name="Landing_ProItem3" xml:space="preserve"><value>Modelos de semana ilimitados</value></data>
+  <data name="Landing_ProPopular" xml:space="preserve"><value>Mais popular</value></data>
+  <data name="Landing_PrecosRodape" xml:space="preserve"><value>Planos anuais com desconto. Cancele quando quiser.</value></data>
+
+  <!-- ── Contato ── -->
+  <data name="Ct_Titulo" xml:space="preserve"><value>Fale com a gente</value></data>
+  <data name="Ct_Intro" xml:space="preserve"><value>Dúvidas, sugestões ou problemas? Escreva — respondemos rápido.</value></data>
+  <data name="Ct_Voltar" xml:space="preserve"><value>Voltar</value></data>
+  <data name="Ct_Nome" xml:space="preserve"><value>Nome</value></data>
+  <data name="Ct_Email" xml:space="preserve"><value>E-mail</value></data>
+  <data name="Ct_Telefone" xml:space="preserve"><value>Telefone (opcional)</value></data>
+  <data name="Ct_Assunto" xml:space="preserve"><value>Assunto</value></data>
+  <data name="Ct_AssuntoDuvida" xml:space="preserve"><value>Dúvida sobre o sistema</value></data>
+  <data name="Ct_AssuntoPlanos" xml:space="preserve"><value>Planos e preços</value></data>
+  <data name="Ct_AssuntoTecnico" xml:space="preserve"><value>Problema técnico</value></data>
+  <data name="Ct_AssuntoCobranca" xml:space="preserve"><value>Cobrança ou cancelamento</value></data>
+  <data name="Ct_AssuntoLgpd" xml:space="preserve"><value>Privacidade / LGPD</value></data>
+  <data name="Ct_AssuntoOutro" xml:space="preserve"><value>Outro</value></data>
+  <data name="Ct_Mensagem" xml:space="preserve"><value>Mensagem</value></data>
+  <data name="Ct_Enviar" xml:space="preserve"><value>Enviar mensagem</value></data>
+  <data name="Ct_Enviando" xml:space="preserve"><value>Enviando...</value></data>
+  <data name="Ct_Privacidade" xml:space="preserve"><value>Ao enviar, você concorda com nossa política de privacidade.</value></data>
+  <data name="Ct_SucessoTitulo" xml:space="preserve"><value>Mensagem enviada!</value></data>
+  <data name="Ct_SucessoCorpo" xml:space="preserve"><value>Recebemos sua mensagem e responderemos para {0} em breve.</value></data>
+  <data name="Ct_EnviarOutra" xml:space="preserve"><value>Enviar outra mensagem</value></data>
+  <data name="Ct_SuporteTitulo" xml:space="preserve"><value>Suporte</value></data>
+  <data name="Ct_SuporteDesc" xml:space="preserve"><value>Prefere e-mail direto? Escreva para nosso time de suporte.</value></data>
+
+  <!-- ── Sobre ── -->
+  <data name="Sobre_Titulo" xml:space="preserve"><value>Sobre o HomePlanner</value></data>
+  <data name="Sobre_P1" xml:space="preserve"><value>O HomePlanner nasceu de uma necessidade real: organizar a rotina de uma família — o que cozinhar, o que comprar e o que cada um precisa fazer — sem pular entre vários aplicativos confusos.</value></data>
+  <data name="Sobre_P2" xml:space="preserve"><value>Acreditamos que planejar a semana deveria ser calmo e até prazeroso. Por isso criamos uma ferramenta bonita, simples e em três idiomas, pensada para famílias de verdade.</value></data>
+  <data name="Sobre_MissaoTitulo" xml:space="preserve"><value>Nossa missão</value></data>
+  <data name="Sobre_MissaoTexto" xml:space="preserve"><value>Devolver tempo e tranquilidade às famílias, um cardápio de cada vez.</value></data>
+
+  <!-- ── Legal ── -->
+  <data name="Legal_Minuta" xml:space="preserve"><value>Este é um documento preliminar, sujeito a revisão jurídica.</value></data>
+  <data name="Priv_Titulo" xml:space="preserve"><value>Política de Privacidade</value></data>
+  <data name="Priv_Versao" xml:space="preserve"><value>Versão 1.0</value></data>
+  <data name="Priv_Corpo" xml:space="preserve"><value>O HomePlanner (Sideris) trata seus dados pessoais (nome, e-mail e dados de uso) apenas para operar o serviço de planejamento familiar. &lt;br/&gt;&lt;br/&gt;Não vendemos seus dados. Compartilhamos somente com provedores essenciais (Stripe para pagamentos, hospedagem e e-mail). &lt;br/&gt;&lt;br/&gt;Você pode solicitar acesso, correção ou exclusão dos seus dados a qualquer momento pelo nosso canal de contato.</value></data>
+  <data name="Termos_Titulo" xml:space="preserve"><value>Termos de Uso</value></data>
+  <data name="Termos_Versao" xml:space="preserve"><value>Versão 1.0</value></data>
+  <data name="Termos_Corpo" xml:space="preserve"><value>Ao usar o HomePlanner você concorda com estes termos. O serviço é oferecido por assinatura, com período de teste gratuito de 30 dias. &lt;br/&gt;&lt;br/&gt;Você é responsável por manter sua senha segura e pelo uso da sua conta. Os dados que você cadastra pertencem a você. &lt;br/&gt;&lt;br/&gt;O serviço é fornecido &quot;como está&quot;. Podemos atualizar estes termos com aviso prévio de 15 dias.</value></data>
+
+  <!-- ── Lista de Compras ── -->
+  <data name="Compras_Semana" xml:space="preserve"><value>Semana de</value></data>
+  <data name="Compras_Receitas" xml:space="preserve"><value>receitas</value></data>
+  <data name="Compras_Itens" xml:space="preserve"><value>itens</value></data>
+  <data name="Compras_JaTenho" xml:space="preserve"><value>já tenho</value></data>
+  <data name="Compras_LimparSelecao" xml:space="preserve"><value>Limpar seleção</value></data>
+  <data name="Compras_Atualizar" xml:space="preserve"><value>Atualizar</value></data>
+  <data name="Compras_SemItens" xml:space="preserve"><value>Nenhuma receita no cardápio desta semana ainda.</value></data>
+  <data name="Compras_IrCardapio" xml:space="preserve"><value>Ir ao cardápio</value></data>
+
+  <!-- ── Planner / Tarefas ── -->
+  <data name="Planner_Titulo" xml:space="preserve"><value>Tarefas da família</value></data>
+  <data name="Planner_Nova" xml:space="preserve"><value>Nova tarefa</value></data>
+  <data name="Planner_Editar" xml:space="preserve"><value>Editar tarefa</value></data>
+  <data name="Planner_Pendentes" xml:space="preserve"><value>Pendentes</value></data>
+  <data name="Planner_Concluidas" xml:space="preserve"><value>Concluídas</value></data>
+  <data name="Planner_Todas" xml:space="preserve"><value>Todas</value></data>
+  <data name="Planner_Nenhuma" xml:space="preserve"><value>Nenhuma tarefa por aqui. Que tal criar uma?</value></data>
+  <data name="Planner_ExcluirConfirm" xml:space="preserve"><value>Excluir esta tarefa?</value></data>
+  <data name="Planner_TituloLabel" xml:space="preserve"><value>Título</value></data>
+  <data name="Planner_DescricaoLabel" xml:space="preserve"><value>Descrição</value></data>
+  <data name="Planner_DataLabel" xml:space="preserve"><value>Data prevista</value></data>
+  <data name="Planner_ResponsavelLabel" xml:space="preserve"><value>Responsável</value></data>
+  <data name="Planner_RecorrenciaLabel" xml:space="preserve"><value>Recorrência</value></data>
+  <data name="Planner_PrivadaLabel" xml:space="preserve"><value>Tarefa privada (só eu vejo)</value></data>
+
+  <!-- ── Recorrência ── -->
+  <data name="Recorrencia_Nenhuma" xml:space="preserve"><value>Sem repetição</value></data>
+  <data name="Recorrencia_Diaria" xml:space="preserve"><value>Diária</value></data>
+  <data name="Recorrencia_Semanal" xml:space="preserve"><value>Semanal</value></data>
+  <data name="Recorrencia_Mensal" xml:space="preserve"><value>Mensal</value></data>
+
+  <!-- ── Onboarding ── -->
+  <data name="Onb_Titulo" xml:space="preserve"><value>Configure sua família</value></data>
+  <data name="Onb_Subtitulo" xml:space="preserve"><value>Só mais um passo para começar a planejar.</value></data>
+  <data name="Onb_TamanhoFamilia" xml:space="preserve"><value>Quantas pessoas na família?</value></data>
+  <data name="Onb_TamanhoFamiliaAjuda" xml:space="preserve"><value>Usamos isso para sugerir porções nas receitas.</value></data>
+  <data name="Onb_FusoHorario" xml:space="preserve"><value>Fuso horário</value></data>
+  <data name="Onb_TiposRefeicao" xml:space="preserve"><value>Quais refeições você quer planejar?</value></data>
+  <data name="Onb_Finalizar" xml:space="preserve"><value>Concluir e começar</value></data>
+
+  <!-- ── Landing page ── -->
+  <data name="Landing_Titulo" xml:space="preserve"><value>HomePlanner</value></data>
+  <data name="Landing_SubTitulo" xml:space="preserve"><value>Organize a semana da sua família. Cardápio, compras e tarefas — tudo em um só lugar.</value></data>
+  <data name="Landing_ComecarGratis" xml:space="preserve"><value>Começar grátis</value></data>
+  <data name="Landing_Entrar" xml:space="preserve"><value>Entrar</value></data>
+  <data name="Landing_BySideris" xml:space="preserve"><value>by Sideris</value></data>
+
+  <!-- ── Dashboard ── -->
+  <data name="Dashboard_Saudacao" xml:space="preserve"><value>Olá! Vamos planejar a semana?</value></data>
+  <data name="Dashboard_CardapioDesc" xml:space="preserve"><value>Planeje as refeições da semana</value></data>
+  <data name="Dashboard_ReceitasDesc" xml:space="preserve"><value>receitas cadastradas</value></data>
+  <data name="Dashboard_ModelosDesc" xml:space="preserve"><value>Semanas favoritas para reusar</value></data>
+  <data name="Dashboard_ListaComprasDesc" xml:space="preserve"><value>Lista de Compras</value></data>
+  <data name="Dashboard_EmBreve" xml:space="preserve"><value>Em breve</value></data>
+  <data name="Dashboard_EstaSemana" xml:space="preserve"><value>Esta semana</value></data>
+  <data name="Dashboard_VerCardapio" xml:space="preserve"><value>Ver cardápio da semana</value></data>
+
+  <!-- ── Receitas ── -->
+  <data name="Receita_Titulo" xml:space="preserve"><value>Receitas</value></data>
+  <data name="Receita_Nova" xml:space="preserve"><value>Nova receita</value></data>
+  <data name="Receita_ImportarUrl" xml:space="preserve"><value>Importar da URL</value></data>
+  <data name="Receita_Buscar" xml:space="preserve"><value>Buscar receitas...</value></data>
+  <data name="Receita_Nenhuma" xml:space="preserve"><value>Nenhuma receita encontrada.</value></data>
+  <data name="Receita_PrimeiraCriar" xml:space="preserve"><value>Criar a primeira!</value></data>
+  <data name="Receita_Porcoes" xml:space="preserve"><value>porções</value></data>
+  <data name="Receita_Min" xml:space="preserve"><value>min</value></data>
+  <data name="Receita_Ingr" xml:space="preserve"><value>ingr.</value></data>
+  <data name="Receita_NovaTitle" xml:space="preserve"><value>Nova receita</value></data>
+  <data name="Receita_NomeLabel" xml:space="preserve"><value>Nome da receita</value></data>
+  <data name="Receita_NumPorcoesLabel" xml:space="preserve"><value>Porções</value></data>
+  <data name="Receita_TempoLabel" xml:space="preserve"><value>Tempo (min)</value></data>
+  <data name="Receita_UrlImagemLabel" xml:space="preserve"><value>URL da imagem (opcional)</value></data>
+  <data name="Receita_ModoPreparoLabel" xml:space="preserve"><value>Modo de preparo</value></data>
+  <data name="Receita_ObservacoesLabel" xml:space="preserve"><value>Observações</value></data>
+  <data name="Receita_SalvoOk" xml:space="preserve"><value>Receita salva!</value></data>
+  <data name="Receita_CriadaOk" xml:space="preserve"><value>Receita criada com sucesso!</value></data>
+  <data name="Receita_ExcluidaOk" xml:space="preserve"><value>Receita excluída.</value></data>
+  <data name="Receita_DuplicadaOk" xml:space="preserve"><value>Receita duplicada!</value></data>
+  <data name="Receita_ExcluirConfirm" xml:space="preserve"><value>Excluir esta receita?</value></data>
+  <data name="Receita_SalvarBtn" xml:space="preserve"><value>Salvar receita</value></data>
+
+  <!-- ── Ingredientes ── -->
+  <data name="Ing_Label" xml:space="preserve"><value>Ingredientes</value></data>
+  <data name="Ing_IngredienteLabel" xml:space="preserve"><value>Ingrediente</value></data>
+  <data name="Ing_Qtde" xml:space="preserve"><value>Qtde</value></data>
+  <data name="Ing_Unidade" xml:space="preserve"><value>Unidade</value></data>
+  <data name="Ing_Obs" xml:space="preserve"><value>Obs.</value></data>
+  <data name="Ing_Opcional" xml:space="preserve"><value>Opt.</value></data>
+  <data name="Ing_Nenhum" xml:space="preserve"><value>Nenhum ingrediente adicionado.</value></data>
+  <data name="Ing_Adicionar" xml:space="preserve"><value>Adicionar</value></data>
+
+  <!-- ── Importar receita ── -->
+  <data name="Importar_Titulo" xml:space="preserve"><value>Importar receita de um site</value></data>
+  <data name="Importar_Descricao" xml:space="preserve"><value>Cole a URL de qualquer site que use o formato schema.org/Recipe (Tudo Gostoso, AllRecipes, Tasty, etc.)</value></data>
+  <data name="Importar_UrlLabel" xml:space="preserve"><value>URL da receita</value></data>
+  <data name="Importar_Preview" xml:space="preserve"><value>Preview da receita importada</value></data>
+  <data name="Importar_IngTexto" xml:space="preserve"><value>Ingredientes importados</value></data>
+  <data name="Importar_IngAviso" xml:space="preserve"><value>Os ingredientes serão salvos como texto. Você poderá vinculá-los ao cadastro na edição da receita.</value></data>
+  <data name="Importar_SalvoOk" xml:space="preserve"><value>Receita importada e salva!</value></data>
+  <data name="Importar_UrlInvalida" xml:space="preserve"><value>Informe uma URL válida.</value></data>
+
+  <!-- ── Cardápio ── -->
+  <data name="Cardapio_Titulo" xml:space="preserve"><value>Cardápio</value></data>
+  <data name="Cardapio_EstaSemana" xml:space="preserve"><value>Esta semana</value></data>
+  <data name="Cardapio_Hoje" xml:space="preserve"><value>Hoje</value></data>
+  <data name="Cardapio_CopiarSemana" xml:space="preserve"><value>Copiar para próxima semana</value></data>
+  <data name="Cardapio_SalvarModelo" xml:space="preserve"><value>Salvar como modelo</value></data>
+  <data name="Cardapio_NomeModelo" xml:space="preserve"><value>Nome do modelo:</value></data>
+  <data name="Cardapio_SemanaCopiada" xml:space="preserve"><value>Semana copiada!</value></data>
+  <data name="Cardapio_ModeloSalvo" xml:space="preserve"><value>Modelo salvo!</value></data>
+
+  <!-- ── Dias da semana ── -->
+  <data name="Dia_Segunda" xml:space="preserve"><value>Seg</value></data>
+  <data name="Dia_Terca" xml:space="preserve"><value>Ter</value></data>
+  <data name="Dia_Quarta" xml:space="preserve"><value>Qua</value></data>
+  <data name="Dia_Quinta" xml:space="preserve"><value>Qui</value></data>
+  <data name="Dia_Sexta" xml:space="preserve"><value>Sex</value></data>
+  <data name="Dia_Sabado" xml:space="preserve"><value>Sáb</value></data>
+  <data name="Dia_Domingo" xml:space="preserve"><value>Dom</value></data>
+
+  <!-- ── Tipos de refeição ── -->
+  <data name="Refeicao_CafeManha" xml:space="preserve"><value>Café</value></data>
+  <data name="Refeicao_Almoco" xml:space="preserve"><value>Almoço</value></data>
+  <data name="Refeicao_Lanche" xml:space="preserve"><value>Lanche</value></data>
+  <data name="Refeicao_Jantar" xml:space="preserve"><value>Jantar</value></data>
+  <data name="Refeicao_Ceia" xml:space="preserve"><value>Ceia</value></data>
+
+  <!-- ── Seletor de receita (dialog) ── -->
+  <data name="Seletor_Buscar" xml:space="preserve"><value>Buscar receita...</value></data>
+  <data name="Seletor_Porcoes" xml:space="preserve"><value>Porções desejadas</value></data>
+  <data name="Seletor_LimparSlot" xml:space="preserve"><value>Limpar slot</value></data>
+  <data name="Seletor_PorcoesBase" xml:space="preserve"><value>porções base</value></data>
+  <data name="Seletor_Nenhuma" xml:space="preserve"><value>Nenhuma receita encontrada.</value></data>
+
+  <!-- ── Modelos de semana ── -->
+  <data name="Modelo_Titulo" xml:space="preserve"><value>Modelos de semana</value></data>
+  <data name="Modelo_Descricao" xml:space="preserve"><value>Salve semanas favoritas como modelos para reutilizar facilmente.</value></data>
+  <data name="Modelo_Nenhum" xml:space="preserve"><value>Nenhum modelo criado ainda. Planeje uma semana no cardápio e salve-a como modelo!</value></data>
+  <data name="Modelo_Aplicar" xml:space="preserve"><value>Aplicar na semana</value></data>
+  <data name="Modelo_AplicadoOk" xml:space="preserve"><value>Modelo aplicado com sucesso!</value></data>
+  <data name="Modelo_ExcluidoOk" xml:space="preserve"><value>Modelo excluído.</value></data>
+  <data name="Modelo_ExcluirConfirm" xml:space="preserve"><value>Excluir este modelo?</value></data>
+  <data name="Modelo_Refeicoes" xml:space="preserve"><value>refeições</value></data>
+  <data name="Modelo_CriarDica" xml:space="preserve"><value>Para criar um modelo, vá ao Cardápio e clique em "Salvar como modelo".</value></data>
+</root>

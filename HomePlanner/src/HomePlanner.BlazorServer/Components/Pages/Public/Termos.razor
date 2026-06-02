@@ -1,0 +1,32 @@
+@page "/termos"
+@page "/terms"
+@page "/terminos"
+@layout HomePlanner.BlazorServer.Components.Layout.PublicLayout
+@attribute [AllowAnonymous]
+@using HomePlanner.BlazorServer.Services
+@inject IStringLocalizer<SharedResource> L
+@inject PublicLanguageService Lang
+
+<PageTitle>@L["Footer_Termos"] — HomePlanner</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="py-8">
+    <MudButton Href="/" StartIcon="@Icons.Material.Filled.ArrowBack" Variant="Variant.Text" Class="mb-3"
+               Style="color:#4A6B5C;">@L["Ct_Voltar"]</MudButton>
+
+    <MudText Typo="Typo.h4" Class="mb-1" Style="font-family:'Fraunces',serif; font-weight:300; color:#4A6B5C;">
+        @L["Termos_Titulo"]
+    </MudText>
+    <MudText Typo="Typo.caption" Class="mb-4 d-block" Style="color:#7A8278;">@L["Termos_Versao"]</MudText>
+
+    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true" Class="mb-4">
+        @L["Legal_Minuta"]
+    </MudAlert>
+
+    <MudText Typo="Typo.body2" Style="color:#2A3A33; line-height:1.7;">
+        @((MarkupString)L["Termos_Corpo"].Value)
+    </MudText>
+</MudContainer>
+
+@code {
+    protected override void OnInitialized() => Lang.SetLang(Lang.Lang);
+}

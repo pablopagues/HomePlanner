@@ -1,0 +1,221 @@
+@page "/assinatura"
+@page "/subscription"
+@page "/suscripcion"
+@attribute [Authorize(Policy = PoliciesAutorizacao.OwnerOnly)]
+@rendermode InteractiveServer
+@using Application.HomePlanner.DTOs.Assinatura
+@using Application.HomePlanner.Services.Assinatura
+@using Domain.HomePlanner.Models.Enums
+@inject IAssinaturaService Service
+@inject NavigationManager Nav
+@inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResource> L
+@inject PublicLanguageService Lang
+
+<PageTitle>@L["Assin_Titulo"] — HomePlanner</PageTitle>
+
+<MudText Typo="Typo.h5" GutterBottom="true" Style="font-family:'Fraunces',serif; font-weight:300;">
+    @L["Assin_Titulo"]
+</MudText>
+<MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">@L["Assin_Subtitulo"]</MudText>
+
+@if (_statusRetorno == "success")
+{
+    <MudAlert Severity="Severity.Success" Class="mb-3" ShowCloseIcon="true"
+              CloseIconClicked="LimparStatus">@L["Assin_PagamentoOk"]</MudAlert>
+}
+else if (_statusRetorno == "cancel")
+{
+    <MudAlert Severity="Severity.Info" Class="mb-3" ShowCloseIcon="true"
+              CloseIconClicked="LimparStatus">@L["Assin_PagamentoCancelado"]</MudAlert>
+}
+
+@if (_carregando)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else if (_atual is not null)
+{
+    @* ── Plano atual ─────────────────────────────────────────────── *@
+    <MudPaper Class="pa-4 mb-4" Elevation="1" Style="border-radius:10px;">
+        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Wrap="Wrap.Wrap">
+            <div>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">@L["Assin_PlanoAtual"]</MudText>
+                <MudText Typo="Typo.h5">@NomePlano(_atual.Plano)</MudText>
+                <MudStack Row="true" Spacing="2" Class="mt-1">
+                    <MudChip T="string" Size="Size.Small" Color="@CorStatus(_atual.Status)" Variant="Variant.Filled">
+                        @NomeStatus(_atual.Status)
+                    </MudChip>
+                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined"
+                             Icon="@Icons.Material.Filled.People">
+                        @_atual.LimiteMembros @L["Assin_Membros"]
+                    </MudChip>
+                </MudStack>
+            </div>
+            @if (_atual.TemAssinaturaStripe)
+            {
+                <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Settings"
+                           OnClick="GerenciarAsync" Disabled="_processando">
+                    @L["Assin_Gerenciar"]
+                </MudButton>
+            }
+        </MudStack>
+
+        <MudDivider Class="my-3" />
+
+        <MudGrid>
+            @if (_atual.DiasRestantesTrial.HasValue)
+            {
+                <MudItem xs="6" md="3">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">@L["Assin_DiasTrial"]</MudText>
+                    <MudText Typo="Typo.body1">
+                        <strong style="@(_atual.DiasRestantesTrial <= 7 ? "color:#C97B5A" : "")">
+                            @_atual.DiasRestantesTrial
+                        </strong>
+                    </MudText>
+                </MudItem>
+            }
+            @if (_atual.DataProximaCobranca.HasValue)
+            {
+                <MudItem xs="6" md="3">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">@L["Assin_ProximaCobranca"]</MudText>
+                    <MudText Typo="Typo.body1">@_atual.DataProximaCobranca.Value.ToString("dd/MM/yyyy")</MudText>
+                </MudItem>
+            }
+            @if (!string.IsNullOrWhiteSpace(_atual.UltimoCartaoFinal))
+            {
+                <MudItem xs="6" md="3">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">@L["Assin_Cartao"]</MudText>
+                    <MudText Typo="Typo.body1">•••• @_atual.UltimoCartaoFinal</MudText>
+                </MudItem>
+            }
+        </MudGrid>
+
+        @if (_atual.CanceladoAoFimDoPeriodo)
+        {
+            <MudAlert Severity="Severity.Warning" Dense="true" Class="mt-3">
+                @L["Assin_CancelamentoAgendado"]
+            </MudAlert>
+        }
+    </MudPaper>
+
+    @* ── Planos disponíveis ──────────────────────────────────────── *@
+    <MudText Typo="Typo.h6" Class="mb-3">@L["Assin_PlanosDisponiveis"]</MudText>
+    <MudGrid Spacing="3">
+        @foreach (var p in _planosOfertados)
+        {
+            <MudItem xs="12" sm="6" md="3">
+                <MudCard Style="@($"border-radius:10px; height:100%; {(p == _atual.Plano ? "border:2px solid #4A6B5C;" : "")}")">
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6" Style="font-size:1rem;">@NomePlano(p)</MudText>
+                        <MudText Typo="Typo.h5" Class="my-2" Style="color:#4A6B5C;">
+                            @_atual.SimboloMoeda @PrecoDe(p)
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Class="d-inline">
+                                /@PeriodoDe(p)
+                            </MudText>
+                        </MudText>
+                    </MudCardContent>
+                    <MudCardActions>
+                        @if (p == _atual.Plano && _atual.Status == StatusAssinatura.Ativo)
+                        {
+                            <MudChip T="string" Size="Size.Small" Color="Color.Success">@L["Assin_SeuPlano"]</MudChip>
+                        }
+                        else
+                        {
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                                       FullWidth="true" OnClick="@(() => AssinarAsync(p))" Disabled="_processando">
+                                @L["Assin_Assinar"]
+                            </MudButton>
+                        }
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+}
+
+@code {
+    private AssinaturaAtualDTO? _atual;
+    private bool _carregando = true;
+    private bool _processando;
+    private string? _statusRetorno;
+
+    private static readonly PlanoAssinatura[] _planosOfertados =
+        [PlanoAssinatura.StandardMensal, PlanoAssinatura.StandardAnual,
+         PlanoAssinatura.ProMensal, PlanoAssinatura.ProAnual];
+
+    protected override async Task OnInitializedAsync()
+    {
+        Lang.SetLang(Lang.Lang);
+        var uri = new Uri(Nav.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        _statusRetorno = query["status"];
+
+        _atual = await Service.ObterMinhaAssinaturaAsync();
+        _carregando = false;
+    }
+
+    private async Task AssinarAsync(PlanoAssinatura plano)
+    {
+        _processando = true;
+        var baseUrl = Nav.BaseUri;
+        var r = await Service.IniciarCheckoutAsync(plano, baseUrl);
+        _processando = false;
+
+        if (r.Sucesso && r.Valor is not null)
+            Nav.NavigateTo(r.Valor.Url, forceLoad: true);
+        else
+            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+    }
+
+    private async Task GerenciarAsync()
+    {
+        _processando = true;
+        var r = await Service.IniciarGerenciamentoAsync(Nav.BaseUri);
+        _processando = false;
+
+        if (r.Sucesso && r.Valor is not null)
+            Nav.NavigateTo(r.Valor.Url, forceLoad: true);
+        else
+            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+    }
+
+    private void LimparStatus() => _statusRetorno = null;
+
+    private string PrecoDe(PlanoAssinatura p)
+        => _atual?.PrecosDisplay.TryGetValue(p, out var v) == true ? v : "—";
+
+    private string PeriodoDe(PlanoAssinatura p) => p switch
+    {
+        PlanoAssinatura.StandardAnual or PlanoAssinatura.ProAnual => L["Assin_Ano"],
+        _ => L["Assin_Mes"],
+    };
+
+    private string NomePlano(PlanoAssinatura p) => p switch
+    {
+        PlanoAssinatura.Gratis         => L["Assin_PlanoGratis"],
+        PlanoAssinatura.StandardMensal => $"Standard ({L["Assin_Mensal"]})",
+        PlanoAssinatura.StandardAnual  => $"Standard ({L["Assin_Anual"]})",
+        PlanoAssinatura.ProMensal      => $"Pro ({L["Assin_Mensal"]})",
+        PlanoAssinatura.ProAnual       => $"Pro ({L["Assin_Anual"]})",
+        _ => p.ToString(),
+    };
+
+    private string NomeStatus(StatusAssinatura s) => s switch
+    {
+        StatusAssinatura.Trial     => L["Assin_StatusTrial"],
+        StatusAssinatura.Ativo     => L["Assin_StatusAtivo"],
+        StatusAssinatura.Suspenso  => L["Assin_StatusSuspenso"],
+        StatusAssinatura.Cancelado => L["Assin_StatusCancelado"],
+        _ => s.ToString(),
+    };
+
+    private Color CorStatus(StatusAssinatura s) => s switch
+    {
+        StatusAssinatura.Ativo     => Color.Success,
+        StatusAssinatura.Trial     => Color.Info,
+        StatusAssinatura.Suspenso  => Color.Warning,
+        StatusAssinatura.Cancelado => Color.Error,
+        _ => Color.Default,
+    };
+}

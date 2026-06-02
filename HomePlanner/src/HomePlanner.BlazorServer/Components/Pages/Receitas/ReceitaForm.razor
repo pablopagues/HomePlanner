@@ -1,0 +1,171 @@
+@* Componente de formulário compartilhado entre Criar e Editar *@
+
+<MudGrid Spacing="3">
+    <MudItem xs="12" md="7">
+        <MudTextField @bind-Value="Dto.Nome" Label="Nome da receita" Required="true"
+                      Variant="Variant.Outlined" />
+    </MudItem>
+    <MudItem xs="6" md="2">
+        <MudNumericField @bind-Value="Dto.NumeroPorcoesBase" Label="Porções" Min="1"
+                         Variant="Variant.Outlined" />
+    </MudItem>
+    <MudItem xs="6" md="3">
+        <MudNumericField @bind-Value="Dto.TempoPreparoMinutos" Label="Tempo (min)"
+                         Variant="Variant.Outlined" />
+    </MudItem>
+
+    <MudItem xs="12">
+        <MudTextField @bind-Value="Dto.UrlImagem" Label="URL da imagem (opcional)"
+                      Variant="Variant.Outlined" Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Image" />
+    </MudItem>
+
+    <MudItem xs="12">
+        <MudTextField @bind-Value="Dto.ModoPreparo" Label="Modo de preparo"
+                      Lines="6" AutoGrow="true" Variant="Variant.Outlined" />
+    </MudItem>
+
+    <MudItem xs="12">
+        <MudTextField @bind-Value="Dto.Observacoes" Label="Observações"
+                      Lines="2" AutoGrow="true" Variant="Variant.Outlined" />
+    </MudItem>
+</MudGrid>
+
+<MudDivider Class="my-4" />
+
+<MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-3">
+    <MudText Typo="Typo.h6">Ingredientes</MudText>
+    <MudButton StartIcon="@Icons.Material.Filled.Add" Size="Size.Small"
+               Variant="Variant.Outlined" Color="Color.Primary"
+               OnClick="AdicionarIngrediente">
+        Adicionar
+    </MudButton>
+</MudStack>
+
+@foreach (var (item, idx) in _linhas.Select((l, i) => (l, i)))
+{
+    <MudPaper Class="pa-3 mb-2" Elevation="0"
+              Style="background:#F9F6F2; border-radius:8px; border:1px solid #E8DDD1;">
+        <MudGrid Spacing="2" Class="align-center">
+            <MudItem xs="12" md="4">
+                <MudAutocomplete T="IngredienteListaDTO?"
+                                 Label="Ingrediente"
+                                 Value="item.Selecionado"
+                                 SearchFunc="BuscarIngredientes"
+                                 ToStringFunc="@(i => i?.Nome ?? string.Empty)"
+                                 ValueChanged="@(v => AtualizarIngrediente(item, v))"
+                                 MinCharacters="2"
+                                 Variant="Variant.Outlined"
+                                 Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="5" md="2">
+                <MudNumericField @bind-Value="item.Dto.Quantidade" Label="Qtde"
+                                 Min="0m" Format="G"
+                                 Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="7" md="2">
+                <MudSelect T="int" @bind-Value="item.Dto.UnidadeMedidaId" Label="Unidade"
+                           Variant="Variant.Outlined" Margin="Margin.Dense">
+                    @foreach (var u in Unidades)
+                    {
+                        <MudSelectItem Value="@u.Id">@u.Codigo — @u.Nome</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="9" md="3">
+                <MudTextField @bind-Value="item.Dto.Observacao" Label="Obs."
+                              Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="2" md="1">
+                <MudStack AlignItems="AlignItems.Center">
+                    <MudCheckBox @bind-Value="item.Dto.Opcional" Label="Opt." Size="Size.Small" />
+                    <MudIconButton Icon="@Icons.Material.Filled.DeleteOutline"
+                                   Color="Color.Error" Size="Size.Small"
+                                   OnClick="@(() => RemoverIngrediente(item))" />
+                </MudStack>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+}
+
+@if (_linhas.Count == 0)
+{
+    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+        Nenhum ingrediente adicionado.
+    </MudText>
+}
+
+<MudDivider Class="my-4" />
+
+<MudStack Row="true" Spacing="2">
+    <MudButton Variant="Variant.Filled" Color="Color.Primary"
+               OnClick="HandleSalvar" Disabled="Salvando">
+        @(Salvando ? "Salvando..." : "Salvar receita")
+    </MudButton>
+    <MudButton Variant="Variant.Text" OnClick="OnCancelar">Cancelar</MudButton>
+</MudStack>
+
+@code {
+    [Parameter, EditorRequired] public ReceitaPersistenciaDTO Dto { get; set; } = null!;
+    [Parameter, EditorRequired] public List<UnidadeMedidaListaDTO> Unidades { get; set; } = null!;
+    [Parameter, EditorRequired] public Func<string, CancellationToken, Task<IEnumerable<IngredienteListaDTO>>> BuscarIngredientes { get; set; } = null!;
+    [Parameter] public bool Salvando { get; set; }
+    [Parameter] public EventCallback OnSalvar { get; set; }
+    [Parameter] public EventCallback OnCancelar { get; set; }
+
+    private List<IngredienteLinhaForm> _linhas = [];
+
+    // Classe interna para manter estado do autocomplete separado do DTO
+    private class IngredienteLinhaForm
+    {
+        public ReceitaIngredientePersistenciaDTO Dto { get; set; } = new();
+        public IngredienteListaDTO? Selecionado { get; set; }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (_linhas.Count == 0 && Dto.Ingredientes.Count > 0)
+        {
+            _linhas = Dto.Ingredientes.Select(d => new IngredienteLinhaForm { Dto = d }).ToList();
+        }
+    }
+
+    private void AdicionarIngrediente()
+    {
+        var novo = new ReceitaIngredientePersistenciaDTO
+        {
+            Ordem = _linhas.Count,
+            UnidadeMedidaId = Unidades.FirstOrDefault()?.Id ?? 0,
+        };
+        Dto.Ingredientes.Add(novo);
+        _linhas.Add(new IngredienteLinhaForm { Dto = novo });
+    }
+
+    private void RemoverIngrediente(IngredienteLinhaForm linha)
+    {
+        Dto.Ingredientes.Remove(linha.Dto);
+        _linhas.Remove(linha);
+        RecalcularOrdem();
+    }
+
+    private void AtualizarIngrediente(IngredienteLinhaForm linha, IngredienteListaDTO? selecionado)
+    {
+        linha.Selecionado = selecionado;
+        linha.Dto.IngredienteId = selecionado?.Id ?? 0;
+        // Auto-preenche unidade padrão do ingrediente
+        if (selecionado?.UnidadeMedidaPadraoId.HasValue == true)
+            linha.Dto.UnidadeMedidaId = selecionado.UnidadeMedidaPadraoId.Value;
+    }
+
+    private void RecalcularOrdem()
+    {
+        for (int i = 0; i < _linhas.Count; i++)
+            _linhas[i].Dto.Ordem = i;
+    }
+
+    private async Task HandleSalvar()
+    {
+        RecalcularOrdem();
+        await OnSalvar.InvokeAsync();
+    }
+}

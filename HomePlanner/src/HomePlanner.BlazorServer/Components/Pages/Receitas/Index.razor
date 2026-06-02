@@ -1,0 +1,169 @@
+@page "/receitas"
+@page "/recipes"
+@page "/recetas"
+@attribute [Authorize]
+@rendermode InteractiveServer
+@using HomePlanner.BlazorServer.Services
+@inject IStringLocalizer<SharedResource> L
+@inject PublicLanguageService Lang
+
+<PageTitle>@L["Receita_Titulo"]</PageTitle>
+
+<MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-4">
+    <MudText Typo="Typo.h5" Style="font-family:'Fraunces',serif; font-weight:300;">@L["Receita_Titulo"]</MudText>
+    <MudStack Row="true" Spacing="2">
+        <MudButton Variant="Variant.Outlined" Color="Color.Secondary"
+                   StartIcon="@Icons.Material.Filled.Link"
+                   Href="/receitas/importar">
+            @L["Receita_ImportarUrl"]
+        </MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   Href="/receitas/criar">
+            @L["Receita_Nova"]
+        </MudButton>
+    </MudStack>
+</MudStack>
+
+<MudPaper Class="pa-4 mb-4" Elevation="0" Style="background:#F5F0EA; border-radius:10px;">
+    <MudTextField Value="@_busca" Placeholder="Buscar receitas..."
+                  Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
+                  Immediate="true" DebounceInterval="300"
+                  ValueChanged="@((string v) => BuscarAsync(v))"
+                  Variant="Variant.Outlined" Margin="Margin.Dense" />
+</MudPaper>
+
+@if (_carregando)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else if (_itens.Count == 0)
+{
+    <MudAlert Severity="Severity.Info" Class="mt-4">
+        Nenhuma receita encontrada.
+        <MudLink Href="/receitas/criar">Criar a primeira!</MudLink>
+    </MudAlert>
+}
+else
+{
+    <MudGrid Spacing="3">
+        @foreach (var r in _itens)
+        {
+            <MudItem xs="12" sm="6" md="4">
+                <MudCard Style="height:100%; border-radius:10px;">
+                    @if (!string.IsNullOrWhiteSpace(r.UrlImagem))
+                    {
+                        <MudCardMedia Image="@r.UrlImagem" Height="140" />
+                    }
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6" Style="font-size:1rem;">@r.Nome</MudText>
+                        <MudStack Row="true" Spacing="1" Class="mt-2">
+                            <MudChip T="string" Size="Size.Small" Color="Color.Default"
+                                     Icon="@Icons.Material.Filled.People">
+                                @r.NumeroPorcoesBase porções
+                            </MudChip>
+                            @if (r.TempoPreparoMinutos.HasValue)
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Default"
+                                         Icon="@Icons.Material.Filled.Timer">
+                                    @r.TempoPreparoMinutos min
+                                </MudChip>
+                            }
+                            <MudChip T="string" Size="Size.Small" Color="Color.Default"
+                                     Icon="@Icons.Material.Filled.List">
+                                @r.TotalIngredientes ingr.
+                            </MudChip>
+                        </MudStack>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Size="Size.Small" Color="Color.Primary"
+                                   Href="@($"/receitas/editar/{r.Id}")">
+                            Editar
+                        </MudButton>
+                        <MudButton Size="Size.Small" Color="Color.Default"
+                                   OnClick="@(() => DuplicarAsync(r.Id))">
+                            Duplicar
+                        </MudButton>
+                        <MudSpacer />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Size="Size.Small" Color="Color.Error"
+                                       OnClick="@(() => ConfirmarExclusao(r))" />
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+
+    @if (_totalPaginas > 1)
+    {
+        <MudPagination Class="mt-4" Count="_totalPaginas" Selected="_pagina"
+                       SelectedChanged="@(async (int p) => { _pagina = p; await CarregarAsync(); })"
+                       Color="Color.Primary" />
+    }
+}
+
+@code {
+    [Inject] IReceitaService Service { get; set; } = null!;
+    [Inject] ISnackbar Snackbar { get; set; } = null!;
+    [Inject] IDialogService Dialog { get; set; } = null!;
+    [Inject] NavigationManager Nav { get; set; } = null!;
+
+    private List<ReceitaListaDTO> _itens = [];
+    private bool _carregando = true;
+    private string _busca = string.Empty;
+    private int _pagina = 1;
+    private int _totalPaginas;
+
+    protected override async Task OnInitializedAsync() => await CarregarAsync();
+
+    private async Task CarregarAsync()
+    {
+        _carregando = true;
+        var r = await Service.ListarAsync(new ReceitaFiltroDTO
+        {
+            Pagina = _pagina, TamanhoPagina = 12, TextoBusca = _busca
+        });
+        _itens = r.Itens.ToList();
+        _totalPaginas = r.TotalPaginas;
+        _carregando = false;
+    }
+
+    private async Task BuscarAsync(string v)
+    {
+        _busca = v;
+        _pagina = 1;
+        await CarregarAsync();
+    }
+
+    private async Task DuplicarAsync(int id)
+    {
+        var r = await Service.DuplicarAsync(id);
+        if (r.Sucesso)
+        {
+            Snackbar.Add("Receita duplicada!", Severity.Success);
+            await CarregarAsync();
+        }
+        else
+            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+    }
+
+    private async Task ConfirmarExclusao(ReceitaListaDTO receita)
+    {
+        var confirm = await Dialog.ShowMessageBox(
+            "Confirmar exclusão",
+            $"Excluir '{receita.Nome}'?",
+            yesText: "Excluir", cancelText: "Cancelar");
+
+        if (confirm == true)
+        {
+            var r = await Service.DeletarAsync(receita.Id);
+            if (r.Sucesso)
+            {
+                Snackbar.Add("Receita excluída.", Severity.Success);
+                await CarregarAsync();
+            }
+            else
+                Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+        }
+    }
+}

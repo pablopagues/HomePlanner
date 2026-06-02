@@ -1,0 +1,112 @@
+@page "/onboarding"
+@layout HomePlanner.BlazorServer.Components.Layout.PublicLayout
+@attribute [Authorize]
+@rendermode InteractiveServer
+@using Application.HomePlanner.DTOs.Onboarding
+@using Application.HomePlanner.Services.Onboarding
+@inject IOnboardingService Service
+@inject IStringLocalizer<SharedResource> L
+@inject PublicLanguageService Lang
+@inject NavigationManager Nav
+
+<PageTitle>@L["Onb_Titulo"] — HomePlanner</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="py-8">
+    <MudPaper Class="pa-8" Elevation="2" Style="border-radius:14px;">
+        <MudText Typo="Typo.h4" Align="Align.Center" GutterBottom="true"
+                 Style="font-family:'Fraunces',serif; font-weight:300; color:#4A6B5C;">
+            @L["Onb_Titulo"]
+        </MudText>
+        <MudText Typo="Typo.body2" Align="Align.Center" Color="Color.Secondary" Class="mb-6">
+            @L["Onb_Subtitulo"]
+        </MudText>
+
+        <MudStack Spacing="4">
+            <MudNumericField @bind-Value="_dto.TamanhoFamiliaPadrao"
+                             Label="@L["Onb_TamanhoFamilia"]" Min="1" Max="20"
+                             Variant="Variant.Outlined"
+                             HelperText="@L["Onb_TamanhoFamiliaAjuda"]" />
+
+            <MudSelect T="string" @bind-Value="_dto.FusoHorario"
+                       Label="@L["Onb_FusoHorario"]" Variant="Variant.Outlined">
+                <MudSelectItem Value="@("America/Toronto")">America/Toronto (Canadá)</MudSelectItem>
+                <MudSelectItem Value="@("America/Sao_Paulo")">America/Sao_Paulo (Brasil)</MudSelectItem>
+                <MudSelectItem Value="@("America/Vancouver")">America/Vancouver</MudSelectItem>
+                <MudSelectItem Value="@("Europe/Madrid")">Europe/Madrid (Espanha)</MudSelectItem>
+            </MudSelect>
+
+            <div>
+                <MudText Typo="Typo.subtitle2" Class="mb-2">@L["Onb_TiposRefeicao"]</MudText>
+                <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="2">
+                    @foreach (var tipo in _tiposDisponiveis)
+                    {
+                        <MudChip T="string"
+                                 Variant="@(_dto.TiposRefeicaoAtivos.Contains(tipo) ? Variant.Filled : Variant.Outlined)"
+                                 Color="@(_dto.TiposRefeicaoAtivos.Contains(tipo) ? Color.Primary : Color.Default)"
+                                 OnClick="@(() => ToggleTipo(tipo))">
+                            @NomeTipo(tipo)
+                        </MudChip>
+                    }
+                </MudStack>
+            </div>
+
+            @if (_erro is not null)
+            {
+                <MudAlert Severity="Severity.Error" Dense="true">@_erro</MudAlert>
+            }
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
+                       FullWidth="true" OnClick="FinalizarAsync" Disabled="_salvando">
+                @(_salvando ? L["Btn_Salvando"] : L["Onb_Finalizar"])
+            </MudButton>
+        </MudStack>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private ConfiguracaoFamiliaDTO _dto = new();
+    private bool _salvando;
+    private string? _erro;
+
+    private static readonly string[] _tiposDisponiveis =
+        ["CafeManha", "Almoco", "Lanche", "Jantar", "Ceia"];
+
+    protected override async Task OnInitializedAsync()
+    {
+        Lang.SetLang(Lang.Lang);
+        _dto = await Service.ObterConfiguracaoAtualAsync();
+        if (_dto.TiposRefeicaoAtivos.Count == 0)
+            _dto.TiposRefeicaoAtivos.Add("Almoco");
+    }
+
+    private void ToggleTipo(string tipo)
+    {
+        if (_dto.TiposRefeicaoAtivos.Contains(tipo))
+            _dto.TiposRefeicaoAtivos.Remove(tipo);
+        else
+            _dto.TiposRefeicaoAtivos.Add(tipo);
+    }
+
+    private async Task FinalizarAsync()
+    {
+        _erro = null;
+        _salvando = true;
+        var r = await Service.FinalizarAsync(_dto);
+        _salvando = false;
+
+        if (r.Sucesso)
+            Nav.NavigateTo("/dashboard", forceLoad: true);
+        else
+            _erro = string.Join(", ", r.Erros);
+    }
+
+    private string NomeTipo(string tipo) => tipo switch
+    {
+        "CafeManha" => L["Refeicao_CafeManha"],
+        "Almoco"    => L["Refeicao_Almoco"],
+        "Lanche"    => L["Refeicao_Lanche"],
+        "Jantar"    => L["Refeicao_Jantar"],
+        "Ceia"      => L["Refeicao_Ceia"],
+        _           => tipo,
+    };
+}

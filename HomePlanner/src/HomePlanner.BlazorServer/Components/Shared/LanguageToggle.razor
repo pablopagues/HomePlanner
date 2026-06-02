@@ -1,0 +1,39 @@
+@inject PublicLanguageService Lang
+@inject NavigationManager Nav
+@using HomePlanner.BlazorServer.Routing
+@using HomePlanner.BlazorServer.Services
+
+<MudStack Row="true" Spacing="0" AlignItems="AlignItems.Center">
+    <MudButton Size="Size.Small"
+               Variant="@(Lang.IsPortugues ? Variant.Filled : Variant.Text)"
+               Color="@(Lang.IsPortugues ? Color.Primary : Color.Default)"
+               Style="min-width:36px; padding:4px 8px; font-size:0.75rem;"
+               OnClick="@(() => TrocarIdioma("pt"))">
+        PT
+    </MudButton>
+    <MudButton Size="Size.Small"
+               Variant="@(Lang.IsIngles ? Variant.Filled : Variant.Text)"
+               Color="@(Lang.IsIngles ? Color.Primary : Color.Default)"
+               Style="min-width:36px; padding:4px 8px; font-size:0.75rem;"
+               OnClick="@(() => TrocarIdioma("en"))">
+        EN
+    </MudButton>
+    <MudButton Size="Size.Small"
+               Variant="@(Lang.IsEspanhol ? Variant.Filled : Variant.Text)"
+               Color="@(Lang.IsEspanhol ? Color.Primary : Color.Default)"
+               Style="min-width:36px; padding:4px 8px; font-size:0.75rem;"
+               OnClick="@(() => TrocarIdioma("es"))">
+        ES
+    </MudButton>
+</MudStack>
+
+@code {
+    private void TrocarIdioma(string novoLang)
+    {
+        var currentPath = "/" + Nav.ToBaseRelativePath(Nav.Uri).Split('?')[0];
+        var targetPath  = UrlMap.Translate(currentPath, Lang.Lang, novoLang);
+        Nav.NavigateTo(
+            $"/set-lang?lang={novoLang}&returnUrl={Uri.EscapeDataString(targetPath)}",
+            forceLoad: true);
+    }
+}

@@ -1,0 +1,41 @@
+@page "/quem-somos"
+@page "/about"
+@page "/acerca"
+@layout HomePlanner.BlazorServer.Components.Layout.PublicLayout
+@attribute [AllowAnonymous]
+@using HomePlanner.BlazorServer.Services
+@inject IStringLocalizer<SharedResource> L
+@inject PublicLanguageService Lang
+
+<PageTitle>@L["Sobre_Titulo"] — HomePlanner</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="py-8">
+    <MudButton Href="/" StartIcon="@Icons.Material.Filled.ArrowBack" Variant="Variant.Text" Class="mb-3"
+               Style="color:#4A6B5C;">
+        @L["Ct_Voltar"]
+    </MudButton>
+
+    <MudText Typo="Typo.h4" Class="mb-4" Style="font-family:'Fraunces',serif; font-weight:300; color:#4A6B5C;">
+        @L["Sobre_Titulo"]
+    </MudText>
+
+    <MudText Typo="Typo.body1" Class="mb-4" Style="color:#2A3A33; line-height:1.7;">
+        @L["Sobre_P1"]
+    </MudText>
+    <MudText Typo="Typo.body1" Class="mb-4" Style="color:#2A3A33; line-height:1.7;">
+        @L["Sobre_P2"]
+    </MudText>
+
+    <MudPaper Class="pa-5 mt-4" Elevation="0" Style="background:#F5F0EA; border-radius:12px;">
+        <MudText Typo="Typo.subtitle1" Style="font-weight:600; color:#4A6B5C;">@L["Sobre_MissaoTitulo"]</MudText>
+        <MudText Typo="Typo.body2" Class="mt-1" Style="color:#7A8278;">@L["Sobre_MissaoTexto"]</MudText>
+    </MudPaper>
+
+    <MudText Typo="Typo.caption" Class="mt-6 d-block" Style="color:#7A8278;">
+        HomePlanner @L["Landing_BySideris"] · siderisx.ca
+    </MudText>
+</MudContainer>
+
+@code {
+    protected override void OnInitialized() => Lang.SetLang(Lang.Lang);
+}

@@ -1,0 +1,22 @@
+## .NET
+*.user
+*.suo
+.vs/
+obj/
+bin/
+**/obj/
+**/bin/
+
+## Logs
+logs/
+*.log
+
+## Secrets
+appsettings.Production.json
+appsettings.Secrets.json
+secrets.json
+
+## OS
+.DS_Store
+Thumbs.db
+desktop.ini

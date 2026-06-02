@@ -1,0 +1,148 @@
+@* Dialog de seleção de receita para um slot do cardápio *@
+@inject IReceitaService ReceitaService
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            @_titulo — @NomeDia(DiaSemana)
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField Value="@_busca" Placeholder="Buscar receita..."
+                      Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
+                      Immediate="true" DebounceInterval="300"
+                      ValueChanged="@((string v) => BuscarAsync(v))"
+                      Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
+
+        <MudNumericField @bind-Value="PorcoesDesejadas" Label="Porções desejadas"
+                         Min="1" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
+
+        @if (_carregando)
+        {
+            <MudProgressLinear Indeterminate="true" />
+        }
+        else
+        {
+            <div style="max-height:360px; overflow-y:auto;">
+                @foreach (var r in _receitas)
+                {
+                    <MudPaper @onclick="@(() => Selecionar(r))"
+                              Class="pa-3 mb-2"
+                              Style='@($"cursor:pointer; border-radius:8px; border: 2px solid {(_selecionadoId == r.Id ? "#4A6B5C" : "transparent")}; background:{(_selecionadoId == r.Id ? "#EEF5F1" : "#F9F6F2")};")'
+                              Elevation="0">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                            @if (!string.IsNullOrWhiteSpace(r.UrlImagem))
+                            {
+                                <MudAvatar Style="width:48px;height:48px;border-radius:6px;">
+                                    <MudImage Src="@r.UrlImagem" Style="object-fit:cover;" />
+                                </MudAvatar>
+                            }
+                            <MudStack Spacing="0">
+                                <MudText Typo="Typo.body1" Style="font-weight:500;">@r.Nome</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                    @r.NumeroPorcoesBase porções base
+                                    @(r.TempoPreparoMinutos.HasValue ? $" · {r.TempoPreparoMinutos} min" : "")
+                                </MudText>
+                            </MudStack>
+                            @if (_selecionadoId == r.Id)
+                            {
+                                <MudSpacer />
+                                <MudIcon Icon="@Icons.Material.Filled.CheckCircle"
+                                         Color="Color.Success" />
+                            }
+                        </MudStack>
+                    </MudPaper>
+                }
+                @if (_receitas.Count == 0 && !_carregando)
+                {
+                    <MudText Color="Color.Secondary">Nenhuma receita encontrada.</MudText>
+                }
+            </div>
+        }
+    </DialogContent>
+    <DialogActions>
+        @if (_selecionadoId.HasValue)
+        {
+            <MudButton Color="Color.Error" Variant="Variant.Text" OnClick="Limpar">
+                Limpar slot
+            </MudButton>
+        }
+        <MudSpacer />
+        <MudButton OnClick="Cancelar">Cancelar</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                   OnClick="Confirmar" Disabled="@(!_selecionadoId.HasValue)">
+            Confirmar
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter] public DiaSemana DiaSemana { get; set; }
+    [Parameter] public TipoRefeicao TipoRefeicao { get; set; }
+    [Parameter] public int? ReceitaIdAtual { get; set; }
+    [Parameter] public int PorcoesAtual { get; set; } = 4;
+
+    private string _busca = string.Empty;
+    private List<ReceitaListaDTO> _receitas = [];
+    private bool _carregando = true;
+    private int? _selecionadoId;
+    private int PorcoesDesejadas;
+
+    private string _titulo => TipoRefeicao switch
+    {
+        TipoRefeicao.CafeManha => "Café da manhã",
+        TipoRefeicao.Almoco    => "Almoço",
+        TipoRefeicao.Lanche    => "Lanche",
+        TipoRefeicao.Jantar    => "Jantar",
+        TipoRefeicao.Ceia      => "Ceia",
+        _                      => TipoRefeicao.ToString()
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        _selecionadoId = ReceitaIdAtual;
+        PorcoesDesejadas = PorcoesAtual;
+        await BuscarAsync(string.Empty);
+    }
+
+    private async Task BuscarAsync(string texto)
+    {
+        _busca = texto;
+        _carregando = true;
+        var r = await ReceitaService.ListarAsync(new ReceitaFiltroDTO
+        {
+            Pagina = 1, TamanhoPagina = 30, TextoBusca = texto
+        });
+        _receitas = r.Itens.ToList();
+        _carregando = false;
+    }
+
+    private void Selecionar(ReceitaListaDTO r)
+    {
+        _selecionadoId = r.Id;
+        if (PorcoesDesejadas == 0 || PorcoesDesejadas == PorcoesAtual)
+            PorcoesDesejadas = r.NumeroPorcoesBase;
+    }
+
+    private void Confirmar()
+        => MudDialog.Close(DialogResult.Ok((_selecionadoId, PorcoesDesejadas)));
+
+    private void Limpar()
+        => MudDialog.Close(DialogResult.Ok<(int?, int)>((null, 0)));
+
+    private void Cancelar() => MudDialog.Cancel();
+
+    private static string NomeDia(DiaSemana d) => d switch
+    {
+        DiaSemana.Segunda => "Segunda",
+        DiaSemana.Terca   => "Terça",
+        DiaSemana.Quarta  => "Quarta",
+        DiaSemana.Quinta  => "Quinta",
+        DiaSemana.Sexta   => "Sexta",
+        DiaSemana.Sabado  => "Sábado",
+        DiaSemana.Domingo => "Domingo",
+        _                  => d.ToString()
+    };
+}

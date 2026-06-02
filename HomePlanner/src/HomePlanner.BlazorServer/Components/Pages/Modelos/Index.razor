@@ -1,0 +1,125 @@
+@page "/modelos"
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+<PageTitle>Modelos de Semana</PageTitle>
+
+<MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-4">
+    <MudText Typo="Typo.h5" Style="font-family:'Fraunces',serif; font-weight:300;">
+        Modelos de semana
+    </MudText>
+</MudStack>
+
+<MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+    Salve semanas favoritas como modelos para reutilizar facilmente.
+    Para criar um modelo, vá ao <MudLink Href="/cardapio">Cardápio</MudLink> e
+    clique em "Salvar como modelo".
+</MudText>
+
+@if (_carregando)
+{
+    <MudProgressLinear Indeterminate="true" />
+}
+else if (_itens.Count == 0)
+{
+    <MudAlert Severity="Severity.Info">
+        Nenhum modelo criado ainda. Planeje uma semana no cardápio e salve-a como modelo!
+    </MudAlert>
+}
+else
+{
+    <MudGrid Spacing="3">
+        @foreach (var m in _itens)
+        {
+            <MudItem xs="12" sm="6" md="4">
+                <MudCard Style="border-radius:10px; height:100%;">
+                    <MudCardContent>
+                        <MudStack Row="true" AlignItems="AlignItems.Start"
+                                  Justify="Justify.SpaceBetween">
+                            <div>
+                                <MudText Typo="Typo.h6" Style="font-size:1rem;">@m.Nome</MudText>
+                                @if (!string.IsNullOrWhiteSpace(m.Descricao))
+                                {
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                        @m.Descricao
+                                    </MudText>
+                                }
+                            </div>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Default">
+                                @m.TotalRefeicoes refeições
+                            </MudChip>
+                        </MudStack>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Size="Size.Small" Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.CalendarMonth"
+                                   OnClick="@(() => AplicarModelo(m))">
+                            Aplicar na semana
+                        </MudButton>
+                        <MudSpacer />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Size="Size.Small" Color="Color.Error"
+                                       OnClick="@(() => ConfirmarExclusao(m))" />
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+}
+
+@code {
+    [Inject] IModeloSemanaService Service { get; set; } = null!;
+    [Inject] IDialogService Dialog { get; set; } = null!;
+    [Inject] ISnackbar Snackbar { get; set; } = null!;
+    [Inject] NavigationManager Nav { get; set; } = null!;
+
+    private List<ModeloSemanaListaDTO> _itens = [];
+    private bool _carregando = true;
+
+    protected override async Task OnInitializedAsync() => await CarregarAsync();
+
+    private async Task CarregarAsync()
+    {
+        _carregando = true;
+        var r = await Service.ListarAsync(new ModeloSemanaFiltroDTO { Pagina = 1, TamanhoPagina = 50 });
+        _itens = r.Itens.ToList();
+        _carregando = false;
+    }
+
+    private async Task AplicarModelo(ModeloSemanaListaDTO modelo)
+    {
+        // Aplica na próxima segunda-feira
+        var hoje = DateOnly.FromDateTime(DateTime.Today);
+        var diasAteSegunda = ((int)hoje.DayOfWeek - 1 + 7) % 7;
+        var segunda = diasAteSegunda == 0 ? hoje : hoje.AddDays(7 - diasAteSegunda);
+
+        var r = await Service.AplicarModeloAsync(modelo.Id, segunda);
+        if (r.Sucesso)
+        {
+            Snackbar.Add($"Modelo '{modelo.Nome}' aplicado à semana de {segunda:dd/MM}!", Severity.Success);
+            Nav.NavigateTo($"/cardapio/{segunda:yyyy-MM-dd}");
+        }
+        else
+            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+    }
+
+    private async Task ConfirmarExclusao(ModeloSemanaListaDTO modelo)
+    {
+        var confirm = await Dialog.ShowMessageBox(
+            "Confirmar exclusão",
+            $"Excluir o modelo '{modelo.Nome}'?",
+            yesText: "Excluir", cancelText: "Cancelar");
+
+        if (confirm == true)
+        {
+            var r = await Service.DeletarAsync(modelo.Id);
+            if (r.Sucesso)
+            {
+                Snackbar.Add("Modelo excluído.", Severity.Success);
+                await CarregarAsync();
+            }
+            else
+                Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+        }
+    }
+}

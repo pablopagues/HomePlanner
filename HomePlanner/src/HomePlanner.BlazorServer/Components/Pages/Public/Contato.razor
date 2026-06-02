@@ -1,0 +1,149 @@
+@page "/contato"
+@page "/contact"
+@page "/contacto"
+@layout HomePlanner.BlazorServer.Components.Layout.PublicLayout
+@attribute [AllowAnonymous]
+@rendermode InteractiveServer
+@using Application.HomePlanner.DTOs.Contato
+@using Application.HomePlanner.Services.Contato
+@using Microsoft.AspNetCore.Components.Forms
+@inject IContatoService ContatoSrv
+@inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResource> L
+@inject PublicLanguageService Lang
+
+<PageTitle>@L["Ct_Titulo"] — HomePlanner</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="py-8">
+    <MudButton Href="/" StartIcon="@Icons.Material.Filled.ArrowBack" Variant="Variant.Text" Class="mb-3"
+               Style="color:#4A6B5C;">
+        @L["Ct_Voltar"]
+    </MudButton>
+
+    <MudText Typo="Typo.h4" Class="mb-2" Style="font-family:'Fraunces',serif; font-weight:300; color:#4A6B5C;">
+        @L["Ct_Titulo"]
+    </MudText>
+    <MudText Class="mb-6" Style="color:#7A8278;">@L["Ct_Intro"]</MudText>
+
+    <MudPaper Class="pa-6 mb-8" Elevation="2" Style="border-radius:12px;">
+        @if (_enviado)
+        {
+            <div style="text-align:center; padding:24px 0;">
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Style="font-size:3rem; color:#5B8A6A;" />
+                <MudText Typo="Typo.h6" Class="mb-2 mt-2">@L["Ct_SucessoTitulo"]</MudText>
+                <MudText Class="mb-4" Style="color:#7A8278;">
+                    @string.Format(L["Ct_SucessoCorpo"], _emailEnviado)
+                </MudText>
+                <MudButton Variant="Variant.Outlined" OnClick="EnviarOutra" Style="color:#4A6B5C; border-color:#4A6B5C;">
+                    @L["Ct_EnviarOutra"]
+                </MudButton>
+            </div>
+        }
+        else
+        {
+            <EditForm Model="_modelo" OnValidSubmit="EnviarAsync">
+                <DataAnnotationsValidator />
+
+                <MudGrid Spacing="3">
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_modelo.Nome" Label="@L["Ct_Nome"]"
+                                      Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        <ValidationMessage For="@(() => _modelo.Nome)" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_modelo.Email" Label="@L["Ct_Email"]"
+                                      InputType="InputType.Email" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        <ValidationMessage For="@(() => _modelo.Email)" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_modelo.Telefone" Label="@L["Ct_Telefone"]"
+                                      Variant="Variant.Outlined" Margin="Margin.Dense" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudSelect @bind-Value="_modelo.Assunto" Label="@L["Ct_Assunto"]"
+                                   Variant="Variant.Outlined" Margin="Margin.Dense">
+                            <MudSelectItem Value="@("Dúvida sobre o sistema")">@L["Ct_AssuntoDuvida"]</MudSelectItem>
+                            <MudSelectItem Value="@("Planos e preços")">@L["Ct_AssuntoPlanos"]</MudSelectItem>
+                            <MudSelectItem Value="@("Problema técnico")">@L["Ct_AssuntoTecnico"]</MudSelectItem>
+                            <MudSelectItem Value="@("Cobrança ou cancelamento")">@L["Ct_AssuntoCobranca"]</MudSelectItem>
+                            <MudSelectItem Value="@("Privacidade / LGPD")">@L["Ct_AssuntoLgpd"]</MudSelectItem>
+                            <MudSelectItem Value="@("Outro")">@L["Ct_AssuntoOutro"]</MudSelectItem>
+                        </MudSelect>
+                        <ValidationMessage For="@(() => _modelo.Assunto)" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_modelo.Mensagem" Label="@L["Ct_Mensagem"]"
+                                      Lines="5" Variant="Variant.Outlined" />
+                        <ValidationMessage For="@(() => _modelo.Mensagem)" />
+                    </MudItem>
+                </MudGrid>
+
+                @* Honeypot anti-bot — escondido *@
+                <div style="position:absolute; left:-9999px;" aria-hidden="true">
+                    <InputText @bind-Value="_modelo.Website" tabindex="-1" autocomplete="off" />
+                </div>
+
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" FullWidth="true"
+                           Disabled="_enviando" Class="mt-4"
+                           Style="background-color:#C97B5A; color:white;">
+                    @(_enviando ? L["Ct_Enviando"] : L["Ct_Enviar"])
+                </MudButton>
+
+                <MudText Typo="Typo.caption" Class="mt-3 d-block" Style="color:#7A8278;">
+                    @L["Ct_Privacidade"]
+                </MudText>
+            </EditForm>
+        }
+    </MudPaper>
+
+    <MudPaper Class="pa-6" Outlined="true" Style="border-radius:12px;">
+        <MudText Typo="Typo.h6" Class="mb-3">
+            <MudIcon Icon="@Icons.Material.Filled.SupportAgent" Size="Size.Small" Class="mr-1" />
+            @L["Ct_SuporteTitulo"]
+        </MudText>
+        <MudText Class="mb-1">
+            <a href="mailto:support@siderisx.ca" style="color:#C97B5A;"><strong>support@siderisx.ca</strong></a>
+        </MudText>
+        <MudText Typo="Typo.body2" Style="color:#7A8278;">@L["Ct_SuporteDesc"]</MudText>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private ContatoMensagemDTO _modelo = new();
+    private bool _enviando;
+    private bool _enviado;
+    private string _emailEnviado = string.Empty;
+
+    protected override void OnInitialized() => Lang.SetLang(Lang.Lang);
+
+    private async Task EnviarAsync()
+    {
+        if (_enviando) return;
+        _enviando = true;
+        try
+        {
+            var r = await ContatoSrv.EnviarAsync(_modelo);
+            if (r.Sucesso)
+            {
+                _emailEnviado = _modelo.Email;
+                _enviado = true;
+                _modelo = new ContatoMensagemDTO();
+            }
+            else
+            {
+                Snackbar.Add(r.Erro ?? L["Msg_ErroGenerico"], Severity.Error);
+            }
+        }
+        finally
+        {
+            _enviando = false;
+        }
+    }
+
+    private void EnviarOutra()
+    {
+        _enviado = false;
+        _emailEnviado = string.Empty;
+        _modelo = new ContatoMensagemDTO();
+    }
+}

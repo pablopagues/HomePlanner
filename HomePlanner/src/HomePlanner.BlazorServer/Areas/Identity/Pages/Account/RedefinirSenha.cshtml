@@ -1,0 +1,33 @@
+@page
+@model HomePlanner.BlazorServer.Areas.Identity.Pages.Account.RedefinirSenhaModel
+@{
+    ViewData["Title"] = "Nova senha";
+}
+
+<h1 class="auth-title">Criar nova senha</h1>
+
+@if (Model.Concluido)
+{
+    <div class="alert-success">Senha redefinida com sucesso!</div>
+    <div class="auth-links"><a asp-page="./Login">Entrar</a></div>
+}
+else
+{
+    <form method="post">
+        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+        <input asp-for="Input.UserId" type="hidden" />
+        <input asp-for="Input.Token" type="hidden" />
+
+        <div class="form-group">
+            <label asp-for="Input.Senha">Nova senha</label>
+            <input asp-for="Input.Senha" autocomplete="new-password" />
+            <span asp-validation-for="Input.Senha" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Input.ConfirmacaoSenha">Confirmar senha</label>
+            <input asp-for="Input.ConfirmacaoSenha" autocomplete="new-password" />
+            <span asp-validation-for="Input.ConfirmacaoSenha" class="text-danger"></span>
+        </div>
+        <button type="submit" class="btn-primary">Redefinir senha</button>
+    </form>
+}

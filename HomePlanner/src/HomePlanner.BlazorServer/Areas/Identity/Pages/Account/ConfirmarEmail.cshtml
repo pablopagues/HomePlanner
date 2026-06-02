@@ -1,0 +1,18 @@
+@page
+@model HomePlanner.BlazorServer.Areas.Identity.Pages.Account.ConfirmarEmailModel
+@{
+    ViewData["Title"] = "Confirmar e-mail";
+}
+
+<h1 class="auth-title">Confirmação de e-mail</h1>
+
+@if (Model.Sucesso)
+{
+    <div class="alert-success">@Model.Mensagem</div>
+    <div class="auth-links"><a asp-page="./Login">Entrar agora</a></div>
+}
+else
+{
+    <div class="alert-error">@Model.Mensagem</div>
+    <div class="auth-links"><a asp-page="./Login">Voltar ao login</a></div>
+}

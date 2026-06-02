@@ -1,0 +1,100 @@
+@page "/receitas/editar/{Id:int}"
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+<PageTitle>Editar Receita</PageTitle>
+
+<MudBreadcrumbs Items="_breadcrumbs" Class="mb-4 pa-0" />
+
+@if (_carregando)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else if (_dto is not null)
+{
+    <MudText Typo="Typo.h5" GutterBottom="true"
+             Style="font-family:'Fraunces',serif; font-weight:300;">
+        @_dto.Nome
+    </MudText>
+
+    <ReceitaForm Dto="_dto" Unidades="_unidades"
+                 BuscarIngredientes="BuscarIngredientes"
+                 Salvando="_salvando"
+                 OnSalvar="SalvarAsync"
+                 OnCancelar='@(() => Nav.NavigateTo("/receitas"))' />
+}
+else
+{
+    <MudAlert Severity="Severity.Error">Receita não encontrada.</MudAlert>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    [Inject] IReceitaService Service { get; set; } = null!;
+    [Inject] IIngredienteService IngService { get; set; } = null!;
+    [Inject] IUnidadeMedidaRepository UnidadeRepo { get; set; } = null!;
+    [Inject] ISnackbar Snackbar { get; set; } = null!;
+    [Inject] NavigationManager Nav { get; set; } = null!;
+
+    private ReceitaPersistenciaDTO? _dto;
+    private List<UnidadeMedidaListaDTO> _unidades = [];
+    private List<BreadcrumbItem> _breadcrumbs = [];
+    private bool _carregando = true;
+    private bool _salvando;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _unidades = (await UnidadeRepo.ListarAtivasAsync()).ToList();
+
+        var r = await Service.ObterAsync(Id);
+        if (r.Sucesso && r.Valor is not null)
+        {
+            var detalhe = r.Valor;
+            _dto = new ReceitaPersistenciaDTO
+            {
+                Id                = detalhe.Id,
+                Nome              = detalhe.Nome,
+                ModoPreparo       = detalhe.ModoPreparo,
+                NumeroPorcoesBase = detalhe.NumeroPorcoesBase,
+                TempoPreparoMinutos = detalhe.TempoPreparoMinutos,
+                UrlOrigem         = detalhe.UrlOrigem,
+                UrlImagem         = detalhe.UrlImagem,
+                Observacoes       = detalhe.Observacoes,
+                Ingredientes      = detalhe.Ingredientes.Select(i => new ReceitaIngredientePersistenciaDTO
+                {
+                    Id              = i.Id,
+                    IngredienteId   = i.IngredienteId,
+                    Quantidade      = i.Quantidade,
+                    UnidadeMedidaId = i.UnidadeMedidaId,
+                    Observacao      = i.Observacao,
+                    Opcional        = i.Opcional,
+                    Ordem           = i.Ordem,
+                }).ToList(),
+            };
+
+            _breadcrumbs =
+            [
+                new("Receitas", "/receitas"),
+                new(detalhe.Nome, null, disabled: true),
+            ];
+        }
+        _carregando = false;
+    }
+
+    private async Task<IEnumerable<IngredienteListaDTO>> BuscarIngredientes(string texto, CancellationToken ct)
+        => await IngService.BuscarAutoCompleteAsync(texto, 10, ct);
+
+    private async Task SalvarAsync()
+    {
+        if (_dto is null) return;
+        _salvando = true;
+        var r = await Service.SalvarAsync(_dto);
+        _salvando = false;
+
+        if (r.Sucesso)
+            Snackbar.Add("Receita salva!", Severity.Success);
+        else
+            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+    }
+}

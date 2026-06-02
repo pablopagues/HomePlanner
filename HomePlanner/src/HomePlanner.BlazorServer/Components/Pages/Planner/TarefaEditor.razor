@@ -1,0 +1,76 @@
+@* Dialog de criação/edição de tarefa *@
+@using Application.HomePlanner.DTOs.Planner
+@inject IStringLocalizer<SharedResource> L
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            @(Dto.Id == 0 ? L["Planner_Nova"] : L["Planner_Editar"])
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudStack Spacing="3">
+            <MudTextField @bind-Value="Dto.Titulo" Label="@L["Planner_TituloLabel"]"
+                          Required="true" Variant="Variant.Outlined" />
+
+            <MudTextField @bind-Value="Dto.Descricao" Label="@L["Planner_DescricaoLabel"]"
+                          Lines="2" AutoGrow="true" Variant="Variant.Outlined" />
+
+            <MudDatePicker @bind-Date="_dataPrevista" Label="@L["Planner_DataLabel"]"
+                           Variant="Variant.Outlined" Editable="true" />
+
+            <MudSelect T="string" @bind-Value="Dto.ResponsavelUsuarioId"
+                       Label="@L["Planner_ResponsavelLabel"]" Clearable="true"
+                       Variant="Variant.Outlined">
+                @foreach (var m in Membros)
+                {
+                    <MudSelectItem T="string" Value="@m.UsuarioId">@m.Nome</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudSelect T="Recorrencia" @bind-Value="Dto.Recorrencia"
+                       Label="@L["Planner_RecorrenciaLabel"]" Variant="Variant.Outlined">
+                <MudSelectItem T="Recorrencia" Value="Recorrencia.Nenhuma">@L["Recorrencia_Nenhuma"]</MudSelectItem>
+                <MudSelectItem T="Recorrencia" Value="Recorrencia.Diaria">@L["Recorrencia_Diaria"]</MudSelectItem>
+                <MudSelectItem T="Recorrencia" Value="Recorrencia.Semanal">@L["Recorrencia_Semanal"]</MudSelectItem>
+                <MudSelectItem T="Recorrencia" Value="Recorrencia.Mensal">@L["Recorrencia_Mensal"]</MudSelectItem>
+            </MudSelect>
+
+            <MudSwitch T="bool" Value="@_privada"
+                       ValueChanged="@((bool v) => { _privada = v; Dto.Visibilidade = v ? VisibilidadeTarefa.Privada : VisibilidadeTarefa.Familia; })"
+                       Label="@L["Planner_PrivadaLabel"]" Color="Color.Secondary" />
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancelar">@L["Btn_Cancelar"]</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Confirmar">
+            @L["Btn_Salvar"]
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter, EditorRequired] public TarefaPersistenciaDTO Dto { get; set; } = null!;
+    [Parameter, EditorRequired] public List<MembroFamiliaDTO> Membros { get; set; } = null!;
+
+    private DateTime? _dataPrevista;
+    private bool _privada;
+
+    protected override void OnInitialized()
+    {
+        _dataPrevista = Dto.DataPrevista?.ToDateTime(TimeOnly.MinValue);
+        _privada = Dto.Visibilidade == VisibilidadeTarefa.Privada;
+    }
+
+    private void Confirmar()
+    {
+        Dto.DataPrevista = _dataPrevista.HasValue
+            ? DateOnly.FromDateTime(_dataPrevista.Value)
+            : null;
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancelar() => MudDialog.Cancel();
+}

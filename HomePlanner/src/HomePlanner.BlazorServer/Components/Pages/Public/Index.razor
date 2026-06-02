@@ -1,0 +1,174 @@
+@page "/"
+@page "/en"
+@page "/es"
+@layout HomePlanner.BlazorServer.Components.Layout.PublicLayout
+@attribute [AllowAnonymous]
+@using HomePlanner.BlazorServer.Services
+@using HomePlanner.BlazorServer.Components.Shared
+@inject IStringLocalizer<SharedResource> L
+@inject PublicLanguageService Lang
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthState
+
+<PageTitle>HomePlanner — @L["Landing_SubTitulo"]</PageTitle>
+
+<div class="landing-container">
+    @* ── Header ─────────────────────────────────────────────── *@
+    <header class="landing-header">
+        <div class="landing-logo">HomePlanner</div>
+        <nav class="landing-nav">
+            <MudButton Href="@Lang.U("/quem-somos")" Variant="Variant.Text" Style="color:#4A6B5C;">
+                @L["Landing_NavSobre"]
+            </MudButton>
+            <LanguageToggle />
+            <MudButton Href="/Identity/Account/Login" Variant="Variant.Text" Style="color:#4A6B5C;">
+                @L["Landing_Entrar"]
+            </MudButton>
+            <MudButton Href="/Identity/Account/Register" Variant="Variant.Filled"
+                       Style="background-color:#C97B5A; color:white;">
+                @L["Landing_ComecarGratis"]
+            </MudButton>
+        </nav>
+    </header>
+
+    @* ── Hero ───────────────────────────────────────────────── *@
+    <section class="landing-hero">
+        <MudContainer MaxWidth="MaxWidth.Medium" Class="text-center py-16">
+            <MudText Typo="Typo.h2" Class="mb-4"
+                     Style="font-family:'Fraunces',serif; font-weight:300; color:#2A3A33;">
+                @L["Landing_HeroTitulo"]
+            </MudText>
+            <MudText Typo="Typo.h6" Class="mb-8" Style="color:#7A8278; font-weight:400;">
+                @L["Landing_HeroSubtitulo"]
+            </MudText>
+            <MudButton Href="/Identity/Account/Register" Variant="Variant.Filled" Size="Size.Large"
+                       Style="background-color:#C97B5A; color:white;"
+                       StartIcon="@Icons.Material.Filled.RestaurantMenu">
+                @L["Landing_HeroCta"]
+            </MudButton>
+            <MudText Typo="Typo.caption" Class="mt-4 d-block" Style="color:#7A8278;">
+                @L["Landing_HeroLegenda"]
+            </MudText>
+        </MudContainer>
+    </section>
+
+    @* ── Features ───────────────────────────────────────────── *@
+    <section class="landing-features" style="background:#FAF7F2;">
+        <MudContainer MaxWidth="MaxWidth.Large" Class="py-16">
+            <MudGrid Spacing="6">
+                <MudItem xs="12" md="4">
+                    <FeatureCard Icon="@Icons.Material.Filled.CalendarMonth" Cor="#4A6B5C"
+                                 Titulo="@L["Landing_Feat1Titulo"]" Descricao="@L["Landing_Feat1Desc"]" />
+                </MudItem>
+                <MudItem xs="12" md="4">
+                    <FeatureCard Icon="@Icons.Material.Filled.ShoppingCart" Cor="#C97B5A"
+                                 Titulo="@L["Landing_Feat2Titulo"]" Descricao="@L["Landing_Feat2Desc"]" />
+                </MudItem>
+                <MudItem xs="12" md="4">
+                    <FeatureCard Icon="@Icons.Material.Filled.Link" Cor="#7A8278"
+                                 Titulo="@L["Landing_Feat3Titulo"]" Descricao="@L["Landing_Feat3Desc"]" />
+                </MudItem>
+            </MudGrid>
+        </MudContainer>
+    </section>
+
+    @* ── Pricing ────────────────────────────────────────────── *@
+    <section class="landing-pricing" style="background:#FFFFFF;">
+        <MudContainer MaxWidth="MaxWidth.Medium" Class="py-16">
+            <MudText Typo="Typo.h3" Align="Align.Center" Class="mb-2"
+                     Style="font-family:'Fraunces',serif; font-weight:300; color:#4A6B5C;">
+                @L["Landing_PrecosTitulo"]
+            </MudText>
+            <MudText Typo="Typo.body1" Align="Align.Center" Class="mb-8" Style="color:#7A8278;">
+                @L["Landing_PrecosSubtitulo"]
+            </MudText>
+
+            <MudGrid Spacing="4" Justify="Justify.Center">
+                <MudItem xs="12" md="5">
+                    <MudCard Elevation="2" Style="border-radius:12px;">
+                        <MudCardContent>
+                            <MudText Typo="Typo.h5" Class="mb-2">Standard</MudText>
+                            <MudText Typo="Typo.h4" Style="color:#4A6B5C;">
+                                @L["Landing_StdPreco"]
+                                <MudText Typo="Typo.body2" Class="d-inline" Style="color:#7A8278;">/@L["Assin_Mes"]</MudText>
+                            </MudText>
+                            <MudList T="string" Dense="true" Class="mt-3">
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.Check">@L["Landing_StdItem1"]</MudListItem>
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.Check">@L["Landing_StdItem2"]</MudListItem>
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.Check">@L["Landing_StdItem3"]</MudListItem>
+                            </MudList>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+                <MudItem xs="12" md="5">
+                    <MudCard Elevation="4" Style="border-radius:12px; border:2px solid #C97B5A;">
+                        <MudCardContent>
+                            <MudChip T="string" Size="Size.Small" Style="background:#C97B5A; color:white;">
+                                @L["Landing_ProPopular"]
+                            </MudChip>
+                            <MudText Typo="Typo.h5" Class="mb-2 mt-2">Pro</MudText>
+                            <MudText Typo="Typo.h4" Style="color:#4A6B5C;">
+                                @L["Landing_ProPreco"]
+                                <MudText Typo="Typo.body2" Class="d-inline" Style="color:#7A8278;">/@L["Assin_Mes"]</MudText>
+                            </MudText>
+                            <MudList T="string" Dense="true" Class="mt-3">
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.Check">@L["Landing_ProItem1"]</MudListItem>
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.Check">@L["Landing_ProItem2"]</MudListItem>
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.Check">@L["Landing_ProItem3"]</MudListItem>
+                            </MudList>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            </MudGrid>
+
+            <MudText Typo="Typo.caption" Align="Align.Center" Class="mt-8 d-block" Style="color:#7A8278;">
+                @L["Landing_PrecosRodape"]
+            </MudText>
+        </MudContainer>
+    </section>
+
+    @* ── Footer ─────────────────────────────────────────────── *@
+    <footer class="landing-footer" style="background:#F5F0EA; border-top:1px solid #E8DDD1;">
+        <MudContainer MaxWidth="MaxWidth.Large" Class="py-8">
+            <MudGrid Class="align-center">
+                <MudItem xs="12" md="4">
+                    <MudText Typo="Typo.body2" Style="color:#7A8278;">
+                        © @DateTime.Now.Year HomePlanner · @L["Landing_BySideris"]
+                    </MudText>
+                </MudItem>
+                <MudItem xs="12" md="4" Class="text-center">
+                    <LanguageToggle />
+                </MudItem>
+                <MudItem xs="12" md="4" Class="text-md-right">
+                    <MudLink Href="@Lang.U("/quem-somos")" Class="mr-3" Style="color:#4A6B5C;">@L["Landing_NavSobre"]</MudLink>
+                    <MudLink Href="@Lang.U("/termos")" Class="mr-3" Style="color:#4A6B5C;">@L["Footer_Termos"]</MudLink>
+                    <MudLink Href="@Lang.U("/privacidade")" Class="mr-3" Style="color:#4A6B5C;">@L["Footer_Privacidade"]</MudLink>
+                    <MudLink Href="@Lang.U("/contato")" Style="color:#4A6B5C;">@L["Footer_Contato"]</MudLink>
+                </MudItem>
+            </MudGrid>
+        </MudContainer>
+    </footer>
+</div>
+
+<style>
+    .landing-header {
+        display:flex; justify-content:space-between; align-items:center;
+        padding:16px 32px; background:#FFFFFF; border-bottom:1px solid #E8DDD1;
+        flex-wrap:wrap; gap:12px;
+    }
+    .landing-logo {
+        font-family:'Fraunces',serif; font-weight:400; font-size:1.4rem; color:#4A6B5C;
+    }
+    .landing-nav { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .landing-hero { background:#FAF7F2; }
+</style>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        Lang.SetLang(Lang.Lang);
+        var auth = await AuthState.GetAuthenticationStateAsync();
+        if (auth.User?.Identity?.IsAuthenticated == true)
+            Nav.NavigateTo("/dashboard");
+    }
+}

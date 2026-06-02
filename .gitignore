@@ -1,0 +1,81 @@
+# ============================================================
+# HomePlanner — .gitignore (.NET / Blazor Server)
+# ============================================================
+
+## Build output
+[Bb]in/
+[Oo]bj/
+**/[Bb]in/
+**/[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+build/
+bld/
+[Oo]ut/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio / Rider / VS Code
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+*_i.c
+*_p.c
+*.rsuser
+
+## .NET
+project.lock.json
+project.fragment.lock.json
+artifacts/
+*.nupkg
+*.snupkg
+.packages/
+*.binlog
+
+## ASP.NET / EF
+appsettings.Production.json
+appsettings.Secrets.json
+appsettings.*.local.json
+*.mdf
+*.ldf
+*.ndf
+
+## Secrets / credenciais — NUNCA versionar
+secrets.json
+*.pfx
+*.key
+.env
+.env.*
+
+## Logs do app (Serilog)
+logs/
+*.log
+
+## Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+## Testes / cobertura
+[Tt]est[Rr]esult*/
+coverage*.json
+coverage*.xml
+*.coverage
+*.coveragexml
+TestResults/
+
+## Temporários
+*.tmp
+*.cache
+~$*
+*~
