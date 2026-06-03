@@ -12,17 +12,22 @@ public class TarefaService : ITarefaService
 {
     private readonly ITarefaRepository _repo;
     private readonly TenantContextAccessor _tenantAccessor;
+    private readonly TenantContext _tenantContext;
     private readonly ILogger<TarefaService> _logger;
 
     public TarefaService(
         ITarefaRepository repo,
         TenantContextAccessor tenantAccessor,
+        TenantContext tenantContext,
         ILogger<TarefaService> logger)
     {
         _repo = repo;
         _tenantAccessor = tenantAccessor;
+        _tenantContext = tenantContext;
         _logger = logger;
     }
+
+    public bool UsuarioRestritoAsProprias => _tenantContext.RestritoAsProprias;
 
     public async Task<ResultadoListagem<TarefaListaDTO>> ListarAsync(
         TarefaFiltroDTO filtro, CancellationToken ct = default)
@@ -42,6 +47,26 @@ public class TarefaService : ITarefaService
         };
     }
 
+    public async Task<IReadOnlyList<TarefaListaDTO>> ListarCalendarioAsync(
+        DateOnly de, DateOnly ate, string? responsavelUsuarioId = null, CancellationToken ct = default)
+    {
+        await _tenantAccessor.GarantirHidratadoAsync();
+
+        if (ate < de) (de, ate) = (ate, de);
+
+        var filtro = new TarefaFiltroDTO
+        {
+            Pagina = 1, TamanhoPagina = 1000,
+            DataDe = de, DataAte = ate,
+            // Papéis restritos (Filho) só enxergam as próprias — ignora o filtro escolhido na UI.
+            ResponsavelUsuarioId = _tenantContext.RestritoAsProprias
+                ? _tenantContext.UsuarioId
+                : responsavelUsuarioId,
+        };
+
+        return await _repo.ListarAsync(filtro, ct);
+    }
+
     public async Task<ResultadoOperacao<int>> SalvarAsync(
         TarefaPersistenciaDTO dto, CancellationToken ct = default)
     {
@@ -50,6 +75,9 @@ public class TarefaService : ITarefaService
         dto.Titulo = dto.Titulo?.Trim() ?? string.Empty;
         if (dto.Titulo.Length < 2)
             return ResultadoOperacao<int>.Falha("O título da tarefa deve ter pelo menos 2 caracteres.");
+
+        if (dto.HoraInicio.HasValue && dto.HoraFim.HasValue && dto.HoraFim < dto.HoraInicio)
+            return ResultadoOperacao<int>.Falha("A hora de fim deve ser igual ou posterior à hora de início.");
 
         Tarefa entidade;
         if (dto.Id == 0)
@@ -66,6 +94,8 @@ public class TarefaService : ITarefaService
         entidade.Titulo               = dto.Titulo;
         entidade.Descricao            = dto.Descricao?.Trim();
         entidade.DataPrevista         = dto.DataPrevista;
+        entidade.HoraInicio           = dto.HoraInicio;
+        entidade.HoraFim              = dto.HoraFim;
         entidade.Recorrencia          = dto.Recorrencia;
         entidade.Visibilidade         = dto.Visibilidade;
         entidade.ResponsavelUsuarioId = string.IsNullOrWhiteSpace(dto.ResponsavelUsuarioId)

@@ -2,6 +2,7 @@ using Application.HomePlanner.Common;
 using Application.HomePlanner.DTOs.Cardapio.Receita;
 using Application.HomePlanner.Repositories.Cardapio;
 using Microsoft.Extensions.Logging;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -74,6 +75,26 @@ public class ImportadorReceitaService : IImportadorReceitaService
 
         return ResultadoOperacao<ReceitaImportadaPreviewDTO>.Ok(preview);
     }
+
+    // ─── Parsing de texto livre ───────────────────────────────────────────────
+
+    public IReadOnlyList<IngredienteImportadoDTO> ParsearTexto(string? texto)
+    {
+        if (string.IsNullOrWhiteSpace(texto)) return [];
+
+        var resultado = new List<IngredienteImportadoDTO>();
+        foreach (var bruta in texto.Split('\n'))
+        {
+            var linha = bruta.Trim().TrimStart('-', '•', '*', '·', '–', '—', ' ').Trim();
+            if (linha.Length == 0 || EhCabecalho(linha)) continue;
+            resultado.Add(ParsearLinhaIngrediente(linha));
+        }
+        return resultado;
+    }
+
+    // Linhas tipo "Ingredientes originais:" ou "Ingredientes:" não são itens.
+    private static bool EhCabecalho(string linha)
+        => linha.EndsWith(':') && Regex.IsMatch(linha, "ingrediente", RegexOptions.IgnoreCase);
 
     // ─── JSON-LD (schema.org/Recipe) ──────────────────────────────────────────
 
@@ -268,32 +289,86 @@ public class ImportadorReceitaService : IImportadorReceitaService
     {
         linha = LimparHtml(linha).Trim();
 
+        // "(opcional)", "opcional" ou "a gosto" → marca como opcional.
+        bool opcional = Regex.IsMatch(linha, @"\bopcional\b|\ba gosto\b", RegexOptions.IgnoreCase);
+
         // Padrão: "2 xícaras de farinha", "500g de frango", "1/2 cup sugar"
         var match = Regex.Match(linha,
             @"^([\d,./]+(?:\s+\d+/\d+)?)\s*([a-záàãâéêíóôõúüç]+(?:\s+de\s+[a-z]+)?)\s+(?:de\s+)?(.+)$",
             RegexOptions.IgnoreCase);
 
         if (!match.Success)
-            return new IngredienteImportadoDTO { NomeIngrediente = linha, TextoOriginal = linha };
+            return new IngredienteImportadoDTO
+            {
+                NomeIngrediente = LimparNome(linha),
+                TextoOriginal   = linha,
+                Opcional        = opcional,
+            };
 
-        var quantidadeStr = match.Groups[1].Value.Replace(",", ".");
+        var quantidadeStr = match.Groups[1].Value;
         var unidadeStr    = match.Groups[2].Value.Trim().ToLowerInvariant();
-        var nomeIngrediente = match.Groups[3].Value.Trim();
+        var resto         = match.Groups[3].Value.Trim();
 
-        decimal? quantidade = null;
-        if (decimal.TryParse(quantidadeStr, System.Globalization.NumberStyles.Any,
-            System.Globalization.CultureInfo.InvariantCulture, out var q))
-            quantidade = q;
+        var quantidade = ParsearQuantidade(quantidadeStr);
 
-        _mapaUnidades.TryGetValue(unidadeStr, out var codigoUnidade);
+        string? codigoUnidade = null;
+        string nomeIngrediente;
+        if (_mapaUnidades.TryGetValue(unidadeStr, out var codigo))
+        {
+            // A palavra capturada é uma unidade conhecida.
+            codigoUnidade   = codigo;
+            nomeIngrediente = resto;
+        }
+        else
+        {
+            // Não é unidade (ex.: "3 ovos batidos") → a palavra faz parte do nome.
+            nomeIngrediente = $"{match.Groups[2].Value} {resto}".Trim();
+        }
 
         return new IngredienteImportadoDTO
         {
             Quantidade      = quantidade,
             CodigoUnidade   = codigoUnidade,
-            NomeIngrediente = nomeIngrediente,
+            NomeIngrediente = LimparNome(nomeIngrediente),
             TextoOriginal   = linha,
+            Opcional        = opcional,
         };
+    }
+
+    // Converte "1/2", "1 1/2", "0.5", "1,5" em decimal.
+    private static decimal? ParsearQuantidade(string texto)
+    {
+        texto = texto.Trim();
+        if (texto.Length == 0) return null;
+
+        var misto = Regex.Match(texto, @"^(\d+)\s+(\d+)/(\d+)$");
+        if (misto.Success)
+        {
+            var inteiro = decimal.Parse(misto.Groups[1].Value, CultureInfo.InvariantCulture);
+            var den = decimal.Parse(misto.Groups[3].Value, CultureInfo.InvariantCulture);
+            return den == 0 ? inteiro
+                : inteiro + decimal.Parse(misto.Groups[2].Value, CultureInfo.InvariantCulture) / den;
+        }
+
+        var fracao = Regex.Match(texto, @"^(\d+)/(\d+)$");
+        if (fracao.Success)
+        {
+            var den = decimal.Parse(fracao.Groups[2].Value, CultureInfo.InvariantCulture);
+            return den == 0 ? null
+                : decimal.Parse(fracao.Groups[1].Value, CultureInfo.InvariantCulture) / den;
+        }
+
+        return decimal.TryParse(texto.Replace(",", "."), NumberStyles.Any,
+            CultureInfo.InvariantCulture, out var q) ? q : null;
+    }
+
+    // Remove marcações de opcionalidade e pontuação residual do nome.
+    private static string LimparNome(string nome)
+    {
+        nome = Regex.Replace(nome, @"\(?\s*\bopcional\b\s*\)?", " ", RegexOptions.IgnoreCase);
+        nome = Regex.Replace(nome, @"\ba gosto\b", " ", RegexOptions.IgnoreCase);
+        nome = Regex.Replace(nome, @"\s{2,}", " ");
+        return nome.Trim().Trim(',', '.', ';', '-', ' ');
     }
 
     private static string LimparHtml(string texto)

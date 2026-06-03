@@ -2,7 +2,6 @@
 @page "/tasks"
 @page "/tareas"
 @attribute [Authorize]
-@rendermode InteractiveServer
 @using Application.HomePlanner.DTOs.Planner
 @using Application.HomePlanner.Services.Planner
 @inject ITarefaService Service
@@ -69,6 +68,10 @@ else
                                     <MudIcon Icon="@Icons.Material.Filled.Event" Size="Size.Small"
                                              Style="vertical-align:middle; font-size:0.9rem;" />
                                     @t.DataPrevista.Value.ToString("dd/MM/yyyy")
+                                    @if (t.HoraInicio.HasValue)
+                                    {
+                                        <span> · @FormatarHorario(t.HoraInicio, t.HoraFim)</span>
+                                    }
                                 </MudText>
                             }
                             @if (!string.IsNullOrWhiteSpace(t.ResponsavelNome))
@@ -152,6 +155,8 @@ else
                 Titulo               = tarefa.Titulo,
                 Descricao            = tarefa.Descricao,
                 DataPrevista         = tarefa.DataPrevista,
+                HoraInicio           = tarefa.HoraInicio,
+                HoraFim              = tarefa.HoraFim,
                 Recorrencia          = tarefa.Recorrencia,
                 Visibilidade         = tarefa.Visibilidade,
                 ResponsavelUsuarioId = tarefa.ResponsavelUsuarioId,
@@ -197,6 +202,14 @@ else
             else
                 Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
         }
+    }
+
+    private static string FormatarHorario(TimeOnly? inicio, TimeOnly? fim)
+    {
+        if (!inicio.HasValue) return string.Empty;
+        return fim.HasValue
+            ? $"{inicio.Value:HH\\:mm}–{fim.Value:HH\\:mm}"
+            : inicio.Value.ToString("HH\\:mm");
     }
 
     private string NomeRecorrencia(Recorrencia r) => r switch

@@ -1,11 +1,26 @@
 @page "/dashboard"
 @attribute [Authorize]
-@rendermode InteractiveServer
 @using HomePlanner.BlazorServer.Services
+@using Application.HomePlanner.Services.Empresa
 @inject IStringLocalizer<SharedResource> L
 @inject PublicLanguageService Lang
+@inject IEmpresaService EmpresaService
 
 <PageTitle>Dashboard — HomePlanner</PageTitle>
+
+@if (!_emailConfirmado)
+{
+    <MudAlert Severity="Severity.Warning" Class="mb-4" Variant="Variant.Filled">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween"
+                  Wrap="Wrap.Wrap" Style="width:100%;">
+            <span>@L["Dashboard_EmailNaoConfirmado"]</span>
+            <MudButton Variant="Variant.Filled" Color="Color.Surface" Size="Size.Small"
+                       Href="@Lang.U("/empresa")">
+                @L["Dashboard_ConfirmarAgora"]
+            </MudButton>
+        </MudStack>
+    </MudAlert>
+}
 
 <MudText Typo="Typo.h4" GutterBottom="true"
          Style="font-family:'Fraunces',serif; font-weight:300; color:#4A6B5C;">
@@ -86,11 +101,22 @@
     [Inject] IReceitaService ReceitaService { get; set; } = null!;
 
     private int _totalReceitas;
+    private bool _emailConfirmado = true; // assume confirmado até carregar (evita flash do aviso)
 
     protected override async Task OnInitializedAsync()
     {
         var resultado = await ReceitaService.ListarAsync(
             new ReceitaFiltroDTO { Pagina = 1, TamanhoPagina = 1 });
         _totalReceitas = resultado.Total;
+
+        try
+        {
+            var conta = await EmpresaService.ObterAsync();
+            _emailConfirmado = conta.EmailConfirmado;
+        }
+        catch
+        {
+            _emailConfirmado = true; // em caso de erro, não exibe o aviso
+        }
     }
 }

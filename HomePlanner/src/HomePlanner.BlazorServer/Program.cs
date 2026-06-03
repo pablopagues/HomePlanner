@@ -6,11 +6,15 @@ using Application.HomePlanner.Repositories.Planner;
 using Application.HomePlanner.Services.Assinatura;
 using Application.HomePlanner.Services.Auth;
 using Application.HomePlanner.Services.Cardapio;
+using Application.HomePlanner.Services.Configuracao;
 using Application.HomePlanner.Services.Contato;
 using Application.HomePlanner.Services.Email;
+using Application.HomePlanner.Services.Empresa;
+using Application.HomePlanner.Services.Familia;
 using Application.HomePlanner.Services.ListaCompras;
 using Application.HomePlanner.Services.Onboarding;
 using Application.HomePlanner.Services.Planner;
+using Application.HomePlanner.Services.Seguranca;
 using Domain.HomePlanner.Models.SaaS.Identity;
 using Domain.HomePlanner.Models.SaaS.Options;
 using HomePlanner.BlazorServer.Services;
@@ -19,10 +23,15 @@ using Infrastructure.HomePlanner.Repositories.Assinatura;
 using Infrastructure.HomePlanner.Repositories.Cardapio;
 using Infrastructure.HomePlanner.Repositories.Planner;
 using Infrastructure.HomePlanner.Services.Auth;
+using Infrastructure.HomePlanner.Services.Configuracao;
 using Infrastructure.HomePlanner.Services.Contato;
 using Infrastructure.HomePlanner.Services.Email;
+using Infrastructure.HomePlanner.Services.Empresa;
+using Infrastructure.HomePlanner.Services.Familia;
 using Infrastructure.HomePlanner.Services.Onboarding;
+using Infrastructure.HomePlanner.Services.Seguranca;
 using Infrastructure.HomePlanner.Services.Stripe;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
@@ -97,7 +106,9 @@ try
             opts.Lockout.AllowedForNewUsers = true;
 
             opts.User.RequireUniqueEmail = true;
-            opts.SignIn.RequireConfirmedEmail = true;
+            // Login é permitido sem confirmar e-mail; um aviso é exibido no Dashboard
+            // e o reenvio fica disponível na página /empresa (dados da conta).
+            opts.SignIn.RequireConfirmedEmail = false;
         })
         .AddEntityFrameworkStores<HomePlannerDbContext>()
         .AddDefaultTokenProviders();
@@ -114,6 +125,11 @@ try
         opts.ExpireTimeSpan = TimeSpan.FromDays(7);
         opts.SlidingExpiration = true;
     });
+
+    // 2FA: "lembrar este dispositivo por 30 dias" — duração do cookie TwoFactorRememberMe.
+    builder.Services.Configure<CookieAuthenticationOptions>(
+        IdentityConstants.TwoFactorRememberMeScheme,
+        opts => opts.ExpireTimeSpan = TimeSpan.FromDays(30));
 
     // ── Authorization Policies ────────────────────────────────────────────────
     builder.Services.AddAuthorization(PoliciesAutorizacao.Registrar);
@@ -158,8 +174,12 @@ try
     // ── Auth / Onboarding / Email ─────────────────────────────────────────────
     builder.Services.AddScoped<IRegistroTenantService, RegistroTenantService>();
     builder.Services.AddScoped<IOnboardingService, OnboardingService>();
+    builder.Services.AddScoped<IConfiguracaoFamiliaService, ConfiguracaoFamiliaService>();
+    builder.Services.AddScoped<IFamiliaService, FamiliaService>();
+    builder.Services.AddScoped<IDoisFatoresService, DoisFatoresService>();
     builder.Services.AddScoped<IOnboardingStatusReader, OnboardingStatusReader>();
     builder.Services.AddScoped<IEmailService, EmailService>();
+    builder.Services.AddScoped<IEmpresaService, EmpresaService>();
 
     // ── Contato (formulário público) ──────────────────────────────────────────
     builder.Services.Configure<ContatoOptions>(builder.Configuration.GetSection(ContatoOptions.SectionName));

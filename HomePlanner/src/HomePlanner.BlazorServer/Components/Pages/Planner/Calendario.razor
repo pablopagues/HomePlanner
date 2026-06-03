@@ -1,0 +1,304 @@
+@page "/calendario"
+@page "/calendar"
+@attribute [Authorize]
+@using Application.HomePlanner.DTOs.Planner
+@using Application.HomePlanner.Services.Planner
+@using System.Globalization
+@inject ITarefaService Service
+@inject IStringLocalizer<SharedResource> L
+@inject ISnackbar Snackbar
+@inject IDialogService Dialog
+
+<PageTitle>@L["Cal_Titulo"] — HomePlanner</PageTitle>
+
+@* ── Cabeçalho ──────────────────────────────────────────────────────────── *@
+<MudPaper Class="pa-4 mb-4" Elevation="1" Style="border-radius:10px;">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Wrap="Wrap.Wrap" Spacing="2">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+            <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft" OnClick="Anterior" />
+            <MudText Typo="Typo.h6" Style="font-family:'Fraunces',serif; font-weight:300; min-width:200px; text-align:center;">
+                @RotuloPeriodo()
+            </MudText>
+            <MudIconButton Icon="@Icons.Material.Filled.ChevronRight" OnClick="Proximo" />
+            <MudButton Size="Size.Small" Variant="Variant.Outlined" Class="ml-2" OnClick="IrParaHoje">
+                @L["Cal_Hoje"]
+            </MudButton>
+        </MudStack>
+
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+            @if (!_restrito && _membros.Count > 0)
+            {
+                <MudSelect T="string" Value="_responsavelFiltro" Dense="true"
+                           Label="@L["Cal_Membro"]" Variant="Variant.Outlined" Clearable="true"
+                           Style="min-width:180px;" Margin="Margin.Dense"
+                           ValueChanged="@(async (string v) => { _responsavelFiltro = v; await CarregarAsync(); })">
+                    <MudSelectItem T="string" Value="@((string?)null)">@L["Cal_TodosMembros"]</MudSelectItem>
+                    @foreach (var m in _membros)
+                    {
+                        <MudSelectItem T="string" Value="@m.UsuarioId">@m.Nome</MudSelectItem>
+                    }
+                </MudSelect>
+            }
+
+            <MudChipSet T="CalendarioVista" SelectedValue="_vista"
+                        SelectedValueChanged="@(async (CalendarioVista v) => { _vista = v; await CarregarAsync(); })"
+                        SelectionMode="SelectionMode.SingleSelection" Variant="Variant.Filled">
+                <MudChip T="CalendarioVista" Value="CalendarioVista.Semana">@L["Cal_Semana"]</MudChip>
+                <MudChip T="CalendarioVista" Value="CalendarioVista.Mes">@L["Cal_Mes"]</MudChip>
+            </MudChipSet>
+        </MudStack>
+    </MudStack>
+    @if (_restrito)
+    {
+        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-2">@L["Cal_SomenteMinhas"]</MudText>
+    }
+</MudPaper>
+
+@if (_carregando)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else
+{
+    @* Cabeçalho com nomes dos dias da semana *@
+    <div style="display:grid; grid-template-columns:repeat(7, 1fr); gap:8px; margin-bottom:8px;">
+        @foreach (var nome in _nomesDias)
+        {
+            <div style="text-align:center;">
+                <MudText Typo="Typo.subtitle2" Style="color:#4A6B5C; font-weight:600;">@nome</MudText>
+            </div>
+        }
+    </div>
+
+    @* Grade de dias *@
+    <div style="display:grid; grid-template-columns:repeat(7, 1fr); gap:8px;">
+        @foreach (var dia in _dias)
+        {
+            var ehHoje = dia.Data == _hoje;
+            var doMes  = _vista == CalendarioVista.Semana || dia.Data.Month == _referencia.Month;
+            <MudPaper Elevation="0"
+                      Style="@($"border-radius:8px; padding:6px; min-height:{(_vista == CalendarioVista.Semana ? "220px" : "120px")}; " +
+                               $"border:1px solid {(ehHoje ? "#C97B5A" : "#E8DDD1")}; " +
+                               $"background:{(doMes ? "#FFFFFF" : "#F5F0EA")};")">
+                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Spacing="0">
+                    <MudText Typo="Typo.body2"
+                             Style="@($"font-weight:{(ehHoje ? "700" : "500")}; color:{(doMes ? (ehHoje ? "#C97B5A" : "#3A3A3A") : "#A99")};")">
+                        @dia.Data.Day
+                    </MudText>
+                    <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small"
+                                   Style="padding:2px;" OnClick="@(() => NovaTarefa(dia.Data))" />
+                </MudStack>
+
+                <MudStack Spacing="1" Class="mt-1">
+                    @foreach (var t in dia.Tarefas)
+                    {
+                        <div @onclick="@(() => EditarTarefa(t))"
+                             style="@($"cursor:pointer; border-radius:6px; padding:3px 6px; font-size:0.72rem; line-height:1.2; " +
+                                      $"background:{CorFundo(t)}; border-left:3px solid {CorBorda(t)}; " +
+                                      $"{(t.Concluida ? "opacity:0.55; text-decoration:line-through;" : "")}")"
+                             title="@TituloCompleto(t)">
+                            @if (t.HoraInicio.HasValue)
+                            {
+                                <span style="font-weight:600;">@t.HoraInicio.Value.ToString("HH\\:mm") </span>
+                            }
+                            <span>@t.Titulo</span>
+                        </div>
+                    }
+                </MudStack>
+            </MudPaper>
+        }
+    </div>
+}
+
+@code {
+    public enum CalendarioVista { Semana, Mes }
+
+    private sealed class DiaCalendario
+    {
+        public DateOnly Data { get; init; }
+        public List<TarefaListaDTO> Tarefas { get; } = new();
+    }
+
+    private CalendarioVista _vista = CalendarioVista.Mes;
+    private DateOnly _referencia = DateOnly.FromDateTime(DateTime.Today);
+    private readonly DateOnly _hoje = DateOnly.FromDateTime(DateTime.Today);
+    private string? _responsavelFiltro;
+    private bool _restrito;
+    private bool _carregando = true;
+
+    private List<DiaCalendario> _dias = new();
+    private List<MembroFamiliaDTO> _membros = new();
+    private string[] _nomesDias = Array.Empty<string>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _nomesDias = NomesDiasSemana();
+        _membros = (await Service.ListarMembrosFamiliaAsync()).ToList();
+        await CarregarAsync();
+        _restrito = Service.UsuarioRestritoAsProprias;
+    }
+
+    private async Task CarregarAsync()
+    {
+        _carregando = true;
+        StateHasChanged();
+
+        var (inicio, fim) = IntervaloVisivel();
+        var tarefas = await Service.ListarCalendarioAsync(inicio, fim, _responsavelFiltro);
+
+        var porData = tarefas
+            .Where(t => t.DataPrevista.HasValue)
+            .GroupBy(t => t.DataPrevista!.Value)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        _dias = new List<DiaCalendario>();
+        for (var d = inicio; d <= fim; d = d.AddDays(1))
+        {
+            var dia = new DiaCalendario { Data = d };
+            if (porData.TryGetValue(d, out var lista))
+                dia.Tarefas.AddRange(lista);
+            _dias.Add(dia);
+        }
+
+        _carregando = false;
+        StateHasChanged();
+    }
+
+    // ── Intervalos ──────────────────────────────────────────────────────────
+    private (DateOnly inicio, DateOnly fim) IntervaloVisivel()
+    {
+        if (_vista == CalendarioVista.Semana)
+        {
+            var inicio = InicioSemana(_referencia);
+            return (inicio, inicio.AddDays(6));
+        }
+        // Mês: grade completa de semanas que cobre o mês de referência.
+        var primeiroDoMes = new DateOnly(_referencia.Year, _referencia.Month, 1);
+        var inicioGrade = InicioSemana(primeiroDoMes);
+        var ultimoDoMes = primeiroDoMes.AddMonths(1).AddDays(-1);
+        var fimGrade = InicioSemana(ultimoDoMes).AddDays(6);
+        return (inicioGrade, fimGrade);
+    }
+
+    private static DateOnly InicioSemana(DateOnly data)
+    {
+        // Semana começa na segunda-feira.
+        int diff = ((int)data.DayOfWeek + 6) % 7;
+        return data.AddDays(-diff);
+    }
+
+    // ── Navegação ───────────────────────────────────────────────────────────
+    private async Task Anterior()
+    {
+        _referencia = _vista == CalendarioVista.Semana ? _referencia.AddDays(-7) : _referencia.AddMonths(-1);
+        await CarregarAsync();
+    }
+
+    private async Task Proximo()
+    {
+        _referencia = _vista == CalendarioVista.Semana ? _referencia.AddDays(7) : _referencia.AddMonths(1);
+        await CarregarAsync();
+    }
+
+    private async Task IrParaHoje()
+    {
+        _referencia = _hoje;
+        await CarregarAsync();
+    }
+
+    private string RotuloPeriodo()
+    {
+        var cultura = CultureInfo.CurrentCulture;
+        if (_vista == CalendarioVista.Semana)
+        {
+            var inicio = InicioSemana(_referencia);
+            var fim = inicio.AddDays(6);
+            return $"{inicio:dd/MM} – {fim:dd/MM/yyyy}";
+        }
+        var nome = cultura.DateTimeFormat.GetMonthName(_referencia.Month);
+        if (nome.Length > 0) nome = char.ToUpper(nome[0], cultura) + nome[1..];
+        return $"{nome} {_referencia.Year}";
+    }
+
+    private string[] NomesDiasSemana()
+    {
+        var cultura = CultureInfo.CurrentCulture;
+        var nomes = new string[7];
+        var inicio = InicioSemana(_hoje);
+        for (int i = 0; i < 7; i++)
+        {
+            var nome = cultura.DateTimeFormat.GetAbbreviatedDayName(inicio.AddDays(i).DayOfWeek);
+            nomes[i] = nome.Length > 0 ? char.ToUpper(nome[0], cultura) + nome[1..] : nome;
+        }
+        return nomes;
+    }
+
+    // ── Tarefas (criar/editar) ──────────────────────────────────────────────
+    private Task NovaTarefa(DateOnly data) => AbrirEditor(new TarefaPersistenciaDTO { DataPrevista = data });
+
+    private Task EditarTarefa(TarefaListaDTO t) => AbrirEditor(new TarefaPersistenciaDTO
+    {
+        Id                   = t.Id,
+        Titulo               = t.Titulo,
+        Descricao            = t.Descricao,
+        DataPrevista         = t.DataPrevista,
+        HoraInicio           = t.HoraInicio,
+        HoraFim              = t.HoraFim,
+        Recorrencia          = t.Recorrencia,
+        Visibilidade         = t.Visibilidade,
+        ResponsavelUsuarioId = t.ResponsavelUsuarioId,
+    });
+
+    private async Task AbrirEditor(TarefaPersistenciaDTO dto)
+    {
+        var parameters = new DialogParameters<TarefaEditor>
+        {
+            { x => x.Dto, dto },
+            { x => x.Membros, _membros },
+        };
+
+        var dialog = await Dialog.ShowAsync<TarefaEditor>(string.Empty, parameters,
+            new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true });
+
+        var result = await dialog.Result;
+        if (result is null || result.Canceled) return;
+
+        var r = await Service.SalvarAsync(dto);
+        if (r.Sucesso)
+        {
+            Snackbar.Add(L["Msg_SalvoOk"], Severity.Success);
+            await CarregarAsync();
+        }
+        else
+            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+    }
+
+    // ── Cores / textos ──────────────────────────────────────────────────────
+    private static readonly string[] Paleta =
+    {
+        "#4A6B5C", "#C97B5A", "#7B92A6", "#A6748C", "#8C9B5A", "#B58A4A", "#5A8C8C",
+    };
+
+    private string CorBorda(TarefaListaDTO t)
+    {
+        if (string.IsNullOrEmpty(t.ResponsavelUsuarioId)) return "#B9AE9E";
+        var idx = (uint)t.ResponsavelUsuarioId.GetHashCode() % (uint)Paleta.Length;
+        return Paleta[idx];
+    }
+
+    private string CorFundo(TarefaListaDTO t) => CorBorda(t) + "1A"; // ~10% alpha
+
+    private string TituloCompleto(TarefaListaDTO t)
+    {
+        var partes = new List<string>();
+        if (t.HoraInicio.HasValue)
+        {
+            partes.Add(t.HoraFim.HasValue
+                ? $"{t.HoraInicio.Value:HH\\:mm}–{t.HoraFim.Value:HH\\:mm}"
+                : t.HoraInicio.Value.ToString("HH\\:mm"));
+        }
+        partes.Add(t.Titulo);
+        if (!string.IsNullOrWhiteSpace(t.ResponsavelNome)) partes.Add($"({t.ResponsavelNome})");
+        return string.Join(" ", partes);
+    }
+}

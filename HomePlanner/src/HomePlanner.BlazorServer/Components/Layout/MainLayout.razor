@@ -4,8 +4,11 @@
 @using HomePlanner.BlazorServer.Components.Shared
 @inject IStringLocalizer<SharedResource> L
 @inject PublicLanguageService Lang
+@inject PersistentComponentState PersistentState
+@implements IDisposable
 
 <MudThemeProvider Theme="HomePlannerTheme.Tema" />
+<MudPopoverProvider />
 <MudSnackbarProvider />
 <MudDialogProvider />
 
@@ -19,7 +22,15 @@
         </MudText>
         <MudSpacer />
         <LanguageToggle />
-        <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" Class="ml-2" />
+        <MudMenu Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit"
+                 AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Class="ml-2">
+            <MudMenuItem Href="@Lang.U("/perfil")" Icon="@Icons.Material.Filled.ManageAccounts">
+                @L["Nav_Perfil"]
+            </MudMenuItem>
+            <MudMenuItem Href="/Identity/Account/Logout" ForceLoad="true" Icon="@Icons.Material.Filled.Logout">
+                @L["Nav_Sair"]
+            </MudMenuItem>
+        </MudMenu>
     </MudAppBar>
 
     <MudDrawer @bind-Open="_drawerAberto" ClipMode="DrawerClipMode.Always"
@@ -49,12 +60,20 @@
                         Icon="@Icons.Material.Filled.CheckCircleOutline">
                 @L["Nav_Planner"]
             </MudNavLink>
+            <MudNavLink Href="@Lang.U("/calendario")"
+                        Icon="@Icons.Material.Filled.EditCalendar">
+                @L["Nav_Calendario"]
+            </MudNavLink>
             <MudNavLink Href="@Lang.U("/familia")"
                         Icon="@Icons.Material.Filled.People">
                 @L["Nav_Familia"]
             </MudNavLink>
             <MudDivider Class="my-2" />
             <AuthorizeView Roles="Owner">
+                <MudNavLink Href="@Lang.U("/empresa")"
+                            Icon="@Icons.Material.Filled.Home">
+                    @L["Nav_Empresa"]
+                </MudNavLink>
                 <MudNavLink Href="@Lang.U("/assinatura")"
                             Icon="@Icons.Material.Filled.CreditCard">
                     @L["Nav_Assinatura"]
@@ -75,10 +94,29 @@
 </MudLayout>
 
 @code {
+    private const string PersistKey = "public_lang";
+    private PersistingComponentStateSubscription _langSub;
     private bool _drawerAberto = true;
 
     protected override void OnInitialized()
-        => Lang.SetLang(Lang.Lang);
+    {
+        // Carrega o idioma do SSR para o circuit interativo (HttpContext é null no circuit).
+        _langSub = PersistentState.RegisterOnPersisting(PersistLang);
+
+        if (PersistentState.TryTakeFromJson<string>(PersistKey, out var persisted)
+            && persisted is not null)
+            Lang.SetLang(persisted);
+        else
+            Lang.SetLang(Lang.Lang);
+    }
+
+    private Task PersistLang()
+    {
+        PersistentState.PersistAsJson(PersistKey, Lang.Lang);
+        return Task.CompletedTask;
+    }
 
     private void ToggleDrawer() => _drawerAberto = !_drawerAberto;
+
+    public void Dispose() => _langSub.Dispose();
 }

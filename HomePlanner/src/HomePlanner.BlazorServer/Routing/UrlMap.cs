@@ -24,8 +24,10 @@ public static class UrlMap
             ["/modelos"]       = ("/templates",   "/plantillas"),
             ["/compras"]       = ("/shopping",    "/compras"),
             ["/planner"]       = ("/tasks",       "/tareas"),
+            ["/calendario"]    = ("/calendar",    "/calendario"),
             ["/configuracoes"] = ("/settings",    "/configuracion"),
             ["/familia"]       = ("/family",      "/familia"),
+            ["/empresa"]       = ("/company",     "/empresa"),
         };
 
     // Mapas inversos calculados a partir do mapa principal

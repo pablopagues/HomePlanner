@@ -1,4 +1,6 @@
 @* Componente de formulário compartilhado entre Criar e Editar *@
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
 
 <MudGrid Spacing="3">
     <MudItem xs="12" md="7">
@@ -35,11 +37,18 @@
 
 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-3">
     <MudText Typo="Typo.h6">Ingredientes</MudText>
-    <MudButton StartIcon="@Icons.Material.Filled.Add" Size="Size.Small"
-               Variant="Variant.Outlined" Color="Color.Primary"
-               OnClick="AdicionarIngrediente">
-        Adicionar
-    </MudButton>
+    <MudStack Row="true" Spacing="2">
+        <MudButton StartIcon="@Icons.Material.Filled.AutoFixHigh" Size="Size.Small"
+                   Variant="Variant.Text" Color="Color.Secondary"
+                   OnClick="AbrirLancarIngredientes">
+            Lançar do texto
+        </MudButton>
+        <MudButton StartIcon="@Icons.Material.Filled.Add" Size="Size.Small"
+                   Variant="Variant.Outlined" Color="Color.Primary"
+                   OnClick="AdicionarIngrediente">
+            Adicionar
+        </MudButton>
+    </MudStack>
 </MudStack>
 
 @foreach (var (item, idx) in _linhas.Select((l, i) => (l, i)))
@@ -139,6 +148,44 @@
         };
         Dto.Ingredientes.Add(novo);
         _linhas.Add(new IngredienteLinhaForm { Dto = novo });
+    }
+
+    private async Task AbrirLancarIngredientes()
+    {
+        var parameters = new DialogParameters<LancarIngredientesDialog>
+        {
+            { x => x.TextoInicial, Dto.Observacoes ?? string.Empty },
+            { x => x.Unidades,     Unidades },
+        };
+
+        var dialog = await DialogService.ShowAsync<LancarIngredientesDialog>(
+            string.Empty, parameters,
+            new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true });
+
+        var result = await dialog.Result;
+        if (result is null || result.Canceled
+            || result.Data is not List<IngredienteParseadoDTO> novos) return;
+
+        foreach (var n in novos)
+        {
+            var dto = new ReceitaIngredientePersistenciaDTO
+            {
+                IngredienteId   = n.IngredienteId,
+                Quantidade      = n.Quantidade,
+                UnidadeMedidaId = n.UnidadeMedidaId,
+                Observacao      = n.Observacao,
+                Opcional        = n.Opcional,
+                Ordem           = _linhas.Count,
+            };
+            Dto.Ingredientes.Add(dto);
+            _linhas.Add(new IngredienteLinhaForm
+            {
+                Dto         = dto,
+                Selecionado = new IngredienteListaDTO { Id = n.IngredienteId, Nome = n.NomeIngrediente },
+            });
+        }
+
+        Snackbar.Add($"{novos.Count} ingrediente(s) lançado(s). Revise antes de salvar.", Severity.Success);
     }
 
     private void RemoverIngrediente(IngredienteLinhaForm linha)

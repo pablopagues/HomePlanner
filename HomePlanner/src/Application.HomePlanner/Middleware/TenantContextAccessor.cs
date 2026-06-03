@@ -28,9 +28,11 @@ public class TenantContextAccessor
         var tenantIdStr = ctx.User.FindFirstValue("tenant_id");
         var usuarioId = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier);
         var nome = ctx.User.FindFirstValue(ClaimTypes.Name) ?? string.Empty;
+        // Filho (e qualquer papel que não seja Owner/Membro) só enxerga os próprios registros.
+        var restrito = !ctx.User.IsInRole("Owner") && !ctx.User.IsInRole("Membro");
 
         if (Guid.TryParse(tenantIdStr, out var tenantId))
-            _tenantContext.Definir(tenantId, usuarioId, nome);
+            _tenantContext.Definir(tenantId, usuarioId, nome, restrito);
 
         return Task.CompletedTask;
     }

@@ -12,6 +12,12 @@ public class Tarefa : ITenantEntity, IDeletableEntity, IAuditable
     public string? Descricao { get; set; }
 
     public DateOnly? DataPrevista { get; set; }
+
+    /// <summary>Hora de início do agendamento (opcional). Só faz sentido com DataPrevista.</summary>
+    public TimeOnly? HoraInicio { get; set; }
+    /// <summary>Hora de término do agendamento (opcional). Deve ser >= HoraInicio.</summary>
+    public TimeOnly? HoraFim { get; set; }
+
     public bool Concluida { get; set; }
     public DateTime? DataConclusao { get; set; }
 

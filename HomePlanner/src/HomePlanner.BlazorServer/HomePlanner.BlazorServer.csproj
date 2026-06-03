@@ -3,6 +3,11 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>6a183602-aed7-4600-adae-01f790c3c0ec</UserSecretsId>
+    <!-- Nomeia .resx pelo caminho da pasta (Resources.SharedResource), e não pelo
+         namespace da classe marcadora adjacente. Necessário para o IStringLocalizer
+         encontrar o recurso quando SharedResource.cs vive dentro de Resources/. -->
+    <EmbeddedResourceUseDependentUponConvention>false</EmbeddedResourceUseDependentUponConvention>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="MudBlazor" Version="7.*" />
@@ -13,6 +18,7 @@
     <PackageReference Include="Serilog.Enrichers.Thread" Version="3.*" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.*" />
     <PackageReference Include="Stripe.net" Version="46.*" />
+    <PackageReference Include="QRCoder" Version="1.*" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Application.HomePlanner\Application.HomePlanner.csproj" />

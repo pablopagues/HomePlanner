@@ -61,10 +61,8 @@ public class IngredienteRepository : IIngredienteRepository
     }
 
     public async Task<Ingrediente?> ObterEntidadeAsync(int id, CancellationToken ct = default)
-    {
-        await using var db = await _dbFactory.CreateDbContextAsync(ct);
-        return await db.Ingredientes.FirstOrDefaultAsync(i => i.Id == id, ct);
-    }
+        // Usa _db (contexto rastreado) — a entidade será mutada e persistida via SalvarAsync().
+        => await _db.Ingredientes.FirstOrDefaultAsync(i => i.Id == id, ct);
 
     public async Task<IReadOnlyList<IngredienteListaDTO>> BuscarAutoCompleteAsync(
         string textoNormalizado, int limite, CancellationToken ct = default)

@@ -4,6 +4,19 @@
 @using HomePlanner.BlazorServer.Components.Shared
 @inject IStringLocalizer<SharedResource> L
 @inject PublicLanguageService Lang
+@inject PersistentComponentState PersistentState
+@implements IDisposable
+
+@* ─────────────────────────────────────────────────────────────────────────────
+   O Blazor Server tem dois escopos de DI separados:
+     • SSR (HTTP request)    → HttpContext disponível → PublicLanguageService lê o cookie
+     • Interactive (SignalR) → HttpContext = null     → PublicLanguageService defaulta p/ "pt"
+
+   Para o idioma sobreviver à transição SSR → Interactive usamos PersistentComponentState:
+     • Fase SSR:         RegisterOnPersisting grava Lang.Lang no HTML.
+     • Fase Interactive: TryTakeFromJson restaura o valor e chama Lang.SetLang(),
+                         reaplicando CultureInfo no thread do circuit antes do 1º render.
+   ───────────────────────────────────────────────────────────────────────────── *@
 
 <MudThemeProvider Theme="HomePlannerTheme.Tema" />
 <MudPopoverProvider />
@@ -11,7 +24,9 @@
 <MudDialogProvider />
 
 <div class="public-layout">
-    @Body
+    <div class="public-layout-body">
+        @Body
+    </div>
 
     <footer class="public-layout-footer">
         <MudContainer MaxWidth="MaxWidth.Large">
@@ -35,18 +50,53 @@
 </div>
 
 <style>
+    .public-layout {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+    /* Cresce para ocupar o espaço livre e centraliza o conteúdo vertical/horizontalmente */
+    .public-layout-body {
+        flex: 1 0 auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
     .public-layout-footer {
-        margin-top: 48px;
+        flex-shrink: 0;
         padding: 24px 0;
         border-top: 1px solid #E8DDD1;
         background: #F5F0EA;
     }
     /* A landing tem footer próprio — esconde o do layout para não duplicar */
-    .landing-container ~ .public-layout-footer {
+    .public-layout-body:has(.landing-container) ~ .public-layout-footer {
         display: none;
     }
 </style>
 
 @code {
-    protected override void OnInitialized() => Lang.SetLang(Lang.Lang);
+    private const string PersistKey = "public_lang";
+    private PersistingComponentStateSubscription _langSub;
+
+    protected override void OnInitialized()
+    {
+        // Fase SSR: registra o callback que persiste o idioma lido do cookie.
+        _langSub = PersistentState.RegisterOnPersisting(PersistLang);
+
+        // Fase Interactive: restaura o idioma persistido pelo SSR e reaplica a cultura.
+        // Durante o SSR o TryTakeFromJson retorna false e cai no fallback Lang.Lang.
+        if (PersistentState.TryTakeFromJson<string>(PersistKey, out var persisted)
+            && persisted is not null)
+            Lang.SetLang(persisted);
+        else
+            Lang.SetLang(Lang.Lang);
+    }
+
+    private Task PersistLang()
+    {
+        PersistentState.PersistAsJson(PersistKey, Lang.Lang);
+        return Task.CompletedTask;
+    }
+
+    public void Dispose() => _langSub.Dispose();
 }

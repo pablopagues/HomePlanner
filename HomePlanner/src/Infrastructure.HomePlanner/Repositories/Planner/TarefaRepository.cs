@@ -24,6 +24,7 @@ public class TarefaRepository : ITarefaRepository
         return await MontarQueryBase(db, filtro)
             .OrderBy(t => t.Concluida)
             .ThenBy(t => t.DataPrevista ?? DateOnly.MaxValue)
+            .ThenBy(t => t.HoraInicio ?? TimeOnly.MaxValue)
             .ThenBy(t => t.Titulo)
             .Skip((filtro.Pagina - 1) * filtro.TamanhoPagina)
             .Take(filtro.TamanhoPagina)
@@ -33,6 +34,8 @@ public class TarefaRepository : ITarefaRepository
                 Titulo               = t.Titulo,
                 Descricao            = t.Descricao,
                 DataPrevista         = t.DataPrevista,
+                HoraInicio           = t.HoraInicio,
+                HoraFim              = t.HoraFim,
                 Concluida            = t.Concluida,
                 Recorrencia          = t.Recorrencia,
                 Visibilidade         = t.Visibilidade,
@@ -85,6 +88,10 @@ public class TarefaRepository : ITarefaRepository
             q = q.Where(t => t.Concluida == filtro.Concluida.Value);
         if (!string.IsNullOrWhiteSpace(filtro.ResponsavelUsuarioId))
             q = q.Where(t => t.ResponsavelUsuarioId == filtro.ResponsavelUsuarioId);
+        if (filtro.DataDe.HasValue)
+            q = q.Where(t => t.DataPrevista != null && t.DataPrevista >= filtro.DataDe.Value);
+        if (filtro.DataAte.HasValue)
+            q = q.Where(t => t.DataPrevista != null && t.DataPrevista <= filtro.DataAte.Value);
 
         return q;
     }

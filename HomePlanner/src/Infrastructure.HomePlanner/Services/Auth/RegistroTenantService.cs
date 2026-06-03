@@ -69,7 +69,7 @@ public class RegistroTenantService : IRegistroTenantService
             await _db.SaveChangesAsync(ct);
 
             // 2. Papéis do tenant (Owner / Membro / Filho)
-            await CriarPapelAsync(tenant.Id, PapelUsuario.Owner, "Owner");
+            var papelOwner = await CriarPapelAsync(tenant.Id, PapelUsuario.Owner, "Owner");
             await CriarPapelAsync(tenant.Id, PapelUsuario.Membro, "Membro");
             await CriarPapelAsync(tenant.Id, PapelUsuario.Filho, "Filho");
 
@@ -96,8 +96,17 @@ public class RegistroTenantService : IRegistroTenantService
                     resultado.Errors.Select(e => TraduzirErroIdentity(e.Code, e.Description)).ToArray());
             }
 
-            // 4. Atribui papel Owner
-            await _userManager.AddToRoleAsync(usuario, "Owner");
+            // 4. Atribui papel Owner.
+            // Inserimos a relação diretamente em vez de UserManager.AddToRoleAsync porque,
+            // durante o registro, o usuário ainda não está autenticado: o filtro global de
+            // tenant resolve para Guid.Empty e a busca interna do RoleManager não encontraria
+            // o papel recém-criado (TenantId = tenant.Id). A tabela AspNetUserRoles não possui
+            // TenantId, logo não sofre com o filtro.
+            _db.UserRoles.Add(new IdentityUserRole<string>
+            {
+                UserId = usuario.Id,
+                RoleId = papelOwner.Id,
+            });
 
             // 5. Vincula owner ao tenant
             tenant.OwnerUsuarioId = usuario.Id;
@@ -130,7 +139,7 @@ public class RegistroTenantService : IRegistroTenantService
         }
     }
 
-    private async Task CriarPapelAsync(Guid tenantId, PapelUsuario tipo, string nomeAmigavel)
+    private async Task<Papel> CriarPapelAsync(Guid tenantId, PapelUsuario tipo, string nomeAmigavel)
     {
         // Nome técnico único globalmente: {NomeAmigavel}_{TenantId}
         var papel = new Papel
@@ -142,6 +151,7 @@ public class RegistroTenantService : IRegistroTenantService
             Name         = $"{nomeAmigavel}_{tenantId}",
         };
         await _roleManager.CreateAsync(papel);
+        return papel;
     }
 
     private static string TraduzirErroIdentity(string code, string descricaoPadrao) => code switch

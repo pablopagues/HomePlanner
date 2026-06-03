@@ -12,6 +12,8 @@ public class TarefaConfiguration : IEntityTypeConfiguration<Tarefa>
         builder.HasKey(t => t.Id);
         builder.Property(t => t.Titulo).HasMaxLength(300).IsRequired();
         builder.Property(t => t.Descricao).HasMaxLength(2000);
+        builder.Property(t => t.HoraInicio).HasColumnType("time");
+        builder.Property(t => t.HoraFim).HasColumnType("time");
         builder.Property(t => t.ResponsavelUsuarioId).HasMaxLength(450);
         builder.Property(t => t.DeletedByUsuarioId).HasMaxLength(450);
         builder.Property(t => t.CriadoPor).HasMaxLength(450);

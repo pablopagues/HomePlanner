@@ -53,7 +53,32 @@
   <data name="Nav_Configuracoes" xml:space="preserve"><value>Configurações</value></data>
   <data name="Nav_Modelos" xml:space="preserve"><value>Modelos</value></data>
   <data name="Nav_Planner" xml:space="preserve"><value>Tarefas</value></data>
+  <data name="Nav_Calendario" xml:space="preserve"><value>Calendário</value></data>
   <data name="Nav_Assinatura" xml:space="preserve"><value>Assinatura</value></data>
+  <data name="Nav_Empresa" xml:space="preserve"><value>Minha Conta</value></data>
+
+  <!-- ── Dashboard: aviso de e-mail ── -->
+  <data name="Dashboard_EmailNaoConfirmado" xml:space="preserve"><value>Seu e-mail ainda não foi confirmado. Confirme para garantir o acesso e a recuperação da conta.</value></data>
+  <data name="Dashboard_ConfirmarAgora" xml:space="preserve"><value>Confirmar agora</value></data>
+
+  <!-- ── Empresa / Dados da conta ── -->
+  <data name="Emp_Titulo" xml:space="preserve"><value>Minha Conta</value></data>
+  <data name="Emp_Subtitulo" xml:space="preserve"><value>Dados da sua conta no HomePlanner.</value></data>
+  <data name="Emp_SecaoDados" xml:space="preserve"><value>Dados cadastrais</value></data>
+  <data name="Emp_NomeResponsavel" xml:space="preserve"><value>Nome do responsável</value></data>
+  <data name="Emp_Email" xml:space="preserve"><value>E-mail (login)</value></data>
+  <data name="Emp_EmailConfirmado" xml:space="preserve"><value>E-mail confirmado</value></data>
+  <data name="Emp_EmailNaoConfirmado" xml:space="preserve"><value>Seu e-mail ainda não foi confirmado. Clique em reenviar para receber o link de confirmação.</value></data>
+  <data name="Emp_ReenviarConfirmacao" xml:space="preserve"><value>Reenviar confirmação</value></data>
+  <data name="Emp_Pais" xml:space="preserve"><value>País</value></data>
+  <data name="Emp_PaisHelperText" xml:space="preserve"><value>Determina os preços da assinatura e não pode ser alterado.</value></data>
+  <data name="Emp_Cpf" xml:space="preserve"><value>CPF</value></data>
+  <data name="Emp_Province" xml:space="preserve"><value>Província</value></data>
+  <data name="Emp_Salvar" xml:space="preserve"><value>Salvar</value></data>
+  <data name="Emp_Salvando" xml:space="preserve"><value>Salvando...</value></data>
+  <data name="Emp_SalvoOk" xml:space="preserve"><value>Dados salvos com sucesso.</value></data>
+  <data name="Emp_ConfirmacaoEnviada" xml:space="preserve"><value>E-mail de confirmação enviado. Verifique sua caixa de entrada.</value></data>
+  <data name="Emp_ErroCarregar" xml:space="preserve"><value>Erro ao carregar os dados: {0}</value></data>
 
   <!-- ── Assinatura ── -->
   <data name="Assin_Titulo" xml:space="preserve"><value>Sua assinatura</value></data>
@@ -175,6 +200,16 @@
   <data name="Planner_ResponsavelLabel" xml:space="preserve"><value>Responsável</value></data>
   <data name="Planner_RecorrenciaLabel" xml:space="preserve"><value>Recorrência</value></data>
   <data name="Planner_PrivadaLabel" xml:space="preserve"><value>Tarefa privada (só eu vejo)</value></data>
+  <data name="Planner_HoraInicioLabel" xml:space="preserve"><value>Hora de início</value></data>
+  <data name="Planner_HoraFimLabel" xml:space="preserve"><value>Hora de fim</value></data>
+
+  <data name="Cal_Titulo" xml:space="preserve"><value>Calendário</value></data>
+  <data name="Cal_Semana" xml:space="preserve"><value>Semana</value></data>
+  <data name="Cal_Mes" xml:space="preserve"><value>Mês</value></data>
+  <data name="Cal_Hoje" xml:space="preserve"><value>Hoje</value></data>
+  <data name="Cal_Membro" xml:space="preserve"><value>Membro</value></data>
+  <data name="Cal_TodosMembros" xml:space="preserve"><value>Todos</value></data>
+  <data name="Cal_SomenteMinhas" xml:space="preserve"><value>Você está vendo apenas as suas tarefas.</value></data>
 
   <!-- ── Recorrência ── -->
   <data name="Recorrencia_Nenhuma" xml:space="preserve"><value>Sem repetição</value></data>
@@ -295,4 +330,68 @@
   <data name="Modelo_ExcluirConfirm" xml:space="preserve"><value>Excluir este modelo?</value></data>
   <data name="Modelo_Refeicoes" xml:space="preserve"><value>refeições</value></data>
   <data name="Modelo_CriarDica" xml:space="preserve"><value>Para criar um modelo, vá ao Cardápio e clique em "Salvar como modelo".</value></data>
+
+  <!-- ── Configurações ── -->
+  <data name="Cfg_Titulo" xml:space="preserve"><value>Configurações</value></data>
+  <data name="Cfg_Subtitulo" xml:space="preserve"><value>Ajuste as preferências da sua família.</value></data>
+
+  <!-- ── Família ── -->
+  <data name="Fam_Titulo" xml:space="preserve"><value>Família</value></data>
+  <data name="Fam_Subtitulo" xml:space="preserve"><value>Gerencie quem faz parte da família e acessa o HomePlanner.</value></data>
+  <data name="Fam_Adicionar" xml:space="preserve"><value>Adicionar membro</value></data>
+  <data name="Fam_NovoMembro" xml:space="preserve"><value>Novo membro</value></data>
+  <data name="Fam_Nome" xml:space="preserve"><value>Nome</value></data>
+  <data name="Fam_Email" xml:space="preserve"><value>E-mail (login)</value></data>
+  <data name="Fam_Papel" xml:space="preserve"><value>Papel</value></data>
+  <data name="Fam_PapelOwner" xml:space="preserve"><value>Administrador</value></data>
+  <data name="Fam_PapelPai" xml:space="preserve"><value>Pai / Responsável</value></data>
+  <data name="Fam_PapelFilho" xml:space="preserve"><value>Filho</value></data>
+  <data name="Fam_ConviteAjuda" xml:space="preserve"><value>Pais têm acesso completo; filhos terão acesso restrito. O membro recebe um convite por e-mail para definir a senha e entrar.</value></data>
+  <data name="Fam_EnviarConvite" xml:space="preserve"><value>Enviar convite</value></data>
+  <data name="Fam_ConviteEnviado" xml:space="preserve"><value>Convite enviado por e-mail!</value></data>
+  <data name="Fam_MembroCriado" xml:space="preserve"><value>Membro criado. Compartilhe o link de convite abaixo.</value></data>
+  <data name="Fam_LinkGerado" xml:space="preserve"><value>Link de convite gerado.</value></data>
+  <data name="Fam_LinkConviteManual" xml:space="preserve"><value>E-mail não configurado — compartilhe este link com o membro para definir a senha:</value></data>
+  <data name="Fam_Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Fam_Acoes" xml:space="preserve"><value>Ações</value></data>
+  <data name="Fam_Ativo" xml:space="preserve"><value>Ativo</value></data>
+  <data name="Fam_Pendente" xml:space="preserve"><value>Convite pendente</value></data>
+  <data name="Fam_Desativado" xml:space="preserve"><value>Desativado</value></data>
+  <data name="Fam_ReenviarConvite" xml:space="preserve"><value>Reenviar convite</value></data>
+  <data name="Fam_TornarPai" xml:space="preserve"><value>Tornar Pai / Responsável</value></data>
+  <data name="Fam_TornarFilho" xml:space="preserve"><value>Tornar Filho</value></data>
+  <data name="Fam_Desativar" xml:space="preserve"><value>Desativar acesso</value></data>
+  <data name="Fam_Reativar" xml:space="preserve"><value>Reativar acesso</value></data>
+  <data name="Fam_DesativarTitulo" xml:space="preserve"><value>Desativar membro</value></data>
+  <data name="Fam_DesativarConfirm" xml:space="preserve"><value>O membro não poderá mais entrar até ser reativado. Continuar?</value></data>
+  <data name="Fam_Uso" xml:space="preserve"><value>{0} de {1} membros</value></data>
+  <data name="Fam_LimiteAtingido" xml:space="preserve"><value>Você atingiu o limite de {0} membro(s) do seu plano atual.</value></data>
+  <data name="Fam_VerPlanos" xml:space="preserve"><value>Ver planos</value></data>
+
+  <!-- ── Conta / Navegação ── -->
+  <data name="Nav_Perfil" xml:space="preserve"><value>Meu perfil</value></data>
+  <data name="Nav_Sair" xml:space="preserve"><value>Sair</value></data>
+
+  <!-- ── Perfil / Segurança (2FA) ── -->
+  <data name="Perfil_Titulo" xml:space="preserve"><value>Segurança da conta</value></data>
+  <data name="Perfil_Subtitulo" xml:space="preserve"><value>Proteja sua conta com verificação em duas etapas.</value></data>
+  <data name="Perfil_2FA_Ativado" xml:space="preserve"><value>Verificação em duas etapas ativada. Sua conta está protegida por uma camada extra de segurança.</value></data>
+  <data name="Perfil_2FA_Desativado" xml:space="preserve"><value>Verificação em duas etapas desativada. Ative para aumentar a segurança da sua conta.</value></data>
+  <data name="Perfil_2FA_AppTitulo" xml:space="preserve"><value>App autenticador</value></data>
+  <data name="Perfil_2FA_AppDesc" xml:space="preserve"><value>Use Google Authenticator, Microsoft Authenticator ou outro app compatível com TOTP para gerar um código a cada login.</value></data>
+  <data name="Perfil_2FA_Configurar" xml:space="preserve"><value>Configurar app autenticador</value></data>
+  <data name="Perfil_2FA_PassoScan" xml:space="preserve"><value>Escaneie o QR code com seu app autenticador e depois informe o código de 6 dígitos.</value></data>
+  <data name="Perfil_2FA_ChaveManual" xml:space="preserve"><value>Não consegue escanear? Digite esta chave manualmente:</value></data>
+  <data name="Perfil_2FA_CodigoLabel" xml:space="preserve"><value>Código do autenticador</value></data>
+  <data name="Perfil_2FA_VerificarAtivar" xml:space="preserve"><value>Verificar e ativar</value></data>
+  <data name="Perfil_2FA_InformeCodigo" xml:space="preserve"><value>Informe o código do app autenticador.</value></data>
+  <data name="Perfil_2FA_AtivadoOk" xml:space="preserve"><value>Verificação em duas etapas ativada com sucesso!</value></data>
+  <data name="Perfil_2FA_Gerenciar" xml:space="preserve"><value>Gerenciar verificação em duas etapas</value></data>
+  <data name="Perfil_2FA_NovosCodigos" xml:space="preserve"><value>Gerar novos códigos de recuperação</value></data>
+  <data name="Perfil_2FA_NovosCodigosOk" xml:space="preserve"><value>Novos códigos de recuperação gerados. Salve-os agora!</value></data>
+  <data name="Perfil_2FA_Desativar" xml:space="preserve"><value>Desativar verificação em duas etapas</value></data>
+  <data name="Perfil_2FA_DesativarConfirm" xml:space="preserve"><value>Tem certeza? Sua conta ficará protegida apenas pela senha.</value></data>
+  <data name="Perfil_2FA_DesativadoOk" xml:space="preserve"><value>Verificação em duas etapas desativada.</value></data>
+  <data name="Perfil_2FA_SalveCodigos" xml:space="preserve"><value>Salve estes códigos de recuperação agora!</value></data>
+  <data name="Perfil_2FA_CodigosAjuda" xml:space="preserve"><value>Cada código só pode ser usado uma vez. Guarde-os em local seguro — eles permitem acessar a conta caso você perca o app autenticador.</value></data>
 </root>

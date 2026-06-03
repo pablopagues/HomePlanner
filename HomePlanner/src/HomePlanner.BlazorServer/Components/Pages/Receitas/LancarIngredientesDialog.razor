@@ -1,0 +1,225 @@
+@* Diálogo: parseia um texto livre de ingredientes e lança como linhas estruturadas *@
+@using Application.HomePlanner.Helpers
+@inject IImportadorReceitaService Importador
+@inject IIngredienteService IngService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">Lançar ingredientes do texto</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-2">
+            Ajuste a lista (um ingrediente por linha) e clique em <b>Analisar</b>. Os itens
+            serão identificados; ingredientes que não existirem no cadastro serão criados ao lançar.
+        </MudText>
+
+        <MudTextField @bind-Value="_texto" Label="Texto dos ingredientes"
+                      Lines="6" AutoGrow="true" Variant="Variant.Outlined" Class="mb-3" />
+
+        <MudButton StartIcon="@Icons.Material.Filled.AutoFixHigh" Variant="Variant.Outlined"
+                   Color="Color.Primary" OnClick="Analisar" Class="mb-3">
+            Analisar
+        </MudButton>
+
+        @if (_linhas.Count > 0)
+        {
+            <MudDivider Class="mb-3" />
+            <MudText Typo="Typo.subtitle2" Class="mb-2">
+                @_linhas.Count item(ns) — @_linhas.Count(l => l.Selecionado is null) será(ão) criado(s) no cadastro
+            </MudText>
+
+            @foreach (var linha in _linhas)
+            {
+                <MudPaper Class="pa-2 mb-2" Elevation="0"
+                          Style="background:#F9F6F2; border-radius:8px; border:1px solid #E8DDD1;">
+                    <MudGrid Spacing="2" Class="align-center">
+                        <MudItem xs="4" md="2">
+                            <MudNumericField @bind-Value="linha.Quantidade" Label="Qtde" Min="0m"
+                                             Format="G" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                        <MudItem xs="4" md="2">
+                            <MudSelect T="int" @bind-Value="linha.UnidadeMedidaId" Label="Unidade"
+                                       Variant="Variant.Outlined" Margin="Margin.Dense">
+                                @foreach (var u in Unidades)
+                                {
+                                    <MudSelectItem Value="@u.Id">@u.Codigo</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudAutocomplete T="IngredienteListaDTO?"
+                                             Label="Ingrediente"
+                                             Value="linha.Selecionado"
+                                             SearchFunc="Buscar"
+                                             ToStringFunc="@(i => i?.Nome ?? string.Empty)"
+                                             ValueChanged="@(v => SelecionarIngrediente(linha, v))"
+                                             MinCharacters="2" Clearable="true"
+                                             Placeholder="@linha.NomeParseado"
+                                             Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                        <MudItem xs="6" md="2">
+                            @if (linha.Selecionado is null)
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Text"
+                                         Icon="@Icons.Material.Filled.AddCircleOutline">novo</MudChip>
+                            }
+                            else
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Text"
+                                         Icon="@Icons.Material.Filled.CheckCircle">existente</MudChip>
+                            }
+                        </MudItem>
+                        <MudItem xs="4" md="1">
+                            <MudCheckBox @bind-Value="linha.Opcional" Label="Opt." Size="Size.Small" />
+                        </MudItem>
+                        <MudItem xs="2" md="1">
+                            <MudIconButton Icon="@Icons.Material.Filled.DeleteOutline" Color="Color.Error"
+                                           Size="Size.Small" OnClick="@(() => _linhas.Remove(linha))" />
+                        </MudItem>
+                    </MudGrid>
+                </MudPaper>
+            }
+        }
+        else if (_analisou)
+        {
+            <MudAlert Severity="Severity.Warning" Dense="true">
+                Nenhum ingrediente foi identificado no texto.
+            </MudAlert>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => MudDialog.Cancel())">Cancelar</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Aplicar"
+                   Disabled="@(_linhas.Count == 0 || _aplicando)">
+            @(_aplicando ? "Lançando..." : $"Lançar {_linhas.Count} ingrediente(s)")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter] public string TextoInicial { get; set; } = string.Empty;
+    [Parameter] public List<UnidadeMedidaListaDTO> Unidades { get; set; } = [];
+
+    private string _texto = string.Empty;
+    private bool _analisou;
+    private bool _aplicando;
+    private readonly List<LinhaPreview> _linhas = [];
+
+    protected override void OnInitialized() => _texto = TextoInicial;
+
+    private async Task Analisar()
+    {
+        _analisou = true;
+        _linhas.Clear();
+
+        foreach (var p in Importador.ParsearTexto(_texto))
+        {
+            _linhas.Add(new LinhaPreview
+            {
+                Quantidade      = p.Quantidade,
+                UnidadeMedidaId = ResolverUnidade(p.CodigoUnidade),
+                Selecionado     = await ResolverIngredienteExistente(p.NomeIngrediente),
+                NomeParseado    = p.NomeIngrediente,
+                Opcional        = p.Opcional,
+            });
+        }
+    }
+
+    private int ResolverUnidade(string? codigo)
+    {
+        if (!string.IsNullOrWhiteSpace(codigo))
+        {
+            var u = Unidades.FirstOrDefault(x =>
+                string.Equals(x.Codigo, codigo, StringComparison.OrdinalIgnoreCase));
+            if (u is not null) return u.Id;
+        }
+        return Unidades.FirstOrDefault()?.Id ?? 0;
+    }
+
+    private async Task<IngredienteListaDTO?> ResolverIngredienteExistente(string nome)
+    {
+        if (string.IsNullOrWhiteSpace(nome)) return null;
+        var candidatos = await IngService.BuscarAutoCompleteAsync(nome, 5);
+        var alvo = TextoHelper.NormalizarNome(nome);
+        return candidatos.FirstOrDefault(c => TextoHelper.NormalizarNome(c.Nome) == alvo);
+    }
+
+    private void SelecionarIngrediente(LinhaPreview linha, IngredienteListaDTO? v)
+    {
+        linha.Selecionado = v;
+        if (v?.UnidadeMedidaPadraoId is int uid) linha.UnidadeMedidaId = uid;
+    }
+
+    private async Task<IEnumerable<IngredienteListaDTO>> Buscar(string texto, CancellationToken ct)
+        => await IngService.BuscarAutoCompleteAsync(texto, 10, ct);
+
+    private async Task Aplicar()
+    {
+        _aplicando = true;
+        var resultado = new List<IngredienteParseadoDTO>();
+
+        foreach (var l in _linhas)
+        {
+            var (ingredienteId, nome) = await ResolverParaLancamento(l);
+            if (ingredienteId == 0) continue;
+
+            resultado.Add(new IngredienteParseadoDTO
+            {
+                IngredienteId   = ingredienteId,
+                NomeIngrediente = nome,
+                Quantidade      = l.Quantidade ?? 0,
+                UnidadeMedidaId = l.UnidadeMedidaId,
+                Opcional        = l.Opcional,
+            });
+        }
+
+        _aplicando = false;
+
+        if (resultado.Count == 0)
+        {
+            Snackbar.Add("Nenhum ingrediente pôde ser lançado.", Severity.Warning);
+            return;
+        }
+        MudDialog.Close(DialogResult.Ok(resultado));
+    }
+
+    // Retorna o id do ingrediente (existente ou recém-criado) e seu nome; 0 se falhar.
+    private async Task<(int Id, string Nome)> ResolverParaLancamento(LinhaPreview l)
+    {
+        if (l.Selecionado is not null)
+            return (l.Selecionado.Id, l.Selecionado.Nome);
+
+        var nomeNovo = Capitalizar(l.NomeParseado.Trim());
+        if (string.IsNullOrWhiteSpace(nomeNovo)) return (0, string.Empty);
+
+        var r = await IngService.SalvarAsync(new IngredientePersistenciaDTO
+        {
+            Nome                  = nomeNovo,
+            UnidadeMedidaPadraoId = l.UnidadeMedidaId == 0 ? null : l.UnidadeMedidaId,
+        });
+
+        if (r.Sucesso) return (r.Valor, nomeNovo);
+
+        // Falha provável: nome já existente — tenta reaproveitar.
+        var existente = await ResolverIngredienteExistente(l.NomeParseado);
+        if (existente is not null) return (existente.Id, existente.Nome);
+
+        Snackbar.Add($"Não foi possível criar '{nomeNovo}': {string.Join(", ", r.Erros)}", Severity.Warning);
+        return (0, string.Empty);
+    }
+
+    private static string Capitalizar(string s)
+        => string.IsNullOrWhiteSpace(s) ? s : char.ToUpper(s[0]) + s[1..];
+
+    private class LinhaPreview
+    {
+        public decimal? Quantidade { get; set; }
+        public int UnidadeMedidaId { get; set; }
+        public IngredienteListaDTO? Selecionado { get; set; }
+        public string NomeParseado { get; set; } = string.Empty;
+        public bool Opcional { get; set; }
+    }
+}

@@ -23,4 +23,19 @@ public class IngredienteImportadoDTO
     public string? CodigoUnidade { get; init; }
     public string NomeIngrediente { get; init; } = string.Empty;
     public string TextoOriginal { get; init; } = string.Empty;
+    public bool Opcional { get; init; }
+}
+
+/// <summary>
+/// Linha de ingrediente já resolvida (vinculada a um ingrediente e unidade do cadastro),
+/// pronta para virar uma linha de <c>ReceitaIngredientePersistenciaDTO</c>.
+/// </summary>
+public class IngredienteParseadoDTO
+{
+    public int IngredienteId { get; set; }
+    public string NomeIngrediente { get; set; } = string.Empty;
+    public decimal Quantidade { get; set; }
+    public int UnidadeMedidaId { get; set; }
+    public bool Opcional { get; set; }
+    public string? Observacao { get; set; }
 }

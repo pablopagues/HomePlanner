@@ -50,7 +50,32 @@
   <data name="Nav_Configuracoes" xml:space="preserve"><value>Settings</value></data>
   <data name="Nav_Modelos" xml:space="preserve"><value>Templates</value></data>
   <data name="Nav_Planner" xml:space="preserve"><value>Tasks</value></data>
+  <data name="Nav_Calendario" xml:space="preserve"><value>Calendar</value></data>
   <data name="Nav_Assinatura" xml:space="preserve"><value>Subscription</value></data>
+  <data name="Nav_Empresa" xml:space="preserve"><value>My Account</value></data>
+
+  <!-- ── Dashboard: email notice ── -->
+  <data name="Dashboard_EmailNaoConfirmado" xml:space="preserve"><value>Your email has not been confirmed yet. Confirm it to secure account access and recovery.</value></data>
+  <data name="Dashboard_ConfirmarAgora" xml:space="preserve"><value>Confirm now</value></data>
+
+  <!-- ── Company / Account data ── -->
+  <data name="Emp_Titulo" xml:space="preserve"><value>My Account</value></data>
+  <data name="Emp_Subtitulo" xml:space="preserve"><value>Your HomePlanner account details.</value></data>
+  <data name="Emp_SecaoDados" xml:space="preserve"><value>Account details</value></data>
+  <data name="Emp_NomeResponsavel" xml:space="preserve"><value>Account holder name</value></data>
+  <data name="Emp_Email" xml:space="preserve"><value>Email (login)</value></data>
+  <data name="Emp_EmailConfirmado" xml:space="preserve"><value>Email confirmed</value></data>
+  <data name="Emp_EmailNaoConfirmado" xml:space="preserve"><value>Your email has not been confirmed yet. Click resend to receive the confirmation link.</value></data>
+  <data name="Emp_ReenviarConfirmacao" xml:space="preserve"><value>Resend confirmation</value></data>
+  <data name="Emp_Pais" xml:space="preserve"><value>Country</value></data>
+  <data name="Emp_PaisHelperText" xml:space="preserve"><value>Determines subscription pricing and cannot be changed.</value></data>
+  <data name="Emp_Cpf" xml:space="preserve"><value>CPF</value></data>
+  <data name="Emp_Province" xml:space="preserve"><value>Province</value></data>
+  <data name="Emp_Salvar" xml:space="preserve"><value>Save</value></data>
+  <data name="Emp_Salvando" xml:space="preserve"><value>Saving...</value></data>
+  <data name="Emp_SalvoOk" xml:space="preserve"><value>Data saved successfully.</value></data>
+  <data name="Emp_ConfirmacaoEnviada" xml:space="preserve"><value>Confirmation email sent. Please check your inbox.</value></data>
+  <data name="Emp_ErroCarregar" xml:space="preserve"><value>Error loading data: {0}</value></data>
 
   <data name="Assin_Titulo" xml:space="preserve"><value>Your subscription</value></data>
   <data name="Assin_Subtitulo" xml:space="preserve"><value>Manage your plan and payment method.</value></data>
@@ -164,6 +189,16 @@
   <data name="Planner_ResponsavelLabel" xml:space="preserve"><value>Assigned to</value></data>
   <data name="Planner_RecorrenciaLabel" xml:space="preserve"><value>Recurrence</value></data>
   <data name="Planner_PrivadaLabel" xml:space="preserve"><value>Private task (only I can see)</value></data>
+  <data name="Planner_HoraInicioLabel" xml:space="preserve"><value>Start time</value></data>
+  <data name="Planner_HoraFimLabel" xml:space="preserve"><value>End time</value></data>
+
+  <data name="Cal_Titulo" xml:space="preserve"><value>Calendar</value></data>
+  <data name="Cal_Semana" xml:space="preserve"><value>Week</value></data>
+  <data name="Cal_Mes" xml:space="preserve"><value>Month</value></data>
+  <data name="Cal_Hoje" xml:space="preserve"><value>Today</value></data>
+  <data name="Cal_Membro" xml:space="preserve"><value>Member</value></data>
+  <data name="Cal_TodosMembros" xml:space="preserve"><value>Everyone</value></data>
+  <data name="Cal_SomenteMinhas" xml:space="preserve"><value>You are seeing only your own tasks.</value></data>
 
   <data name="Recorrencia_Nenhuma" xml:space="preserve"><value>No repeat</value></data>
   <data name="Recorrencia_Diaria" xml:space="preserve"><value>Daily</value></data>
@@ -272,4 +307,68 @@
   <data name="Modelo_ExcluirConfirm" xml:space="preserve"><value>Delete this template?</value></data>
   <data name="Modelo_Refeicoes" xml:space="preserve"><value>meals</value></data>
   <data name="Modelo_CriarDica" xml:space="preserve"><value>To create a template, go to the Menu and click "Save as template".</value></data>
+
+  <!-- ── Settings ── -->
+  <data name="Cfg_Titulo" xml:space="preserve"><value>Settings</value></data>
+  <data name="Cfg_Subtitulo" xml:space="preserve"><value>Adjust your family preferences.</value></data>
+
+  <!-- ── Family ── -->
+  <data name="Fam_Titulo" xml:space="preserve"><value>Family</value></data>
+  <data name="Fam_Subtitulo" xml:space="preserve"><value>Manage who is part of the family and can access HomePlanner.</value></data>
+  <data name="Fam_Adicionar" xml:space="preserve"><value>Add member</value></data>
+  <data name="Fam_NovoMembro" xml:space="preserve"><value>New member</value></data>
+  <data name="Fam_Nome" xml:space="preserve"><value>Name</value></data>
+  <data name="Fam_Email" xml:space="preserve"><value>Email (login)</value></data>
+  <data name="Fam_Papel" xml:space="preserve"><value>Role</value></data>
+  <data name="Fam_PapelOwner" xml:space="preserve"><value>Administrator</value></data>
+  <data name="Fam_PapelPai" xml:space="preserve"><value>Parent</value></data>
+  <data name="Fam_PapelFilho" xml:space="preserve"><value>Child</value></data>
+  <data name="Fam_ConviteAjuda" xml:space="preserve"><value>Parents get full access; children will have restricted access. The member receives an email invitation to set a password and sign in.</value></data>
+  <data name="Fam_EnviarConvite" xml:space="preserve"><value>Send invitation</value></data>
+  <data name="Fam_ConviteEnviado" xml:space="preserve"><value>Invitation sent by email!</value></data>
+  <data name="Fam_MembroCriado" xml:space="preserve"><value>Member created. Share the invitation link below.</value></data>
+  <data name="Fam_LinkGerado" xml:space="preserve"><value>Invitation link generated.</value></data>
+  <data name="Fam_LinkConviteManual" xml:space="preserve"><value>Email not configured — share this link with the member to set their password:</value></data>
+  <data name="Fam_Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Fam_Acoes" xml:space="preserve"><value>Actions</value></data>
+  <data name="Fam_Ativo" xml:space="preserve"><value>Active</value></data>
+  <data name="Fam_Pendente" xml:space="preserve"><value>Invitation pending</value></data>
+  <data name="Fam_Desativado" xml:space="preserve"><value>Disabled</value></data>
+  <data name="Fam_ReenviarConvite" xml:space="preserve"><value>Resend invitation</value></data>
+  <data name="Fam_TornarPai" xml:space="preserve"><value>Make Parent</value></data>
+  <data name="Fam_TornarFilho" xml:space="preserve"><value>Make Child</value></data>
+  <data name="Fam_Desativar" xml:space="preserve"><value>Disable access</value></data>
+  <data name="Fam_Reativar" xml:space="preserve"><value>Re-enable access</value></data>
+  <data name="Fam_DesativarTitulo" xml:space="preserve"><value>Disable member</value></data>
+  <data name="Fam_DesativarConfirm" xml:space="preserve"><value>The member won't be able to sign in until re-enabled. Continue?</value></data>
+  <data name="Fam_Uso" xml:space="preserve"><value>{0} of {1} members</value></data>
+  <data name="Fam_LimiteAtingido" xml:space="preserve"><value>You've reached your current plan's limit of {0} member(s).</value></data>
+  <data name="Fam_VerPlanos" xml:space="preserve"><value>View plans</value></data>
+
+  <!-- ── Account / Navigation ── -->
+  <data name="Nav_Perfil" xml:space="preserve"><value>My profile</value></data>
+  <data name="Nav_Sair" xml:space="preserve"><value>Sign out</value></data>
+
+  <!-- ── Profile / Security (2FA) ── -->
+  <data name="Perfil_Titulo" xml:space="preserve"><value>Account security</value></data>
+  <data name="Perfil_Subtitulo" xml:space="preserve"><value>Protect your account with two-step verification.</value></data>
+  <data name="Perfil_2FA_Ativado" xml:space="preserve"><value>Two-step verification is enabled. Your account has an extra layer of security.</value></data>
+  <data name="Perfil_2FA_Desativado" xml:space="preserve"><value>Two-step verification is disabled. Enable it to increase your account security.</value></data>
+  <data name="Perfil_2FA_AppTitulo" xml:space="preserve"><value>Authenticator app</value></data>
+  <data name="Perfil_2FA_AppDesc" xml:space="preserve"><value>Use Google Authenticator, Microsoft Authenticator or another TOTP-compatible app to generate a code at each login.</value></data>
+  <data name="Perfil_2FA_Configurar" xml:space="preserve"><value>Set up authenticator app</value></data>
+  <data name="Perfil_2FA_PassoScan" xml:space="preserve"><value>Scan the QR code with your authenticator app, then enter the 6-digit code.</value></data>
+  <data name="Perfil_2FA_ChaveManual" xml:space="preserve"><value>Can't scan? Enter this key manually:</value></data>
+  <data name="Perfil_2FA_CodigoLabel" xml:space="preserve"><value>Authenticator code</value></data>
+  <data name="Perfil_2FA_VerificarAtivar" xml:space="preserve"><value>Verify and enable</value></data>
+  <data name="Perfil_2FA_InformeCodigo" xml:space="preserve"><value>Enter the code from your authenticator app.</value></data>
+  <data name="Perfil_2FA_AtivadoOk" xml:space="preserve"><value>Two-step verification enabled successfully!</value></data>
+  <data name="Perfil_2FA_Gerenciar" xml:space="preserve"><value>Manage two-step verification</value></data>
+  <data name="Perfil_2FA_NovosCodigos" xml:space="preserve"><value>Generate new recovery codes</value></data>
+  <data name="Perfil_2FA_NovosCodigosOk" xml:space="preserve"><value>New recovery codes generated. Save them now!</value></data>
+  <data name="Perfil_2FA_Desativar" xml:space="preserve"><value>Disable two-step verification</value></data>
+  <data name="Perfil_2FA_DesativarConfirm" xml:space="preserve"><value>Are you sure? Your account will be protected by password only.</value></data>
+  <data name="Perfil_2FA_DesativadoOk" xml:space="preserve"><value>Two-step verification disabled.</value></data>
+  <data name="Perfil_2FA_SalveCodigos" xml:space="preserve"><value>Save these recovery codes now!</value></data>
+  <data name="Perfil_2FA_CodigosAjuda" xml:space="preserve"><value>Each code can be used only once. Keep them in a safe place — they let you access your account if you lose your authenticator app.</value></data>
 </root>

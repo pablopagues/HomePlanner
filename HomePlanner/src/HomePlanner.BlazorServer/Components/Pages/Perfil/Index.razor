@@ -1,0 +1,247 @@
+@page "/perfil"
+@page "/profile"
+@attribute [Authorize]
+@using Application.HomePlanner.Services.Seguranca
+@using QRCoder
+@inject IDoisFatoresService Service
+@inject IStringLocalizer<SharedResource> L
+@inject ISnackbar Snackbar
+
+<PageTitle>@L["Perfil_Titulo"] — HomePlanner</PageTitle>
+
+<MudText Typo="Typo.h5" Class="mb-1" Style="font-family:'Fraunces',serif; font-weight:300;">
+    @L["Perfil_Titulo"]
+</MudText>
+<MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+    @L["Perfil_Subtitulo"]
+</MudText>
+
+@if (_carregando)
+{
+    <MudProgressLinear Indeterminate="true" />
+}
+else
+{
+    <MudPaper Class="pa-6" Elevation="1" Style="border-radius:14px; max-width:620px;">
+        <MudStack Spacing="4">
+
+            <MudAlert Severity="@(_ativo ? Severity.Success : Severity.Info)" Variant="Variant.Outlined" Dense="true">
+                @(_ativo ? L["Perfil_2FA_Ativado"] : L["Perfil_2FA_Desativado"])
+            </MudAlert>
+
+            @* ─── Códigos de recuperação (mostrados após ativar/regenerar) ─── *@
+            @if (_codigosRecuperacao is not null)
+            {
+                <MudAlert Severity="Severity.Warning" Variant="Variant.Filled">
+                    <MudText Typo="Typo.subtitle2" Class="mb-1">@L["Perfil_2FA_SalveCodigos"]</MudText>
+                    <MudText Typo="Typo.body2" Class="mb-2">@L["Perfil_2FA_CodigosAjuda"]</MudText>
+                    <div style="background:rgba(255,255,255,0.25); border-radius:6px; padding:12px; font-family:monospace; letter-spacing:1px;">
+                        @foreach (var c in _codigosRecuperacao)
+                        {
+                            <div>@c</div>
+                        }
+                    </div>
+                </MudAlert>
+            }
+
+            @if (!_ativo && !_configurando)
+            {
+                @* ─── Estado: desativado ─── *@
+                <div>
+                    <MudText Typo="Typo.h6" Style="font-size:1rem;" Class="mb-1">@L["Perfil_2FA_AppTitulo"]</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">@L["Perfil_2FA_AppDesc"]</MudText>
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                               StartIcon="@Icons.Material.Filled.QrCode"
+                               OnClick="IniciarConfiguracaoAsync" Disabled="_processando">
+                        @L["Perfil_2FA_Configurar"]
+                    </MudButton>
+                </div>
+            }
+
+            @if (_configurando)
+            {
+                @* ─── Estado: configurando TOTP ─── *@
+                <div>
+                    <MudText Typo="Typo.h6" Style="font-size:1rem;" Class="mb-1">@L["Perfil_2FA_Configurar"]</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">@L["Perfil_2FA_PassoScan"]</MudText>
+
+                    @if (!string.IsNullOrEmpty(_qrCodeBase64))
+                    {
+                        <div class="d-flex flex-column align-center mb-3">
+                            <img src="data:image/png;base64,@_qrCodeBase64" alt="QR Code 2FA"
+                                 style="width:200px; height:200px; border:1px solid #eee; border-radius:8px; padding:8px;" />
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(_chaveFormatada))
+                    {
+                        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true" Class="mb-3">
+                            <MudText Typo="Typo.caption">@L["Perfil_2FA_ChaveManual"]</MudText>
+                            <MudText Typo="Typo.body2" Style="font-family:monospace; font-weight:bold; letter-spacing:2px;">
+                                @_chaveFormatada
+                            </MudText>
+                        </MudAlert>
+                    }
+
+                    <MudTextField @bind-Value="_codigoVerificacao" Label="@L["Perfil_2FA_CodigoLabel"]"
+                                  Variant="Variant.Outlined" Class="mb-3" MaxLength="7"
+                                  Placeholder="000000" Disabled="_processando"
+                                  Style="max-width:220px;" />
+
+                    <MudStack Row="true" Spacing="2">
+                        <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                                   StartIcon="@Icons.Material.Filled.Check"
+                                   OnClick="VerificarEAtivarAsync" Disabled="_processando">
+                            @(_processando ? L["Btn_Salvando"] : L["Perfil_2FA_VerificarAtivar"])
+                        </MudButton>
+                        <MudButton Variant="Variant.Text" OnClick="CancelarConfiguracao" Disabled="_processando">
+                            @L["Btn_Cancelar"]
+                        </MudButton>
+                    </MudStack>
+                </div>
+            }
+
+            @if (_ativo)
+            {
+                @* ─── Estado: ativo ─── *@
+                <div>
+                    <MudText Typo="Typo.h6" Style="font-size:1rem;" Class="mb-2">@L["Perfil_2FA_Gerenciar"]</MudText>
+                    <MudStack Row="true" Spacing="2" Wrap="Wrap.Wrap">
+                        <MudButton Color="Color.Secondary" Variant="Variant.Outlined"
+                                   StartIcon="@Icons.Material.Filled.Refresh"
+                                   OnClick="GerarNovosCodigosAsync" Disabled="_processando">
+                            @L["Perfil_2FA_NovosCodigos"]
+                        </MudButton>
+                        <MudButton Color="Color.Error" Variant="Variant.Outlined"
+                                   StartIcon="@Icons.Material.Filled.LockOpen"
+                                   OnClick="DesativarAsync" Disabled="_processando">
+                            @L["Perfil_2FA_Desativar"]
+                        </MudButton>
+                    </MudStack>
+                </div>
+            }
+
+        </MudStack>
+    </MudPaper>
+}
+
+@code {
+    [Inject] IDialogService Dialog { get; set; } = null!;
+
+    private bool _carregando = true;
+    private bool _processando;
+    private bool _ativo;
+    private bool _configurando;
+    private string? _chaveFormatada;
+    private string? _qrCodeBase64;
+    private string _codigoVerificacao = string.Empty;
+    private IReadOnlyList<string>? _codigosRecuperacao;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _ativo = await Service.EstaAtivoAsync();
+        _carregando = false;
+    }
+
+    private async Task IniciarConfiguracaoAsync()
+    {
+        _processando = true;
+        var r = await Service.GerarChaveAsync();
+        _processando = false;
+
+        if (!r.Sucesso || r.Valor is null)
+        {
+            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            return;
+        }
+
+        _chaveFormatada = r.Valor.ChaveFormatada;
+        _qrCodeBase64 = GerarQrCode(r.Valor.ChaveRaw, r.Valor.Email);
+        _codigoVerificacao = string.Empty;
+        _codigosRecuperacao = null;
+        _configurando = true;
+    }
+
+    private async Task VerificarEAtivarAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_codigoVerificacao))
+        {
+            Snackbar.Add(L["Perfil_2FA_InformeCodigo"], Severity.Warning);
+            return;
+        }
+
+        _processando = true;
+        var r = await Service.VerificarEAtivarAsync(_codigoVerificacao);
+        _processando = false;
+
+        if (!r.Sucesso)
+        {
+            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            return;
+        }
+
+        _codigosRecuperacao = r.Valor;
+        _ativo = true;
+        _configurando = false;
+        _chaveFormatada = null;
+        _qrCodeBase64 = null;
+        Snackbar.Add(L["Perfil_2FA_AtivadoOk"], Severity.Success);
+    }
+
+    private void CancelarConfiguracao()
+    {
+        _configurando = false;
+        _chaveFormatada = null;
+        _qrCodeBase64 = null;
+        _codigoVerificacao = string.Empty;
+    }
+
+    private async Task GerarNovosCodigosAsync()
+    {
+        _processando = true;
+        var r = await Service.GerarNovosCodigosRecuperacaoAsync();
+        _processando = false;
+
+        if (r.Sucesso)
+        {
+            _codigosRecuperacao = r.Valor;
+            Snackbar.Add(L["Perfil_2FA_NovosCodigosOk"], Severity.Warning);
+        }
+        else
+            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+    }
+
+    private async Task DesativarAsync()
+    {
+        var confirm = await Dialog.ShowMessageBox(
+            L["Perfil_2FA_Desativar"],
+            L["Perfil_2FA_DesativarConfirm"],
+            yesText: L["Perfil_2FA_Desativar"], cancelText: L["Btn_Cancelar"]);
+        if (confirm != true) return;
+
+        _processando = true;
+        var r = await Service.DesativarAsync();
+        _processando = false;
+
+        if (r.Sucesso)
+        {
+            _ativo = false;
+            _codigosRecuperacao = null;
+            Snackbar.Add(L["Perfil_2FA_DesativadoOk"], Severity.Info);
+        }
+        else
+            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+    }
+
+    private static string GerarQrCode(string chave, string email)
+    {
+        const string issuer = "HomePlanner";
+        var uri = $"otpauth://totp/{Uri.EscapeDataString(issuer)}:{Uri.EscapeDataString(email)}" +
+                  $"?secret={chave}&issuer={Uri.EscapeDataString(issuer)}&digits=6&period=30";
+
+        using var generator = new QRCodeGenerator();
+        using var data = generator.CreateQrCode(uri, QRCodeGenerator.ECCLevel.Q);
+        using var qr = new PngByteQRCode(data);
+        return Convert.ToBase64String(qr.GetGraphic(20));
+    }
+}

@@ -83,8 +83,8 @@ public class ReceitaRepository : IReceitaRepository
 
     public async Task<Receita?> ObterEntidadeComIngredientesAsync(int id, CancellationToken ct = default)
     {
-        await using var db = await _dbFactory.CreateDbContextAsync(ct);
-        return await db.Receitas
+        // Usa _db (contexto rastreado) — a entidade será mutada e persistida via SalvarAsync().
+        return await _db.Receitas
             .Include(r => r.Ingredientes.Where(ri => !ri.IsDeleted))
             .FirstOrDefaultAsync(r => r.Id == id, ct);
     }

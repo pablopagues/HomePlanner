@@ -83,11 +83,10 @@ public class LoginModel : PageModel
             return LocalRedirect(returnUrl ?? "~/dashboard");
         }
 
-        if (resultado.IsNotAllowed)
+        if (resultado.RequiresTwoFactor)
         {
-            ModelState.AddModelError(string.Empty,
-                "Seu e-mail ainda não foi confirmado. Verifique sua caixa de entrada.");
-            return Page();
+            _logger.LogInformation("Login requer 2FA: {Email}", usuario.Email);
+            return RedirectToPage("LoginCom2FA", new { returnUrl, rememberMe = Input.Lembrar });
         }
 
         if (resultado.IsLockedOut)

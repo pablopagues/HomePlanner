@@ -7,4 +7,9 @@ public class TarefaFiltroDTO
     public string? TextoBusca { get; set; }
     public bool? Concluida { get; set; }
     public string? ResponsavelUsuarioId { get; set; }
+
+    /// <summary>Início do intervalo de datas (inclusive) — usado pelo calendário.</summary>
+    public DateOnly? DataDe { get; set; }
+    /// <summary>Fim do intervalo de datas (inclusive) — usado pelo calendário.</summary>
+    public DateOnly? DataAte { get; set; }
 }

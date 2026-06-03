@@ -1,0 +1,286 @@
+@page "/familia"
+@page "/family"
+@attribute [Authorize]
+@using Application.HomePlanner.DTOs.Familia
+@using Application.HomePlanner.Services.Familia
+@using Domain.HomePlanner.Models.Enums
+@using HomePlanner.BlazorServer.Services
+@inject IFamiliaService Service
+@inject IStringLocalizer<SharedResource> L
+@inject IDialogService Dialog
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+@inject PublicLanguageService Lang
+
+<PageTitle>@L["Fam_Titulo"] — HomePlanner</PageTitle>
+
+<MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-1">
+    <MudText Typo="Typo.h5" Style="font-family:'Fraunces',serif; font-weight:300;">
+        @L["Fam_Titulo"]
+    </MudText>
+    <AuthorizeView Roles="Owner">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3">
+            @if (_resumo is not null)
+            {
+                <MudChip T="string" Size="Size.Small"
+                         Color="@(_resumo.LimiteAtingido ? Color.Warning : Color.Default)">
+                    @string.Format(L["Fam_Uso"], _resumo.MembrosAtivos, _resumo.LimiteMembros)
+                </MudChip>
+            }
+            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.PersonAdd"
+                       Disabled="@(_resumo?.LimiteAtingido ?? false)"
+                       OnClick="@(() => _mostrarForm = !_mostrarForm)">
+                @L["Fam_Adicionar"]
+            </MudButton>
+        </MudStack>
+    </AuthorizeView>
+</MudStack>
+<MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+    @L["Fam_Subtitulo"]
+</MudText>
+
+<AuthorizeView Roles="Owner">
+    @if (_resumo?.LimiteAtingido == true)
+    {
+        <MudAlert Severity="Severity.Info" Dense="true" Class="mb-4">
+            @string.Format(L["Fam_LimiteAtingido"], _resumo.LimiteMembros)
+            <MudLink Href="@Lang.U("/assinatura")" Class="ml-1">@L["Fam_VerPlanos"]</MudLink>
+        </MudAlert>
+    }
+</AuthorizeView>
+
+<AuthorizeView Roles="Owner">
+    @if (_mostrarForm)
+    {
+        <MudPaper Class="pa-5 mb-4" Elevation="1" Style="border-radius:14px; max-width:560px;">
+            <MudText Typo="Typo.subtitle1" Class="mb-3">@L["Fam_NovoMembro"]</MudText>
+            <MudStack Spacing="3">
+                <MudTextField @bind-Value="_novo.Nome" Label="@L["Fam_Nome"]" Variant="Variant.Outlined" />
+                <MudTextField @bind-Value="_novo.Email" Label="@L["Fam_Email"]" Variant="Variant.Outlined"
+                              InputType="InputType.Email" />
+                <MudSelect T="PapelUsuario" @bind-Value="_novo.Papel" Label="@L["Fam_Papel"]"
+                           Variant="Variant.Outlined">
+                    <MudSelectItem Value="PapelUsuario.Membro">@L["Fam_PapelPai"]</MudSelectItem>
+                    <MudSelectItem Value="PapelUsuario.Filho">@L["Fam_PapelFilho"]</MudSelectItem>
+                </MudSelect>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">@L["Fam_ConviteAjuda"]</MudText>
+                <MudStack Row="true" Spacing="2">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                               OnClick="AdicionarAsync" Disabled="_salvando">
+                        @(_salvando ? L["Btn_Salvando"] : L["Fam_EnviarConvite"])
+                    </MudButton>
+                    <MudButton Variant="Variant.Text" OnClick="@(() => _mostrarForm = false)">
+                        @L["Btn_Cancelar"]
+                    </MudButton>
+                </MudStack>
+
+                @if (_linkConvite is not null)
+                {
+                    <MudAlert Severity="Severity.Info" Dense="true">
+                        @L["Fam_LinkConviteManual"]
+                        <MudLink Href="@_linkConvite" Target="_blank" Class="ml-1">@_linkConvite</MudLink>
+                    </MudAlert>
+                }
+            </MudStack>
+        </MudPaper>
+    }
+</AuthorizeView>
+
+@if (_carregando)
+{
+    <MudProgressLinear Indeterminate="true" />
+}
+else
+{
+    <MudTable Items="_membros" Hover="true" Elevation="1" Style="border-radius:14px;">
+        <HeaderContent>
+            <MudTh>@L["Fam_Nome"]</MudTh>
+            <MudTh>@L["Fam_Email"]</MudTh>
+            <MudTh>@L["Fam_Papel"]</MudTh>
+            <MudTh>@L["Fam_Status"]</MudTh>
+            <AuthorizeView Roles="Owner" Context="acoes">
+                <MudTh Style="text-align:right;">@L["Fam_Acoes"]</MudTh>
+            </AuthorizeView>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="@L["Fam_Nome"]">@context.Nome</MudTd>
+            <MudTd DataLabel="@L["Fam_Email"]">@context.Email</MudTd>
+            <MudTd DataLabel="@L["Fam_Papel"]">
+                <MudChip T="string" Size="Size.Small" Color="@CorPapel(context.Papel)">
+                    @NomePapel(context.Papel)
+                </MudChip>
+            </MudTd>
+            <MudTd DataLabel="@L["Fam_Status"]">
+                @if (!context.Ativo)
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Error">@L["Fam_Desativado"]</MudChip>
+                }
+                else if (!context.SenhaDefinida)
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Warning">@L["Fam_Pendente"]</MudChip>
+                }
+                else
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Success">@L["Fam_Ativo"]</MudChip>
+                }
+            </MudTd>
+            <AuthorizeView Roles="Owner" Context="acoes">
+                <MudTd Style="text-align:right;">
+                    @if (context.Papel != PapelUsuario.Owner)
+                    {
+                        <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true"
+                                 AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+                            @if (!context.SenhaDefinida)
+                            {
+                                <MudMenuItem OnClick="@(() => ReenviarConviteAsync(context))">
+                                    @L["Fam_ReenviarConvite"]
+                                </MudMenuItem>
+                            }
+                            @if (context.Papel == PapelUsuario.Filho)
+                            {
+                                <MudMenuItem OnClick="@(() => AlterarPapelAsync(context, PapelUsuario.Membro))">
+                                    @L["Fam_TornarPai"]
+                                </MudMenuItem>
+                            }
+                            else
+                            {
+                                <MudMenuItem OnClick="@(() => AlterarPapelAsync(context, PapelUsuario.Filho))">
+                                    @L["Fam_TornarFilho"]
+                                </MudMenuItem>
+                            }
+                            @if (context.Ativo)
+                            {
+                                <MudMenuItem OnClick="@(() => DefinirAtivoAsync(context, false))">
+                                    @L["Fam_Desativar"]
+                                </MudMenuItem>
+                            }
+                            else
+                            {
+                                <MudMenuItem OnClick="@(() => DefinirAtivoAsync(context, true))">
+                                    @L["Fam_Reativar"]
+                                </MudMenuItem>
+                            }
+                        </MudMenu>
+                    }
+                </MudTd>
+            </AuthorizeView>
+        </RowTemplate>
+    </MudTable>
+}
+
+@code {
+    private List<MembroFamiliaDetalheDTO> _membros = [];
+    private ResumoFamiliaDTO? _resumo;
+    private bool _carregando = true;
+    private bool _mostrarForm;
+    private bool _salvando;
+    private NovoMembroDTO _novo = new();
+    private string? _linkConvite;
+
+    protected override async Task OnInitializedAsync() => await CarregarAsync();
+
+    private async Task CarregarAsync()
+    {
+        _carregando = true;
+        _membros = (await Service.ListarMembrosAsync()).ToList();
+        _resumo = await Service.ObterResumoAsync();
+        _carregando = false;
+    }
+
+    private async Task AdicionarAsync()
+    {
+        _salvando = true;
+        _linkConvite = null;
+        var r = await Service.AdicionarMembroAsync(_novo, Nav.BaseUri);
+        _salvando = false;
+
+        if (!r.Sucesso)
+        {
+            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            return;
+        }
+
+        if (r.Valor!.EmailEnviado)
+        {
+            Snackbar.Add(L["Fam_ConviteEnviado"], Severity.Success);
+            _mostrarForm = false;
+        }
+        else
+        {
+            _linkConvite = r.Valor.LinkConvite;
+            Snackbar.Add(L["Fam_MembroCriado"], Severity.Success);
+        }
+
+        _novo = new();
+        await CarregarAsync();
+    }
+
+    private async Task ReenviarConviteAsync(MembroFamiliaDetalheDTO m)
+    {
+        var r = await Service.ReenviarConviteAsync(m.UsuarioId, Nav.BaseUri);
+        if (!r.Sucesso)
+        {
+            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            return;
+        }
+
+        if (r.Valor!.EmailEnviado)
+            Snackbar.Add(L["Fam_ConviteEnviado"], Severity.Success);
+        else
+        {
+            _linkConvite = r.Valor.LinkConvite;
+            _mostrarForm = true;
+            Snackbar.Add(L["Fam_LinkGerado"], Severity.Success);
+        }
+    }
+
+    private async Task AlterarPapelAsync(MembroFamiliaDetalheDTO m, PapelUsuario novoPapel)
+    {
+        var r = await Service.AlterarPapelAsync(m.UsuarioId, novoPapel);
+        if (r.Sucesso)
+        {
+            Snackbar.Add(L["Msg_SalvoOk"], Severity.Success);
+            await CarregarAsync();
+        }
+        else
+            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+    }
+
+    private async Task DefinirAtivoAsync(MembroFamiliaDetalheDTO m, bool ativo)
+    {
+        if (!ativo)
+        {
+            var confirm = await Dialog.ShowMessageBox(
+                L["Fam_DesativarTitulo"],
+                L["Fam_DesativarConfirm"],
+                yesText: L["Fam_Desativar"], cancelText: L["Btn_Cancelar"]);
+            if (confirm != true) return;
+        }
+
+        var r = await Service.DefinirAtivoAsync(m.UsuarioId, ativo);
+        if (r.Sucesso)
+        {
+            Snackbar.Add(L["Msg_SalvoOk"], Severity.Success);
+            await CarregarAsync();
+        }
+        else
+            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+    }
+
+    private string NomePapel(PapelUsuario p) => p switch
+    {
+        PapelUsuario.Owner  => L["Fam_PapelOwner"],
+        PapelUsuario.Membro => L["Fam_PapelPai"],
+        PapelUsuario.Filho  => L["Fam_PapelFilho"],
+        _                   => p.ToString(),
+    };
+
+    private static Color CorPapel(PapelUsuario p) => p switch
+    {
+        PapelUsuario.Owner  => Color.Primary,
+        PapelUsuario.Membro => Color.Tertiary,
+        PapelUsuario.Filho  => Color.Default,
+        _                   => Color.Default,
+    };
+}

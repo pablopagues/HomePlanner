@@ -19,6 +19,15 @@
             <MudDatePicker @bind-Date="_dataPrevista" Label="@L["Planner_DataLabel"]"
                            Variant="Variant.Outlined" Editable="true" />
 
+            <MudStack Row="true" Spacing="3">
+                <MudTimePicker @bind-Time="_horaInicio" Label="@L["Planner_HoraInicioLabel"]"
+                               Variant="Variant.Outlined" Editable="true" Clearable="true"
+                               AmPm="false" Class="flex-grow-1" />
+                <MudTimePicker @bind-Time="_horaFim" Label="@L["Planner_HoraFimLabel"]"
+                               Variant="Variant.Outlined" Editable="true" Clearable="true"
+                               AmPm="false" Class="flex-grow-1" />
+            </MudStack>
+
             <MudSelect T="string" @bind-Value="Dto.ResponsavelUsuarioId"
                        Label="@L["Planner_ResponsavelLabel"]" Clearable="true"
                        Variant="Variant.Outlined">
@@ -56,11 +65,15 @@
     [Parameter, EditorRequired] public List<MembroFamiliaDTO> Membros { get; set; } = null!;
 
     private DateTime? _dataPrevista;
+    private TimeSpan? _horaInicio;
+    private TimeSpan? _horaFim;
     private bool _privada;
 
     protected override void OnInitialized()
     {
         _dataPrevista = Dto.DataPrevista?.ToDateTime(TimeOnly.MinValue);
+        _horaInicio = Dto.HoraInicio?.ToTimeSpan();
+        _horaFim = Dto.HoraFim?.ToTimeSpan();
         _privada = Dto.Visibilidade == VisibilidadeTarefa.Privada;
     }
 
@@ -69,6 +82,8 @@
         Dto.DataPrevista = _dataPrevista.HasValue
             ? DateOnly.FromDateTime(_dataPrevista.Value)
             : null;
+        Dto.HoraInicio = _horaInicio.HasValue ? TimeOnly.FromTimeSpan(_horaInicio.Value) : null;
+        Dto.HoraFim = _horaFim.HasValue ? TimeOnly.FromTimeSpan(_horaFim.Value) : null;
         MudDialog.Close(DialogResult.Ok(true));
     }
 

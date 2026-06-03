@@ -7,11 +7,19 @@ public class TenantContext
     public string UsuarioNome { get; private set; } = string.Empty;
     public bool EstaHidratado { get; private set; }
 
-    public void Definir(Guid? tenantId, string? usuarioId, string usuarioNome = "")
+    /// <summary>
+    /// Verdadeiro quando o usuário só pode enxergar os próprios registros (papel Filho).
+    /// Owner e Membro (pai/mãe) têm visão de toda a família.
+    /// </summary>
+    public bool RestritoAsProprias { get; private set; }
+
+    public void Definir(Guid? tenantId, string? usuarioId, string usuarioNome = "",
+        bool restritoAsProprias = false)
     {
         TenantId = tenantId;
         UsuarioId = usuarioId;
         UsuarioNome = usuarioNome;
+        RestritoAsProprias = restritoAsProprias;
         EstaHidratado = true;
     }
 }
