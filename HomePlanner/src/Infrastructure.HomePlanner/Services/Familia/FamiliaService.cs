@@ -92,6 +92,11 @@ public class FamiliaService : IFamiliaService
         if (dto.Papel != PapelUsuario.Membro && dto.Papel != PapelUsuario.Filho)
             return ResultadoOperacao<ConviteMembroResultadoDTO>.Falha("Papel inválido para um membro.");
 
+        // Owner adiciona qualquer papel; Membro (pai/mãe) só pode adicionar filhos.
+        var erroPermissao = ValidarGestao(dto.Papel);
+        if (erroPermissao is not null)
+            return ResultadoOperacao<ConviteMembroResultadoDTO>.Falha(erroPermissao);
+
         var emailExiste = await _db.Users
             .IgnoreQueryFilters()
             .AnyAsync(u => !u.IsDeleted && u.NormalizedEmail == email.ToUpperInvariant(), ct);
@@ -146,6 +151,11 @@ public class FamiliaService : IFamiliaService
         if (usuario is null)
             return ResultadoOperacao<ConviteMembroResultadoDTO>.Falha("Membro não encontrado.");
 
+        var papelAlvo = await ObterPapelDoUsuarioAsync(usuarioId, ct);
+        var erroPermissao = ValidarGestao(papelAlvo?.Tipo);
+        if (erroPermissao is not null)
+            return ResultadoOperacao<ConviteMembroResultadoDTO>.Falha(erroPermissao);
+
         var convite = await GerarEnviarConviteAsync(usuario, baseUrl, ct);
         return ResultadoOperacao<ConviteMembroResultadoDTO>.Ok(convite);
     }
@@ -168,6 +178,9 @@ public class FamiliaService : IFamiliaService
             return ResultadoOperacao.Falha("Membro não encontrado.");
 
         var papel = await ObterPapelDoUsuarioAsync(usuarioId, ct);
+        var erroPermissao = ValidarGestao(papel?.Tipo);
+        if (erroPermissao is not null)
+            return ResultadoOperacao.Falha(erroPermissao);
         if (papel?.Tipo == PapelUsuario.Owner)
             return ResultadoOperacao.Falha("Os dados do administrador (Owner) devem ser alterados no perfil.");
 
@@ -207,6 +220,10 @@ public class FamiliaService : IFamiliaService
     {
         await _tenantAccessor.GarantirHidratadoAsync();
 
+        // Trocar papel é escalonamento de privilégio — só o Owner pode.
+        if (!_tenantContext.EhOwner)
+            return ResultadoOperacao.Falha("Somente o administrador pode alterar o papel de um membro.");
+
         if (novoPapel != PapelUsuario.Membro && novoPapel != PapelUsuario.Filho)
             return ResultadoOperacao.Falha("Só é possível alternar entre Pai e Filho.");
 
@@ -242,6 +259,9 @@ public class FamiliaService : IFamiliaService
             return ResultadoOperacao.Falha("Membro não encontrado.");
 
         var papel = await ObterPapelDoUsuarioAsync(usuarioId, ct);
+        var erroPermissao = ValidarGestao(papel?.Tipo);
+        if (erroPermissao is not null)
+            return ResultadoOperacao.Falha(erroPermissao);
         if (papel?.Tipo == PapelUsuario.Owner)
             return ResultadoOperacao.Falha("O administrador (Owner) não pode ser desativado.");
 
@@ -274,6 +294,9 @@ public class FamiliaService : IFamiliaService
             return ResultadoOperacao.Falha("Membro não encontrado.");
 
         var papel = await ObterPapelDoUsuarioAsync(usuarioId, ct);
+        var erroPermissao = ValidarGestao(papel?.Tipo);
+        if (erroPermissao is not null)
+            return ResultadoOperacao.Falha(erroPermissao);
         if (papel?.Tipo == PapelUsuario.Owner)
             return ResultadoOperacao.Falha("O administrador (Owner) não pode ser removido.");
 
@@ -308,6 +331,22 @@ public class FamiliaService : IFamiliaService
         var assinatura = await _assinaturaRepo.ObterMinhaAssinaturaAsync(ct);
         var plano = assinatura?.Plano ?? PlanoAssinatura.Gratis;
         return (total, LimitesPorPlano.Membros(plano));
+    }
+
+    /// <summary>
+    /// Valida se o usuário atual pode administrar um membro com o papel-alvo informado.
+    /// Owner administra todos; Membro (pai/mãe) só administra Filhos; Filho não administra ninguém.
+    /// Retorna a mensagem de erro, ou null se permitido.
+    /// </summary>
+    private string? ValidarGestao(PapelUsuario? papelAlvo)
+    {
+        if (_tenantContext.EhOwner) return null;
+        if (_tenantContext.RestritoAsProprias)
+            return "Você não tem permissão para gerenciar membros da família.";
+        // Membro (pai/mãe): só administra filhos.
+        if (papelAlvo is not null && papelAlvo != PapelUsuario.Filho)
+            return "Pais podem administrar apenas os filhos da família.";
+        return null;
     }
 
     private async Task<Papel?> ObterPapelDoUsuarioAsync(string usuarioId, CancellationToken ct)

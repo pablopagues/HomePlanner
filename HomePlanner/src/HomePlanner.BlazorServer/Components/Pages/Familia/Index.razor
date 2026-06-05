@@ -5,6 +5,7 @@
 @using Application.HomePlanner.Services.Familia
 @using Domain.HomePlanner.Models.Enums
 @using HomePlanner.BlazorServer.Services
+@using Microsoft.AspNetCore.Components.Authorization
 @inject IFamiliaService Service
 @inject IStringLocalizer<SharedResource> L
 @inject IDialogService Dialog
@@ -18,7 +19,7 @@
     <MudText Typo="Typo.h5" Style="font-family:'Fraunces',serif; font-weight:300;">
         @L["Fam_Titulo"]
     </MudText>
-    <AuthorizeView Roles="Owner">
+    <AuthorizeView Roles="Owner,Membro">
         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3">
             @if (_resumo is not null)
             {
@@ -40,7 +41,7 @@
     @L["Fam_Subtitulo"]
 </MudText>
 
-<AuthorizeView Roles="Owner">
+<AuthorizeView Roles="Owner,Membro">
     @if (_resumo?.LimiteAtingido == true)
     {
         <MudAlert Severity="Severity.Info" Dense="true" Class="mb-4">
@@ -50,7 +51,7 @@
     }
 </AuthorizeView>
 
-<AuthorizeView Roles="Owner">
+<AuthorizeView Roles="Owner,Membro">
     @if (_mostrarForm)
     {
         <MudPaper Class="pa-5 mb-4" Elevation="1" Style="border-radius:14px; max-width:560px;">
@@ -59,11 +60,20 @@
                 <MudTextField @bind-Value="_novo.Nome" Label="@L["Fam_Nome"]" Variant="Variant.Outlined" />
                 <MudTextField @bind-Value="_novo.Email" Label="@L["Fam_Email"]" Variant="Variant.Outlined"
                               InputType="InputType.Email" />
-                <MudSelect T="PapelUsuario" @bind-Value="_novo.Papel" Label="@L["Fam_Papel"]"
-                           Variant="Variant.Outlined">
-                    <MudSelectItem Value="PapelUsuario.Membro">@L["Fam_PapelPai"]</MudSelectItem>
-                    <MudSelectItem Value="PapelUsuario.Filho">@L["Fam_PapelFilho"]</MudSelectItem>
-                </MudSelect>
+                @* Owner escolhe o papel; pai/mãe (Membro) só adiciona filhos. *@
+                @if (_ehOwner)
+                {
+                    <MudSelect T="PapelUsuario" @bind-Value="_novo.Papel" Label="@L["Fam_Papel"]"
+                               Variant="Variant.Outlined">
+                        <MudSelectItem Value="PapelUsuario.Membro">@L["Fam_PapelPai"]</MudSelectItem>
+                        <MudSelectItem Value="PapelUsuario.Filho">@L["Fam_PapelFilho"]</MudSelectItem>
+                    </MudSelect>
+                }
+                else
+                {
+                    <MudTextField Value="@L["Fam_PapelFilho"]" Label="@L["Fam_Papel"]"
+                                  ReadOnly="true" Variant="Variant.Outlined" />
+                }
                 <MudText Typo="Typo.caption" Color="Color.Secondary">@L["Fam_ConviteAjuda"]</MudText>
                 <MudStack Row="true" Spacing="2">
                     <MudButton Variant="Variant.Filled" Color="Color.Primary"
@@ -87,7 +97,7 @@
     }
 </AuthorizeView>
 
-<AuthorizeView Roles="Owner">
+<AuthorizeView Roles="Owner,Membro">
     @if (_editando is not null)
     {
         <MudPaper Class="pa-5 mb-4" Elevation="1" Style="border-radius:14px; max-width:560px;">
@@ -123,7 +133,7 @@ else
             <MudTh>@L["Fam_Email"]</MudTh>
             <MudTh>@L["Fam_Papel"]</MudTh>
             <MudTh>@L["Fam_Status"]</MudTh>
-            <AuthorizeView Roles="Owner" Context="acoes">
+            <AuthorizeView Roles="Owner,Membro" Context="acoes">
                 <MudTh Style="text-align:right;">@L["Fam_Acoes"]</MudTh>
             </AuthorizeView>
         </HeaderContent>
@@ -149,9 +159,9 @@ else
                     <MudChip T="string" Size="Size.Small" Color="Color.Success">@L["Fam_Ativo"]</MudChip>
                 }
             </MudTd>
-            <AuthorizeView Roles="Owner" Context="acoes">
+            <AuthorizeView Roles="Owner,Membro" Context="acoes">
                 <MudTd Style="text-align:right;">
-                    @if (context.Papel != PapelUsuario.Owner)
+                    @if (PodeGerenciar(context))
                     {
                         <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true"
                                  AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
@@ -164,17 +174,21 @@ else
                                     @L["Fam_ReenviarConvite"]
                                 </MudMenuItem>
                             }
-                            @if (context.Papel == PapelUsuario.Filho)
+                            @* Trocar papel é exclusivo do Owner (escalonamento de privilégio). *@
+                            @if (_ehOwner)
                             {
-                                <MudMenuItem OnClick="@(() => AlterarPapelAsync(context, PapelUsuario.Membro))">
-                                    @L["Fam_TornarPai"]
-                                </MudMenuItem>
-                            }
-                            else
-                            {
-                                <MudMenuItem OnClick="@(() => AlterarPapelAsync(context, PapelUsuario.Filho))">
-                                    @L["Fam_TornarFilho"]
-                                </MudMenuItem>
+                                @if (context.Papel == PapelUsuario.Filho)
+                                {
+                                    <MudMenuItem OnClick="@(() => AlterarPapelAsync(context, PapelUsuario.Membro))">
+                                        @L["Fam_TornarPai"]
+                                    </MudMenuItem>
+                                }
+                                else
+                                {
+                                    <MudMenuItem OnClick="@(() => AlterarPapelAsync(context, PapelUsuario.Filho))">
+                                        @L["Fam_TornarFilho"]
+                                    </MudMenuItem>
+                                }
                             }
                             @if (context.Ativo)
                             {
@@ -213,8 +227,28 @@ else
     private string? _linkConvite;
     private MembroFamiliaDetalheDTO? _editando;
     private NovoMembroDTO _edit = new();
+    private bool _ehOwner;
 
-    protected override async Task OnInitializedAsync() => await CarregarAsync();
+    [CascadingParameter] private Task<AuthenticationState>? AuthState { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthState is not null)
+        {
+            var state = await AuthState;
+            _ehOwner = state.User.IsInRole("Owner");
+        }
+        _novo = NovoMembroPadrao();
+        await CarregarAsync();
+    }
+
+    /// <summary>Membro (pai/mãe) só adiciona filhos; Owner adiciona pai por padrão.</summary>
+    private NovoMembroDTO NovoMembroPadrao()
+        => new() { Papel = _ehOwner ? PapelUsuario.Membro : PapelUsuario.Filho };
+
+    /// <summary>Owner gerencia qualquer não-Owner; Membro (pai/mãe) só gerencia filhos.</summary>
+    private bool PodeGerenciar(MembroFamiliaDetalheDTO m)
+        => m.Papel != PapelUsuario.Owner && (_ehOwner || m.Papel == PapelUsuario.Filho);
 
     private async Task CarregarAsync()
     {
@@ -248,7 +282,7 @@ else
             Snackbar.Add(L["Fam_MembroCriado"], Severity.Success);
         }
 
-        _novo = new();
+        _novo = NovoMembroPadrao();
         await CarregarAsync();
     }
 

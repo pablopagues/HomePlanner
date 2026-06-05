@@ -17,10 +17,11 @@ public class TenantContextMiddleware
             var usuarioId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
             var nome = context.User.FindFirstValue(ClaimTypes.Name) ?? string.Empty;
             // Filho (e qualquer papel que não seja Owner/Membro) só enxerga os próprios registros.
-            var restrito = !context.User.IsInRole("Owner") && !context.User.IsInRole("Membro");
+            var ehOwner = context.User.IsInRole("Owner");
+            var restrito = !ehOwner && !context.User.IsInRole("Membro");
 
             if (Guid.TryParse(tenantIdStr, out var tenantId))
-                tenantContext.Definir(tenantId, usuarioId, nome, restrito);
+                tenantContext.Definir(tenantId, usuarioId, nome, restrito, ehOwner);
         }
 
         await _next(context);

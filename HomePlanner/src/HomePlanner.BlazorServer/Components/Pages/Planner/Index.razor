@@ -32,6 +32,20 @@
             <MudChip T="string" Value="@("concluidas")">@L["Planner_Concluidas"]</MudChip>
             <MudChip T="string" Value="@("todas")">@L["Planner_Todas"]</MudChip>
         </MudChipSet>
+
+        @if (!_restrito && _membros.Count > 0)
+        {
+            <MudSelect T="string" Value="_responsavelFiltro" Dense="true" Class="ml-auto"
+                       Label="@L["Cal_Membro"]" Variant="Variant.Outlined" Clearable="true"
+                       Style="min-width:180px; max-width:220px;" Margin="Margin.Dense"
+                       ValueChanged="@(async (string v) => { _responsavelFiltro = v; await CarregarAsync(); })">
+                <MudSelectItem T="string" Value="@((string?)null)">@L["Cal_TodosMembros"]</MudSelectItem>
+                @foreach (var m in _membros)
+                {
+                    <MudSelectItem T="string" Value="@m.UsuarioId">@m.Nome</MudSelectItem>
+                }
+            </MudSelect>
+        }
     </MudStack>
 </MudPaper>
 
@@ -114,6 +128,7 @@ else
     private List<MembroFamiliaDTO> _membros = [];
     private bool _carregando = true;
     private bool _restrito;
+    private string? _responsavelFiltro;
     private string _filtroStatus = "pendentes";
 
     protected override async Task OnInitializedAsync()
@@ -129,6 +144,7 @@ else
         var filtro = new TarefaFiltroDTO
         {
             Pagina = 1, TamanhoPagina = 200,
+            ResponsavelUsuarioId = _responsavelFiltro,
             Concluida = _filtroStatus switch
             {
                 "pendentes"  => false,

@@ -13,13 +13,17 @@ public class TenantContext
     /// </summary>
     public bool RestritoAsProprias { get; private set; }
 
+    /// <summary>Verdadeiro quando o usuário é o administrador (papel Owner) da família.</summary>
+    public bool EhOwner { get; private set; }
+
     public void Definir(Guid? tenantId, string? usuarioId, string usuarioNome = "",
-        bool restritoAsProprias = false)
+        bool restritoAsProprias = false, bool ehOwner = false)
     {
         TenantId = tenantId;
         UsuarioId = usuarioId;
         UsuarioNome = usuarioNome;
         RestritoAsProprias = restritoAsProprias;
+        EhOwner = ehOwner;
         EstaHidratado = true;
     }
 }
