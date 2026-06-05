@@ -76,10 +76,11 @@ else
                             }
                             @if (!string.IsNullOrWhiteSpace(t.ResponsavelNome))
                             {
-                                <MudChip T="string" Size="Size.Small" Color="Color.Default"
-                                         Icon="@Icons.Material.Filled.Person">
-                                    @t.ResponsavelNome
-                                </MudChip>
+                                <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
+                                    <AvatarUsuario UsuarioId="@t.ResponsavelUsuarioId" Nome="@t.ResponsavelNome"
+                                                   Versao="@t.ResponsavelFotoVersao" Px="22" />
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">@t.ResponsavelNome</MudText>
+                                </MudStack>
                             }
                             @if (t.Recorrencia != Recorrencia.Nenhuma)
                             {

@@ -395,4 +395,14 @@
   <data name="Perfil_2FA_DesativadoOk" xml:space="preserve"><value>Verificação em duas etapas desativada.</value></data>
   <data name="Perfil_2FA_SalveCodigos" xml:space="preserve"><value>Salve estes códigos de recuperação agora!</value></data>
   <data name="Perfil_2FA_CodigosAjuda" xml:space="preserve"><value>Cada código só pode ser usado uma vez. Guarde-os em local seguro — eles permitem acessar a conta caso você perca o app autenticador.</value></data>
+
+  <!-- ── Perfil / Foto ── -->
+  <data name="Perfil_Foto_Titulo" xml:space="preserve"><value>Foto de perfil</value></data>
+  <data name="Perfil_Foto_Desc" xml:space="preserve"><value>Adicione uma foto para personalizar sua conta. JPG, PNG, WEBP ou GIF, até 2 MB.</value></data>
+  <data name="Perfil_Foto_Enviar" xml:space="preserve"><value>Enviar foto</value></data>
+  <data name="Perfil_Foto_Alterar" xml:space="preserve"><value>Alterar foto</value></data>
+  <data name="Perfil_Foto_Remover" xml:space="preserve"><value>Remover foto</value></data>
+  <data name="Perfil_Foto_Sucesso" xml:space="preserve"><value>Foto atualizada com sucesso!</value></data>
+  <data name="Perfil_Foto_Removida" xml:space="preserve"><value>Foto removida.</value></data>
+  <data name="Perfil_Foto_MuitoGrande" xml:space="preserve"><value>A imagem excede o tamanho máximo permitido (2 MB).</value></data>
 </root>

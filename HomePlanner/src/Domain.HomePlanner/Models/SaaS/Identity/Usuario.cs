@@ -11,6 +11,11 @@ public class Usuario : IdentityUser<string>, ITenantEntity, IDeletableEntity
     public DateTime DataCriacao { get; set; }
     public DateTime? UltimoLogin { get; set; }
 
+    // Foto de perfil (avatar) — armazenada no próprio banco
+    public byte[]? Foto { get; set; }
+    public string? FotoContentType { get; set; }
+    public DateTime? FotoAtualizadaEm { get; set; }
+
     // IDeletableEntity
     public bool IsDeleted { get; set; }
     public DateTime? DeletedAt { get; set; }

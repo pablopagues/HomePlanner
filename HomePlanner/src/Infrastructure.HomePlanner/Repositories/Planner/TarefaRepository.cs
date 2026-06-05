@@ -41,6 +41,7 @@ public class TarefaRepository : ITarefaRepository
                 Visibilidade         = t.Visibilidade,
                 ResponsavelUsuarioId = t.ResponsavelUsuarioId,
                 ResponsavelNome      = t.Responsavel != null ? t.Responsavel.NomeCompleto : null,
+                ResponsavelFotoAtualizadaEm = t.Responsavel != null ? t.Responsavel.FotoAtualizadaEm : null,
             })
             .ToListAsync(ct);
     }

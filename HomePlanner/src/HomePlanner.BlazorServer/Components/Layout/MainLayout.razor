@@ -2,9 +2,12 @@
 @using HomePlanner.BlazorServer.Theme
 @using HomePlanner.BlazorServer.Services
 @using HomePlanner.BlazorServer.Components.Shared
+@using Application.HomePlanner.Services.Perfil
 @inject IStringLocalizer<SharedResource> L
 @inject PublicLanguageService Lang
 @inject PersistentComponentState PersistentState
+@inject IFotoUsuarioService Foto
+@inject EstadoFotoUsuario EstadoFoto
 @inject IJSRuntime JS
 @implements IDisposable
 
@@ -23,8 +26,21 @@
         </MudText>
         <MudSpacer />
         <LanguageToggle />
-        <MudMenu Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit"
-                 AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Class="ml-2">
+        <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Class="ml-2">
+            <ActivatorContent>
+                <MudAvatar Size="Size.Medium" Color="Color.Primary" Style="cursor:pointer;">
+                    @if (_versaoFoto is not null)
+                    {
+                        <MudImage Src="@($"/perfil/foto?v={_versaoFoto}")" Alt="Foto de perfil"
+                                  ObjectFit="ObjectFit.Cover" Width="40" Height="40" />
+                    }
+                    else
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.AccountCircle" />
+                    }
+                </MudAvatar>
+            </ActivatorContent>
+            <ChildContent>
             <MudMenuItem Href="@Lang.U("/perfil")" Icon="@Icons.Material.Filled.ManageAccounts">
                 @L["Nav_Perfil"]
             </MudMenuItem>
@@ -62,6 +78,7 @@
             <MudMenuItem Href="/Identity/Account/Logout" ForceLoad="true" Icon="@Icons.Material.Filled.Logout">
                 @L["Nav_Sair"]
             </MudMenuItem>
+            </ChildContent>
         </MudMenu>
     </MudAppBar>
 
@@ -135,6 +152,8 @@
     private string _temaNome = "sage";
     private MudTheme _temaAtivo = HomePlannerTheme.Tema;
 
+    private string? _versaoFoto;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -142,7 +161,15 @@
             var temaSalvo = await JS.InvokeAsync<string?>("localStorage.getItem", ThemeKey);
             if (!string.IsNullOrEmpty(temaSalvo) && temaSalvo != _temaNome)
                 await AplicarTema(temaSalvo);
+
+            EstadoFoto.Definir(await Foto.ObterVersaoFotoAsync());
         }
+    }
+
+    private void AoMudarFoto()
+    {
+        _versaoFoto = EstadoFoto.Versao;
+        InvokeAsync(StateHasChanged);
     }
 
     private async Task AplicarTema(string nome)
@@ -172,6 +199,8 @@
 
     protected override void OnInitialized()
     {
+        EstadoFoto.OnChange += AoMudarFoto;
+
         // Carrega o idioma do SSR para o circuit interativo (HttpContext é null no circuit).
         _langSub = PersistentState.RegisterOnPersisting(PersistLang);
 
@@ -190,5 +219,9 @@
 
     private void ToggleDrawer() => _drawerAberto = !_drawerAberto;
 
-    public void Dispose() => _langSub.Dispose();
+    public void Dispose()
+    {
+        EstadoFoto.OnChange -= AoMudarFoto;
+        _langSub.Dispose();
+    }
 }

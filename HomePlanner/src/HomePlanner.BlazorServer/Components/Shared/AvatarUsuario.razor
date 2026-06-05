@@ -1,0 +1,50 @@
+@* Avatar reutilizável de um usuário: mostra a foto (se houver), senão as iniciais, senão um ícone. *@
+
+<MudAvatar Color="Color.Primary" Style="@EstiloAvatar" title="@Nome">
+    @if (TemFoto)
+    {
+        <MudImage Src="@($"/usuario/{UsuarioId}/foto?v={Versao}")" Alt="@Nome"
+                  ObjectFit="ObjectFit.Cover" Width="@Px" Height="@Px" />
+    }
+    else if (!string.IsNullOrWhiteSpace(Iniciais))
+    {
+        @Iniciais
+    }
+    else
+    {
+        <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" />
+    }
+</MudAvatar>
+
+@code {
+    /// <summary>Id do usuário dono da foto (mesmo tenant).</summary>
+    [Parameter] public string? UsuarioId { get; set; }
+
+    /// <summary>Nome completo — usado para iniciais e tooltip.</summary>
+    [Parameter] public string? Nome { get; set; }
+
+    /// <summary>Token de versão da foto; null/vazio significa que o usuário não tem foto.</summary>
+    [Parameter] public string? Versao { get; set; }
+
+    /// <summary>Tamanho do avatar em pixels.</summary>
+    [Parameter] public int Px { get; set; } = 32;
+
+    private bool TemFoto => !string.IsNullOrEmpty(Versao) && !string.IsNullOrEmpty(UsuarioId);
+
+    private string EstiloAvatar =>
+        $"height:{Px}px; width:{Px}px; font-size:{Math.Max(10, (int)Math.Round(Px / 2.4)):0}px; flex:none;";
+
+    private string Iniciais
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(Nome)) return string.Empty;
+            var partes = Nome.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (partes.Length == 0) return string.Empty;
+            var primeira = char.ToUpperInvariant(partes[0][0]);
+            if (partes.Length == 1) return primeira.ToString();
+            var ultima = char.ToUpperInvariant(partes[^1][0]);
+            return $"{primeira}{ultima}";
+        }
+    }
+}

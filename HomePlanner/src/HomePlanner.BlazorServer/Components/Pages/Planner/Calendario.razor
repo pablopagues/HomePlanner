@@ -94,14 +94,22 @@ else
                     {
                         <div @onclick="@(() => EditarTarefa(t))"
                              style="@($"cursor:pointer; border-radius:6px; padding:3px 6px; font-size:0.72rem; line-height:1.2; " +
+                                      $"display:flex; align-items:center; gap:4px; " +
                                       $"background:{CorFundo(t)}; border-left:3px solid {CorBorda(t)}; " +
                                       $"{(t.Concluida ? "opacity:0.55; text-decoration:line-through;" : "")}")"
                              title="@TituloCompleto(t)">
-                            @if (t.HoraInicio.HasValue)
+                            @if (!string.IsNullOrWhiteSpace(t.ResponsavelNome))
                             {
-                                <span style="font-weight:600;">@t.HoraInicio.Value.ToString("HH\\:mm") </span>
+                                <AvatarUsuario UsuarioId="@t.ResponsavelUsuarioId" Nome="@t.ResponsavelNome"
+                                               Versao="@t.ResponsavelFotoVersao" Px="16" />
                             }
-                            <span>@t.Titulo</span>
+                            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                @if (t.HoraInicio.HasValue)
+                                {
+                                    <span style="font-weight:600;">@t.HoraInicio.Value.ToString("HH\\:mm") </span>
+                                }
+                                @t.Titulo
+                            </span>
                         </div>
                     }
                 </MudStack>

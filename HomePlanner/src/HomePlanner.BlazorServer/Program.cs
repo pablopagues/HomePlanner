@@ -13,6 +13,7 @@ using Application.HomePlanner.Services.Empresa;
 using Application.HomePlanner.Services.Familia;
 using Application.HomePlanner.Services.ListaCompras;
 using Application.HomePlanner.Services.Onboarding;
+using Application.HomePlanner.Services.Perfil;
 using Application.HomePlanner.Services.Planner;
 using Application.HomePlanner.Services.Seguranca;
 using Domain.HomePlanner.Models.SaaS.Identity;
@@ -29,6 +30,7 @@ using Infrastructure.HomePlanner.Services.Email;
 using Infrastructure.HomePlanner.Services.Empresa;
 using Infrastructure.HomePlanner.Services.Familia;
 using Infrastructure.HomePlanner.Services.Onboarding;
+using Infrastructure.HomePlanner.Services.Perfil;
 using Infrastructure.HomePlanner.Services.Seguranca;
 using Infrastructure.HomePlanner.Services.Stripe;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -76,6 +78,7 @@ try
     // ── Localization (.resx em Resources/, 3 idiomas) ─────────────────────────
     builder.Services.AddLocalization(opts => opts.ResourcesPath = "Resources");
     builder.Services.AddScoped<PublicLanguageService>();
+    builder.Services.AddScoped<EstadoFotoUsuario>();
 
     // ── TenantContext ─────────────────────────────────────────────────────────
     builder.Services.AddTenantContext();
@@ -177,6 +180,7 @@ try
     builder.Services.AddScoped<IConfiguracaoFamiliaService, ConfiguracaoFamiliaService>();
     builder.Services.AddScoped<IFamiliaService, FamiliaService>();
     builder.Services.AddScoped<IDoisFatoresService, DoisFatoresService>();
+    builder.Services.AddScoped<IFotoUsuarioService, FotoUsuarioService>();
     builder.Services.AddScoped<IOnboardingStatusReader, OnboardingStatusReader>();
     builder.Services.AddScoped<IEmailService, EmailService>();
     builder.Services.AddScoped<IEmpresaService, EmpresaService>();
@@ -241,6 +245,27 @@ try
     app.UseOnboardingRequired();
     app.UseAuthorization();
     app.UseAntiforgery();
+
+    // ── Foto de perfil do usuário atual (GET /perfil/foto) ───────────────────
+    app.MapGet("/perfil/foto", async (IFotoUsuarioService svc, CancellationToken ct) =>
+    {
+        var foto = await svc.ObterConteudoFotoAsync(ct);
+        if (foto is null) return Results.NotFound();
+
+        var etag = new Microsoft.Net.Http.Headers.EntityTagHeaderValue($"\"{foto.Versao}\"");
+        return Results.File(foto.Conteudo, foto.ContentType, entityTag: etag);
+    }).RequireAuthorization();
+
+    // ── Foto de um membro da família (GET /usuario/{usuarioId}/foto) ─────────
+    // O serviço aplica o filtro de tenant: só serve fotos de membros da própria família.
+    app.MapGet("/usuario/{usuarioId}/foto", async (string usuarioId, IFotoUsuarioService svc, CancellationToken ct) =>
+    {
+        var foto = await svc.ObterConteudoFotoAsync(usuarioId, ct);
+        if (foto is null) return Results.NotFound();
+
+        var etag = new Microsoft.Net.Http.Headers.EntityTagHeaderValue($"\"{foto.Versao}\"");
+        return Results.File(foto.Conteudo, foto.ContentType, entityTag: etag);
+    }).RequireAuthorization();
 
     app.MapRazorPages();
     app.MapControllers(); // StripeWebhookController

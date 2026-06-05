@@ -2,8 +2,13 @@
 @page "/profile"
 @attribute [Authorize]
 @using Application.HomePlanner.Services.Seguranca
+@using Application.HomePlanner.Services.Perfil
+@using HomePlanner.BlazorServer.Services
+@using Microsoft.AspNetCore.Components.Forms
 @using QRCoder
 @inject IDoisFatoresService Service
+@inject IFotoUsuarioService Foto
+@inject EstadoFotoUsuario EstadoFoto
 @inject IStringLocalizer<SharedResource> L
 @inject ISnackbar Snackbar
 
@@ -15,6 +20,47 @@
 <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
     @L["Perfil_Subtitulo"]
 </MudText>
+
+@* ─── Foto de perfil ─────────────────────────────────────────────── *@
+<MudPaper Class="pa-6 mb-4" Elevation="1" Style="border-radius:14px; max-width:620px;">
+    <MudText Typo="Typo.h6" Style="font-size:1rem;" Class="mb-1">@L["Perfil_Foto_Titulo"]</MudText>
+    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">@L["Perfil_Foto_Desc"]</MudText>
+
+    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="4" Wrap="Wrap.Wrap">
+        <MudAvatar Style="height:96px; width:96px;" Color="Color.Primary">
+            @if (_versaoFoto is not null)
+            {
+                <MudImage Src="@($"/perfil/foto?v={_versaoFoto}")" Alt="Foto de perfil"
+                          ObjectFit="ObjectFit.Cover" Width="96" Height="96" />
+            }
+            else
+            {
+                <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Large" />
+            }
+        </MudAvatar>
+
+        <MudStack Spacing="2">
+            <MudFileUpload T="IBrowserFile" FilesChanged="OnFotoSelecionadaAsync"
+                           Accept="image/png,image/jpeg,image/webp,image/gif" MaximumFileCount="1">
+                <ActivatorContent>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.PhotoCamera" Disabled="_enviandoFoto">
+                        @(_versaoFoto is null ? L["Perfil_Foto_Enviar"] : L["Perfil_Foto_Alterar"])
+                    </MudButton>
+                </ActivatorContent>
+            </MudFileUpload>
+
+            @if (_versaoFoto is not null)
+            {
+                <MudButton Variant="Variant.Text" Color="Color.Error"
+                           StartIcon="@Icons.Material.Filled.Delete"
+                           OnClick="RemoverFotoAsync" Disabled="_enviandoFoto">
+                    @L["Perfil_Foto_Remover"]
+                </MudButton>
+            }
+        </MudStack>
+    </MudStack>
+</MudPaper>
 
 @if (_carregando)
 {
@@ -137,10 +183,72 @@ else
     private string _codigoVerificacao = string.Empty;
     private IReadOnlyList<string>? _codigosRecuperacao;
 
+    private bool _enviandoFoto;
+    private string? _versaoFoto;
+
     protected override async Task OnInitializedAsync()
     {
+        _versaoFoto = await Foto.ObterVersaoFotoAsync();
+        EstadoFoto.Definir(_versaoFoto);
         _ativo = await Service.EstaAtivoAsync();
         _carregando = false;
+    }
+
+    private async Task OnFotoSelecionadaAsync(IBrowserFile? file)
+    {
+        if (file is null) return;
+
+        if (file.Size > Foto.TamanhoMaximoBytes)
+        {
+            Snackbar.Add(L["Perfil_Foto_MuitoGrande"], Severity.Warning);
+            return;
+        }
+
+        _enviandoFoto = true;
+        try
+        {
+            using var ms = new MemoryStream();
+            await using (var stream = file.OpenReadStream(Foto.TamanhoMaximoBytes))
+                await stream.CopyToAsync(ms);
+
+            var r = await Foto.AtualizarFotoAsync(ms.ToArray(), file.ContentType);
+            if (r.Sucesso)
+            {
+                _versaoFoto = r.Valor;
+                EstadoFoto.Definir(_versaoFoto);
+                Snackbar.Add(L["Perfil_Foto_Sucesso"], Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            }
+        }
+        catch (IOException)
+        {
+            Snackbar.Add(L["Perfil_Foto_MuitoGrande"], Severity.Warning);
+        }
+        finally
+        {
+            _enviandoFoto = false;
+        }
+    }
+
+    private async Task RemoverFotoAsync()
+    {
+        _enviandoFoto = true;
+        var r = await Foto.RemoverFotoAsync();
+        _enviandoFoto = false;
+
+        if (r.Sucesso)
+        {
+            _versaoFoto = null;
+            EstadoFoto.Definir(null);
+            Snackbar.Add(L["Perfil_Foto_Removida"], Severity.Info);
+        }
+        else
+        {
+            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+        }
     }
 
     private async Task IniciarConfiguracaoAsync()

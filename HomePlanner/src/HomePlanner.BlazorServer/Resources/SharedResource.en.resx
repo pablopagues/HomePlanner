@@ -372,4 +372,14 @@
   <data name="Perfil_2FA_DesativadoOk" xml:space="preserve"><value>Two-step verification disabled.</value></data>
   <data name="Perfil_2FA_SalveCodigos" xml:space="preserve"><value>Save these recovery codes now!</value></data>
   <data name="Perfil_2FA_CodigosAjuda" xml:space="preserve"><value>Each code can be used only once. Keep them in a safe place — they let you access your account if you lose your authenticator app.</value></data>
+
+  <!-- ── Perfil / Photo ── -->
+  <data name="Perfil_Foto_Titulo" xml:space="preserve"><value>Profile photo</value></data>
+  <data name="Perfil_Foto_Desc" xml:space="preserve"><value>Add a photo to personalize your account. JPG, PNG, WEBP or GIF, up to 2 MB.</value></data>
+  <data name="Perfil_Foto_Enviar" xml:space="preserve"><value>Upload photo</value></data>
+  <data name="Perfil_Foto_Alterar" xml:space="preserve"><value>Change photo</value></data>
+  <data name="Perfil_Foto_Remover" xml:space="preserve"><value>Remove photo</value></data>
+  <data name="Perfil_Foto_Sucesso" xml:space="preserve"><value>Photo updated successfully!</value></data>
+  <data name="Perfil_Foto_Removida" xml:space="preserve"><value>Photo removed.</value></data>
+  <data name="Perfil_Foto_MuitoGrande" xml:space="preserve"><value>The image exceeds the maximum allowed size (2 MB).</value></data>
 </root>
