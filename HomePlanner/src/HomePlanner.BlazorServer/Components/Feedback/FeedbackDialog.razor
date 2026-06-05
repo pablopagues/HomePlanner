@@ -1,0 +1,153 @@
+@using Application.HomePlanner.DTOs.Feedback
+@using Application.HomePlanner.Services.Feedback
+
+@inject IFeedbackService FeedbackService
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+@inject IStringLocalizer<SharedResource> L
+
+<MudDialog DefaultFocus="DefaultFocus.Element">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Feedback" Class="mr-2" />
+            @L["Fb_Titulo"]
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        @if (_enviado)
+        {
+            <div class="text-center py-6">
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle"
+                         Size="Size.Large"
+                         Color="Color.Success" />
+                <MudText Typo="Typo.h6" Class="mt-3">@L["Fb_SucessoTitulo"]</MudText>
+                <MudText Typo="Typo.body2" Class="mt-2" Style="color: var(--mud-palette-text-secondary);">
+                    @L["Fb_SucessoCorpo"]
+                </MudText>
+            </div>
+        }
+        else
+        {
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudText Typo="Typo.body2" Style="color: var(--mud-palette-text-secondary);" Class="mb-2">
+                        @L["Fb_Intro"]
+                    </MudText>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudSelect T="TipoFeedback"
+                               Value="@_dto.Tipo"
+                               ValueChanged="@(v => _dto.Tipo = v)"
+                               Label="@L["Fb_Tipo"]"
+                               Variant="Variant.Outlined"
+                               Required="true"
+                               Disabled="@_enviando">
+                        <MudSelectItem Value="TipoFeedback.Bug">
+                            <MudIcon Icon="@Icons.Material.Filled.BugReport" Class="mr-2" Size="Size.Small" />
+                            @L["Fb_TipoBug"]
+                        </MudSelectItem>
+                        <MudSelectItem Value="TipoFeedback.Sugestao">
+                            <MudIcon Icon="@Icons.Material.Filled.Lightbulb" Class="mr-2" Size="Size.Small" />
+                            @L["Fb_TipoSugestao"]
+                        </MudSelectItem>
+                        <MudSelectItem Value="TipoFeedback.Elogio">
+                            <MudIcon Icon="@Icons.Material.Filled.ThumbUp" Class="mr-2" Size="Size.Small" />
+                            @L["Fb_TipoElogio"]
+                        </MudSelectItem>
+                        <MudSelectItem Value="TipoFeedback.Outro">
+                            <MudIcon Icon="@Icons.Material.Filled.Forum" Class="mr-2" Size="Size.Small" />
+                            @L["Fb_TipoOutro"]
+                        </MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField T="string"
+                                  Value="@_dto.Mensagem"
+                                  ValueChanged="@(v => _dto.Mensagem = v)"
+                                  Label="@L["Fb_Mensagem"]"
+                                  Variant="Variant.Outlined"
+                                  Lines="6"
+                                  MaxLength="2000"
+                                  Counter="2000"
+                                  Required="true"
+                                  HelperText="@L["Fb_MensagemAjuda"]"
+                                  Disabled="@_enviando"
+                                  Placeholder="@L["Fb_MensagemPlaceholder"]" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true">
+                        @L["Fb_AvisoMetadados"]
+                    </MudAlert>
+                </MudItem>
+            </MudGrid>
+        }
+    </DialogContent>
+    <DialogActions>
+        @if (_enviado)
+        {
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Fechar">
+                @L["Btn_Fechar"]
+            </MudButton>
+        }
+        else
+        {
+            <MudButton OnClick="Fechar" Disabled="@_enviando">@L["Btn_Cancelar"]</MudButton>
+            <MudButton Color="Color.Primary"
+                       Variant="Variant.Filled"
+                       OnClick="EnviarAsync"
+                       Disabled="@_enviando"
+                       StartIcon="@Icons.Material.Filled.Send">
+                @(_enviando ? L["Fb_Enviando"] : L["Fb_Enviar"])
+            </MudButton>
+        }
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private MudDialogInstance MudDialog { get; set; } = default!;
+
+    private FeedbackDTO _dto = new();
+    private bool _enviando;
+    private bool _enviado;
+
+    protected override void OnInitialized()
+    {
+        // Captura a página atual automaticamente — útil pra debug.
+        _dto.PaginaAtual = Nav.Uri;
+    }
+
+    private async Task EnviarAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_dto.Mensagem) || _dto.Mensagem.Length < 10)
+        {
+            Snackbar.Add(L["Fb_ErroMin"], Severity.Warning);
+            return;
+        }
+        if (_dto.Mensagem.Length > 2000)
+        {
+            Snackbar.Add(L["Fb_ErroMax"], Severity.Warning);
+            return;
+        }
+
+        _enviando = true;
+        try
+        {
+            var res = await FeedbackService.EnviarAsync(_dto);
+            if (!res.Sucesso)
+            {
+                Snackbar.Add(res.Erro ?? L["Msg_ErroGenerico"], Severity.Error);
+                return;
+            }
+            _enviado = true;
+        }
+        finally
+        {
+            _enviando = false;
+        }
+    }
+
+    private void Fechar() => MudDialog.Close(DialogResult.Ok(true));
+}

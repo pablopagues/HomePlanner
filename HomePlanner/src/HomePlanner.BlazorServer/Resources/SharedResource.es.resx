@@ -34,6 +34,7 @@
   <data name="Btn_Importando" xml:space="preserve"><value>Importando...</value></data>
   <data name="Btn_Aplicar" xml:space="preserve"><value>Aplicar</value></data>
   <data name="Btn_Voltar" xml:space="preserve"><value>Volver</value></data>
+  <data name="Btn_Fechar" xml:space="preserve"><value>Cerrar</value></data>
 
   <data name="Msg_SalvoOk" xml:space="preserve"><value>¡Guardado con éxito!</value></data>
   <data name="Msg_ExcluidoOk" xml:space="preserve"><value>Eliminado con éxito.</value></data>
@@ -151,6 +152,26 @@
   <data name="Ct_EnviarOutra" xml:space="preserve"><value>Enviar otro mensaje</value></data>
   <data name="Ct_SuporteTitulo" xml:space="preserve"><value>Soporte</value></data>
   <data name="Ct_SuporteDesc" xml:space="preserve"><value>¿Prefieres correo directo? Escribe a nuestro equipo de soporte.</value></data>
+
+  <!-- ── Feedback (FAB in-app) ── -->
+  <data name="Fb_Tooltip" xml:space="preserve"><value>Enviar comentarios</value></data>
+  <data name="Fb_Titulo" xml:space="preserve"><value>Enviar comentarios</value></data>
+  <data name="Fb_Intro" xml:space="preserve"><value>¿Encontraste un error? ¿Tienes una idea? ¿Algo te gustó? Cuéntanos.</value></data>
+  <data name="Fb_Tipo" xml:space="preserve"><value>Tipo</value></data>
+  <data name="Fb_TipoBug" xml:space="preserve"><value>Error — algo no funciona</value></data>
+  <data name="Fb_TipoSugestao" xml:space="preserve"><value>Sugerencia — una idea de mejora</value></data>
+  <data name="Fb_TipoElogio" xml:space="preserve"><value>Elogio — algo que está bien</value></data>
+  <data name="Fb_TipoOutro" xml:space="preserve"><value>Otro</value></data>
+  <data name="Fb_Mensagem" xml:space="preserve"><value>Mensaje</value></data>
+  <data name="Fb_MensagemAjuda" xml:space="preserve"><value>Entre 10 y 2000 caracteres.</value></data>
+  <data name="Fb_MensagemPlaceholder" xml:space="preserve"><value>Descríbelo con el mayor detalle posible...</value></data>
+  <data name="Fb_AvisoMetadados" xml:space="preserve"><value>Junto con tu mensaje enviaremos automáticamente: tu nombre, la pantalla en la que estabas y la versión de la app — para ayudarnos a investigar.</value></data>
+  <data name="Fb_Enviar" xml:space="preserve"><value>Enviar</value></data>
+  <data name="Fb_Enviando" xml:space="preserve"><value>Enviando...</value></data>
+  <data name="Fb_SucessoTitulo" xml:space="preserve"><value>¡Gracias por tus comentarios!</value></data>
+  <data name="Fb_SucessoCorpo" xml:space="preserve"><value>Tu mensaje fue enviado a nuestro equipo. Lo revisaremos con cariño.</value></data>
+  <data name="Fb_ErroMin" xml:space="preserve"><value>El mensaje debe tener al menos 10 caracteres.</value></data>
+  <data name="Fb_ErroMax" xml:space="preserve"><value>El mensaje no puede superar los 2000 caracteres.</value></data>
 
   <data name="Sobre_Titulo" xml:space="preserve"><value>Acerca de HomePlanner</value></data>
   <data name="Sobre_P1" xml:space="preserve"><value>HomePlanner nació de una necesidad real: organizar la rutina de una familia — qué cocinar, qué comprar y qué necesita hacer cada uno — sin saltar entre varias apps confusas.</value></data>

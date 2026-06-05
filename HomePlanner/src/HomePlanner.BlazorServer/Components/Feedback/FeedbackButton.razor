@@ -1,0 +1,26 @@
+@* FAB de feedback que aparece em todas as telas autenticadas, no canto inferior-esquerdo. *@
+
+@inject IDialogService DialogService
+@inject NavigationManager Nav
+@inject IStringLocalizer<SharedResource> L
+
+<MudTooltip Text="@L["Fb_Tooltip"]" Placement="Placement.Right">
+    <MudFab Color="Color.Primary"
+            StartIcon="@Icons.Material.Filled.Feedback"
+            Style="position: fixed; bottom: 24px; left: 24px; z-index: 1100;"
+            OnClick="AbrirAsync"
+            aria-label="@L["Fb_Tooltip"]" />
+</MudTooltip>
+
+@code {
+    private Task AbrirAsync()
+    {
+        var options = new DialogOptions
+        {
+            CloseOnEscapeKey = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true,
+        };
+        return DialogService.ShowAsync<FeedbackDialog>(L["Fb_Titulo"], options);
+    }
+}

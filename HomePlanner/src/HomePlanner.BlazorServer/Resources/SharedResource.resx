@@ -35,6 +35,7 @@
   <data name="Btn_Importando" xml:space="preserve"><value>Importando...</value></data>
   <data name="Btn_Aplicar" xml:space="preserve"><value>Aplicar</value></data>
   <data name="Btn_Voltar" xml:space="preserve"><value>Voltar</value></data>
+  <data name="Btn_Fechar" xml:space="preserve"><value>Fechar</value></data>
 
   <!-- ── Mensagens ── -->
   <data name="Msg_SalvoOk" xml:space="preserve"><value>Salvo com sucesso!</value></data>
@@ -158,6 +159,26 @@
   <data name="Ct_EnviarOutra" xml:space="preserve"><value>Enviar outra mensagem</value></data>
   <data name="Ct_SuporteTitulo" xml:space="preserve"><value>Suporte</value></data>
   <data name="Ct_SuporteDesc" xml:space="preserve"><value>Prefere e-mail direto? Escreva para nosso time de suporte.</value></data>
+
+  <!-- ── Feedback (FAB in-app) ── -->
+  <data name="Fb_Tooltip" xml:space="preserve"><value>Enviar feedback</value></data>
+  <data name="Fb_Titulo" xml:space="preserve"><value>Enviar feedback</value></data>
+  <data name="Fb_Intro" xml:space="preserve"><value>Encontrou um bug? Tem uma ideia? Algo te agradou? Conta pra gente.</value></data>
+  <data name="Fb_Tipo" xml:space="preserve"><value>Tipo</value></data>
+  <data name="Fb_TipoBug" xml:space="preserve"><value>Bug — algo não está funcionando</value></data>
+  <data name="Fb_TipoSugestao" xml:space="preserve"><value>Sugestão — uma ideia de melhoria</value></data>
+  <data name="Fb_TipoElogio" xml:space="preserve"><value>Elogio — algo que está bom</value></data>
+  <data name="Fb_TipoOutro" xml:space="preserve"><value>Outro</value></data>
+  <data name="Fb_Mensagem" xml:space="preserve"><value>Mensagem</value></data>
+  <data name="Fb_MensagemAjuda" xml:space="preserve"><value>Entre 10 e 2000 caracteres.</value></data>
+  <data name="Fb_MensagemPlaceholder" xml:space="preserve"><value>Descreva com o máximo de detalhes possível...</value></data>
+  <data name="Fb_AvisoMetadados" xml:space="preserve"><value>Junto da sua mensagem enviaremos automaticamente: seu nome, a tela onde você estava e a versão do app — para nos ajudar a investigar.</value></data>
+  <data name="Fb_Enviar" xml:space="preserve"><value>Enviar</value></data>
+  <data name="Fb_Enviando" xml:space="preserve"><value>Enviando...</value></data>
+  <data name="Fb_SucessoTitulo" xml:space="preserve"><value>Obrigado pelo feedback!</value></data>
+  <data name="Fb_SucessoCorpo" xml:space="preserve"><value>Sua mensagem foi enviada para nossa equipe. Vamos analisar com carinho.</value></data>
+  <data name="Fb_ErroMin" xml:space="preserve"><value>A mensagem deve ter pelo menos 10 caracteres.</value></data>
+  <data name="Fb_ErroMax" xml:space="preserve"><value>A mensagem não pode passar de 2000 caracteres.</value></data>
 
   <!-- ── Sobre ── -->
   <data name="Sobre_Titulo" xml:space="preserve"><value>Sobre o HomePlanner</value></data>

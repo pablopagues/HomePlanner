@@ -189,6 +189,10 @@ try
     builder.Services.Configure<ContatoOptions>(builder.Configuration.GetSection(ContatoOptions.SectionName));
     builder.Services.AddScoped<IContatoService, ContatoService>();
 
+    // ── Feedback (formulário in-app) ──────────────────────────────────────────
+    builder.Services.AddScoped<Application.HomePlanner.Services.Feedback.IFeedbackService,
+                               Infrastructure.HomePlanner.Services.Feedback.FeedbackService>();
+
     // ── Stripe / Assinatura ───────────────────────────────────────────────────
     builder.Services.AddScoped<IAssinaturaRepository, AssinaturaRepository>();
     builder.Services.AddScoped<IStripeBillingService, StripeBillingService>();
