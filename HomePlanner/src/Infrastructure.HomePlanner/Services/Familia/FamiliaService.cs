@@ -94,7 +94,7 @@ public class FamiliaService : IFamiliaService
 
         var emailExiste = await _db.Users
             .IgnoreQueryFilters()
-            .AnyAsync(u => u.NormalizedEmail == email.ToUpperInvariant(), ct);
+            .AnyAsync(u => !u.IsDeleted && u.NormalizedEmail == email.ToUpperInvariant(), ct);
         if (emailExiste)
             return ResultadoOperacao<ConviteMembroResultadoDTO>.Falha("Já existe uma conta com este e-mail.");
 
@@ -148,6 +148,58 @@ public class FamiliaService : IFamiliaService
 
         var convite = await GerarEnviarConviteAsync(usuario, baseUrl, ct);
         return ResultadoOperacao<ConviteMembroResultadoDTO>.Ok(convite);
+    }
+
+    public async Task<ResultadoOperacao> EditarMembroAsync(
+        string usuarioId, string nome, string email, CancellationToken ct = default)
+    {
+        await _tenantAccessor.GarantirHidratadoAsync();
+
+        var nomeLimpo = nome?.Trim() ?? string.Empty;
+        var emailLimpo = email?.Trim().ToLowerInvariant() ?? string.Empty;
+
+        if (nomeLimpo.Length < 2)
+            return ResultadoOperacao.Falha("Informe o nome do membro.");
+        if (string.IsNullOrWhiteSpace(emailLimpo) || !emailLimpo.Contains('@'))
+            return ResultadoOperacao.Falha("Informe um e-mail válido.");
+
+        var usuario = await _db.Users.FirstOrDefaultAsync(u => u.Id == usuarioId, ct);
+        if (usuario is null)
+            return ResultadoOperacao.Falha("Membro não encontrado.");
+
+        var papel = await ObterPapelDoUsuarioAsync(usuarioId, ct);
+        if (papel?.Tipo == PapelUsuario.Owner)
+            return ResultadoOperacao.Falha("Os dados do administrador (Owner) devem ser alterados no perfil.");
+
+        // Só é editável enquanto o convite está pendente (senha ainda não definida).
+        // Depois que o membro define a senha, ele já pode ter dados — o e-mail vira imutável.
+        if (usuario.PasswordHash != null)
+            return ResultadoOperacao.Falha(
+                "Este membro já ativou a conta. O e-mail não pode mais ser alterado; use Desativar se necessário.");
+
+        var emailNormalizado = emailLimpo.ToUpperInvariant();
+        var emailEmUso = await _db.Users
+            .IgnoreQueryFilters()
+            .AnyAsync(u => !u.IsDeleted && u.Id != usuarioId && u.NormalizedEmail == emailNormalizado, ct);
+        if (emailEmUso)
+            return ResultadoOperacao.Falha("Já existe uma conta com este e-mail.");
+
+        var emailMudou = usuario.NormalizedEmail != emailNormalizado;
+
+        usuario.NomeCompleto = nomeLimpo;
+        // Mantém UserName == Email (padrão do registro) e os campos normalizados em sincronia.
+        usuario.Email = emailLimpo;
+        usuario.NormalizedEmail = emailNormalizado;
+        usuario.UserName = emailLimpo;
+        usuario.NormalizedUserName = emailNormalizado;
+        // Trocou o e-mail: o anterior nunca foi confirmado de fato — exige novo convite/confirmação.
+        if (emailMudou)
+            usuario.EmailConfirmed = false;
+
+        await _db.SaveChangesAsync(ct);
+
+        _logger.LogInformation("Dados do membro {UsuarioId} atualizados.", usuarioId);
+        return ResultadoOperacao.Ok();
     }
 
     public async Task<ResultadoOperacao> AlterarPapelAsync(
@@ -210,6 +262,35 @@ public class FamiliaService : IFamiliaService
         await _db.SaveChangesAsync(ct);
 
         _logger.LogInformation("Membro {UsuarioId} {Estado}.", usuarioId, ativo ? "ativado" : "desativado");
+        return ResultadoOperacao.Ok();
+    }
+
+    public async Task<ResultadoOperacao> RemoverMembroAsync(string usuarioId, CancellationToken ct = default)
+    {
+        await _tenantAccessor.GarantirHidratadoAsync();
+
+        var usuario = await _db.Users.FirstOrDefaultAsync(u => u.Id == usuarioId, ct);
+        if (usuario is null)
+            return ResultadoOperacao.Falha("Membro não encontrado.");
+
+        var papel = await ObterPapelDoUsuarioAsync(usuarioId, ct);
+        if (papel?.Tipo == PapelUsuario.Owner)
+            return ResultadoOperacao.Falha("O administrador (Owner) não pode ser removido.");
+
+        // Exclusão FÍSICA só é permitida na fase de criação (convite pendente, senha não definida):
+        // sem senha o membro nunca logou, logo não tem dados no sistema. Depois disso, só Desativar.
+        if (usuario.PasswordHash != null)
+            return ResultadoOperacao.Falha(
+                "Este membro já ativou a conta e pode ter dados no sistema. Use Desativar em vez de remover.");
+
+        // DELETE físico (libera totalmente o e-mail no Identity). ExecuteDelete ignora o soft-delete
+        // do SaveChanges; respeita os filtros globais (tenant + não-removido), então é escopado ao tenant.
+        await _db.UserRoles.Where(ur => ur.UserId == usuarioId).ExecuteDeleteAsync(ct);
+        var removidos = await _db.Users.Where(u => u.Id == usuarioId).ExecuteDeleteAsync(ct);
+        if (removidos == 0)
+            return ResultadoOperacao.Falha("Membro não encontrado.");
+
+        _logger.LogInformation("Membro {UsuarioId} removido fisicamente (convite pendente).", usuarioId);
         return ResultadoOperacao.Ok();
     }
 

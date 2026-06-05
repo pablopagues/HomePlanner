@@ -87,6 +87,30 @@
     }
 </AuthorizeView>
 
+<AuthorizeView Roles="Owner">
+    @if (_editando is not null)
+    {
+        <MudPaper Class="pa-5 mb-4" Elevation="1" Style="border-radius:14px; max-width:560px;">
+            <MudText Typo="Typo.subtitle1" Class="mb-3">@L["Fam_EditarMembro"]</MudText>
+            <MudStack Spacing="3">
+                <MudTextField @bind-Value="_edit.Nome" Label="@L["Fam_Nome"]" Variant="Variant.Outlined" />
+                <MudTextField @bind-Value="_edit.Email" Label="@L["Fam_Email"]" Variant="Variant.Outlined"
+                              InputType="InputType.Email" />
+                <MudText Typo="Typo.caption" Color="Color.Secondary">@L["Fam_EditarAjuda"]</MudText>
+                <MudStack Row="true" Spacing="2">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                               OnClick="SalvarEdicaoAsync" Disabled="_salvando">
+                        @(_salvando ? L["Btn_Salvando"] : L["Btn_Salvar"])
+                    </MudButton>
+                    <MudButton Variant="Variant.Text" OnClick="@(() => _editando = null)">
+                        @L["Btn_Cancelar"]
+                    </MudButton>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+    }
+</AuthorizeView>
+
 @if (_carregando)
 {
     <MudProgressLinear Indeterminate="true" />
@@ -133,6 +157,9 @@ else
                                  AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
                             @if (!context.SenhaDefinida)
                             {
+                                <MudMenuItem OnClick="@(() => AbrirEdicao(context))">
+                                    @L["Fam_Editar"]
+                                </MudMenuItem>
                                 <MudMenuItem OnClick="@(() => ReenviarConviteAsync(context))">
                                     @L["Fam_ReenviarConvite"]
                                 </MudMenuItem>
@@ -161,6 +188,13 @@ else
                                     @L["Fam_Reativar"]
                                 </MudMenuItem>
                             }
+                            @if (!context.SenhaDefinida)
+                            {
+                                <MudMenuItem OnClick="@(() => RemoverAsync(context))"
+                                             IconColor="Color.Error" Style="color:var(--mud-palette-error);">
+                                    @L["Fam_Remover"]
+                                </MudMenuItem>
+                            }
                         </MudMenu>
                     }
                 </MudTd>
@@ -177,6 +211,8 @@ else
     private bool _salvando;
     private NovoMembroDTO _novo = new();
     private string? _linkConvite;
+    private MembroFamiliaDetalheDTO? _editando;
+    private NovoMembroDTO _edit = new();
 
     protected override async Task OnInitializedAsync() => await CarregarAsync();
 
@@ -233,6 +269,50 @@ else
             _mostrarForm = true;
             Snackbar.Add(L["Fam_LinkGerado"], Severity.Success);
         }
+    }
+
+    private void AbrirEdicao(MembroFamiliaDetalheDTO m)
+    {
+        _editando = m;
+        _edit = new NovoMembroDTO { Nome = m.Nome, Email = m.Email, Papel = m.Papel };
+    }
+
+    private async Task SalvarEdicaoAsync()
+    {
+        if (_editando is null) return;
+
+        _salvando = true;
+        var r = await Service.EditarMembroAsync(_editando.UsuarioId, _edit.Nome, _edit.Email);
+        _salvando = false;
+
+        if (!r.Sucesso)
+        {
+            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            return;
+        }
+
+        Snackbar.Add(L["Msg_SalvoOk"], Severity.Success);
+        _editando = null;
+        await CarregarAsync();
+    }
+
+    private async Task RemoverAsync(MembroFamiliaDetalheDTO m)
+    {
+        var confirm = await Dialog.ShowMessageBox(
+            L["Fam_RemoverTitulo"],
+            string.Format(L["Fam_RemoverConfirm"], m.Nome),
+            yesText: L["Fam_Remover"], cancelText: L["Btn_Cancelar"]);
+        if (confirm != true) return;
+
+        var r = await Service.RemoverMembroAsync(m.UsuarioId);
+        if (r.Sucesso)
+        {
+            Snackbar.Add(L["Fam_MembroRemovido"], Severity.Success);
+            if (_editando?.UsuarioId == m.UsuarioId) _editando = null;
+            await CarregarAsync();
+        }
+        else
+            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
     }
 
     private async Task AlterarPapelAsync(MembroFamiliaDetalheDTO m, PapelUsuario novoPapel)

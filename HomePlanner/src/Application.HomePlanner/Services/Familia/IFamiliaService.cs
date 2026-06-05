@@ -20,7 +20,14 @@ public interface IFamiliaService
     Task<ResultadoOperacao<ConviteMembroResultadoDTO>> ReenviarConviteAsync(
         string usuarioId, string baseUrl, CancellationToken ct = default);
 
+    /// <summary>Edita nome e e-mail de um membro (ex.: corrigir um e-mail digitado errado). Owner não é editável aqui.</summary>
+    Task<ResultadoOperacao> EditarMembroAsync(
+        string usuarioId, string nome, string email, CancellationToken ct = default);
+
     Task<ResultadoOperacao> AlterarPapelAsync(string usuarioId, PapelUsuario novoPapel, CancellationToken ct = default);
 
     Task<ResultadoOperacao> DefinirAtivoAsync(string usuarioId, bool ativo, CancellationToken ct = default);
+
+    /// <summary>Remove (soft-delete) um membro da família, liberando o assento do plano. Owner não pode ser removido.</summary>
+    Task<ResultadoOperacao> RemoverMembroAsync(string usuarioId, CancellationToken ct = default);
 }

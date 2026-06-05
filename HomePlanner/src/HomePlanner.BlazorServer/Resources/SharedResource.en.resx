@@ -356,6 +356,13 @@
   <data name="Fam_Pendente" xml:space="preserve"><value>Invitation pending</value></data>
   <data name="Fam_Desativado" xml:space="preserve"><value>Disabled</value></data>
   <data name="Fam_ReenviarConvite" xml:space="preserve"><value>Resend invitation</value></data>
+  <data name="Fam_Editar" xml:space="preserve"><value>Edit details</value></data>
+  <data name="Fam_EditarMembro" xml:space="preserve"><value>Edit member</value></data>
+  <data name="Fam_EditarAjuda" xml:space="preserve"><value>Fix the name or email. After changing the email, resend the invitation to the correct address.</value></data>
+  <data name="Fam_Remover" xml:space="preserve"><value>Remove member</value></data>
+  <data name="Fam_RemoverTitulo" xml:space="preserve"><value>Remove member</value></data>
+  <data name="Fam_RemoverConfirm" xml:space="preserve"><value>Remove "{0}" from the family? This frees up the plan seat and can't be undone.</value></data>
+  <data name="Fam_MembroRemovido" xml:space="preserve"><value>Member removed.</value></data>
   <data name="Fam_TornarPai" xml:space="preserve"><value>Make Parent</value></data>
   <data name="Fam_TornarFilho" xml:space="preserve"><value>Make Child</value></data>
   <data name="Fam_Desativar" xml:space="preserve"><value>Disable access</value></data>

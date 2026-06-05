@@ -365,7 +365,7 @@
   <data name="Fam_Email" xml:space="preserve"><value>E-mail (login)</value></data>
   <data name="Fam_Papel" xml:space="preserve"><value>Papel</value></data>
   <data name="Fam_PapelOwner" xml:space="preserve"><value>Administrador</value></data>
-  <data name="Fam_PapelPai" xml:space="preserve"><value>Pai / Responsável</value></data>
+  <data name="Fam_PapelPai" xml:space="preserve"><value>Pai / Mãe / Responsável</value></data>
   <data name="Fam_PapelFilho" xml:space="preserve"><value>Filho</value></data>
   <data name="Fam_ConviteAjuda" xml:space="preserve"><value>Pais têm acesso completo; filhos terão acesso restrito. O membro recebe um convite por e-mail para definir a senha e entrar.</value></data>
   <data name="Fam_EnviarConvite" xml:space="preserve"><value>Enviar convite</value></data>
@@ -379,7 +379,14 @@
   <data name="Fam_Pendente" xml:space="preserve"><value>Convite pendente</value></data>
   <data name="Fam_Desativado" xml:space="preserve"><value>Desativado</value></data>
   <data name="Fam_ReenviarConvite" xml:space="preserve"><value>Reenviar convite</value></data>
-  <data name="Fam_TornarPai" xml:space="preserve"><value>Tornar Pai / Responsável</value></data>
+  <data name="Fam_Editar" xml:space="preserve"><value>Editar dados</value></data>
+  <data name="Fam_EditarMembro" xml:space="preserve"><value>Editar membro</value></data>
+  <data name="Fam_EditarAjuda" xml:space="preserve"><value>Corrija o nome ou o e-mail. Ao trocar o e-mail, reenvie o convite para o endereço correto.</value></data>
+  <data name="Fam_Remover" xml:space="preserve"><value>Remover membro</value></data>
+  <data name="Fam_RemoverTitulo" xml:space="preserve"><value>Remover membro</value></data>
+  <data name="Fam_RemoverConfirm" xml:space="preserve"><value>Remover "{0}" da família? Esta ação libera o assento do plano e não pode ser desfeita.</value></data>
+  <data name="Fam_MembroRemovido" xml:space="preserve"><value>Membro removido.</value></data>
+  <data name="Fam_TornarPai" xml:space="preserve"><value>Tornar Pai / Mãe / Responsável</value></data>
   <data name="Fam_TornarFilho" xml:space="preserve"><value>Tornar Filho</value></data>
   <data name="Fam_Desativar" xml:space="preserve"><value>Desativar acesso</value></data>
   <data name="Fam_Reativar" xml:space="preserve"><value>Reativar acesso</value></data>
