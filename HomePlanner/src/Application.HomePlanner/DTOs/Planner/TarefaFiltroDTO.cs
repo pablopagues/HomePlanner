@@ -8,6 +8,12 @@ public class TarefaFiltroDTO
     public bool? Concluida { get; set; }
     public string? ResponsavelUsuarioId { get; set; }
 
+    /// <summary>
+    /// Usuário que está consultando. Aplica a regra de visibilidade:
+    /// tarefas Privadas só aparecem quando foram criadas por ele. Definido pelo serviço.
+    /// </summary>
+    public string? UsuarioAtualId { get; set; }
+
     /// <summary>Início do intervalo de datas (inclusive) — usado pelo calendário.</summary>
     public DateOnly? DataDe { get; set; }
     /// <summary>Fim do intervalo de datas (inclusive) — usado pelo calendário.</summary>

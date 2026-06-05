@@ -16,6 +16,9 @@ public class TarefaListaDTO
     public string? ResponsavelUsuarioId { get; init; }
     public string? ResponsavelNome { get; init; }
 
+    /// <summary>Usuário que criou a tarefa. Permite à UI distinguir tarefas próprias.</summary>
+    public string? CriadoPorUsuarioId { get; init; }
+
     /// <summary>Data da última atualização da foto do responsável (null = sem foto). Usada para montar a URL/cache do avatar.</summary>
     public DateTime? ResponsavelFotoAtualizadaEm { get; init; }
 

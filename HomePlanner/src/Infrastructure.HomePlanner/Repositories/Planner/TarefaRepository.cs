@@ -1,5 +1,6 @@
 using Application.HomePlanner.DTOs.Planner;
 using Application.HomePlanner.Repositories.Planner;
+using Domain.HomePlanner.Models.Enums;
 using Domain.HomePlanner.Models.Planner;
 using Infrastructure.HomePlanner.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -41,6 +42,7 @@ public class TarefaRepository : ITarefaRepository
                 Visibilidade         = t.Visibilidade,
                 ResponsavelUsuarioId = t.ResponsavelUsuarioId,
                 ResponsavelNome      = t.Responsavel != null ? t.Responsavel.NomeCompleto : null,
+                CriadoPorUsuarioId   = t.CriadoPorUsuarioId,
                 ResponsavelFotoAtualizadaEm = t.Responsavel != null ? t.Responsavel.FotoAtualizadaEm : null,
             })
             .ToListAsync(ct);
@@ -89,6 +91,10 @@ public class TarefaRepository : ITarefaRepository
             q = q.Where(t => t.Concluida == filtro.Concluida.Value);
         if (!string.IsNullOrWhiteSpace(filtro.ResponsavelUsuarioId))
             q = q.Where(t => t.ResponsavelUsuarioId == filtro.ResponsavelUsuarioId);
+        // Visibilidade: tarefas Privadas só aparecem para quem as criou.
+        if (!string.IsNullOrWhiteSpace(filtro.UsuarioAtualId))
+            q = q.Where(t => t.Visibilidade == VisibilidadeTarefa.Familia
+                          || t.CriadoPorUsuarioId == filtro.UsuarioAtualId);
         if (filtro.DataDe.HasValue)
             q = q.Where(t => t.DataPrevista != null && t.DataPrevista >= filtro.DataDe.Value);
         if (filtro.DataAte.HasValue)

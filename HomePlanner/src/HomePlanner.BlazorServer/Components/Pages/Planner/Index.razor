@@ -113,11 +113,13 @@ else
     private List<TarefaListaDTO> _tarefas = [];
     private List<MembroFamiliaDTO> _membros = [];
     private bool _carregando = true;
+    private bool _restrito;
     private string _filtroStatus = "pendentes";
 
     protected override async Task OnInitializedAsync()
     {
         _membros = (await Service.ListarMembrosFamiliaAsync()).ToList();
+        _restrito = Service.UsuarioRestritoAsProprias;
         await CarregarAsync();
     }
 
@@ -167,6 +169,7 @@ else
         {
             { x => x.Dto, dto },
             { x => x.Membros, _membros },
+            { x => x.Restrito, _restrito },
         };
 
         var dialog = await Dialog.ShowAsync<TarefaEditor>(string.Empty, parameters,

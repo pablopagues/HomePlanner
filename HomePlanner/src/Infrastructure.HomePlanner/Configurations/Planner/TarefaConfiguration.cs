@@ -15,6 +15,7 @@ public class TarefaConfiguration : IEntityTypeConfiguration<Tarefa>
         builder.Property(t => t.HoraInicio).HasColumnType("time");
         builder.Property(t => t.HoraFim).HasColumnType("time");
         builder.Property(t => t.ResponsavelUsuarioId).HasMaxLength(450);
+        builder.Property(t => t.CriadoPorUsuarioId).HasMaxLength(450);
         builder.Property(t => t.DeletedByUsuarioId).HasMaxLength(450);
         builder.Property(t => t.CriadoPor).HasMaxLength(450);
         builder.Property(t => t.ModificadoPor).HasMaxLength(450);
@@ -22,6 +23,7 @@ public class TarefaConfiguration : IEntityTypeConfiguration<Tarefa>
         // TenantId primeiro no índice composto
         builder.HasIndex(t => new { t.TenantId, t.DataPrevista });
         builder.HasIndex(t => new { t.TenantId, t.Concluida });
+        builder.HasIndex(t => new { t.TenantId, t.CriadoPorUsuarioId });
 
         builder.HasOne(t => t.Responsavel)
             .WithMany()

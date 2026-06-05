@@ -37,6 +37,11 @@ public class TarefaService : ITarefaService
         filtro.Pagina = Math.Max(1, filtro.Pagina);
         filtro.TamanhoPagina = Math.Clamp(filtro.TamanhoPagina, 1, 200);
 
+        // Regra de visibilidade (privadas só do criador) e escopo de papel (Filho só as próprias).
+        filtro.UsuarioAtualId = _tenantContext.UsuarioId;
+        if (_tenantContext.RestritoAsProprias)
+            filtro.ResponsavelUsuarioId = _tenantContext.UsuarioId;
+
         var itens = await _repo.ListarAsync(filtro, ct);
         var total = await _repo.ContarAsync(filtro, ct);
 
@@ -58,6 +63,7 @@ public class TarefaService : ITarefaService
         {
             Pagina = 1, TamanhoPagina = 1000,
             DataDe = de, DataAte = ate,
+            UsuarioAtualId = _tenantContext.UsuarioId,
             // Papéis restritos (Filho) só enxergam as próprias — ignora o filtro escolhido na UI.
             ResponsavelUsuarioId = _tenantContext.RestritoAsProprias
                 ? _tenantContext.UsuarioId
@@ -79,16 +85,22 @@ public class TarefaService : ITarefaService
         if (dto.HoraInicio.HasValue && dto.HoraFim.HasValue && dto.HoraFim < dto.HoraInicio)
             return ResultadoOperacao<int>.Falha("A hora de fim deve ser igual ou posterior à hora de início.");
 
+        var restrito = _tenantContext.RestritoAsProprias;
+
         Tarefa entidade;
         if (dto.Id == 0)
         {
-            entidade = new Tarefa();
+            entidade = new Tarefa { CriadoPorUsuarioId = _tenantContext.UsuarioId };
             await _repo.AdicionarAsync(entidade, ct);
         }
         else
         {
             entidade = await _repo.ObterEntidadeAsync(dto.Id, ct)
                 ?? throw new InvalidOperationException($"Tarefa {dto.Id} não encontrada para edição.");
+
+            // Filho (papel restrito) só pode editar as próprias tarefas.
+            if (restrito && !EhDono(entidade))
+                return ResultadoOperacao<int>.Falha("Você só pode editar as suas próprias tarefas.");
         }
 
         entidade.Titulo               = dto.Titulo;
@@ -98,8 +110,10 @@ public class TarefaService : ITarefaService
         entidade.HoraFim              = dto.HoraFim;
         entidade.Recorrencia          = dto.Recorrencia;
         entidade.Visibilidade         = dto.Visibilidade;
-        entidade.ResponsavelUsuarioId = string.IsNullOrWhiteSpace(dto.ResponsavelUsuarioId)
-            ? null : dto.ResponsavelUsuarioId;
+        // Filho só pode atribuir tarefas a si mesmo; Owner/Membro atribuem a qualquer membro.
+        entidade.ResponsavelUsuarioId = restrito
+            ? _tenantContext.UsuarioId
+            : (string.IsNullOrWhiteSpace(dto.ResponsavelUsuarioId) ? null : dto.ResponsavelUsuarioId);
 
         await _repo.SalvarAsync(ct);
         return ResultadoOperacao<int>.Ok(entidade.Id);
@@ -112,6 +126,9 @@ public class TarefaService : ITarefaService
         var entidade = await _repo.ObterEntidadeAsync(id, ct);
         if (entidade is null)
             return ResultadoOperacao.Falha("Tarefa não encontrada.");
+
+        if (_tenantContext.RestritoAsProprias && !EhDono(entidade))
+            return ResultadoOperacao.Falha("Você só pode alterar as suas próprias tarefas.");
 
         entidade.Concluida     = concluida;
         entidade.DataConclusao = concluida ? DateTime.UtcNow : null;
@@ -138,6 +155,9 @@ public class TarefaService : ITarefaService
         if (entidade is null)
             return ResultadoOperacao.Falha("Tarefa não encontrada.");
 
+        if (_tenantContext.RestritoAsProprias && !EhDono(entidade))
+            return ResultadoOperacao.Falha("Você só pode excluir as suas próprias tarefas.");
+
         entidade.IsDeleted = true;
         await _repo.SalvarAsync(ct);
         return ResultadoOperacao.Ok();
@@ -148,6 +168,11 @@ public class TarefaService : ITarefaService
         await _tenantAccessor.GarantirHidratadoAsync();
         return await _repo.ListarMembrosFamiliaAsync(ct);
     }
+
+    /// <summary>Tarefa pertence ao usuário atual (é responsável OU criador). Usado nas guardas de papel restrito.</summary>
+    private bool EhDono(Tarefa t) =>
+        t.ResponsavelUsuarioId == _tenantContext.UsuarioId
+        || t.CriadoPorUsuarioId == _tenantContext.UsuarioId;
 
     private static DateOnly ProximaData(DateOnly atual, Recorrencia recorrencia) => recorrencia switch
     {

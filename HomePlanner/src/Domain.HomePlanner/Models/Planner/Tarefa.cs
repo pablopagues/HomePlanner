@@ -27,6 +27,13 @@ public class Tarefa : ITenantEntity, IDeletableEntity, IAuditable
     /// <summary>Membro da família responsável (FK para Usuario). Null = sem responsável.</summary>
     public string? ResponsavelUsuarioId { get; set; }
 
+    /// <summary>
+    /// Usuário que criou a tarefa (Id do Usuario). Base da regra de visibilidade:
+    /// tarefas <see cref="VisibilidadeTarefa.Privada"/> só aparecem para o criador.
+    /// Diferente de <see cref="CriadoPor"/>, que é campo de auditoria e pode valer "system".
+    /// </summary>
+    public string? CriadoPorUsuarioId { get; set; }
+
     // IDeletableEntity
     public bool IsDeleted { get; set; }
     public DateTime? DeletedAt { get; set; }

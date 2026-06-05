@@ -28,14 +28,18 @@
                                AmPm="false" Class="flex-grow-1" />
             </MudStack>
 
-            <MudSelect T="string" @bind-Value="Dto.ResponsavelUsuarioId"
-                       Label="@L["Planner_ResponsavelLabel"]" Clearable="true"
-                       Variant="Variant.Outlined">
-                @foreach (var m in Membros)
-                {
-                    <MudSelectItem T="string" Value="@m.UsuarioId">@m.Nome</MudSelectItem>
-                }
-            </MudSelect>
+            @* Filho só atribui tarefas a si mesmo — o responsável é definido no servidor. *@
+            @if (!Restrito)
+            {
+                <MudSelect T="string" @bind-Value="Dto.ResponsavelUsuarioId"
+                           Label="@L["Planner_ResponsavelLabel"]" Clearable="true"
+                           Variant="Variant.Outlined">
+                    @foreach (var m in Membros)
+                    {
+                        <MudSelectItem T="string" Value="@m.UsuarioId">@m.Nome</MudSelectItem>
+                    }
+                </MudSelect>
+            }
 
             <MudSelect T="Recorrencia" @bind-Value="Dto.Recorrencia"
                        Label="@L["Planner_RecorrenciaLabel"]" Variant="Variant.Outlined">
@@ -63,6 +67,9 @@
 
     [Parameter, EditorRequired] public TarefaPersistenciaDTO Dto { get; set; } = null!;
     [Parameter, EditorRequired] public List<MembroFamiliaDTO> Membros { get; set; } = null!;
+
+    /// <summary>Papel restrito (Filho): não escolhe responsável, só cria para si.</summary>
+    [Parameter] public bool Restrito { get; set; }
 
     private DateTime? _dataPrevista;
     private TimeSpan? _horaInicio;
