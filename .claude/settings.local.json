@@ -26,7 +26,10 @@
       "PowerShell(Select-String -Path \"HomePlanner\\\\src\\\\HomePlanner.BlazorServer\\\\logs\\\\homeplanner-20260602.log\" -Pattern \"configuracoes|settings|configuracion|Cfg_|ConfiguracaoFamiliaService|OwnerOnly|AccessDenied|Authorization|InvalidOperation|NullReference|404\" | Select-Object -Last 40 | ForEach-Object { $_.Line })",
       "PowerShell(dotnet build src\\\\HomePlanner.BlazorServer\\\\HomePlanner.BlazorServer.csproj -c Debug --nologo -v q 2>&1)",
       "PowerShell(dotnet build \"D:\\\\_MeuCodigoDotNet\\\\HomePlanner\\\\HomePlanner\\\\HomePlanner\\\\src\\\\HomePlanner.BlazorServer\\\\HomePlanner.BlazorServer.csproj\" -c Debug --nologo -v q 2>&1)",
-      "PowerShell(dotnet build HomePlanner\\\\HomePlanner.slnx -nologo -clp:ErrorsOnly 2>&1)"
+      "PowerShell(dotnet build HomePlanner\\\\HomePlanner.slnx -nologo -clp:ErrorsOnly 2>&1)",
+      "PowerShell(dotnet build src\\\\HomePlanner.BlazorServer\\\\HomePlanner.BlazorServer.csproj -nologo -clp:ErrorsOnly 2>&1)",
+      "PowerShell(dotnet build HomePlanner\\\\src\\\\HomePlanner.BlazorServer\\\\HomePlanner.BlazorServer.csproj -nologo -clp:ErrorsOnly 2>&1)",
+      "PowerShell(dotnet build \"HomePlanner\\\\src\\\\HomePlanner.BlazorServer\\\\HomePlanner.BlazorServer.csproj\" -c Debug --nologo -v q 2>&1)"
     ]
   }
 }

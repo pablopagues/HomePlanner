@@ -371,6 +371,7 @@
   <!-- ── Conta / Navegação ── -->
   <data name="Nav_Perfil" xml:space="preserve"><value>Meu perfil</value></data>
   <data name="Nav_Sair" xml:space="preserve"><value>Sair</value></data>
+  <data name="Nav_Tema" xml:space="preserve"><value>Tema</value></data>
 
   <!-- ── Perfil / Segurança (2FA) ── -->
   <data name="Perfil_Titulo" xml:space="preserve"><value>Segurança da conta</value></data>

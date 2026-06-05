@@ -92,7 +92,7 @@ else if (_lista is not null)
 
                 <MudItem xs="12" sm="6" md="4">
                     <MudPaper Class="pa-3"
-                              Style="@($"border-radius:8px; border:1px solid {(jaTenho ? "#B5CFC0" : "#E8DDD1")}; background:{(jaTenho ? "#EEF5F1" : "#FDFAF7")}; transition:all 200ms;")"
+                              Style="@($"border-radius:8px; border:1px solid {(jaTenho ? "var(--mud-palette-success)" : "var(--mud-palette-lines-default)")}; background:{(jaTenho ? "var(--mud-palette-success-hover)" : "var(--mud-palette-surface)")}; transition:all 200ms;")"
                               Elevation="0">
                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                             <MudCheckBox T="bool"
@@ -116,7 +116,7 @@ else if (_lista is not null)
 
         @* ── Resumo do progresso ─────────────────────────────────────────── *@
         <MudPaper Class="pa-4 mt-4" Elevation="0"
-                  Style="background:#F5F0EA; border-radius:10px;">
+                  Style="background:var(--mud-palette-background-gray); border-radius:10px;">
             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3">
                 <MudProgressLinear Color="Color.Success"
                                    Value="@Progresso" Class="flex-grow-1"

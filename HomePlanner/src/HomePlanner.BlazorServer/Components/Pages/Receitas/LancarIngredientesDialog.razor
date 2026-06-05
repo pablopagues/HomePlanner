@@ -32,7 +32,7 @@
             @foreach (var linha in _linhas)
             {
                 <MudPaper Class="pa-2 mb-2" Elevation="0"
-                          Style="background:#F9F6F2; border-radius:8px; border:1px solid #E8DDD1;">
+                          Style="background:var(--mud-palette-background-gray); border-radius:8px; border:1px solid var(--mud-palette-lines-default);">
                     <MudGrid Spacing="2" Class="align-center">
                         <MudItem xs="4" md="2">
                             <MudNumericField @bind-Value="linha.Quantidade" Label="Qtde" Min="0m"

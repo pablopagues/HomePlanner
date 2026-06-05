@@ -2,8 +2,9 @@
 
 html, body {
     font-family: 'Inter', sans-serif;
-    background-color: #FAF7F2;
-    color: #2A3A33;
+    /* Segue a paleta ativa do MudBlazor (claro/escuro) com fallback Sage. */
+    background-color: var(--mud-palette-background, #FAF7F2);
+    color: var(--mud-palette-text-primary, #2A3A33);
     margin: 0;
     padding: 0;
 }
@@ -24,3 +25,55 @@ h1, h2, h3 {
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: #E8DDD1; }
 ::-webkit-scrollbar-thumb { background: #7A8278; border-radius: 3px; }
+
+/* =============================================
+   TEMA: Plum & Blush
+   Ativado pela class "theme-plum" no <body>
+   ============================================= */
+body.theme-plum {
+    --hp-primary:          #7a4a9a;
+    --hp-primary-dark:     #4a2a68;
+    --hp-primary-light:    #c8a0e0;
+    --hp-accent:           #e8a0b0;
+    --hp-accent-light:     #f5dce8;
+    --hp-bg:               #fdf7fa;
+    --hp-bg-secondary:     #f5f0f3;
+    --hp-surface:          #ffffff;
+    --hp-text-primary:     #4a2a68;
+    --hp-text-secondary:   #7a5a70;
+    --hp-text-muted:       #a08898;
+    --hp-border:           #eedde8;
+    --hp-border-strong:    #c8a0c0;
+    --hp-shadow:           rgba(122, 74, 154, 0.08);
+
+    background-color: #fdf7fa;
+    color: #4a2a68;
+}
+
+/* =============================================
+   TEMA: Carbon & Mint
+   Ativado pela class "theme-carbon" no <body>
+   ============================================= */
+body.theme-carbon {
+    --hp-primary:          #4dc9a0;
+    --hp-primary-dark:     #2a9a78;
+    --hp-primary-light:    #80e0c0;
+    --hp-accent:           #d0f0e4;
+    --hp-accent-light:     #e8f8f2;
+    --hp-bg:               #15181e;
+    --hp-bg-secondary:     #1e2228;
+    --hp-surface:          #2a2e35;
+    --hp-text-primary:     #f4f5f6;
+    --hp-text-secondary:   #9aa0ac;
+    --hp-text-muted:       #6a7080;
+    --hp-border:           rgba(77, 201, 160, 0.15);
+    --hp-border-strong:    rgba(77, 201, 160, 0.35);
+    --hp-shadow:           rgba(0, 0, 0, 0.4);
+
+    background-color: #15181e;
+    color: #f4f5f6;
+}
+
+/* Tema escuro: scrollbar adaptada */
+body.theme-carbon ::-webkit-scrollbar-track { background: #1e2228; }
+body.theme-carbon ::-webkit-scrollbar-thumb { background: #4dc9a0; }

@@ -28,7 +28,7 @@
                 {
                     <MudPaper @onclick="@(() => Selecionar(r))"
                               Class="pa-3 mb-2"
-                              Style='@($"cursor:pointer; border-radius:8px; border: 2px solid {(_selecionadoId == r.Id ? "#4A6B5C" : "transparent")}; background:{(_selecionadoId == r.Id ? "#EEF5F1" : "#F9F6F2")};")'
+                              Style='@($"cursor:pointer; border-radius:8px; border: 2px solid {(_selecionadoId == r.Id ? "var(--mud-palette-primary)" : "transparent")}; background:{(_selecionadoId == r.Id ? "var(--mud-palette-primary-hover)" : "var(--mud-palette-surface)")};")'
                               Elevation="0">
                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                             @if (!string.IsNullOrWhiteSpace(r.UrlImagem))

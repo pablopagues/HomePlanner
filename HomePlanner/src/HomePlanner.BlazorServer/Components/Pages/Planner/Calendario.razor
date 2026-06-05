@@ -65,7 +65,7 @@ else
         @foreach (var nome in _nomesDias)
         {
             <div style="text-align:center;">
-                <MudText Typo="Typo.subtitle2" Style="color:#4A6B5C; font-weight:600;">@nome</MudText>
+                <MudText Typo="Typo.subtitle2" Style="color:var(--mud-palette-primary); font-weight:600;">@nome</MudText>
             </div>
         }
     </div>
@@ -78,11 +78,11 @@ else
             var doMes  = _vista == CalendarioVista.Semana || dia.Data.Month == _referencia.Month;
             <MudPaper Elevation="0"
                       Style="@($"border-radius:8px; padding:6px; min-height:{(_vista == CalendarioVista.Semana ? "220px" : "120px")}; " +
-                               $"border:1px solid {(ehHoje ? "#C97B5A" : "#E8DDD1")}; " +
-                               $"background:{(doMes ? "#FFFFFF" : "#F5F0EA")};")">
+                               $"border:1px solid {(ehHoje ? "var(--mud-palette-secondary)" : "var(--mud-palette-lines-default)")}; " +
+                               $"background:{(doMes ? "var(--mud-palette-surface)" : "var(--mud-palette-background-gray)")};")">
                 <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Spacing="0">
                     <MudText Typo="Typo.body2"
-                             Style="@($"font-weight:{(ehHoje ? "700" : "500")}; color:{(doMes ? (ehHoje ? "#C97B5A" : "#3A3A3A") : "#A99")};")">
+                             Style="@($"font-weight:{(ehHoje ? "700" : "500")}; color:{(doMes ? (ehHoje ? "var(--mud-palette-secondary)" : "var(--mud-palette-text-primary)") : "var(--mud-palette-text-disabled)")};")">
                         @dia.Data.Day
                     </MudText>
                     <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small"

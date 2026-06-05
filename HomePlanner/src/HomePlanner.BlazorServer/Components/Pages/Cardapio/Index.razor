@@ -4,6 +4,7 @@
 @page "/menu/{DataStr}"
 @attribute [Authorize]
 @using HomePlanner.BlazorServer.Services
+@using Application.HomePlanner.Services.Configuracao
 @inject IStringLocalizer<SharedResource> L
 @inject PublicLanguageService Lang
 
@@ -48,7 +49,7 @@ else
         @foreach (var dia in _dias)
         {
             <div style="text-align:center; padding:8px 4px;">
-                <MudText Typo="Typo.subtitle2" Style="color:#4A6B5C; font-weight:600;">
+                <MudText Typo="Typo.subtitle2" Style="color:var(--mud-palette-primary); font-weight:600;">
                     @dia.NomeCurto
                 </MudText>
                 <MudText Typo="Typo.caption" Color="Color.Secondary">
@@ -56,7 +57,7 @@ else
                 </MudText>
                 @if (dia.Data == DateOnly.FromDateTime(DateTime.Today))
                 {
-                    <div style="width:6px;height:6px;border-radius:50%;background:#C97B5A;margin:2px auto;"></div>
+                    <div style="width:6px;height:6px;border-radius:50%;background:var(--mud-palette-secondary);margin:2px auto;"></div>
                 }
             </div>
         }
@@ -65,7 +66,7 @@ else
         @foreach (var tipo in _tiposAtivos)
         {
             <div style="display:flex; align-items:center; padding:8px 4px;">
-                <MudText Typo="Typo.caption" Style="color:#7A8278; font-weight:500; writing-mode:horizontal-tb;">
+                <MudText Typo="Typo.caption" Style="color:var(--mud-palette-text-secondary); font-weight:500; writing-mode:horizontal-tb;">
                     @NomeTipo(tipo)
                 </MudText>
             </div>
@@ -77,7 +78,7 @@ else
                     @if (refeicao?.ReceitaId.HasValue == true)
                     {
                         <MudPaper @onclick="@(() => AbrirSeletor(dia, tipo, refeicao))"
-                                  Style="cursor:pointer; height:100%; border-radius:8px; padding:8px; background:#EEF5F1; border:1px solid #B5CFC0;"
+                                  Style="cursor:pointer; height:100%; border-radius:8px; padding:8px; background:var(--mud-palette-primary-hover); border:1px solid var(--mud-palette-primary);"
                                   Elevation="0">
                             @if (!string.IsNullOrWhiteSpace(refeicao.ReceitaUrlImagem))
                             {
@@ -89,7 +90,7 @@ else
                             </MudText>
                             @if (refeicao.PorcoesDesejadas.HasValue)
                             {
-                                <MudText Typo="Typo.caption" Style="color:#7A8278; font-size:0.7rem;">
+                                <MudText Typo="Typo.caption" Style="color:var(--mud-palette-text-secondary); font-size:0.7rem;">
                                     @refeicao.PorcoesDesejadas porç.
                                 </MudText>
                             }
@@ -98,10 +99,10 @@ else
                     else
                     {
                         <MudPaper @onclick="@(() => AbrirSeletor(dia, tipo, refeicao))"
-                                  Style="cursor:pointer; height:100%; min-height:70px; border-radius:8px; border:1px dashed #C4BAB0; background:transparent; display:flex; align-items:center; justify-content:center;"
+                                  Style="cursor:pointer; height:100%; min-height:70px; border-radius:8px; border:1px dashed var(--mud-palette-lines-default); background:transparent; display:flex; align-items:center; justify-content:center;"
                                   Elevation="0">
                             <MudIcon Icon="@Icons.Material.Filled.Add"
-                                     Style="color:#C4BAB0;" Size="Size.Small" />
+                                     Style="color:var(--mud-palette-text-disabled);" Size="Size.Small" />
                         </MudPaper>
                     }
                 </div>
@@ -129,6 +130,7 @@ else
 
     [Inject] ICardapioService CardapioService { get; set; } = null!;
     [Inject] IModeloSemanaService ModeloService { get; set; } = null!;
+    [Inject] IConfiguracaoFamiliaService ConfigService { get; set; } = null!;
     [Inject] IDialogService Dialog { get; set; } = null!;
     [Inject] ISnackbar Snackbar { get; set; } = null!;
     [Inject] NavigationManager Nav { get; set; } = null!;
@@ -139,13 +141,15 @@ else
     private CardapioSemanaDTO? _cardapio;
     private bool _carregando = true;
 
-    private static readonly TipoRefeicao[] _tiposAtivos = [TipoRefeicao.Almoco]; // MVP
+    private TipoRefeicao[] _tiposAtivos = [TipoRefeicao.Almoco]; // fallback até carregar a config
 
     private record DiaInfo(DiaSemana DiaSemana, string NomeCurto, DateOnly Data);
     private List<DiaInfo> _dias = [];
 
     protected override async Task OnParametersSetAsync()
     {
+        await CarregarTiposAtivosAsync();
+
         _dataInicio = DataStr is not null && DateOnly.TryParse(DataStr, out var d)
             ? d
             : SegundaDeHoje();
@@ -172,6 +176,20 @@ else
             .ToList();
 
         await CarregarSemanaAsync();
+    }
+
+    private async Task CarregarTiposAtivosAsync()
+    {
+        var cfg = await ConfigService.ObterAsync();
+        var tipos = cfg.TiposRefeicaoAtivos
+            .Select(t => Enum.TryParse<TipoRefeicao>(t, out var tipo) ? tipo : (TipoRefeicao?)null)
+            .Where(t => t.HasValue)
+            .Select(t => t!.Value)
+            .OrderBy(t => (int)t) // ordem cronológica do dia: Café → Almoço → Lanche → Jantar → Ceia
+            .ToArray();
+
+        if (tipos.Length > 0)
+            _tiposAtivos = tipos;
     }
 
     private async Task CarregarSemanaAsync()

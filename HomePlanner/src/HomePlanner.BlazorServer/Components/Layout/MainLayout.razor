@@ -5,9 +5,10 @@
 @inject IStringLocalizer<SharedResource> L
 @inject PublicLanguageService Lang
 @inject PersistentComponentState PersistentState
+@inject IJSRuntime JS
 @implements IDisposable
 
-<MudThemeProvider Theme="HomePlannerTheme.Tema" />
+<MudThemeProvider Theme="_temaAtivo" IsDarkMode="_isDark" />
 <MudPopoverProvider />
 <MudSnackbarProvider />
 <MudDialogProvider />
@@ -17,7 +18,7 @@
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit"
                        Edge="Edge.Start" OnClick="ToggleDrawer" />
         <MudText Typo="Typo.h6" Class="ml-3"
-                 Style="font-family: 'Fraunces', serif; font-weight: 400; color:#4A6B5C;">
+                 Style="font-family: 'Fraunces', serif; font-weight: 400; color:var(--mud-palette-primary);">
             HomePlanner
         </MudText>
         <MudSpacer />
@@ -27,6 +28,37 @@
             <MudMenuItem Href="@Lang.U("/perfil")" Icon="@Icons.Material.Filled.ManageAccounts">
                 @L["Nav_Perfil"]
             </MudMenuItem>
+
+            <MudDivider Class="my-1" />
+            <MudListSubheader>
+                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                    <MudIcon Icon="@Icons.Material.Outlined.Palette" Size="Size.Small" />
+                    <MudText Typo="Typo.caption">@L["Nav_Tema"]</MudText>
+                </MudStack>
+            </MudListSubheader>
+            <MudMenuItem OnClick="@(() => AplicarTema("sage"))">
+                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                    <div style="width:14px;height:14px;border-radius:50%;background:#4A6B5C;flex:none;"></div>
+                    <span>Sage &amp; Terracotta</span>
+                    @if (_temaNome == "sage") { <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Color="Color.Primary" /> }
+                </MudStack>
+            </MudMenuItem>
+            <MudMenuItem OnClick="@(() => AplicarTema("plum"))">
+                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                    <div style="width:14px;height:14px;border-radius:50%;background:#7a4a9a;flex:none;"></div>
+                    <span>Plum &amp; Blush</span>
+                    @if (_temaNome == "plum") { <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Color="Color.Primary" /> }
+                </MudStack>
+            </MudMenuItem>
+            <MudMenuItem OnClick="@(() => AplicarTema("carbon"))">
+                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                    <div style="width:14px;height:14px;border-radius:50%;background:#4dc9a0;flex:none;"></div>
+                    <span>Carbon &amp; Mint</span>
+                    @if (_temaNome == "carbon") { <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Color="Color.Primary" /> }
+                </MudStack>
+            </MudMenuItem>
+            <MudDivider Class="my-1" />
+
             <MudMenuItem Href="/Identity/Account/Logout" ForceLoad="true" Icon="@Icons.Material.Filled.Logout">
                 @L["Nav_Sair"]
             </MudMenuItem>
@@ -95,8 +127,48 @@
 
 @code {
     private const string PersistKey = "public_lang";
+    private const string ThemeKey = "hp-theme";
     private PersistingComponentStateSubscription _langSub;
     private bool _drawerAberto = true;
+
+    private bool _isDark;
+    private string _temaNome = "sage";
+    private MudTheme _temaAtivo = HomePlannerTheme.Tema;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var temaSalvo = await JS.InvokeAsync<string?>("localStorage.getItem", ThemeKey);
+            if (!string.IsNullOrEmpty(temaSalvo) && temaSalvo != _temaNome)
+                await AplicarTema(temaSalvo);
+        }
+    }
+
+    private async Task AplicarTema(string nome)
+    {
+        _temaNome = nome;
+        (_temaAtivo, _isDark) = nome switch
+        {
+            "plum"   => (HomePlannerTheme.PlumBlush,  false),
+            "carbon" => (HomePlannerTheme.CarbonMint, true),
+            _        => (HomePlannerTheme.Tema,       false),
+        };
+
+        // Aplica a class CSS no <body> para as variáveis --hp-* customizadas.
+        var cssClass = nome switch
+        {
+            "plum"   => "theme-plum",
+            "carbon" => "theme-carbon",
+            _        => "",
+        };
+        await JS.InvokeVoidAsync("eval",
+            "document.body.className = document.body.className.replace(/theme-\\S+/g, '').trim(); " +
+            (string.IsNullOrEmpty(cssClass) ? "" : $"document.body.classList.add('{cssClass}');"));
+
+        await JS.InvokeVoidAsync("localStorage.setItem", ThemeKey, nome);
+        StateHasChanged();
+    }
 
     protected override void OnInitialized()
     {

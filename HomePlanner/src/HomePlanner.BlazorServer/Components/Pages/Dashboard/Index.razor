@@ -23,7 +23,7 @@
 }
 
 <MudText Typo="Typo.h4" GutterBottom="true"
-         Style="font-family:'Fraunces',serif; font-weight:300; color:#4A6B5C;">
+         Style="font-family:'Fraunces',serif; font-weight:300; color:var(--mud-palette-primary);">
     @L["Dashboard_Saudacao"]
 </MudText>
 <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-6">
@@ -32,11 +32,11 @@
 
 <MudGrid Spacing="3">
     <MudItem xs="12" sm="6" md="3">
-        <MudCard Class="hover-card" Style="cursor:pointer; border-top: 4px solid #4A6B5C;"
+        <MudCard Class="hover-card" Style="cursor:pointer; border-top: 4px solid var(--mud-palette-primary);"
                  @onclick='@(() => Nav.NavigateTo("/cardapio"))'>
             <MudCardContent>
                 <MudIcon Icon="@Icons.Material.Filled.CalendarMonth"
-                         Style="color:#4A6B5C; font-size:2.5rem;" />
+                         Style="color:var(--mud-palette-primary); font-size:2.5rem;" />
                 <MudText Typo="Typo.h6" Class="mt-2">Cardápio</MudText>
                 <MudText Typo="Typo.body2" Color="Color.Secondary">
                     Planeje as refeições da semana
@@ -46,11 +46,11 @@
     </MudItem>
 
     <MudItem xs="12" sm="6" md="3">
-        <MudCard Class="hover-card" Style="cursor:pointer; border-top: 4px solid #C97B5A;"
+        <MudCard Class="hover-card" Style="cursor:pointer; border-top: 4px solid var(--mud-palette-secondary);"
                  @onclick='@(() => Nav.NavigateTo("/receitas"))'>
             <MudCardContent>
                 <MudIcon Icon="@Icons.Material.Filled.MenuBook"
-                         Style="color:#C97B5A; font-size:2.5rem;" />
+                         Style="color:var(--mud-palette-secondary); font-size:2.5rem;" />
                 <MudText Typo="Typo.h6" Class="mt-2">Receitas</MudText>
                 <MudText Typo="Typo.body2" Color="Color.Secondary">
                     @_totalReceitas receitas cadastradas
@@ -60,11 +60,11 @@
     </MudItem>
 
     <MudItem xs="12" sm="6" md="3">
-        <MudCard Class="hover-card" Style="cursor:pointer; border-top: 4px solid #7A8278;"
+        <MudCard Class="hover-card" Style="cursor:pointer; border-top: 4px solid var(--mud-palette-text-secondary);"
                  @onclick='@(() => Nav.NavigateTo("/modelos"))'>
             <MudCardContent>
                 <MudIcon Icon="@Icons.Material.Filled.ContentCopy"
-                         Style="color:#7A8278; font-size:2.5rem;" />
+                         Style="color:var(--mud-palette-text-secondary); font-size:2.5rem;" />
                 <MudText Typo="Typo.h6" Class="mt-2">Modelos</MudText>
                 <MudText Typo="Typo.body2" Color="Color.Secondary">
                     Semanas favoritas para reusar
@@ -74,10 +74,10 @@
     </MudItem>
 
     <MudItem xs="12" sm="6" md="3">
-        <MudCard Style="border-top: 4px solid #E8DDD1; opacity: 0.6;">
+        <MudCard Style="border-top: 4px solid var(--mud-palette-lines-default); opacity: 0.6;">
             <MudCardContent>
                 <MudIcon Icon="@Icons.Material.Filled.ShoppingCart"
-                         Style="color:#7A8278; font-size:2.5rem;" />
+                         Style="color:var(--mud-palette-text-secondary); font-size:2.5rem;" />
                 <MudText Typo="Typo.h6" Class="mt-2">Lista de Compras</MudText>
                 <MudText Typo="Typo.body2" Color="Color.Secondary">
                     Em breve
