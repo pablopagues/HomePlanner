@@ -7,6 +7,7 @@
 @using Application.HomePlanner.Services.Configuracao
 @inject IStringLocalizer<SharedResource> L
 @inject PublicLanguageService Lang
+@inject EstadoMural Mural
 
 <PageTitle>@L["Cardapio_Titulo"]</PageTitle>
 
@@ -96,7 +97,7 @@ else
                             }
                         </MudPaper>
                     }
-                    else
+                    else if (!Mural.Ativo)
                     {
                         <MudPaper @onclick="@(() => AbrirSeletor(dia, tipo, refeicao))"
                                   Style="cursor:pointer; height:100%; min-height:70px; border-radius:8px; border:1px dashed var(--mud-palette-lines-default); background:transparent; display:flex; align-items:center; justify-content:center;"
@@ -111,18 +112,21 @@ else
     </div>
 
     @* ── Ações da semana ─────────────────────────────────────────── *@
-    <MudStack Row="true" Spacing="2" Class="mt-4">
-        <MudButton Variant="Variant.Outlined" Size="Size.Small"
-                   StartIcon="@Icons.Material.Filled.ContentCopy"
-                   OnClick="CopiarSemana">
-            @L["Cardapio_CopiarSemana"]
-        </MudButton>
-        <MudButton Variant="Variant.Outlined" Size="Size.Small"
-                   StartIcon="@Icons.Material.Filled.BookmarkAdd"
-                   OnClick="SalvarComoModelo">
-            @L["Cardapio_SalvarModelo"]
-        </MudButton>
-    </MudStack>
+    @if (!Mural.Ativo)
+    {
+        <MudStack Row="true" Spacing="2" Class="mt-4">
+            <MudButton Variant="Variant.Outlined" Size="Size.Small"
+                       StartIcon="@Icons.Material.Filled.ContentCopy"
+                       OnClick="CopiarSemana">
+                @L["Cardapio_CopiarSemana"]
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Size="Size.Small"
+                       StartIcon="@Icons.Material.Filled.BookmarkAdd"
+                       OnClick="SalvarComoModelo">
+                @L["Cardapio_SalvarModelo"]
+            </MudButton>
+        </MudStack>
+    }
 }
 
 @code {
@@ -207,6 +211,8 @@ else
 
     private async Task AbrirSeletor(DiaInfo dia, TipoRefeicao tipo, RefeicaoDiaDTO? refeicao)
     {
+        if (Mural.Ativo) return; // somente-leitura no Modo Mural
+
         var parameters = new DialogParameters<SeletorReceita>
         {
             { x => x.DiaSemana,     dia.DiaSemana },

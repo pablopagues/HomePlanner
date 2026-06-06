@@ -8,6 +8,7 @@
 @inject IStringLocalizer<SharedResource> L
 @inject ISnackbar Snackbar
 @inject IDialogService Dialog
+@inject EstadoMural Mural
 
 <PageTitle>@L["Planner_Titulo"]</PageTitle>
 
@@ -15,11 +16,14 @@
     <MudText Typo="Typo.h5" Style="font-family:'Fraunces',serif; font-weight:300;">
         @L["Planner_Titulo"]
     </MudText>
-    <MudButton Variant="Variant.Filled" Color="Color.Primary"
-               StartIcon="@Icons.Material.Filled.Add"
-               OnClick="@(() => AbrirEditor(null))">
-        @L["Planner_Nova"]
-    </MudButton>
+    @if (!Mural.Ativo)
+    {
+        <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   OnClick="@(() => AbrirEditor(null))">
+            @L["Planner_Nova"]
+        </MudButton>
+    }
 </MudStack>
 
 @* ── Filtros ────────────────────────────────────────────────────────────── *@
@@ -68,7 +72,7 @@ else
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                     <MudCheckBox T="bool" Value="@t.Concluida"
                                  ValueChanged="@(async (bool v) => await ConcluirAsync(t, v))"
-                                 Color="Color.Success" />
+                                 ReadOnly="Mural.Ativo" Color="Color.Success" />
 
                     <MudStack Spacing="0" Style="flex:1; min-width:0;">
                         <MudText Typo="Typo.body1"
@@ -112,11 +116,14 @@ else
                         </MudStack>
                     </MudStack>
 
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
-                                   OnClick="@(() => AbrirEditor(t))" />
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
-                                   Color="Color.Error"
-                                   OnClick="@(() => ConfirmarExclusao(t))" />
+                    @if (!Mural.Ativo)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                                       OnClick="@(() => AbrirEditor(t))" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                                       Color="Color.Error"
+                                       OnClick="@(() => ConfirmarExclusao(t))" />
+                    }
                 </MudStack>
             </MudPaper>
         }

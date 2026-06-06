@@ -13,12 +13,13 @@ public class LogoutModel : PageModel
     public LogoutModel(SignInManager<Usuario> signInManager)
         => _signInManager = signInManager;
 
-    public async Task<IActionResult> OnGetAsync() => await SairAsync();
-    public async Task<IActionResult> OnPostAsync() => await SairAsync();
+    public async Task<IActionResult> OnGetAsync(string? paraLogin = null) => await SairAsync(paraLogin);
+    public async Task<IActionResult> OnPostAsync(string? paraLogin = null) => await SairAsync(paraLogin);
 
-    private async Task<IActionResult> SairAsync()
+    private async Task<IActionResult> SairAsync(string? paraLogin)
     {
         await _signInManager.SignOutAsync();
-        return Redirect("/");
+        // Saída do Modo Mural por recarga do tablet: vai direto para o login.
+        return Redirect(paraLogin == "1" ? "/Identity/Account/Login" : "/");
     }
 }

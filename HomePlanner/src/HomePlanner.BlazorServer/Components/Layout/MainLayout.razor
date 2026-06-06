@@ -8,6 +8,9 @@
 @inject PersistentComponentState PersistentState
 @inject IFotoUsuarioService Foto
 @inject EstadoFotoUsuario EstadoFoto
+@inject EstadoMural Mural
+@inject IDialogService Dialog
+@inject NavigationManager Nav
 @inject IJSRuntime JS
 @implements IDisposable
 
@@ -16,138 +19,191 @@
 <MudSnackbarProvider />
 <MudDialogProvider />
 
-<MudLayout>
-    <MudAppBar Elevation="1" Color="Color.Surface" Dense="false">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit"
-                       Edge="Edge.Start" OnClick="ToggleDrawer" />
-        <MudText Typo="Typo.h6" Class="ml-3"
-                 Style="font-family: 'Fraunces', serif; font-weight: 400; color:var(--mud-palette-primary);">
-            HomePlanner
-        </MudText>
-        <MudSpacer />
-        <LanguageToggle />
-        <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Class="ml-2">
-            <ActivatorContent>
-                <MudAvatar Size="Size.Medium" Color="Color.Primary" Style="cursor:pointer;">
-                    @if (_versaoFoto is not null)
-                    {
-                        <MudImage Src="@($"/perfil/foto?v={_versaoFoto}")" Alt="Foto de perfil"
-                                  ObjectFit="ObjectFit.Cover" Width="40" Height="40" />
-                    }
-                    else
-                    {
-                        <MudIcon Icon="@Icons.Material.Filled.AccountCircle" />
-                    }
-                </MudAvatar>
-            </ActivatorContent>
-            <ChildContent>
-            <MudMenuItem Href="@Lang.U("/perfil")" Icon="@Icons.Material.Filled.ManageAccounts">
-                @L["Nav_Perfil"]
-            </MudMenuItem>
+@if (Mural.Ativo)
+{
+    @* ── Modo Mural: visão de família somente-leitura para o tablet ────────── *@
+    <MudLayout>
+        <MudAppBar Elevation="1" Color="Color.Primary" Dense="false">
+            <MudIcon Icon="@Icons.Material.Filled.Tablet" />
+            <MudText Typo="Typo.h6" Class="ml-3"
+                     Style="font-family:'Fraunces',serif; font-weight:400;">
+                @L["Mural_Titulo"]
+            </MudText>
+            <MudSpacer />
+            <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center" Class="d-none d-sm-flex">
+                <MudButton Href="@Lang.U("/planner")" Color="Color.Inherit"
+                           StartIcon="@Icons.Material.Filled.CheckCircleOutline">@L["Nav_Planner"]</MudButton>
+                <MudButton Href="@Lang.U("/calendario")" Color="Color.Inherit"
+                           StartIcon="@Icons.Material.Filled.EditCalendar">@L["Nav_Calendario"]</MudButton>
+                <MudButton Href="@Lang.U("/cardapio")" Color="Color.Inherit"
+                           StartIcon="@Icons.Material.Filled.CalendarMonth">@L["Nav_Cardapio"]</MudButton>
+                <MudButton Href="@Lang.U("/compras")" Color="Color.Inherit"
+                           StartIcon="@Icons.Material.Filled.ShoppingCart">@L["Nav_ListaCompras"]</MudButton>
+            </MudStack>
+            <MudSpacer />
+            <MudButton OnClick="AbrirSairMural" Color="Color.Inherit" Variant="Variant.Outlined"
+                       StartIcon="@Icons.Material.Filled.Lock">@L["Mural_Sair"]</MudButton>
+        </MudAppBar>
 
-            <MudDivider Class="my-1" />
-            <MudListSubheader>
-                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
-                    <MudIcon Icon="@Icons.Material.Outlined.Palette" Size="Size.Small" />
-                    <MudText Typo="Typo.caption">@L["Nav_Tema"]</MudText>
-                </MudStack>
-            </MudListSubheader>
-            <MudMenuItem OnClick="@(() => AplicarTema("sage"))">
-                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
-                    <div style="width:14px;height:14px;border-radius:50%;background:#4A6B5C;flex:none;"></div>
-                    <span>Sage &amp; Terracotta</span>
-                    @if (_temaNome == "sage") { <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Color="Color.Primary" /> }
-                </MudStack>
-            </MudMenuItem>
-            <MudMenuItem OnClick="@(() => AplicarTema("plum"))">
-                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
-                    <div style="width:14px;height:14px;border-radius:50%;background:#7a4a9a;flex:none;"></div>
-                    <span>Plum &amp; Blush</span>
-                    @if (_temaNome == "plum") { <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Color="Color.Primary" /> }
-                </MudStack>
-            </MudMenuItem>
-            <MudMenuItem OnClick="@(() => AplicarTema("carbon"))">
-                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
-                    <div style="width:14px;height:14px;border-radius:50%;background:#4dc9a0;flex:none;"></div>
-                    <span>Carbon &amp; Mint</span>
-                    @if (_temaNome == "carbon") { <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Color="Color.Primary" /> }
-                </MudStack>
-            </MudMenuItem>
-            <MudDivider Class="my-1" />
+        @* Navegação compacta para telas pequenas *@
+        <MudAppBar Bottom="true" Elevation="1" Color="Color.Surface" Dense="true" Class="d-flex d-sm-none">
+            <MudStack Row="true" Spacing="0" Justify="Justify.SpaceAround" Style="width:100%;">
+                <MudIconButton Href="@Lang.U("/planner")" Icon="@Icons.Material.Filled.CheckCircleOutline" />
+                <MudIconButton Href="@Lang.U("/calendario")" Icon="@Icons.Material.Filled.EditCalendar" />
+                <MudIconButton Href="@Lang.U("/cardapio")" Icon="@Icons.Material.Filled.CalendarMonth" />
+                <MudIconButton Href="@Lang.U("/compras")" Icon="@Icons.Material.Filled.ShoppingCart" />
+            </MudStack>
+        </MudAppBar>
 
-            <MudMenuItem Href="/Identity/Account/Logout" ForceLoad="true" Icon="@Icons.Material.Filled.Logout">
-                @L["Nav_Sair"]
-            </MudMenuItem>
-            </ChildContent>
-        </MudMenu>
-    </MudAppBar>
+        <MudMainContent>
+            <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-4">
+                @Body
+            </MudContainer>
+        </MudMainContent>
+    </MudLayout>
+}
+else
+{
+    <MudLayout>
+        <MudAppBar Elevation="1" Color="Color.Surface" Dense="false">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit"
+                           Edge="Edge.Start" OnClick="ToggleDrawer" />
+            <MudText Typo="Typo.h6" Class="ml-3"
+                     Style="font-family: 'Fraunces', serif; font-weight: 400; color:var(--mud-palette-primary);">
+                HomePlanner
+            </MudText>
+            <MudSpacer />
+            <LanguageToggle />
+            <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Class="ml-2">
+                <ActivatorContent>
+                    <MudAvatar Size="Size.Medium" Color="Color.Primary" Style="cursor:pointer;">
+                        @if (_versaoFoto is not null)
+                        {
+                            <MudImage Src="@($"/perfil/foto?v={_versaoFoto}")" Alt="Foto de perfil"
+                                      ObjectFit="ObjectFit.Cover" Width="40" Height="40" />
+                        }
+                        else
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.AccountCircle" />
+                        }
+                    </MudAvatar>
+                </ActivatorContent>
+                <ChildContent>
+                <MudMenuItem Href="@Lang.U("/perfil")" Icon="@Icons.Material.Filled.ManageAccounts">
+                    @L["Nav_Perfil"]
+                </MudMenuItem>
 
-    <MudDrawer @bind-Open="_drawerAberto" ClipMode="DrawerClipMode.Always"
-               Elevation="2" Variant="DrawerVariant.Responsive">
-        <MudNavMenu>
-            <MudNavLink Href="/dashboard" Match="NavLinkMatch.All"
-                        Icon="@Icons.Material.Filled.Dashboard">
-                @L["Nav_Dashboard"]
-            </MudNavLink>
-            <MudNavLink Href="@Lang.U("/cardapio")"
-                        Icon="@Icons.Material.Filled.CalendarMonth">
-                @L["Nav_Cardapio"]
-            </MudNavLink>
-            <MudNavLink Href="@Lang.U("/receitas")"
-                        Icon="@Icons.Material.Filled.MenuBook">
-                @L["Nav_Receitas"]
-            </MudNavLink>
-            <MudNavLink Href="@Lang.U("/modelos")"
-                        Icon="@Icons.Material.Filled.ContentCopy">
-                @L["Nav_Modelos"]
-            </MudNavLink>
-            <MudNavLink Href="@Lang.U("/compras")"
-                        Icon="@Icons.Material.Filled.ShoppingCart">
-                @L["Nav_ListaCompras"]
-            </MudNavLink>
-            <MudNavLink Href="@Lang.U("/planner")"
-                        Icon="@Icons.Material.Filled.CheckCircleOutline">
-                @L["Nav_Planner"]
-            </MudNavLink>
-            <MudNavLink Href="@Lang.U("/calendario")"
-                        Icon="@Icons.Material.Filled.EditCalendar">
-                @L["Nav_Calendario"]
-            </MudNavLink>
-            <MudNavLink Href="@Lang.U("/familia")"
-                        Icon="@Icons.Material.Filled.People">
-                @L["Nav_Familia"]
-            </MudNavLink>
-            <MudDivider Class="my-2" />
-            <AuthorizeView Roles="Owner">
-                <MudNavLink Href="@Lang.U("/empresa")"
-                            Icon="@Icons.Material.Filled.Home">
-                    @L["Nav_Empresa"]
+                <AuthorizeView Roles="Owner">
+                    <MudMenuItem OnClick="EntrarMural" Icon="@Icons.Material.Filled.Tablet">
+                        @L["Mural_Entrar"]
+                    </MudMenuItem>
+                </AuthorizeView>
+
+                <MudDivider Class="my-1" />
+                <MudListSubheader>
+                    <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                        <MudIcon Icon="@Icons.Material.Outlined.Palette" Size="Size.Small" />
+                        <MudText Typo="Typo.caption">@L["Nav_Tema"]</MudText>
+                    </MudStack>
+                </MudListSubheader>
+                <MudMenuItem OnClick="@(() => AplicarTema("sage"))">
+                    <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                        <div style="width:14px;height:14px;border-radius:50%;background:#4A6B5C;flex:none;"></div>
+                        <span>Sage &amp; Terracotta</span>
+                        @if (_temaNome == "sage") { <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Color="Color.Primary" /> }
+                    </MudStack>
+                </MudMenuItem>
+                <MudMenuItem OnClick="@(() => AplicarTema("plum"))">
+                    <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                        <div style="width:14px;height:14px;border-radius:50%;background:#7a4a9a;flex:none;"></div>
+                        <span>Plum &amp; Blush</span>
+                        @if (_temaNome == "plum") { <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Color="Color.Primary" /> }
+                    </MudStack>
+                </MudMenuItem>
+                <MudMenuItem OnClick="@(() => AplicarTema("carbon"))">
+                    <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                        <div style="width:14px;height:14px;border-radius:50%;background:#4dc9a0;flex:none;"></div>
+                        <span>Carbon &amp; Mint</span>
+                        @if (_temaNome == "carbon") { <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Color="Color.Primary" /> }
+                    </MudStack>
+                </MudMenuItem>
+                <MudDivider Class="my-1" />
+
+                <MudMenuItem Href="/Identity/Account/Logout" ForceLoad="true" Icon="@Icons.Material.Filled.Logout">
+                    @L["Nav_Sair"]
+                </MudMenuItem>
+                </ChildContent>
+            </MudMenu>
+        </MudAppBar>
+
+        <MudDrawer @bind-Open="_drawerAberto" ClipMode="DrawerClipMode.Always"
+                   Elevation="2" Variant="DrawerVariant.Responsive">
+            <MudNavMenu>
+                <MudNavLink Href="/dashboard" Match="NavLinkMatch.All"
+                            Icon="@Icons.Material.Filled.Dashboard">
+                    @L["Nav_Dashboard"]
                 </MudNavLink>
-                <MudNavLink Href="@Lang.U("/assinatura")"
-                            Icon="@Icons.Material.Filled.CreditCard">
-                    @L["Nav_Assinatura"]
+                <MudNavLink Href="@Lang.U("/cardapio")"
+                            Icon="@Icons.Material.Filled.CalendarMonth">
+                    @L["Nav_Cardapio"]
                 </MudNavLink>
-            </AuthorizeView>
-            <MudNavLink Href="@Lang.U("/configuracoes")"
-                        Icon="@Icons.Material.Filled.Settings">
-                @L["Nav_Configuracoes"]
-            </MudNavLink>
-        </MudNavMenu>
-    </MudDrawer>
+                <MudNavLink Href="@Lang.U("/receitas")"
+                            Icon="@Icons.Material.Filled.MenuBook">
+                    @L["Nav_Receitas"]
+                </MudNavLink>
+                <MudNavLink Href="@Lang.U("/modelos")"
+                            Icon="@Icons.Material.Filled.ContentCopy">
+                    @L["Nav_Modelos"]
+                </MudNavLink>
+                <MudNavLink Href="@Lang.U("/compras")"
+                            Icon="@Icons.Material.Filled.ShoppingCart">
+                    @L["Nav_ListaCompras"]
+                </MudNavLink>
+                <MudNavLink Href="@Lang.U("/planner")"
+                            Icon="@Icons.Material.Filled.CheckCircleOutline">
+                    @L["Nav_Planner"]
+                </MudNavLink>
+                <MudNavLink Href="@Lang.U("/calendario")"
+                            Icon="@Icons.Material.Filled.EditCalendar">
+                    @L["Nav_Calendario"]
+                </MudNavLink>
+                <MudNavLink Href="@Lang.U("/familia")"
+                            Icon="@Icons.Material.Filled.People">
+                    @L["Nav_Familia"]
+                </MudNavLink>
+                <MudDivider Class="my-2" />
+                <AuthorizeView Roles="Owner">
+                    <MudNavLink Href="@Lang.U("/empresa")"
+                                Icon="@Icons.Material.Filled.Home">
+                        @L["Nav_Empresa"]
+                    </MudNavLink>
+                    <MudNavLink Href="@Lang.U("/assinatura")"
+                                Icon="@Icons.Material.Filled.CreditCard">
+                        @L["Nav_Assinatura"]
+                    </MudNavLink>
+                </AuthorizeView>
+                <MudNavLink Href="@Lang.U("/configuracoes")"
+                            Icon="@Icons.Material.Filled.Settings">
+                    @L["Nav_Configuracoes"]
+                </MudNavLink>
+            </MudNavMenu>
+        </MudDrawer>
 
-    <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-4">
-            @Body
-        </MudContainer>
-    </MudMainContent>
-</MudLayout>
+        <MudMainContent>
+            <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-4">
+                @Body
+            </MudContainer>
+        </MudMainContent>
+    </MudLayout>
 
-@* FAB de feedback — canto inferior-esquerdo, só em telas autenticadas *@
-<HomePlanner.BlazorServer.Components.Feedback.FeedbackButton />
+    @* FAB de feedback — canto inferior-esquerdo, só em telas autenticadas *@
+    <HomePlanner.BlazorServer.Components.Feedback.FeedbackButton />
+}
 
 @code {
     private const string PersistKey = "public_lang";
     private const string ThemeKey = "hp-theme";
+    private const string MuralKey = "hp_mural";
     private PersistingComponentStateSubscription _langSub;
     private bool _drawerAberto = true;
 
@@ -161,6 +217,16 @@
     {
         if (firstRender)
         {
+            // Recarga de página enquanto o Mural estava ativo: o circuito é novo
+            // (Mural.Ativo == false) mas o marcador persiste → cai para o login.
+            var marcador = await JS.InvokeAsync<string?>("appStorage.get", MuralKey);
+            if (marcador == "1" && !Mural.Ativo)
+            {
+                await JS.InvokeVoidAsync("appStorage.remove", MuralKey);
+                Nav.NavigateTo("/Identity/Account/Logout?paraLogin=1", forceLoad: true);
+                return;
+            }
+
             var temaSalvo = await JS.InvokeAsync<string?>("localStorage.getItem", ThemeKey);
             if (!string.IsNullOrEmpty(temaSalvo) && temaSalvo != _temaNome)
                 await AplicarTema(temaSalvo);
@@ -203,6 +269,8 @@
     protected override void OnInitialized()
     {
         EstadoFoto.OnChange += AoMudarFoto;
+        Mural.OnChange += AoMudarMural;
+        Nav.LocationChanged += AoNavegar;
 
         // Carrega o idioma do SSR para o circuit interativo (HttpContext é null no circuit).
         _langSub = PersistentState.RegisterOnPersisting(PersistLang);
@@ -222,9 +290,43 @@
 
     private void ToggleDrawer() => _drawerAberto = !_drawerAberto;
 
+    // ── Modo Mural ────────────────────────────────────────────────────────────
+    private void AoMudarMural() => InvokeAsync(StateHasChanged);
+
+    /// <summary>Guarda de navegação: no Mural, qualquer rota fora da allow-list volta para Tarefas.</summary>
+    private void AoNavegar(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        if (!Mural.Ativo) return;
+        var path = Nav.ToBaseRelativePath(e.Location);
+        if (!MuralRotas.Permitida(path))
+            Nav.NavigateTo(Lang.U("/planner"));
+    }
+
+    private async Task EntrarMural()
+    {
+        await JS.InvokeVoidAsync("appStorage.set", MuralKey, "1");
+        Mural.Ativar();
+        Nav.NavigateTo(Lang.U("/planner"));
+    }
+
+    private async Task AbrirSairMural()
+    {
+        var dialog = await Dialog.ShowAsync<SairMuralDialog>(string.Empty,
+            new DialogOptions { MaxWidth = MaxWidth.ExtraSmall, FullWidth = true });
+
+        var result = await dialog.Result;
+        if (result is null || result.Canceled || result.Data is not true) return;
+
+        await JS.InvokeVoidAsync("appStorage.remove", MuralKey);
+        Mural.Desativar();
+        Nav.NavigateTo("/dashboard");
+    }
+
     public void Dispose()
     {
         EstadoFoto.OnChange -= AoMudarFoto;
+        Mural.OnChange -= AoMudarMural;
+        Nav.LocationChanged -= AoNavegar;
         _langSub.Dispose();
     }
 }

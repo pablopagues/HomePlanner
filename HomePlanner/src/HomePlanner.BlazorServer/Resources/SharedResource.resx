@@ -231,6 +231,14 @@
   <data name="Cal_Membro" xml:space="preserve"><value>Membro</value></data>
   <data name="Cal_TodosMembros" xml:space="preserve"><value>Todos</value></data>
   <data name="Cal_SomenteMinhas" xml:space="preserve"><value>Você está vendo apenas as suas tarefas.</value></data>
+  <data name="Mural_Entrar" xml:space="preserve"><value>Modo Mural</value></data>
+  <data name="Mural_Titulo" xml:space="preserve"><value>Modo Mural</value></data>
+  <data name="Mural_Sair" xml:space="preserve"><value>Sair do Mural</value></data>
+  <data name="Mural_Senha" xml:space="preserve"><value>Sua senha</value></data>
+  <data name="Mural_SenhaPrompt" xml:space="preserve"><value>Digite a senha da sua conta para sair do Modo Mural.</value></data>
+  <data name="Mural_SenhaInvalida" xml:space="preserve"><value>Senha incorreta.</value></data>
+  <data name="Mural_Bloqueado" xml:space="preserve"><value>Muitas tentativas. Tente novamente mais tarde.</value></data>
+  <data name="Mural_Confirmar" xml:space="preserve"><value>Sair do Mural</value></data>
 
   <!-- ── Recorrência ── -->
   <data name="Recorrencia_Nenhuma" xml:space="preserve"><value>Sem repetição</value></data>

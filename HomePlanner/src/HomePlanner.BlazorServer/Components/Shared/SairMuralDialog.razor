@@ -1,0 +1,89 @@
+@using Domain.HomePlanner.Models.SaaS.Identity
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<Usuario> Users
+@inject AuthenticationStateProvider AuthState
+@inject IStringLocalizer<SharedResource> L
+
+<MudDialog>
+    <TitleContent>
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+            <MudIcon Icon="@Icons.Material.Filled.Lock" Color="Color.Primary" />
+            <MudText Typo="Typo.h6">@L["Mural_Sair"]</MudText>
+        </MudStack>
+    </TitleContent>
+    <DialogContent>
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
+            @L["Mural_SenhaPrompt"]
+        </MudText>
+        <MudTextField @bind-Value="_senha" Label="@L["Mural_Senha"]"
+                      InputType="InputType.Password" Variant="Variant.Outlined"
+                      Immediate="true" AutoFocus="true"
+                      OnKeyDown="@OnKeyDown" Disabled="_verificando" />
+        @if (_erro is not null)
+        {
+            <MudAlert Severity="Severity.Error" Class="mt-3" Dense="true">@_erro</MudAlert>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancelar" Disabled="_verificando">@L["Btn_Cancelar"]</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                   OnClick="Confirmar" Disabled="_verificando">
+            @L["Mural_Confirmar"]
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private MudDialogInstance Dialog { get; set; } = null!;
+
+    private string _senha = string.Empty;
+    private string? _erro;
+    private bool _verificando;
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key is "Enter" or "NumpadEnter" && !_verificando)
+            await Confirmar();
+    }
+
+    private async Task Confirmar()
+    {
+        if (string.IsNullOrEmpty(_senha)) return;
+
+        _verificando = true;
+        _erro = null;
+
+        var estado = await AuthState.GetAuthenticationStateAsync();
+        var usuario = await Users.GetUserAsync(estado.User);
+        if (usuario is null)
+        {
+            _erro = L["Mural_SenhaInvalida"];
+            _verificando = false;
+            return;
+        }
+
+        if (await Users.IsLockedOutAsync(usuario))
+        {
+            _erro = L["Mural_Bloqueado"];
+            _verificando = false;
+            return;
+        }
+
+        if (await Users.CheckPasswordAsync(usuario, _senha))
+        {
+            await Users.ResetAccessFailedCountAsync(usuario);
+            Dialog.Close(DialogResult.Ok(true));
+            return;
+        }
+
+        // Senha errada: incrementa o contador (pode acionar o lockout do Identity).
+        await Users.AccessFailedAsync(usuario);
+        _erro = await Users.IsLockedOutAsync(usuario)
+            ? L["Mural_Bloqueado"]
+            : L["Mural_SenhaInvalida"];
+        _senha = string.Empty;
+        _verificando = false;
+    }
+
+    private void Cancelar() => Dialog.Cancel();
+}

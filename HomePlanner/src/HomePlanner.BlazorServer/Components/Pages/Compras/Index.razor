@@ -10,6 +10,7 @@
 @inject PublicLanguageService Lang
 @inject IJSRuntime JS
 @inject NavigationManager Nav
+@inject EstadoMural Mural
 
 <PageTitle>@L["Nav_ListaCompras"]</PageTitle>
 
@@ -57,20 +58,23 @@ else if (_lista is not null)
                 @_jaTenho.Count(kv => kv.Value) @L["Compras_JaTenho"]
             </MudText>
         </MudStack>
-        <MudStack Row="true" Spacing="2">
-            @if (_jaTenho.Any(kv => kv.Value))
-            {
-                <MudButton Size="Size.Small" Variant="Variant.Text"
-                           OnClick="LimparSelecao">
-                    @L["Compras_LimparSelecao"]
+        @if (!Mural.Ativo)
+        {
+            <MudStack Row="true" Spacing="2">
+                @if (_jaTenho.Any(kv => kv.Value))
+                {
+                    <MudButton Size="Size.Small" Variant="Variant.Text"
+                               OnClick="LimparSelecao">
+                        @L["Compras_LimparSelecao"]
+                    </MudButton>
+                }
+                <MudButton Size="Size.Small" Variant="Variant.Outlined"
+                           StartIcon="@Icons.Material.Filled.Refresh"
+                           OnClick="CarregarAsync">
+                    @L["Compras_Atualizar"]
                 </MudButton>
-            }
-            <MudButton Size="Size.Small" Variant="Variant.Outlined"
-                       StartIcon="@Icons.Material.Filled.Refresh"
-                       OnClick="CarregarAsync">
-                @L["Compras_Atualizar"]
-            </MudButton>
-        </MudStack>
+            </MudStack>
+        }
     </MudStack>
 
     @if (_lista.Vazia)
@@ -98,7 +102,7 @@ else if (_lista is not null)
                             <MudCheckBox T="bool"
                                          Value="@jaTenho"
                                          ValueChanged="@(async (bool val) => await TrocarJaTenho(item.IngredienteId, val))"
-                                         Color="Color.Success" />
+                                         ReadOnly="Mural.Ativo" Color="Color.Success" />
                             <MudStack Spacing="0" Style="flex:1; min-width:0;">
                                 <MudText Typo="Typo.body2"
                                          Style="@(jaTenho ? "text-decoration:line-through; opacity:0.55;" : "font-weight:500;")">

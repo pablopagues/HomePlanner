@@ -79,6 +79,7 @@ try
     builder.Services.AddLocalization(opts => opts.ResourcesPath = "Resources");
     builder.Services.AddScoped<PublicLanguageService>();
     builder.Services.AddScoped<EstadoFotoUsuario>();
+    builder.Services.AddScoped<EstadoMural>();
 
     // ── TenantContext ─────────────────────────────────────────────────────────
     builder.Services.AddTenantContext();

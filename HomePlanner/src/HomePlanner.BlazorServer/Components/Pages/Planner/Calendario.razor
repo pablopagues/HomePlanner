@@ -8,6 +8,7 @@
 @inject IStringLocalizer<SharedResource> L
 @inject ISnackbar Snackbar
 @inject IDialogService Dialog
+@inject EstadoMural Mural
 
 <PageTitle>@L["Cal_Titulo"] — HomePlanner</PageTitle>
 
@@ -85,8 +86,11 @@ else
                              Style="@($"font-weight:{(ehHoje ? "700" : "500")}; color:{(doMes ? (ehHoje ? "var(--mud-palette-secondary)" : "var(--mud-palette-text-primary)") : "var(--mud-palette-text-disabled)")};")">
                         @dia.Data.Day
                     </MudText>
-                    <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small"
-                                   Style="padding:2px;" OnClick="@(() => NovaTarefa(dia.Data))" />
+                    @if (!Mural.Ativo)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small"
+                                       Style="padding:2px;" OnClick="@(() => NovaTarefa(dia.Data))" />
+                    }
                 </MudStack>
 
                 <MudStack Spacing="1" Class="mt-1">
@@ -259,6 +263,8 @@ else
 
     private async Task AbrirEditor(TarefaPersistenciaDTO dto)
     {
+        if (Mural.Ativo) return; // somente-leitura no Modo Mural
+
         var parameters = new DialogParameters<TarefaEditor>
         {
             { x => x.Dto, dto },
