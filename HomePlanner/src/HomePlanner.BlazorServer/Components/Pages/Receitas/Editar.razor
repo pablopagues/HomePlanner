@@ -92,7 +92,10 @@ else
         {
             var r = await Service.SalvarAsync(_dto);
             if (r.Sucesso)
+            {
                 Snackbar.Add("Receita salva!", Severity.Success);
+                Nav.NavigateTo("/receitas");
+            }
             else
                 Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
         }

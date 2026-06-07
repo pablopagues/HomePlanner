@@ -48,7 +48,7 @@
             if (r.Sucesso)
             {
                 Snackbar.Add("Receita criada com sucesso!", Severity.Success);
-                Nav.NavigateTo($"/receitas/editar/{r.Valor}");
+                Nav.NavigateTo("/receitas");
             }
             else
                 Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
