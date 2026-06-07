@@ -39,16 +39,10 @@
 
         @if (!_restrito && _membros.Count > 0)
         {
-            <MudSelect T="string" Value="_responsavelFiltro" Dense="true" Class="ml-auto"
-                       Label="@L["Cal_Membro"]" Variant="Variant.Outlined" Clearable="true"
-                       Style="min-width:180px; max-width:220px;" Margin="Margin.Dense"
-                       ValueChanged="@(async (string v) => { _responsavelFiltro = v; await CarregarAsync(); })">
-                <MudSelectItem T="string" Value="@((string?)null)">@L["Cal_TodosMembros"]</MudSelectItem>
-                @foreach (var m in _membros)
-                {
-                    <MudSelectItem T="string" Value="@m.UsuarioId">@m.Nome</MudSelectItem>
-                }
-            </MudSelect>
+            <div class="ml-auto">
+                <SeletorMembro Membros="_membros" SelecionadoId="@_responsavelFiltro"
+                               SelecionadoIdChanged="@(async (string? v) => { _responsavelFiltro = v; await CarregarAsync(); })" />
+            </div>
         }
     </MudStack>
 </MudPaper>

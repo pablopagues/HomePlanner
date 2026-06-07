@@ -29,16 +29,8 @@
         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
             @if (!_restrito && _membros.Count > 0)
             {
-                <MudSelect T="string" Value="_responsavelFiltro" Dense="true"
-                           Label="@L["Cal_Membro"]" Variant="Variant.Outlined" Clearable="true"
-                           Style="min-width:180px;" Margin="Margin.Dense"
-                           ValueChanged="@(async (string v) => { _responsavelFiltro = v; await CarregarAsync(); })">
-                    <MudSelectItem T="string" Value="@((string?)null)">@L["Cal_TodosMembros"]</MudSelectItem>
-                    @foreach (var m in _membros)
-                    {
-                        <MudSelectItem T="string" Value="@m.UsuarioId">@m.Nome</MudSelectItem>
-                    }
-                </MudSelect>
+                <SeletorMembro Membros="_membros" SelecionadoId="@_responsavelFiltro"
+                               SelecionadoIdChanged="@(async (string? v) => { _responsavelFiltro = v; await CarregarAsync(); })" />
             }
 
             <MudChipSet T="CalendarioVista" SelectedValue="_vista"

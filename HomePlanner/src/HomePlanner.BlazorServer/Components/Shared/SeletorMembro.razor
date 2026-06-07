@@ -1,0 +1,83 @@
+@* Filtro de membro da família: fotos clicáveis em telas grandes, dropdown em telas pequenas. *@
+@using Application.HomePlanner.DTOs.Planner
+@inject IStringLocalizer<SharedResource> L
+
+@* ── Telas grandes (PC/tablet): fotos ─────────────────────────────────────── *@
+<MudHidden Breakpoint="Breakpoint.SmAndDown">
+    <div style="display:flex; flex-wrap:wrap; align-items:flex-start; gap:10px;">
+        <div style="@EstiloItem" title="@L["Cal_TodosMembros"]" @onclick="@(() => SelecionarAsync(null))">
+            <div style="@EstiloAnel(null)">
+                <MudAvatar Color="Color.Default" Style="height:44px; width:44px; flex:none;">
+                    <MudIcon Icon="@Icons.Material.Filled.Groups" />
+                </MudAvatar>
+            </div>
+            <span style="@EstiloLegenda(null)">@L["Cal_TodosMembros"]</span>
+        </div>
+        @foreach (var m in Membros)
+        {
+            <div style="@EstiloItem" title="@m.Nome" @onclick="@(() => SelecionarAsync(m.UsuarioId))">
+                <div style="@EstiloAnel(m.UsuarioId)">
+                    <AvatarUsuario UsuarioId="@m.UsuarioId" Nome="@m.Nome" Versao="@m.FotoVersao" Px="44" />
+                </div>
+                <span style="@EstiloLegenda(m.UsuarioId)">@PrimeiroNome(m.Nome)</span>
+            </div>
+        }
+    </div>
+</MudHidden>
+
+@* ── Telas pequenas: dropdown ──────────────────────────────────────────────── *@
+<MudHidden Breakpoint="Breakpoint.SmAndDown" Invert="true">
+    <MudSelect T="string" Value="SelecionadoId" Dense="true"
+               Label="@L["Cal_Membro"]" Variant="Variant.Outlined" Clearable="true"
+               Style="min-width:180px; max-width:220px;" Margin="Margin.Dense"
+               ValueChanged="SelecionarAsync">
+        <MudSelectItem T="string" Value="@((string?)null)">@L["Cal_TodosMembros"]</MudSelectItem>
+        @foreach (var m in Membros)
+        {
+            <MudSelectItem T="string" Value="@m.UsuarioId">@m.Nome</MudSelectItem>
+        }
+    </MudSelect>
+</MudHidden>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<MembroFamiliaDTO> Membros { get; set; } = [];
+    [Parameter] public string? SelecionadoId { get; set; }
+    [Parameter] public EventCallback<string?> SelecionadoIdChanged { get; set; }
+
+    private const string Verde = "#2e7d32";
+
+    private const string EstiloItem =
+        "display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; width:60px;";
+
+    private string EstiloAnel(string? id)
+    {
+        var selecionado = SelecionadoId == id;
+        var cor = selecionado ? Verde : "transparent";
+        var sombra = selecionado ? $"box-shadow:0 0 0 2px {Verde};" : string.Empty;
+        return $"border-radius:50%; padding:2px; border:2px solid {cor}; {sombra} line-height:0; transition:border-color 150ms ease;";
+    }
+
+    private string EstiloLegenda(string? id)
+    {
+        var selecionado = SelecionadoId == id;
+        var cor = selecionado ? Verde : "var(--mud-palette-text-secondary)";
+        var peso = selecionado ? "600" : "400";
+        return $"font-size:0.7rem; line-height:1.1; text-align:center; color:{cor}; font-weight:{peso}; " +
+               "max-width:60px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;";
+    }
+
+    private static string PrimeiroNome(string nome)
+    {
+        var partes = nome.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return partes.Length > 0 ? partes[0] : nome;
+    }
+
+    private async Task SelecionarAsync(string? id)
+    {
+        // Clicar de novo no membro já selecionado volta ao filtro "Todos".
+        var novo = SelecionadoId == id ? null : id;
+        if (novo == SelecionadoId) return;
+        SelecionadoId = novo;
+        await SelecionadoIdChanged.InvokeAsync(novo);
+    }
+}

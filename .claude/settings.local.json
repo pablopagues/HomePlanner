@@ -37,7 +37,10 @@
       "PowerShell(dotnet build .\\\\HomePlanner\\\\src\\\\Infrastructure.HomePlanner\\\\Infrastructure.HomePlanner.csproj -nologo -clp:ErrorsOnly --no-dependencies -p:BaseOutputPath=obj\\\\buildcheck\\\\ 2>&1)",
       "PowerShell(dotnet build .\\\\HomePlanner\\\\src\\\\Infrastructure.HomePlanner\\\\Infrastructure.HomePlanner.csproj -nologo -clp:ErrorsOnly -p:BaseOutputPath=obj\\\\buildcheck\\\\ 2>&1)",
       "PowerShell(dotnet build .\\\\HomePlanner\\\\src\\\\HomePlanner.BlazorServer\\\\HomePlanner.BlazorServer.csproj -nologo -clp:ErrorsOnly -p:BaseOutputPath=obj\\\\buildcheck\\\\ 2>&1)",
-      "PowerShell(dotnet build \"HomePlanner\\\\src\\\\HomePlanner.BlazorServer\\\\HomePlanner.BlazorServer.csproj\" -nologo -clp:ErrorsOnly)"
+      "PowerShell(dotnet build \"HomePlanner\\\\src\\\\HomePlanner.BlazorServer\\\\HomePlanner.BlazorServer.csproj\" -nologo -clp:ErrorsOnly)",
+      "PowerShell(dotnet build \"src\\\\HomePlanner.BlazorServer\\\\HomePlanner.BlazorServer.csproj\" -nologo -clp:ErrorsOnly)",
+      "PowerShell(dotnet build src/HomePlanner.BlazorServer/HomePlanner.BlazorServer.csproj -c Debug --nologo -v q 2>&1)",
+      "PowerShell(dotnet build HomePlanner/src/HomePlanner.BlazorServer/HomePlanner.BlazorServer.csproj -c Debug --nologo -v q 2>&1)"
     ]
   }
 }

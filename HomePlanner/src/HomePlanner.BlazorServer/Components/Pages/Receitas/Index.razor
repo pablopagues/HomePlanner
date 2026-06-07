@@ -52,11 +52,14 @@ else
                 <MudCard Style="height:100%; border-radius:10px;">
                     @if (!string.IsNullOrWhiteSpace(r.UrlImagem))
                     {
-                        <MudCardMedia Image="@r.UrlImagem" Height="140" />
+                        <MudCardMedia Image="@r.UrlImagem" Height="140"
+                                      Style="cursor:pointer;"
+                                      @onclick="@(() => Nav.NavigateTo($"/receitas/{r.Id}"))" />
                     }
                     <MudCardContent>
-                        <MudText Typo="Typo.h6" Style="font-size:1rem;">@r.Nome</MudText>
-                        <MudStack Row="true" Spacing="1" Class="mt-2">
+                        <MudText Typo="Typo.h6" Style="font-size:1rem; cursor:pointer;"
+                                 @onclick="@(() => Nav.NavigateTo($"/receitas/{r.Id}"))">@r.Nome</MudText>
+                        <MudStack Row="true" Spacing="1" Wrap="Wrap.Wrap" Class="mt-2">
                             <MudChip T="string" Size="Size.Small" Color="Color.Default"
                                      Icon="@Icons.Material.Filled.People">
                                 @r.NumeroPorcoesBase porções
@@ -76,6 +79,10 @@ else
                     </MudCardContent>
                     <MudCardActions>
                         <MudButton Size="Size.Small" Color="Color.Primary"
+                                   Href="@($"/receitas/{r.Id}")">
+                            Ver
+                        </MudButton>
+                        <MudButton Size="Size.Small" Color="Color.Default"
                                    Href="@($"/receitas/editar/{r.Id}")">
                             Editar
                         </MudButton>

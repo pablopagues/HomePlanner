@@ -1,0 +1,155 @@
+@page "/receitas/{Id:int}"
+@attribute [Authorize]
+
+<PageTitle>@(_dto?.Nome ?? "Receita")</PageTitle>
+
+<MudBreadcrumbs Items="_breadcrumbs" Class="mb-4 pa-0" />
+
+@if (_carregando)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else if (_dto is not null)
+{
+    <MudStack Row="true" AlignItems="AlignItems.Start" Justify="Justify.SpaceBetween"
+              Wrap="Wrap.Wrap" Spacing="2" Class="mb-4">
+        <MudText Typo="Typo.h4" Style="font-family:'Fraunces',serif; font-weight:300;">
+            @_dto.Nome
+        </MudText>
+        <MudStack Row="true" Spacing="2">
+            <MudButton Variant="Variant.Outlined" Color="Color.Default"
+                       StartIcon="@Icons.Material.Filled.ArrowBack"
+                       Href="/receitas">
+                Voltar
+            </MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Edit"
+                       Href="@($"/receitas/editar/{_dto.Id}")">
+                Editar
+            </MudButton>
+        </MudStack>
+    </MudStack>
+
+    <MudGrid Spacing="4">
+        @if (!string.IsNullOrWhiteSpace(_dto.UrlImagem))
+        {
+            <MudItem xs="12" md="5">
+                <MudImage Src="@_dto.UrlImagem" Alt="@_dto.Nome" Fluid="true"
+                          ObjectFit="ObjectFit.Cover"
+                          Style="width:100%; max-height:320px; border-radius:10px;" />
+            </MudItem>
+        }
+
+        <MudItem xs="12" md="@(string.IsNullOrWhiteSpace(_dto.UrlImagem) ? 12 : 7)">
+            <MudStack Row="true" Spacing="1" Wrap="Wrap.Wrap" Class="mb-4">
+                <MudChip T="string" Size="Size.Small" Color="Color.Default"
+                         Icon="@Icons.Material.Filled.People">
+                    @_dto.NumeroPorcoesBase porções
+                </MudChip>
+                @if (_dto.TempoPreparoMinutos.HasValue)
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Default"
+                             Icon="@Icons.Material.Filled.Timer">
+                        @_dto.TempoPreparoMinutos min
+                    </MudChip>
+                }
+                <MudChip T="string" Size="Size.Small" Color="Color.Default"
+                         Icon="@Icons.Material.Filled.List">
+                    @_dto.Ingredientes.Count ingr.
+                </MudChip>
+            </MudStack>
+
+            <MudText Typo="Typo.h6" GutterBottom="true">Ingredientes</MudText>
+            @if (_dto.Ingredientes.Count == 0)
+            {
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    Nenhum ingrediente cadastrado.
+                </MudText>
+            }
+            else
+            {
+                <MudList T="string" Dense="true">
+                    @foreach (var i in _dto.Ingredientes.OrderBy(x => x.Ordem))
+                    {
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.FiberManualRecord"
+                                     IconSize="Size.Small">
+                            <MudText Typo="Typo.body2">
+                                <strong>@FormatarQuantidade(i.Quantidade) @i.CodigoUnidade</strong>
+                                @i.NomeIngrediente
+                                @if (!string.IsNullOrWhiteSpace(i.Observacao))
+                                {
+                                    <MudText Component="@("span")" Typo="Typo.body2" Color="Color.Secondary">
+                                        — @i.Observacao
+                                    </MudText>
+                                }
+                                @if (i.Opcional)
+                                {
+                                    <MudChip T="string" Size="Size.Small" Color="Color.Secondary"
+                                             Variant="Variant.Text" Class="ml-1">opcional</MudChip>
+                                }
+                            </MudText>
+                        </MudListItem>
+                    }
+                </MudList>
+            }
+        </MudItem>
+    </MudGrid>
+
+    @if (!string.IsNullOrWhiteSpace(_dto.ModoPreparo))
+    {
+        <MudDivider Class="my-4" />
+        <MudText Typo="Typo.h6" GutterBottom="true">Modo de preparo</MudText>
+        <MudText Typo="Typo.body1" Style="white-space:pre-wrap; overflow-wrap:anywhere;">@_dto.ModoPreparo</MudText>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(_dto.Observacoes))
+    {
+        <MudDivider Class="my-4" />
+        <MudText Typo="Typo.h6" GutterBottom="true">Observações</MudText>
+        <MudText Typo="Typo.body1" Style="white-space:pre-wrap; overflow-wrap:anywhere;">@_dto.Observacoes</MudText>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(_dto.UrlOrigem))
+    {
+        <MudDivider Class="my-4" />
+        <MudButton Href="@_dto.UrlOrigem" Target="_blank"
+                   Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
+                   StartIcon="@Icons.Material.Filled.Link" Class="pa-0">
+            Receita original
+        </MudButton>
+    }
+}
+else
+{
+    <MudAlert Severity="Severity.Error">Receita não encontrada.</MudAlert>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    [Inject] IReceitaService Service { get; set; } = null!;
+
+    private ReceitaDetalheDTO? _dto;
+    private List<BreadcrumbItem> _breadcrumbs = [];
+    private bool _carregando = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var r = await Service.ObterAsync(Id);
+        if (r.Sucesso && r.Valor is not null)
+        {
+            _dto = r.Valor;
+            _breadcrumbs =
+            [
+                new("Receitas", "/receitas"),
+                new(_dto.Nome, null, disabled: true),
+            ];
+        }
+        _carregando = false;
+    }
+
+    private static string FormatarQuantidade(decimal valor)
+        => valor == Math.Truncate(valor)
+            ? valor.ToString("0")
+            : valor.ToString("0.##");
+}

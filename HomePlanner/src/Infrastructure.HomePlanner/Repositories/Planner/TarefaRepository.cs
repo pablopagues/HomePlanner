@@ -66,8 +66,9 @@ public class TarefaRepository : ITarefaRepository
             .OrderBy(u => u.NomeCompleto)
             .Select(u => new MembroFamiliaDTO
             {
-                UsuarioId = u.Id,
-                Nome      = u.NomeCompleto,
+                UsuarioId        = u.Id,
+                Nome             = u.NomeCompleto,
+                FotoAtualizadaEm = u.FotoAtualizadaEm,
             })
             .ToListAsync(ct);
     }
