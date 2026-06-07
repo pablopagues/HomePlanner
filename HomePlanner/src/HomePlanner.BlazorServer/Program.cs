@@ -170,6 +170,8 @@ try
 
     // ── Lista de Compras ──────────────────────────────────────────────────────
     builder.Services.AddScoped<IListaComprasService, ListaComprasService>();
+    builder.Services.AddScoped<IPedidoCompraRepository, PedidoCompraRepository>();
+    builder.Services.AddScoped<IPedidoCompraService, PedidoCompraService>();
 
     // ── Planner / Tarefas ─────────────────────────────────────────────────────
     builder.Services.AddScoped<ITarefaRepository, TarefaRepository>();

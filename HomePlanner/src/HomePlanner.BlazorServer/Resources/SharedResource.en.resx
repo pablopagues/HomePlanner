@@ -195,6 +195,14 @@
   <data name="Compras_Atualizar" xml:space="preserve"><value>Refresh</value></data>
   <data name="Compras_SemItens" xml:space="preserve"><value>No recipes in this week's menu yet.</value></data>
   <data name="Compras_IrCardapio" xml:space="preserve"><value>Go to menu</value></data>
+  <data name="Compras_CategoriaCardapio" xml:space="preserve"><value>This week's menu</value></data>
+  <data name="Compras_NovoPedido" xml:space="preserve"><value>What to add?</value></data>
+  <data name="Compras_Quantidade" xml:space="preserve"><value>Quantity</value></data>
+  <data name="Compras_Solicitante" xml:space="preserve"><value>For</value></data>
+  <data name="Compras_AdicionarPedido" xml:space="preserve"><value>Add</value></data>
+  <data name="Compras_Comprado" xml:space="preserve"><value>bought</value></data>
+  <data name="Compras_SemSolicitante" xml:space="preserve"><value>No member</value></data>
+  <data name="Compras_RemoverPedidoConfirm" xml:space="preserve"><value>Remove this item from the list?</value></data>
 
   <data name="Planner_Titulo" xml:space="preserve"><value>Family tasks</value></data>
   <data name="Planner_Nova" xml:space="preserve"><value>New task</value></data>

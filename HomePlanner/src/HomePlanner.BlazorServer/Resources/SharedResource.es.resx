@@ -195,6 +195,14 @@
   <data name="Compras_Atualizar" xml:space="preserve"><value>Actualizar</value></data>
   <data name="Compras_SemItens" xml:space="preserve"><value>Aún no hay recetas en el menú de esta semana.</value></data>
   <data name="Compras_IrCardapio" xml:space="preserve"><value>Ir al menú</value></data>
+  <data name="Compras_CategoriaCardapio" xml:space="preserve"><value>Menú de la semana</value></data>
+  <data name="Compras_NovoPedido" xml:space="preserve"><value>¿Qué agregar?</value></data>
+  <data name="Compras_Quantidade" xml:space="preserve"><value>Cantidad</value></data>
+  <data name="Compras_Solicitante" xml:space="preserve"><value>Para</value></data>
+  <data name="Compras_AdicionarPedido" xml:space="preserve"><value>Agregar</value></data>
+  <data name="Compras_Comprado" xml:space="preserve"><value>comprado</value></data>
+  <data name="Compras_SemSolicitante" xml:space="preserve"><value>Sin miembro</value></data>
+  <data name="Compras_RemoverPedidoConfirm" xml:space="preserve"><value>¿Quitar este pedido de la lista?</value></data>
 
   <data name="Planner_Titulo" xml:space="preserve"><value>Tareas de la familia</value></data>
   <data name="Planner_Nova" xml:space="preserve"><value>Nueva tarea</value></data>

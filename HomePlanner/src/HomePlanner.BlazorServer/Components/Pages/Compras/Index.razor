@@ -4,8 +4,10 @@
 @page "/shopping/{DataStr}"
 @attribute [Authorize]
 @using Application.HomePlanner.DTOs.ListaCompras
+@using Application.HomePlanner.DTOs.Planner
 @using Application.HomePlanner.Services.ListaCompras
 @inject IListaComprasService Service
+@inject IPedidoCompraService PedidoService
 @inject IIngredienteService IngService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
@@ -37,6 +39,47 @@
     </MudStack>
 </MudPaper>
 
+@* ── Filtro por membro (categorias) ─────────────────────────────────────── *@
+@if (!Mural.Ativo && _membros.Count > 0)
+{
+    <MudPaper Class="pa-3 mb-4" Elevation="0" Style="background:var(--mud-palette-background-gray); border-radius:10px;">
+        <SeletorMembro Membros="_membros" SelecionadoId="@_membroFiltro"
+                       SelecionadoIdChanged="@((string? v) => { _membroFiltro = v; })" />
+    </MudPaper>
+}
+
+@* ── Adicionar pedido ───────────────────────────────────────────────────── *@
+@if (!Mural.Ativo)
+{
+    <MudPaper Class="pa-3 mb-4" Elevation="0" Style="border:1px solid var(--mud-palette-lines-default); border-radius:10px;">
+        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center" Wrap="Wrap.Wrap">
+            <MudTextField @bind-Value="_novoDescricao" Label="@L["Compras_NovoPedido"]"
+                          Variant="Variant.Outlined" Margin="Margin.Dense"
+                          Immediate="true" Style="flex:1; min-width:160px;"
+                          OnKeyDown="@(async (e) => { if (e.Key == "Enter") await AdicionarPedido(); })" />
+            <MudTextField @bind-Value="_novoQuantidade" Label="@L["Compras_Quantidade"]"
+                          Variant="Variant.Outlined" Margin="Margin.Dense"
+                          Style="width:140px;"
+                          OnKeyDown="@(async (e) => { if (e.Key == "Enter") await AdicionarPedido(); })" />
+            @if (!_restrito && _membros.Count > 0)
+            {
+                <MudSelect T="string" @bind-Value="_novoSolicitante" Dense="true"
+                           Label="@L["Compras_Solicitante"]" Variant="Variant.Outlined"
+                           Margin="Margin.Dense" Style="min-width:160px; max-width:200px;">
+                    @foreach (var m in _membros)
+                    {
+                        <MudSelectItem T="string" Value="@m.UsuarioId">@m.Nome</MudSelectItem>
+                    }
+                </MudSelect>
+            }
+            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add" OnClick="AdicionarPedido">
+                @L["Compras_AdicionarPedido"]
+            </MudButton>
+        </MudStack>
+    </MudPaper>
+}
+
 @if (_carregando)
 {
     <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
@@ -52,35 +95,12 @@ else if (_erro is not null)
 }
 else if (_lista is not null)
 {
-    @* ── Barra de ações ──────────────────────────────────────────────────── *@
-    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-4">
-        <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
-            <MudText Typo="Typo.body2" Color="Color.Secondary">
-                @_lista.TotalReceitas @L["Compras_Receitas"] ·
-                @_lista.Itens.Count @L["Compras_Itens"] ·
-                @_jaTenho.Count(kv => kv.Value) @L["Compras_JaTenho"]
-            </MudText>
-        </MudStack>
-        @if (!Mural.Ativo)
-        {
-            <MudStack Row="true" Spacing="2">
-                @if (_jaTenho.Any(kv => kv.Value))
-                {
-                    <MudButton Size="Size.Small" Variant="Variant.Text"
-                               OnClick="LimparSelecao">
-                        @L["Compras_LimparSelecao"]
-                    </MudButton>
-                }
-                <MudButton Size="Size.Small" Variant="Variant.Outlined"
-                           StartIcon="@Icons.Material.Filled.Refresh"
-                           OnClick="CarregarAsync">
-                    @L["Compras_Atualizar"]
-                </MudButton>
-            </MudStack>
-        }
-    </MudStack>
+    var mostrarCardapio = _membroFiltro is null && !_lista.Vazia;
+    var gruposVisiveis = _membroFiltro is null
+        ? _grupos
+        : _grupos.Where(g => g.SolicitanteUsuarioId == _membroFiltro).ToList();
 
-    @if (_lista.Vazia)
+    @if (!mostrarCardapio && gruposVisiveis.Count == 0)
     {
         <MudAlert Severity="Severity.Info">
             @L["Compras_SemItens"]
@@ -89,57 +109,147 @@ else if (_lista is not null)
             </MudLink>
         </MudAlert>
     }
-    else
+
+    @* ── Categoria: Cardápio da semana ──────────────────────────────────── *@
+    @if (mostrarCardapio)
     {
-        @* ── Lista de itens ──────────────────────────────────────────────── *@
-        <MudGrid Spacing="2">
-            @foreach (var item in _lista.Itens)
-            {
-                var jaTenho = _jaTenho.TryGetValue(item.IngredienteId, out var v) && v;
+        <MudPaper Class="pa-4 mb-4" Elevation="0"
+                  Style="border:1px solid var(--mud-palette-lines-default); border-radius:10px;">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-3" Wrap="Wrap.Wrap">
+                <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                    <MudAvatar Color="Color.Primary" Style="height:28px; width:28px; flex:none;">
+                        <MudIcon Icon="@Icons.Material.Filled.Restaurant" Size="Size.Small" />
+                    </MudAvatar>
+                    <MudText Typo="Typo.subtitle1" Style="font-weight:600;">@L["Compras_CategoriaCardapio"]</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                        @_lista.TotalReceitas @L["Compras_Receitas"] ·
+                        @_lista.Itens.Count @L["Compras_Itens"] ·
+                        @_jaTenho.Count(kv => kv.Value) @L["Compras_JaTenho"]
+                    </MudText>
+                </MudStack>
+                @if (!Mural.Ativo)
+                {
+                    <MudStack Row="true" Spacing="2">
+                        @if (_jaTenho.Any(kv => kv.Value))
+                        {
+                            <MudButton Size="Size.Small" Variant="Variant.Text"
+                                       OnClick="LimparSelecao">
+                                @L["Compras_LimparSelecao"]
+                            </MudButton>
+                        }
+                        <MudButton Size="Size.Small" Variant="Variant.Outlined"
+                                   StartIcon="@Icons.Material.Filled.Refresh"
+                                   OnClick="CarregarAsync">
+                            @L["Compras_Atualizar"]
+                        </MudButton>
+                    </MudStack>
+                }
+            </MudStack>
 
-                <MudItem xs="12" sm="6" md="4">
-                    <MudPaper Class="pa-3"
-                              Style="@($"border-radius:8px; border:1px solid {(jaTenho ? "var(--mud-palette-success)" : "var(--mud-palette-lines-default)")}; background:{(jaTenho ? "var(--mud-palette-success-hover)" : "var(--mud-palette-surface)")}; transition:all 200ms;")"
-                              Elevation="0">
-                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                            <MudCheckBox T="bool"
-                                         Value="@jaTenho"
-                                         ValueChanged="@(async (bool val) => await TrocarJaTenho(item.IngredienteId, val))"
-                                         ReadOnly="Mural.Ativo" Color="Color.Success" />
-                            <MudStack Spacing="0" Style="flex:1; min-width:0;">
-                                <MudText Typo="Typo.body2"
-                                         Style="@(jaTenho ? "text-decoration:line-through; opacity:0.55;" : "font-weight:500;")">
-                                    @item.NomeIngrediente
-                                </MudText>
-                                <MudText Typo="Typo.caption" Color="Color.Secondary">
-                                    @item.QuantidadeFormatada
-                                </MudText>
+            @* ── Lista de itens ──────────────────────────────────────────── *@
+            <MudGrid Spacing="2">
+                @foreach (var item in _lista.Itens)
+                {
+                    var jaTenho = _jaTenho.TryGetValue(item.IngredienteId, out var v) && v;
+
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudPaper Class="pa-3"
+                                  Style="@($"border-radius:8px; border:1px solid {(jaTenho ? "var(--mud-palette-success)" : "var(--mud-palette-lines-default)")}; background:{(jaTenho ? "var(--mud-palette-success-hover)" : "var(--mud-palette-surface)")}; transition:all 200ms;")"
+                                  Elevation="0">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudCheckBox T="bool"
+                                             Value="@jaTenho"
+                                             ValueChanged="@(async (bool val) => await TrocarJaTenho(item.IngredienteId, val))"
+                                             ReadOnly="Mural.Ativo" Color="Color.Success" />
+                                <MudStack Spacing="0" Style="flex:1; min-width:0;">
+                                    <MudText Typo="Typo.body2"
+                                             Style="@(jaTenho ? "text-decoration:line-through; opacity:0.55;" : "font-weight:500;")">
+                                        @item.NomeIngrediente
+                                    </MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        @item.QuantidadeFormatada
+                                    </MudText>
+                                </MudStack>
+                                @if (!Mural.Ativo)
+                                {
+                                    <MudTooltip Text="Agrupar sob um produto base">
+                                        <MudIconButton Icon="@Icons.Material.Filled.Merge"
+                                                       Size="Size.Small" Color="Color.Default"
+                                                       OnClick="@(() => AbrirAgrupar(item))" />
+                                    </MudTooltip>
+                                }
                             </MudStack>
-                            @if (!Mural.Ativo)
-                            {
-                                <MudTooltip Text="Agrupar sob um produto base">
-                                    <MudIconButton Icon="@Icons.Material.Filled.Merge"
-                                                   Size="Size.Small" Color="Color.Default"
-                                                   OnClick="@(() => AbrirAgrupar(item))" />
-                                </MudTooltip>
-                            }
-                        </MudStack>
-                    </MudPaper>
-                </MudItem>
-            }
-        </MudGrid>
+                        </MudPaper>
+                    </MudItem>
+                }
+            </MudGrid>
 
-        @* ── Resumo do progresso ─────────────────────────────────────────── *@
-        <MudPaper Class="pa-4 mt-4" Elevation="0"
-                  Style="background:var(--mud-palette-background-gray); border-radius:10px;">
-            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3">
-                <MudProgressLinear Color="Color.Success"
-                                   Value="@Progresso" Class="flex-grow-1"
-                                   Style="height:8px; border-radius:4px;" />
-                <MudText Typo="Typo.body2" Style="white-space:nowrap;">
-                    @_jaTenho.Count(kv => kv.Value) / @_lista.Itens.Count
+            @* ── Resumo do progresso ─────────────────────────────────────── *@
+            <MudPaper Class="pa-4 mt-4" Elevation="0"
+                      Style="background:var(--mud-palette-background-gray); border-radius:10px;">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3">
+                    <MudProgressLinear Color="Color.Success"
+                                       Value="@Progresso" Class="flex-grow-1"
+                                       Style="height:8px; border-radius:4px;" />
+                    <MudText Typo="Typo.body2" Style="white-space:nowrap;">
+                        @_jaTenho.Count(kv => kv.Value) / @_lista.Itens.Count
+                    </MudText>
+                </MudStack>
+            </MudPaper>
+        </MudPaper>
+    }
+
+    @* ── Categorias: pedidos por membro ─────────────────────────────────── *@
+    @foreach (var grupo in gruposVisiveis)
+    {
+        <MudPaper Class="pa-4 mb-4" Elevation="0"
+                  Style="border:1px solid var(--mud-palette-lines-default); border-radius:10px;">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
+                <AvatarUsuario UsuarioId="@grupo.SolicitanteUsuarioId" Nome="@grupo.SolicitanteNome"
+                               Versao="@grupo.SolicitanteFotoVersao" Px="28" />
+                <MudText Typo="Typo.subtitle1" Style="font-weight:600;">
+                    @(string.IsNullOrWhiteSpace(grupo.SolicitanteNome) ? L["Compras_SemSolicitante"] : grupo.SolicitanteNome)
+                </MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                    @grupo.Itens.Count @L["Compras_Itens"] · @grupo.TotalComprados @L["Compras_Comprado"]
                 </MudText>
             </MudStack>
+
+            <MudGrid Spacing="2">
+                @foreach (var pedido in grupo.Itens)
+                {
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudPaper Class="pa-3"
+                                  Style="@($"border-radius:8px; border:1px solid {(pedido.Comprado ? "var(--mud-palette-success)" : "var(--mud-palette-lines-default)")}; background:{(pedido.Comprado ? "var(--mud-palette-success-hover)" : "var(--mud-palette-surface)")}; transition:all 200ms;")"
+                                  Elevation="0">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudCheckBox T="bool"
+                                             Value="@pedido.Comprado"
+                                             ValueChanged="@(async (bool val) => await TrocarComprado(pedido, val))"
+                                             ReadOnly="@(Mural.Ativo || !pedido.PodeEditar)" Color="Color.Success" />
+                                <MudStack Spacing="0" Style="flex:1; min-width:0;">
+                                    <MudText Typo="Typo.body2"
+                                             Style="@(pedido.Comprado ? "text-decoration:line-through; opacity:0.55;" : "font-weight:500;")">
+                                        @pedido.Descricao
+                                    </MudText>
+                                    @if (!string.IsNullOrWhiteSpace(pedido.Quantidade))
+                                    {
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                            @pedido.Quantidade
+                                        </MudText>
+                                    }
+                                </MudStack>
+                                @if (!Mural.Ativo && pedido.PodeEditar)
+                                {
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                                                   Color="Color.Error"
+                                                   OnClick="@(() => ConfirmarExclusao(pedido))" />
+                                }
+                            </MudStack>
+                        </MudPaper>
+                    </MudItem>
+                }
+            </MudGrid>
         </MudPaper>
     }
 }
@@ -150,8 +260,17 @@ else if (_lista is not null)
     private DateOnly _dataInicio;
     private DateOnly _dataFim;
     private ListaComprasDTO? _lista;
+    private List<PedidoMembroGrupoDTO> _grupos = [];
+    private List<MembroFamiliaDTO> _membros = [];
     private bool _carregando = true;
     private string? _erro;
+    private bool _restrito;
+    private string? _membroFiltro;
+
+    // Formulário de novo pedido
+    private string? _novoDescricao;
+    private string? _novoQuantidade;
+    private string? _novoSolicitante;
 
     // Estado "já tenho" — carregado/persistido via localStorage
     private Dictionary<int, bool> _jaTenho = new();
@@ -160,6 +279,13 @@ else if (_lista is not null)
         : (double)_jaTenho.Count(kv => kv.Value) / _lista.Itens.Count * 100;
 
     private bool _precisaCarregarJaTenho;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _restrito = PedidoService.UsuarioRestritoAsProprias;
+        if (!_restrito)
+            _membros = (await PedidoService.ListarMembrosFamiliaAsync()).ToList();
+    }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -191,10 +317,66 @@ else if (_lista is not null)
         else
             _erro = r.Erros.FirstOrDefault();
 
+        _grupos = (await PedidoService.ListarDaSemanaAsync(_dataInicio)).ToList();
+
         _carregando = false;
 
         if (_lista is not null && !_lista.Vazia)
             _precisaCarregarJaTenho = true;
+    }
+
+    private async Task RecarregarPedidos()
+        => _grupos = (await PedidoService.ListarDaSemanaAsync(_dataInicio)).ToList();
+
+    private async Task AdicionarPedido()
+    {
+        if (string.IsNullOrWhiteSpace(_novoDescricao)) return;
+
+        var dto = new PedidoCompraPersistenciaDTO
+        {
+            DataInicioSemana     = _dataInicio,
+            Descricao            = _novoDescricao,
+            Quantidade           = _novoQuantidade,
+            SolicitanteUsuarioId = _restrito ? null : _novoSolicitante,
+        };
+
+        var res = await PedidoService.AdicionarAsync(dto);
+        if (res.Sucesso)
+        {
+            _novoDescricao = null;
+            _novoQuantidade = null;
+            await RecarregarPedidos();
+        }
+        else
+            Snackbar.Add(string.Join(", ", res.Erros), Severity.Error);
+    }
+
+    private async Task TrocarComprado(PedidoCompraDTO pedido, bool valor)
+    {
+        var res = await PedidoService.MarcarCompradoAsync(pedido.Id, valor);
+        if (res.Sucesso)
+            await RecarregarPedidos();
+        else
+            Snackbar.Add(string.Join(", ", res.Erros), Severity.Error);
+    }
+
+    private async Task ConfirmarExclusao(PedidoCompraDTO pedido)
+    {
+        var confirm = await DialogService.ShowMessageBox(
+            L["Confirmacao_Titulo"],
+            L["Compras_RemoverPedidoConfirm"],
+            yesText: L["Btn_Excluir"], cancelText: L["Btn_Cancelar"]);
+
+        if (confirm != true) return;
+
+        var res = await PedidoService.DeletarAsync(pedido.Id);
+        if (res.Sucesso)
+        {
+            Snackbar.Add(L["Msg_ExcluidoOk"], Severity.Success);
+            await RecarregarPedidos();
+        }
+        else
+            Snackbar.Add(string.Join(", ", res.Erros), Severity.Error);
     }
 
     private async Task CarregarJaTenhoAsync()
