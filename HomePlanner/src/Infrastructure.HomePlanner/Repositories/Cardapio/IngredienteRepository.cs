@@ -113,6 +113,28 @@ public class IngredienteRepository : IIngredienteRepository
         return await query.AnyAsync(ct);
     }
 
+    public async Task<IReadOnlyDictionary<int, ProdutoBaseInfo>> ObterMapaBaseAsync(
+        IReadOnlyCollection<int> ids, CancellationToken ct = default)
+    {
+        if (ids.Count == 0) return new Dictionary<int, ProdutoBaseInfo>();
+
+        await using var db = await _dbFactory.CreateDbContextAsync(ct);
+        return await db.Ingredientes
+            .Where(i => ids.Contains(i.Id))
+            .Select(i => new
+            {
+                i.Id,
+                BaseId   = i.IngredienteBaseId ?? i.Id,
+                BaseNome = i.IngredienteBase != null ? i.IngredienteBase.Nome : i.Nome,
+            })
+            .ToDictionaryAsync(x => x.Id, x => new ProdutoBaseInfo(x.BaseId, x.BaseNome), ct);
+    }
+
+    public async Task<IReadOnlyList<Ingrediente>> ObterFilhosDiretosAsync(
+        int paiId, CancellationToken ct = default)
+        // Usa _db (rastreado) — os filhos serão re-apontados e persistidos via SalvarAsync().
+        => await _db.Ingredientes.Where(i => i.IngredienteBaseId == paiId).ToListAsync(ct);
+
     public async Task AdicionarAsync(Ingrediente entidade, CancellationToken ct = default)
         => await _db.Ingredientes.AddAsync(entidade, ct);
 

@@ -166,8 +166,21 @@
         if (result is null || result.Canceled
             || result.Data is not List<IngredienteParseadoDTO> novos) return;
 
+        int adicionados = 0, mesclados = 0;
         foreach (var n in novos)
         {
+            // Evita o mesmo ingrediente duas vezes (restrição única na receita):
+            // mescla na linha existente — soma se a unidade for igual.
+            var existente = _linhas.FirstOrDefault(l => l.Dto.IngredienteId == n.IngredienteId);
+            if (existente is not null)
+            {
+                if (existente.Dto.UnidadeMedidaId == n.UnidadeMedidaId)
+                    existente.Dto.Quantidade += n.Quantidade;
+                existente.Dto.Observacao = JuntarObs(existente.Dto.Observacao, n.Observacao);
+                mesclados++;
+                continue;
+            }
+
             var dto = new ReceitaIngredientePersistenciaDTO
             {
                 IngredienteId   = n.IngredienteId,
@@ -183,9 +196,24 @@
                 Dto         = dto,
                 Selecionado = new IngredienteListaDTO { Id = n.IngredienteId, Nome = n.NomeIngrediente },
             });
+            adicionados++;
         }
+        RecalcularOrdem();
 
-        Snackbar.Add($"{novos.Count} ingrediente(s) lançado(s). Revise antes de salvar.", Severity.Success);
+        Snackbar.Add(
+            mesclados > 0
+                ? $"{adicionados} lançado(s), {mesclados} mesclado(s) a itens já na lista. Revise antes de salvar."
+                : $"{adicionados} ingrediente(s) lançado(s). Revise antes de salvar.",
+            Severity.Success);
+    }
+
+    private static string? JuntarObs(string? a, string? b)
+    {
+        var join = string.Join("; ", new[] { a, b }
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .Select(s => s!.Trim())
+            .Distinct());
+        return string.IsNullOrWhiteSpace(join) ? null : join;
     }
 
     private void RemoverIngrediente(IngredienteLinhaForm linha)

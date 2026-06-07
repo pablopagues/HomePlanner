@@ -24,5 +24,13 @@ public class IngredienteConfiguration : IEntityTypeConfiguration<Ingrediente>
             .WithMany()
             .HasForeignKey(i => i.UnidadeMedidaPadraoId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        // Auto-referência para o produto base de compra.
+        builder.HasOne(i => i.IngredienteBase)
+            .WithMany()
+            .HasForeignKey(i => i.IngredienteBaseId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        builder.HasIndex(i => i.IngredienteBaseId);
     }
 }

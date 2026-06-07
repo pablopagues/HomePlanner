@@ -149,13 +149,18 @@ public class ReceitaService : IReceitaService
 
     private static void SincronizarIngredientes(ReceitaPersistenciaDTO dto, Receita entidade)
     {
+        // O índice único (ReceitaId, IngredienteId) impede o mesmo ingrediente duas
+        // vezes na receita. Como a consolidação faz variantes ("cebola picada") caírem
+        // no mesmo ingrediente, juntamos linhas duplicadas antes de persistir.
+        var linhas = ConsolidarDuplicados(dto.Ingredientes);
+
         // Marca como deletados os que foram removidos
-        var idsNoDto = dto.Ingredientes.Where(i => i.Id > 0).Select(i => i.Id).ToHashSet();
+        var idsNoDto = linhas.Where(i => i.Id > 0).Select(i => i.Id).ToHashSet();
         foreach (var ri in entidade.Ingredientes.Where(i => !i.IsDeleted && !idsNoDto.Contains(i.Id)))
             ri.IsDeleted = true;
 
         // Atualiza existentes e insere novos
-        foreach (var dtoRi in dto.Ingredientes)
+        foreach (var dtoRi in linhas)
         {
             if (dtoRi.Id > 0)
             {
@@ -183,5 +188,39 @@ public class ReceitaService : IReceitaService
                 });
             }
         }
+    }
+
+    // Junta linhas do mesmo ingrediente numa só (soma quantidades de mesma unidade,
+    // concatena observações). Linhas sem ingrediente selecionado são descartadas.
+    private static List<ReceitaIngredientePersistenciaDTO> ConsolidarDuplicados(
+        IEnumerable<ReceitaIngredientePersistenciaDTO> linhas)
+    {
+        var resultado = new List<ReceitaIngredientePersistenciaDTO>();
+
+        foreach (var grupo in linhas.Where(l => l.IngredienteId > 0)
+                                     .GroupBy(l => l.IngredienteId))
+        {
+            // Sobrevivente: prefere uma linha já persistida (Id > 0) para reaproveitar a PK.
+            var sobrevivente = grupo.OrderByDescending(l => l.Id > 0)
+                                    .ThenBy(l => l.Ordem)
+                                    .First();
+
+            foreach (var outro in grupo)
+            {
+                if (ReferenceEquals(outro, sobrevivente)) continue;
+                if (outro.UnidadeMedidaId == sobrevivente.UnidadeMedidaId)
+                    sobrevivente.Quantidade += outro.Quantidade;
+            }
+
+            var obs = string.Join("; ", grupo.Select(l => l.Observacao)
+                .Where(o => !string.IsNullOrWhiteSpace(o))
+                .Select(o => o!.Trim())
+                .Distinct());
+            if (!string.IsNullOrWhiteSpace(obs)) sobrevivente.Observacao = obs;
+
+            resultado.Add(sobrevivente);
+        }
+
+        return resultado;
     }
 }

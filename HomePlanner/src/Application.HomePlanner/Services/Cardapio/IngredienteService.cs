@@ -122,4 +122,45 @@ public class IngredienteService : IIngredienteService
         if (string.IsNullOrWhiteSpace(nome)) return [];
         return await _repo.DetectarSimilaresAsync(TextoHelper.NormalizarNome(nome), excluirId, ct);
     }
+
+    public async Task<ResultadoOperacao> DefinirProdutoBaseAsync(
+        int ingredienteId, int? baseId, CancellationToken ct = default)
+    {
+        await _tenantAccessor.GarantirHidratadoAsync();
+
+        var ingrediente = await _repo.ObterEntidadeAsync(ingredienteId, ct);
+        if (ingrediente is null)
+            return ResultadoOperacao.Falha("Ingrediente não encontrado.");
+
+        // Desagrupar.
+        if (baseId is null)
+        {
+            ingrediente.IngredienteBaseId = null;
+            await _repo.SalvarAsync(ct);
+            return ResultadoOperacao.Ok();
+        }
+
+        if (baseId == ingredienteId)
+            return ResultadoOperacao.Falha("Um ingrediente não pode ser produto base de si mesmo.");
+
+        var alvo = await _repo.ObterEntidadeAsync(baseId.Value, ct);
+        if (alvo is null)
+            return ResultadoOperacao.Falha("Produto base não encontrado.");
+
+        // Mantém a invariante "base sempre aponta para a raiz": achata a cadeia do alvo.
+        var raizId = alvo.IngredienteBaseId ?? alvo.Id;
+        if (raizId == ingredienteId)
+            return ResultadoOperacao.Falha("Este agrupamento criaria um ciclo.");
+
+        ingrediente.IngredienteBaseId = raizId;
+
+        // Variantes que apontavam para este ingrediente passam a apontar para a raiz.
+        foreach (var filho in await _repo.ObterFilhosDiretosAsync(ingredienteId, ct))
+            filho.IngredienteBaseId = raizId;
+
+        await _repo.SalvarAsync(ct);
+        _logger.LogInformation("Ingrediente {Id} agrupado sob produto base {BaseId}.",
+            ingredienteId, raizId);
+        return ResultadoOperacao.Ok();
+    }
 }

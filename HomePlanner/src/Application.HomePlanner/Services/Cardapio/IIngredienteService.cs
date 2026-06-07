@@ -11,4 +11,10 @@ public interface IIngredienteService
     Task<ResultadoOperacao> DeletarAsync(int id, CancellationToken ct = default);
     Task<IReadOnlyList<IngredienteListaDTO>> BuscarAutoCompleteAsync(string texto, int limite = 10, CancellationToken ct = default);
     Task<IReadOnlyList<IngredienteListaDTO>> DetectarSimilaresAsync(string nome, int? excluirId = null, CancellationToken ct = default);
+
+    /// <summary>
+    /// Define (ou remove, com <paramref name="baseId"/> nulo) o produto base de compra de
+    /// um ingrediente, achatando cadeias e re-apontando variantes existentes para a raiz.
+    /// </summary>
+    Task<ResultadoOperacao> DefinirProdutoBaseAsync(int ingredienteId, int? baseId, CancellationToken ct = default);
 }

@@ -1,5 +1,6 @@
 using Application.HomePlanner.Common;
 using Application.HomePlanner.DTOs.Cardapio.Receita;
+using Application.HomePlanner.Helpers;
 using Application.HomePlanner.Repositories.Cardapio;
 using Microsoft.Extensions.Logging;
 using System.Globalization;
@@ -29,6 +30,41 @@ public class ImportadorReceitaService : IImportadorReceitaService
         ["dente"] = "dente", ["dentes"] = "dente", ["clove"] = "dente", ["cloves"] = "dente",
         ["fatia"] = "fatia", ["fatias"] = "fatia", ["slice"] = "fatia", ["slices"] = "fatia",
         ["pacote"] = "pacote", ["pacotes"] = "pacote", ["package"] = "pacote",
+        // Colher isolada / plural / sem acento (default = sopa).
+        ["colher"] = "cs", ["colheres"] = "cs", ["colheres de sopa"] = "cs",
+        ["colher de cha"] = "cc", ["colheres de chá"] = "cc", ["colheres de cha"] = "cc",
+        ["colher de café"] = "cc", ["colher de cafe"] = "cc",
+        // Xícara plural; copo aproximado de volume.
+        ["xícaras"] = "xic", ["xicaras"] = "xic",
+        ["copo"] = "xic", ["copos"] = "xic",
+        // Embalagens / contáveis tratados como unidade.
+        ["lata"] = "un", ["latas"] = "un", ["caixa"] = "un", ["caixas"] = "un",
+        ["vidro"] = "un", ["vidros"] = "un", ["pote"] = "un", ["potes"] = "un",
+        ["ramo"] = "un", ["ramos"] = "un", ["folha"] = "un", ["folhas"] = "un",
+        ["talo"] = "un", ["talos"] = "un",
+    };
+
+    // Palavras-chave de proteína/corte (sem acento — comparadas contra texto
+    // normalizado): produtos distintos no mercado, o nome é mantido intacto
+    // (não separamos termos de preparo como "em cubos").
+    private static readonly string[] _palavrasProteina =
+    {
+        "carne", "bife", "file", "frango", "peito", "coxa", "sobrecoxa",
+        "picanha", "alcatra", "patinho", "maminha", "costela", "lombo", "pernil",
+        "peixe", "salmao", "tilapia", "linguica", "bacon", "presunto",
+        "moida", "moido", "acem", "fraldinha", "cupim", "panceta", "bisteca",
+        "mignon", "musculo",
+    };
+
+    // Descritores de preparo/tamanho/estado (sem acento) que, em itens não-cárneos,
+    // são movidos para a observação (compra-se o produto inteiro e depois transforma).
+    private static readonly string[] _descritoresPreparo =
+    {
+        "picad", "ralad", "cortad", "fatiad", "picadinh", "amassad", "esmagad",
+        "batid", "derretid", "peneirad", "triturad", "descascad", "lavad", "ralinh",
+        "grande", "medio", "media", "medios", "medias", "pequen", "grosso", "grossa",
+        "fino", "fina", "finamente", "bem", "quente", "morna", "morno", "gelad",
+        "fria", "frio", "fervente", "fervendo",
     };
 
     public ImportadorReceitaService(
@@ -287,52 +323,123 @@ public class ImportadorReceitaService : IImportadorReceitaService
 
     private static IngredienteImportadoDTO ParsearLinhaIngrediente(string linha)
     {
-        linha = LimparHtml(linha).Trim();
+        var original = LimparHtml(linha).Trim();
+        linha = original;
 
         // "(opcional)", "opcional" ou "a gosto" → marca como opcional.
         bool opcional = Regex.IsMatch(linha, @"\bopcional\b|\ba gosto\b", RegexOptions.IgnoreCase);
 
-        // Padrão: "2 xícaras de farinha", "500g de frango", "1/2 cup sugar"
-        var match = Regex.Match(linha,
-            @"^([\d,./]+(?:\s+\d+/\d+)?)\s*([a-záàãâéêíóôõúüç]+(?:\s+de\s+[a-z]+)?)\s+(?:de\s+)?(.+)$",
+        // Remove conjunção isolada no início ("e 1/2 litro..." → "1/2 litro...").
+        linha = Regex.Replace(linha, @"^(?:e|ou)\s+", "", RegexOptions.IgnoreCase);
+
+        // Normaliza unidades brasileiras escritas com parênteses ("colher (sopa)").
+        linha = NormalizarUnidadesParentizadas(linha);
+
+        // 1) Quantidade no início: número, fração, mista ou faixa ("1 a 2", "2-3").
+        decimal? quantidade = null;
+        // Ordem importa: mista ("1 1/2") e fração ("1/2") antes do inteiro/decimal,
+        // senão "1/2" casaria só o "1".
+        var mQtd = Regex.Match(linha,
+            @"^(\d+\s+\d+/\d+|\d+/\d+|\d+(?:[.,]\d+)?)(?:\s*(?:a|-|–|—|até)\s*\d+(?:[.,]\d+)?)?\s*",
             RegexOptions.IgnoreCase);
+        if (mQtd.Success && mQtd.Length > 0)
+        {
+            quantidade = ParsearQuantidade(mQtd.Groups[1].Value);
+            linha = linha[mQtd.Length..].TrimStart();
+        }
 
-        if (!match.Success)
-            return new IngredienteImportadoDTO
-            {
-                NomeIngrediente = LimparNome(linha),
-                TextoOriginal   = linha,
-                Opcional        = opcional,
-            };
-
-        var quantidadeStr = match.Groups[1].Value;
-        var unidadeStr    = match.Groups[2].Value.Trim().ToLowerInvariant();
-        var resto         = match.Groups[3].Value.Trim();
-
-        var quantidade = ParsearQuantidade(quantidadeStr);
-
+        // 2) Unidade logo após a quantidade (testa "colher de sopa" antes de "colher").
         string? codigoUnidade = null;
-        string nomeIngrediente;
-        if (_mapaUnidades.TryGetValue(unidadeStr, out var codigo))
+        if (quantidade is not null)
         {
-            // A palavra capturada é uma unidade conhecida.
-            codigoUnidade   = codigo;
-            nomeIngrediente = resto;
+            var (codigo, consumido) = ExtrairUnidade(linha);
+            if (codigo is not null)
+            {
+                codigoUnidade = codigo;
+                linha = linha[consumido..].TrimStart();
+            }
         }
-        else
-        {
-            // Não é unidade (ex.: "3 ovos batidos") → a palavra faz parte do nome.
-            nomeIngrediente = $"{match.Groups[2].Value} {resto}".Trim();
-        }
+
+        // Remove "de "/"da "/"do " residual no começo do nome.
+        linha = Regex.Replace(linha, @"^(?:de|da|do|d['’])\s+", "", RegexOptions.IgnoreCase);
+
+        // 3) Separa o nome núcleo do termo de preparo.
+        var (nome, preparo) = SepararNucleoEPreparo(linha);
+
+        // Há quantidade mas nenhuma unidade reconhecida → item contável: "un".
+        if (quantidade is not null && codigoUnidade is null)
+            codigoUnidade = "un";
+
+        var preparoLimpo = string.IsNullOrWhiteSpace(preparo) ? null : LimparNome(preparo);
 
         return new IngredienteImportadoDTO
         {
             Quantidade      = quantidade,
             CodigoUnidade   = codigoUnidade,
-            NomeIngrediente = LimparNome(nomeIngrediente),
-            TextoOriginal   = linha,
+            NomeIngrediente = LimparNome(nome),
+            Preparo         = string.IsNullOrWhiteSpace(preparoLimpo) ? null : preparoLimpo,
+            TextoOriginal   = original,
             Opcional        = opcional,
         };
+    }
+
+    // "colher (sopa)" → "colher de sopa"; "xícara (chá)" → "xícara"; etc.
+    private static string NormalizarUnidadesParentizadas(string texto)
+    {
+        texto = Regex.Replace(texto, @"\bcolher(es)?\s*\(\s*sopa\s*\)",
+            "colher$1 de sopa", RegexOptions.IgnoreCase);
+        texto = Regex.Replace(texto, @"\bcolher(es)?\s*\(\s*(?:ch[aá]|caf[eé])\s*\)",
+            "colher$1 de chá", RegexOptions.IgnoreCase);
+        texto = Regex.Replace(texto, @"\b(x[ií]cara?s?)\s*\(\s*(?:ch[aá]|caf[eé])\s*\)",
+            "$1", RegexOptions.IgnoreCase);
+        texto = Regex.Replace(texto, @"\b(copos?)\s*\([^)]*\)",
+            "$1", RegexOptions.IgnoreCase);
+        return texto;
+    }
+
+    // Extrai a unidade do início do texto, testando frases de 3, 2 e 1 token(s).
+    // Retorna o código interno e quantos caracteres consumir.
+    private static (string? codigo, int consumido) ExtrairUnidade(string texto)
+    {
+        var tokens = Regex.Matches(texto, @"\S+");
+        for (int n = Math.Min(3, tokens.Count); n >= 1; n--)
+        {
+            var ultimo = tokens[n - 1];
+            int fim = ultimo.Index + ultimo.Length;
+            var chave = Regex.Replace(texto[..fim], @"\s+", " ").Trim();
+            if (_mapaUnidades.TryGetValue(chave, out var codigo))
+                return (codigo, fim);
+        }
+        return (null, 0);
+    }
+
+    // Separa "cebolas médias em cubos" → ("cebolas", "médias em cubos").
+    // Cortes/produtos cárneos ficam intactos (o corte É o produto comprado).
+    private static (string nome, string? preparo) SepararNucleoEPreparo(string frase)
+    {
+        frase = frase.Trim();
+        if (frase.Length == 0) return (frase, null);
+
+        var normalizada = TextoHelper.NormalizarNome(frase);
+        if (_palavrasProteina.Any(p => Regex.IsMatch(normalizada, $@"\b{p}")))
+            return (frase, null);
+
+        var tokens = frase.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        int corte = -1;
+        for (int i = 0; i < tokens.Length; i++)
+        {
+            var t = TextoHelper.NormalizarNome(tokens[i]);
+            // "em cubos", "em rodelas"... — preposição "em" seguida de palavra.
+            if (t == "em" && i + 1 < tokens.Length) { corte = i; break; }
+            if (_descritoresPreparo.Any(d => t.StartsWith(d))) { corte = i; break; }
+        }
+
+        // corte <= 0: nada a separar, ou o primeiro token já é descritor (mantém tudo).
+        if (corte <= 0) return (frase, null);
+
+        var nome    = string.Join(' ', tokens[..corte]).Trim();
+        var preparo = string.Join(' ', tokens[corte..]).Trim();
+        return (nome.Length == 0 ? frase : nome, preparo);
     }
 
     // Converte "1/2", "1 1/2", "0.5", "1,5" em decimal.

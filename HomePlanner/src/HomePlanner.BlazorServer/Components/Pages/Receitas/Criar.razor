@@ -42,15 +42,24 @@
     private async Task SalvarAsync()
     {
         _salvando = true;
-        var r = await Service.SalvarAsync(_dto);
-        _salvando = false;
-
-        if (r.Sucesso)
+        try
         {
-            Snackbar.Add("Receita criada com sucesso!", Severity.Success);
-            Nav.NavigateTo($"/receitas/editar/{r.Valor}");
+            var r = await Service.SalvarAsync(_dto);
+            if (r.Sucesso)
+            {
+                Snackbar.Add("Receita criada com sucesso!", Severity.Success);
+                Nav.NavigateTo($"/receitas/editar/{r.Valor}");
+            }
+            else
+                Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
         }
-        else
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Erro ao salvar a receita: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _salvando = false;
+        }
     }
 }

@@ -88,12 +88,21 @@ else
     {
         if (_dto is null) return;
         _salvando = true;
-        var r = await Service.SalvarAsync(_dto);
-        _salvando = false;
-
-        if (r.Sucesso)
-            Snackbar.Add("Receita salva!", Severity.Success);
-        else
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+        try
+        {
+            var r = await Service.SalvarAsync(_dto);
+            if (r.Sucesso)
+                Snackbar.Add("Receita salva!", Severity.Success);
+            else
+                Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Erro ao salvar a receita: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _salvando = false;
+        }
     }
 }

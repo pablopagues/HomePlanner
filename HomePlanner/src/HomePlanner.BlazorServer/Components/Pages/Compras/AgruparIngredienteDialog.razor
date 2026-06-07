@@ -1,0 +1,47 @@
+@* Diálogo: agrupa um ingrediente sob um produto base de compra *@
+@inject IIngredienteService IngService
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">Agrupar "@NomeItem"</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
+            Escolha o <b>produto base</b> de compra. Itens agrupados são somados como um
+            só na lista — ex.: "Cebola picada" e "Cebolas grandes" sob "Cebola".
+            Cortes de carne diferentes (bife, carne em cubos) devem ficar separados.
+        </MudText>
+
+        <MudAutocomplete T="IngredienteListaDTO?"
+                         Label="Produto base"
+                         @bind-Value="_base"
+                         SearchFunc="Buscar"
+                         ToStringFunc="@(i => i?.Nome ?? string.Empty)"
+                         MinCharacters="2" Clearable="true"
+                         Variant="Variant.Outlined" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => MudDialog.Cancel())">Cancelar</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                   Disabled="@(_base is null)" OnClick="Confirmar">
+            Agrupar
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter] public int IngredienteId { get; set; }
+    [Parameter] public string NomeItem { get; set; } = string.Empty;
+
+    private IngredienteListaDTO? _base;
+
+    private async Task<IEnumerable<IngredienteListaDTO>> Buscar(string texto, CancellationToken ct)
+    {
+        var candidatos = await IngService.BuscarAutoCompleteAsync(texto, 10, ct);
+        return candidatos.Where(i => i.Id != IngredienteId);
+    }
+
+    private void Confirmar() => MudDialog.Close(DialogResult.Ok(_base));
+}

@@ -1,4 +1,5 @@
 using Application.HomePlanner.Common;
+using Application.HomePlanner.DTOs.Cardapio.Ingrediente;
 using Application.HomePlanner.DTOs.ListaCompras;
 using Application.HomePlanner.Middleware;
 using Application.HomePlanner.Repositories.Cardapio;
@@ -12,6 +13,7 @@ public class ListaComprasService : IListaComprasService
     private readonly IPlanejamentoSemanalRepository _cardapioRepo;
     private readonly IReceitaRepository _receitaRepo;
     private readonly IUnidadeMedidaRepository _unidadeRepo;
+    private readonly IIngredienteRepository _ingredienteRepo;
     private readonly TenantContextAccessor _tenantAccessor;
     private readonly ILogger<ListaComprasService> _logger;
 
@@ -19,12 +21,14 @@ public class ListaComprasService : IListaComprasService
         IPlanejamentoSemanalRepository cardapioRepo,
         IReceitaRepository receitaRepo,
         IUnidadeMedidaRepository unidadeRepo,
+        IIngredienteRepository ingredienteRepo,
         TenantContextAccessor tenantAccessor,
         ILogger<ListaComprasService> logger)
     {
         _cardapioRepo = cardapioRepo;
         _receitaRepo  = receitaRepo;
         _unidadeRepo  = unidadeRepo;
+        _ingredienteRepo = ingredienteRepo;
         _tenantAccessor = tenantAccessor;
         _logger = logger;
     }
@@ -50,8 +54,8 @@ public class ListaComprasService : IListaComprasService
         var unidades = (await _unidadeRepo.ListarAtivasAsync(ct))
             .ToDictionary(u => u.Id);
 
-        // Acumulador: chave = IngredienteId
-        var acumulador = new Dictionary<int, ItemAcumulado>();
+        // 1ª passada: acumula por IngredienteId (antes de resolver o produto base).
+        var porIngrediente = new Dictionary<int, ItemAcumulado>();
 
         var receitasProcessadas = new HashSet<int>();
 
@@ -78,7 +82,7 @@ public class ListaComprasService : IListaComprasService
                 // Converte para unidade base (g, ml ou un)
                 var qtdBase = ing.Quantidade * escala * unidade.FatorParaBase;
 
-                if (!acumulador.TryGetValue(ing.IngredienteId, out var item))
+                if (!porIngrediente.TryGetValue(ing.IngredienteId, out var item))
                 {
                     item = new ItemAcumulado
                     {
@@ -87,16 +91,32 @@ public class ListaComprasService : IListaComprasService
                         Tipo          = unidade.Tipo,
                         QtdBase       = 0,
                     };
-                    acumulador[ing.IngredienteId] = item;
+                    porIngrediente[ing.IngredienteId] = item;
                 }
 
-                // Agrega mesmo que a unidade de medida seja diferente (mesmo tipo)
-                if (item.Tipo == unidade.Tipo)
-                    item.QtdBase += qtdBase;
-                else
-                    // Tipo incompatível (ex: g e un para mesmo ingrediente) — soma como unidade
-                    item.QtdBase += qtdBase;
+                // Agrega mesmo que a unidade de medida seja diferente (soma na base).
+                item.QtdBase += qtdBase;
             }
+        }
+
+        // 2ª passada: consolida variantes sob o produto base de compra.
+        var mapaBase = await _ingredienteRepo.ObterMapaBaseAsync(porIngrediente.Keys.ToList(), ct);
+        var acumulador = new Dictionary<int, ItemAcumulado>();
+        foreach (var (id, item) in porIngrediente)
+        {
+            var info = mapaBase.TryGetValue(id, out var b) ? b : new(id, item.Nome);
+            if (!acumulador.TryGetValue(info.BaseId, out var alvo))
+            {
+                alvo = new ItemAcumulado
+                {
+                    IngredienteId = info.BaseId,
+                    Nome          = info.BaseNome,
+                    Tipo          = item.Tipo,
+                    QtdBase       = 0,
+                };
+                acumulador[info.BaseId] = alvo;
+            }
+            alvo.QtdBase += item.QtdBase;
         }
 
         var itens = acumulador.Values

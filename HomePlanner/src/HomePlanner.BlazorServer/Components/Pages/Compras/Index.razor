@@ -6,6 +6,9 @@
 @using Application.HomePlanner.DTOs.ListaCompras
 @using Application.HomePlanner.Services.ListaCompras
 @inject IListaComprasService Service
+@inject IIngredienteService IngService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
 @inject IStringLocalizer<SharedResource> L
 @inject PublicLanguageService Lang
 @inject IJSRuntime JS
@@ -112,6 +115,14 @@ else if (_lista is not null)
                                     @item.QuantidadeFormatada
                                 </MudText>
                             </MudStack>
+                            @if (!Mural.Ativo)
+                            {
+                                <MudTooltip Text="Agrupar sob um produto base">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Merge"
+                                                   Size="Size.Small" Color="Color.Default"
+                                                   OnClick="@(() => AbrirAgrupar(item))" />
+                                </MudTooltip>
+                            }
                         </MudStack>
                     </MudPaper>
                 </MudItem>
@@ -198,6 +209,34 @@ else if (_lista is not null)
             _jaTenho[item.IngredienteId] = val == "1";
         }
         StateHasChanged();
+    }
+
+    private async Task AbrirAgrupar(ItemComprasDTO item)
+    {
+        var parameters = new DialogParameters<AgruparIngredienteDialog>
+        {
+            { x => x.IngredienteId, item.IngredienteId },
+            { x => x.NomeItem,      item.NomeIngrediente },
+        };
+
+        var dialog = await DialogService.ShowAsync<AgruparIngredienteDialog>(
+            string.Empty, parameters,
+            new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true });
+
+        var result = await dialog.Result;
+        if (result is null || result.Canceled
+            || result.Data is not IngredienteListaDTO baseEscolhido) return;
+
+        var r = await IngService.DefinirProdutoBaseAsync(item.IngredienteId, baseEscolhido.Id);
+        if (r.Sucesso)
+        {
+            Snackbar.Add($"\"{item.NomeIngrediente}\" agrupado sob \"{baseEscolhido.Nome}\".", Severity.Success);
+            await CarregarAsync();
+        }
+        else
+        {
+            Snackbar.Add(r.Erros.FirstOrDefault() ?? "Não foi possível agrupar.", Severity.Warning);
+        }
     }
 
     private async Task TrocarJaTenho(int ingredienteId, bool valor)

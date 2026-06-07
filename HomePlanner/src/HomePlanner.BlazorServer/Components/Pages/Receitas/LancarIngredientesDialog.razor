@@ -10,8 +10,10 @@
     </TitleContent>
     <DialogContent>
         <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-2">
-            Ajuste a lista (um ingrediente por linha) e clique em <b>Analisar</b>. Os itens
-            serão identificados; ingredientes que não existirem no cadastro serão criados ao lançar.
+            Ajuste a lista (um ingrediente por linha) e clique em <b>Analisar</b>. Revise
+            <b>nome</b>, quantidade, unidade e observação de cada item — você pode editar tudo.
+            Ingredientes com nome igual a um já cadastrado são reaproveitados; os demais são
+            criados ao lançar.
         </MudText>
 
         <MudTextField @bind-Value="_texto" Label="Texto dos ingredientes"
@@ -34,11 +36,11 @@
                 <MudPaper Class="pa-2 mb-2" Elevation="0"
                           Style="background:var(--mud-palette-background-gray); border-radius:8px; border:1px solid var(--mud-palette-lines-default);">
                     <MudGrid Spacing="2" Class="align-center">
-                        <MudItem xs="4" md="2">
+                        <MudItem xs="6" md="2">
                             <MudNumericField @bind-Value="linha.Quantidade" Label="Qtde" Min="0m"
                                              Format="G" Variant="Variant.Outlined" Margin="Margin.Dense" />
                         </MudItem>
-                        <MudItem xs="4" md="2">
+                        <MudItem xs="6" md="2">
                             <MudSelect T="int" @bind-Value="linha.UnidadeMedidaId" Label="Unidade"
                                        Variant="Variant.Outlined" Margin="Margin.Dense">
                                 @foreach (var u in Unidades)
@@ -47,18 +49,17 @@
                                 }
                             </MudSelect>
                         </MudItem>
-                        <MudItem xs="12" md="4">
-                            <MudAutocomplete T="IngredienteListaDTO?"
-                                             Label="Ingrediente"
-                                             Value="linha.Selecionado"
-                                             SearchFunc="Buscar"
-                                             ToStringFunc="@(i => i?.Nome ?? string.Empty)"
-                                             ValueChanged="@(v => SelecionarIngrediente(linha, v))"
-                                             MinCharacters="2" Clearable="true"
-                                             Placeholder="@linha.NomeParseado"
-                                             Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        <MudItem xs="12" md="3">
+                            <MudTextField Value="linha.Nome"
+                                          ValueChanged="@((string v) => AtualizarNome(linha, v))"
+                                          Immediate="false" Label="Nome do ingrediente"
+                                          Variant="Variant.Outlined" Margin="Margin.Dense" />
                         </MudItem>
-                        <MudItem xs="6" md="2">
+                        <MudItem xs="10" md="2">
+                            <MudTextField @bind-Value="linha.Observacao" Label="Obs. (preparo)"
+                                          Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                        <MudItem xs="6" md="1">
                             @if (linha.Selecionado is null)
                             {
                                 <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Text"
@@ -73,7 +74,7 @@
                         <MudItem xs="4" md="1">
                             <MudCheckBox @bind-Value="linha.Opcional" Label="Opt." Size="Size.Small" />
                         </MudItem>
-                        <MudItem xs="2" md="1">
+                        <MudItem xs="2" md="1" Class="d-flex justify-end">
                             <MudIconButton Icon="@Icons.Material.Filled.DeleteOutline" Color="Color.Error"
                                            Size="Size.Small" OnClick="@(() => _linhas.Remove(linha))" />
                         </MudItem>
@@ -117,26 +118,26 @@
 
         foreach (var p in Importador.ParsearTexto(_texto))
         {
-            _linhas.Add(new LinhaPreview
+            var linha = new LinhaPreview
             {
                 Quantidade      = p.Quantidade,
                 UnidadeMedidaId = ResolverUnidade(p.CodigoUnidade),
-                Selecionado     = await ResolverIngredienteExistente(p.NomeIngrediente),
-                NomeParseado    = p.NomeIngrediente,
+                Nome            = p.NomeIngrediente,
+                Observacao      = p.Preparo,
                 Opcional        = p.Opcional,
-            });
+            };
+            linha.Selecionado = await ResolverIngredienteExistente(linha.Nome);
+            _linhas.Add(linha);
         }
     }
 
+    // Fallback para "un" (não "g") quando o parser não detectou unidade.
     private int ResolverUnidade(string? codigo)
     {
-        if (!string.IsNullOrWhiteSpace(codigo))
-        {
-            var u = Unidades.FirstOrDefault(x =>
-                string.Equals(x.Codigo, codigo, StringComparison.OrdinalIgnoreCase));
-            if (u is not null) return u.Id;
-        }
-        return Unidades.FirstOrDefault()?.Id ?? 0;
+        var alvo = string.IsNullOrWhiteSpace(codigo) ? "un" : codigo;
+        var u = Unidades.FirstOrDefault(x =>
+            string.Equals(x.Codigo, alvo, StringComparison.OrdinalIgnoreCase));
+        return (u ?? Unidades.FirstOrDefault())?.Id ?? 0;
     }
 
     private async Task<IngredienteListaDTO?> ResolverIngredienteExistente(string nome)
@@ -147,14 +148,14 @@
         return candidatos.FirstOrDefault(c => TextoHelper.NormalizarNome(c.Nome) == alvo);
     }
 
-    private void SelecionarIngrediente(LinhaPreview linha, IngredienteListaDTO? v)
+    // Ao editar o nome, redetecta se já existe no cadastro (reaproveita unidade padrão).
+    private async Task AtualizarNome(LinhaPreview linha, string nome)
     {
-        linha.Selecionado = v;
-        if (v?.UnidadeMedidaPadraoId is int uid) linha.UnidadeMedidaId = uid;
+        linha.Nome = nome;
+        linha.Selecionado = await ResolverIngredienteExistente(nome);
+        if (linha.Selecionado?.UnidadeMedidaPadraoId is int uid)
+            linha.UnidadeMedidaId = uid;
     }
-
-    private async Task<IEnumerable<IngredienteListaDTO>> Buscar(string texto, CancellationToken ct)
-        => await IngService.BuscarAutoCompleteAsync(texto, 10, ct);
 
     private async Task Aplicar()
     {
@@ -172,6 +173,7 @@
                 NomeIngrediente = nome,
                 Quantidade      = l.Quantidade ?? 0,
                 UnidadeMedidaId = l.UnidadeMedidaId,
+                Observacao      = string.IsNullOrWhiteSpace(l.Observacao) ? null : l.Observacao.Trim(),
                 Opcional        = l.Opcional,
             });
         }
@@ -192,7 +194,7 @@
         if (l.Selecionado is not null)
             return (l.Selecionado.Id, l.Selecionado.Nome);
 
-        var nomeNovo = Capitalizar(l.NomeParseado.Trim());
+        var nomeNovo = Capitalizar((l.Nome ?? string.Empty).Trim());
         if (string.IsNullOrWhiteSpace(nomeNovo)) return (0, string.Empty);
 
         var r = await IngService.SalvarAsync(new IngredientePersistenciaDTO
@@ -204,7 +206,7 @@
         if (r.Sucesso) return (r.Valor, nomeNovo);
 
         // Falha provável: nome já existente — tenta reaproveitar.
-        var existente = await ResolverIngredienteExistente(l.NomeParseado);
+        var existente = await ResolverIngredienteExistente(nomeNovo);
         if (existente is not null) return (existente.Id, existente.Nome);
 
         Snackbar.Add($"Não foi possível criar '{nomeNovo}': {string.Join(", ", r.Erros)}", Severity.Warning);
@@ -219,7 +221,8 @@
         public decimal? Quantidade { get; set; }
         public int UnidadeMedidaId { get; set; }
         public IngredienteListaDTO? Selecionado { get; set; }
-        public string NomeParseado { get; set; } = string.Empty;
+        public string Nome { get; set; } = string.Empty;
+        public string? Observacao { get; set; }
         public bool Opcional { get; set; }
     }
 }

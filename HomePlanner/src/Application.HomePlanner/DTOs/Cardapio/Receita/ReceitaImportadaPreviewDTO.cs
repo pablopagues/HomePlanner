@@ -22,6 +22,8 @@ public class IngredienteImportadoDTO
     public decimal? Quantidade { get; init; }
     public string? CodigoUnidade { get; init; }
     public string NomeIngrediente { get; init; } = string.Empty;
+    /// <summary>Termo de preparo/corte separado do nome ("picada", "em cubos"), se houver.</summary>
+    public string? Preparo { get; init; }
     public string TextoOriginal { get; init; } = string.Empty;
     public bool Opcional { get; init; }
 }
