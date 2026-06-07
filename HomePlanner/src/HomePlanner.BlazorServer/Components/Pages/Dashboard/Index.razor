@@ -2,9 +2,12 @@
 @attribute [Authorize]
 @using HomePlanner.BlazorServer.Services
 @using Application.HomePlanner.Services.Empresa
+@using Application.HomePlanner.DTOs.Planner
+@using Application.HomePlanner.Services.Planner
 @inject IStringLocalizer<SharedResource> L
 @inject PublicLanguageService Lang
 @inject IEmpresaService EmpresaService
+@inject ITarefaService TarefaService
 
 <PageTitle>Dashboard — HomePlanner</PageTitle>
 
@@ -74,13 +77,14 @@
     </MudItem>
 
     <MudItem xs="12" sm="6" md="3">
-        <MudCard Style="border-top: 4px solid var(--mud-palette-lines-default); opacity: 0.6;">
+        <MudCard Class="hover-card" Style="cursor:pointer; border-top: 4px solid var(--mud-palette-lines-default);"
+                 @onclick='@(() => Nav.NavigateTo("/compras"))'>
             <MudCardContent>
                 <MudIcon Icon="@Icons.Material.Filled.ShoppingCart"
                          Style="color:var(--mud-palette-text-secondary); font-size:2.5rem;" />
                 <MudText Typo="Typo.h6" Class="mt-2">Lista de Compras</MudText>
                 <MudText Typo="Typo.body2" Color="Color.Secondary">
-                    Em breve
+                    Organize as compras da semana
                 </MudText>
             </MudCardContent>
         </MudCard>
@@ -89,12 +93,69 @@
 
 <MudDivider Class="my-6" />
 
-<MudText Typo="Typo.h6" GutterBottom="true">Esta semana</MudText>
-<MudButton Variant="Variant.Filled" Color="Color.Primary"
-           StartIcon="@Icons.Material.Filled.CalendarMonth"
-           Href="/cardapio">
-    Ver cardápio da semana
-</MudButton>
+<MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-3">
+    <MudText Typo="Typo.h6">Tarefas de hoje</MudText>
+    <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
+               EndIcon="@Icons.Material.Filled.ChevronRight"
+               @onclick='@(() => Nav.NavigateTo("/planner"))'>
+        Ver todas
+    </MudButton>
+</MudStack>
+
+@if (_carregandoTarefas)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else if (_gruposTarefas.Count == 0)
+{
+    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+        Nenhuma tarefa agendada para hoje.
+    </MudAlert>
+}
+else
+{
+    <MudGrid Spacing="3">
+        @foreach (var grupo in _gruposTarefas)
+        {
+            <MudItem xs="12" sm="6" md="4">
+                <MudPaper Class="pa-3" Elevation="0"
+                          Style="border-radius:10px; border:1px solid var(--mud-palette-lines-default); height:100%;">
+                    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center" Class="mb-3">
+                        <AvatarUsuario UsuarioId="@grupo.UsuarioId" Nome="@grupo.Nome"
+                                       Versao="@grupo.FotoVersao" Px="36" />
+                        <MudStack Spacing="0" Style="min-width:0;">
+                            <MudText Typo="Typo.subtitle2" Style="font-weight:600;">@grupo.Nome</MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                @grupo.Tarefas.Count(t => !t.Concluida) pendente(s)
+                            </MudText>
+                        </MudStack>
+                    </MudStack>
+
+                    <MudStack Spacing="1">
+                        @foreach (var t in grupo.Tarefas)
+                        {
+                            <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
+                                <MudIcon Size="Size.Small"
+                                         Icon="@(t.Concluida ? Icons.Material.Filled.CheckCircle : Icons.Material.Outlined.RadioButtonUnchecked)"
+                                         Color="@(t.Concluida ? Color.Success : Color.Default)"
+                                         Style="font-size:1.1rem; flex:none;" />
+                                <MudText Typo="Typo.body2" Style="@(t.Concluida ? "text-decoration:line-through; opacity:0.55;" : "")">
+                                    @t.Titulo
+                                </MudText>
+                                @if (t.HoraInicio.HasValue)
+                                {
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary" Class="ml-auto" Style="flex:none;">
+                                        @t.HoraInicio.Value.ToString("HH\\:mm")
+                                    </MudText>
+                                }
+                            </MudStack>
+                        }
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+        }
+    </MudGrid>
+}
 
 @code {
     [Inject] NavigationManager Nav { get; set; } = null!;
@@ -102,6 +163,9 @@
 
     private int _totalReceitas;
     private bool _emailConfirmado = true; // assume confirmado até carregar (evita flash do aviso)
+
+    private bool _carregandoTarefas = true;
+    private List<GrupoTarefas> _gruposTarefas = [];
 
     protected override async Task OnInitializedAsync()
     {
@@ -118,5 +182,34 @@
         {
             _emailConfirmado = true; // em caso de erro, não exibe o aviso
         }
+
+        await CarregarTarefasDoDiaAsync();
     }
+
+    private async Task CarregarTarefasDoDiaAsync()
+    {
+        _carregandoTarefas = true;
+        var hoje = DateOnly.FromDateTime(DateTime.Today);
+        var tarefas = await TarefaService.ListarCalendarioAsync(hoje, hoje);
+
+        // Agrupa por responsável; tarefas sem responsável ficam num grupo próprio.
+        _gruposTarefas = tarefas
+            .GroupBy(t => t.ResponsavelUsuarioId)
+            .Select(g => new GrupoTarefas(
+                g.Key,
+                g.First().ResponsavelNome ?? "Sem responsável",
+                g.First().ResponsavelFotoVersao,
+                g.OrderBy(t => t.Concluida)
+                 .ThenBy(t => t.HoraInicio ?? TimeOnly.MaxValue)
+                 .ToList()))
+            // Membros com tarefas pendentes primeiro; depois ordem alfabética.
+            .OrderByDescending(g => g.Tarefas.Any(t => !t.Concluida))
+            .ThenBy(g => g.Nome)
+            .ToList();
+
+        _carregandoTarefas = false;
+    }
+
+    private record GrupoTarefas(
+        string? UsuarioId, string Nome, string? FotoVersao, List<TarefaListaDTO> Tarefas);
 }
