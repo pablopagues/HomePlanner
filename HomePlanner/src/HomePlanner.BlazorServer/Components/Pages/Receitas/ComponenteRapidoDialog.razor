@@ -1,0 +1,129 @@
+@* Diálogo: cria rapidamente uma receita-componente colando os ingredientes *@
+@using Application.HomePlanner.Helpers
+@inject IImportadorReceitaService Importador
+@inject IIngredienteService IngService
+@inject IReceitaService ReceitaService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">Novo componente rápido</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudGrid Spacing="2" Class="mb-2">
+            <MudItem xs="8">
+                <MudTextField @bind-Value="_nome" Label="Nome do componente" Required="true"
+                              Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="4">
+                <MudNumericField @bind-Value="_porcoes" Label="Porções" Min="1"
+                                 Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+        </MudGrid>
+
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-1">
+            Ingredientes (um por linha — cole da receita):
+        </MudText>
+        <MudTextField @bind-Value="_texto" Lines="6" AutoGrow="true"
+                      Variant="Variant.Outlined" Placeholder="4 batatas grandes em rodelas&#10;2 colheres (sopa) de azeite&#10;sal a gosto" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => MudDialog.Cancel())">Cancelar</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Confirmar"
+                   Disabled="@(_salvando || string.IsNullOrWhiteSpace(_nome))">
+            @(_salvando ? "Criando..." : "Criar e adicionar")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter] public List<UnidadeMedidaListaDTO> Unidades { get; set; } = [];
+
+    private string _nome = string.Empty;
+    private string _texto = string.Empty;
+    private int _porcoes = 4;
+    private bool _salvando;
+
+    private async Task Confirmar()
+    {
+        _salvando = true;
+
+        var linhas = new List<ReceitaIngredientePersistenciaDTO>();
+        int ordem = 0;
+        foreach (var p in Importador.ParsearTexto(_texto))
+        {
+            var unidadeId = ResolverUnidade(p.CodigoUnidade);
+            var ingredienteId = await ResolverIngrediente(p, unidadeId);
+            if (ingredienteId == 0) continue;
+
+            linhas.Add(new ReceitaIngredientePersistenciaDTO
+            {
+                IngredienteId   = ingredienteId,
+                Quantidade      = p.Quantidade ?? 0,
+                UnidadeMedidaId = unidadeId,
+                Observacao      = string.IsNullOrWhiteSpace(p.Preparo) ? null : p.Preparo,
+                Opcional        = p.Opcional,
+                Ordem           = ordem++,
+            });
+        }
+
+        var novo = new ReceitaPersistenciaDTO
+        {
+            Nome              = _nome.Trim(),
+            NumeroPorcoesBase = Math.Max(1, _porcoes),
+            Ingredientes      = linhas,
+        };
+
+        var r = await ReceitaService.SalvarAsync(novo);
+        _salvando = false;
+
+        if (!r.Sucesso)
+        {
+            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            return;
+        }
+
+        if (linhas.Count == 0)
+            Snackbar.Add("Componente criado sem ingredientes — dá para preencher depois.", Severity.Info);
+
+        MudDialog.Close(DialogResult.Ok(new ComponenteCriado(r.Valor, novo.Nome, novo.NumeroPorcoesBase)));
+    }
+
+    private int ResolverUnidade(string? codigo)
+    {
+        var alvo = string.IsNullOrWhiteSpace(codigo) ? "un" : codigo;
+        var u = Unidades.FirstOrDefault(x => string.Equals(x.Codigo, alvo, StringComparison.OrdinalIgnoreCase));
+        return (u ?? Unidades.FirstOrDefault())?.Id ?? 0;
+    }
+
+    private async Task<int> ResolverIngrediente(IngredienteImportadoDTO p, int unidadeId)
+    {
+        if (!string.IsNullOrWhiteSpace(p.NomeIngrediente))
+        {
+            var candidatos = await IngService.BuscarAutoCompleteAsync(p.NomeIngrediente, 5);
+            var alvo = TextoHelper.NormalizarNome(p.NomeIngrediente);
+            var existente = candidatos.FirstOrDefault(c => TextoHelper.NormalizarNome(c.Nome) == alvo);
+            if (existente is not null) return existente.Id;
+        }
+
+        var nomeNovo = Capitalizar(p.NomeIngrediente.Trim());
+        if (string.IsNullOrWhiteSpace(nomeNovo)) return 0;
+
+        var r = await IngService.SalvarAsync(new IngredientePersistenciaDTO
+        {
+            Nome                  = nomeNovo,
+            UnidadeMedidaPadraoId = unidadeId == 0 ? null : unidadeId,
+        });
+        if (r.Sucesso) return r.Valor;
+
+        // Provável nome duplicado — tenta reaproveitar.
+        var cand = await IngService.BuscarAutoCompleteAsync(nomeNovo, 5);
+        var alvo2 = TextoHelper.NormalizarNome(nomeNovo);
+        return cand.FirstOrDefault(c => TextoHelper.NormalizarNome(c.Nome) == alvo2)?.Id ?? 0;
+    }
+
+    private static string Capitalizar(string s)
+        => string.IsNullOrWhiteSpace(s) ? s : char.ToUpper(s[0]) + s[1..];
+}

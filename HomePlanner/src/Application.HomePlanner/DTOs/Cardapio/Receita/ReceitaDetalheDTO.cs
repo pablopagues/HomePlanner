@@ -12,4 +12,23 @@ public class ReceitaDetalheDTO
     public string? Observacoes { get; init; }
     public DateTime DataCriacao { get; init; }
     public IReadOnlyList<ReceitaIngredienteDTO> Ingredientes { get; init; } = [];
+
+    /// <summary>Componentes (outras receitas) que compõem este prato, se houver.</summary>
+    public IReadOnlyList<ReceitaComponenteDetalheDTO> Componentes { get; init; } = [];
+
+    /// <summary>Ingredientes do prato inteiro, já expandidos (próprios + componentes). Preenchido pelo serviço.</summary>
+    public IReadOnlyList<IngredienteExpandidoDTO> IngredientesExpandidos { get; set; } = [];
+
+    public bool EhComposto => Componentes.Count > 0;
+}
+
+public class ReceitaComponenteDetalheDTO
+{
+    /// <summary>Id da linha ReceitaComponente (para reaproveitar na edição).</summary>
+    public int Id { get; init; }
+    public int ComponenteId { get; init; }
+    public string Nome { get; init; } = string.Empty;
+    public int PorcoesDesejadas { get; init; }
+    public string? ModoPreparo { get; init; }
+    public int Ordem { get; init; }
 }

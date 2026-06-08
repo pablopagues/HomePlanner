@@ -1,0 +1,82 @@
+@* Diálogo: extrai linhas de ingrediente selecionadas numa nova receita-componente *@
+@inject IReceitaService ReceitaService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">Extrair como componente</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
+            As @Ingredientes.Count linha(s) marcada(s) viram uma nova receita reutilizável,
+            que entra no lugar como componente.
+        </MudText>
+
+        <MudGrid Spacing="2">
+            <MudItem xs="8">
+                <MudTextField @bind-Value="_nome" Label="Nome do componente" Required="true"
+                              Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="4">
+                <MudNumericField @bind-Value="_porcoes" Label="Porções" Min="1"
+                                 Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => MudDialog.Cancel())">Cancelar</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Confirmar"
+                   Disabled="@(_salvando || string.IsNullOrWhiteSpace(_nome))">
+            @(_salvando ? "Criando..." : "Extrair e adicionar")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter] public List<ReceitaIngredientePersistenciaDTO> Ingredientes { get; set; } = [];
+    [Parameter] public string NomeSugerido { get; set; } = string.Empty;
+    [Parameter] public int PorcoesSugeridas { get; set; } = 4;
+
+    private string _nome = string.Empty;
+    private int _porcoes = 4;
+    private bool _salvando;
+
+    protected override void OnInitialized()
+    {
+        _nome = NomeSugerido;
+        _porcoes = Math.Max(1, PorcoesSugeridas);
+    }
+
+    private async Task Confirmar()
+    {
+        _salvando = true;
+
+        var novo = new ReceitaPersistenciaDTO
+        {
+            Nome              = _nome.Trim(),
+            NumeroPorcoesBase = Math.Max(1, _porcoes),
+            Ingredientes      = Ingredientes.Select((l, i) => new ReceitaIngredientePersistenciaDTO
+            {
+                IngredienteId   = l.IngredienteId,
+                Quantidade      = l.Quantidade,
+                UnidadeMedidaId = l.UnidadeMedidaId,
+                Observacao      = l.Observacao,
+                Opcional        = l.Opcional,
+                Ordem           = i,
+            }).ToList(),
+        };
+
+        var r = await ReceitaService.SalvarAsync(novo);
+        _salvando = false;
+
+        if (!r.Sucesso)
+        {
+            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            return;
+        }
+
+        MudDialog.Close(DialogResult.Ok(new ComponenteCriado(r.Valor, novo.Nome, novo.NumeroPorcoesBase)));
+    }
+}

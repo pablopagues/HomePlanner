@@ -1,5 +1,6 @@
 @* Componente de formulário compartilhado entre Criar e Editar *@
 @inject IDialogService DialogService
+@inject IReceitaService ReceitaService
 @inject ISnackbar Snackbar
 
 <MudGrid Spacing="3">
@@ -35,9 +36,79 @@
 
 <MudDivider Class="my-4" />
 
-<MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-3">
-    <MudText Typo="Typo.h6">Ingredientes</MudText>
+@* ── Componentes (outras receitas que compõem este prato) ─────────────────── *@
+<MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-2" Wrap="Wrap.Wrap">
+    <MudStack Spacing="0">
+        <MudText Typo="Typo.h6">Componentes (pratos que compõem)</MudText>
+        <MudText Typo="Typo.caption" Color="Color.Secondary">
+            Combine outras receitas neste prato. Opcional.
+        </MudText>
+    </MudStack>
     <MudStack Row="true" Spacing="2">
+        <MudButton StartIcon="@Icons.Material.Filled.Bolt" Size="Size.Small"
+                   Variant="Variant.Text" Color="Color.Secondary"
+                   OnClick="CriarComponenteRapido">
+            Criar componente
+        </MudButton>
+        <MudButton StartIcon="@Icons.Material.Filled.Add" Size="Size.Small"
+                   Variant="Variant.Outlined" Color="Color.Primary"
+                   OnClick="AdicionarComponente">
+            Adicionar
+        </MudButton>
+    </MudStack>
+</MudStack>
+
+@foreach (var comp in _componentes)
+{
+    <MudPaper Class="pa-3 mb-2" Elevation="0"
+              Style="background:var(--mud-palette-background-gray); border-radius:8px; border:1px solid var(--mud-palette-lines-default);">
+        <MudGrid Spacing="2" Class="align-center">
+            <MudItem xs="12" md="7">
+                <MudAutocomplete T="ReceitaListaDTO?" Label="Receita componente"
+                                 Value="comp.Selecionado"
+                                 Text="@comp.Texto"
+                                 TextChanged="@(t => comp.Texto = t)"
+                                 CoerceText="false"
+                                 SearchFunc="BuscarReceitas"
+                                 ToStringFunc="@(r => r?.Nome ?? string.Empty)"
+                                 ValueChanged="@(v => AtualizarComponente(comp, v))"
+                                 MinCharacters="0" ResetValueOnEmptyText="false"
+                                 Clearable="true" OpenOnFocus="true"
+                                 Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="8" md="3">
+                <MudNumericField Value="comp.Dto.PorcoesDesejadas"
+                                 ValueChanged="@((int v) => { comp.Dto.PorcoesDesejadas = v; })"
+                                 Label="Porções" Min="1"
+                                 Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="4" md="2" Class="d-flex justify-end">
+                <MudIconButton Icon="@Icons.Material.Filled.DeleteOutline" Color="Color.Error"
+                               Size="Size.Small" OnClick="@(() => RemoverComponente(comp))" />
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+}
+@if (_componentes.Count == 0)
+{
+    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-2">
+        Nenhum componente. Este prato usa só os ingredientes abaixo.
+    </MudText>
+}
+
+<MudDivider Class="my-4" />
+
+<MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-3" Wrap="Wrap.Wrap">
+    <MudText Typo="Typo.h6">Ingredientes próprios</MudText>
+    <MudStack Row="true" Spacing="2">
+        @if (_linhas.Any(l => l.Selecionada))
+        {
+            <MudButton StartIcon="@Icons.Material.Filled.CallSplit" Size="Size.Small"
+                       Variant="Variant.Text" Color="Color.Secondary"
+                       OnClick="ExtrairComponente">
+                Extrair como componente
+            </MudButton>
+        }
         <MudButton StartIcon="@Icons.Material.Filled.AutoFixHigh" Size="Size.Small"
                    Variant="Variant.Text" Color="Color.Secondary"
                    OnClick="AbrirLancarIngredientes">
@@ -56,10 +127,17 @@
     <MudPaper Class="pa-3 mb-2" Elevation="0"
               Style="background:var(--mud-palette-background-gray); border-radius:8px; border:1px solid var(--mud-palette-lines-default);">
         <MudGrid Spacing="2" Class="align-center">
-            <MudItem xs="12" md="4">
+            <MudItem xs="2" md="1" Class="d-flex justify-center">
+                <MudCheckBox @bind-Value="item.Selecionada" Size="Size.Small"
+                             Color="Color.Secondary" />
+            </MudItem>
+            <MudItem xs="10" md="3">
                 <MudAutocomplete T="IngredienteListaDTO?"
                                  Label="Ingrediente"
                                  Value="item.Selecionado"
+                                 Text="@item.Texto"
+                                 TextChanged="@(t => item.Texto = t)"
+                                 CoerceText="false"
                                  SearchFunc="BuscarIngredientes"
                                  ToStringFunc="@(i => i?.Nome ?? string.Empty)"
                                  ValueChanged="@(v => AtualizarIngrediente(item, v))"
@@ -104,6 +182,42 @@
     </MudText>
 }
 
+@* ── Prévia da compra deste prato (próprios + componentes) ────────────────── *@
+<MudDivider Class="my-4" />
+<MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-2" Wrap="Wrap.Wrap">
+    <MudText Typo="Typo.subtitle1">Prévia da compra deste prato</MudText>
+    <MudButton StartIcon="@Icons.Material.Filled.Refresh" Size="Size.Small" Variant="Variant.Text"
+               OnClick="AtualizarPrevia" Disabled="_carregandoPrevia">
+        Atualizar prévia
+    </MudButton>
+</MudStack>
+@if (_carregandoPrevia)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-2" />
+}
+else if (_previa.Count == 0)
+{
+    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-2">
+        Adicione componentes ou ingredientes e clique em <b>Atualizar prévia</b>.
+    </MudText>
+}
+else
+{
+    <MudPaper Class="pa-3 mb-2" Elevation="0"
+              Style="background:var(--mud-palette-background-gray); border-radius:8px;">
+        <MudGrid Spacing="1">
+            @foreach (var p in _previa)
+            {
+                <MudItem xs="12" sm="6" md="4">
+                    <MudText Typo="Typo.body2">
+                        <strong>@FormatarQtd(p.Quantidade) @p.CodigoUnidade</strong> @p.NomeIngrediente
+                    </MudText>
+                </MudItem>
+            }
+        </MudGrid>
+    </MudPaper>
+}
+
 <MudDivider Class="my-4" />
 
 <MudStack Row="true" Spacing="2">
@@ -123,21 +237,57 @@
     [Parameter] public EventCallback OnCancelar { get; set; }
 
     private List<IngredienteLinhaForm> _linhas = [];
+    private List<ComponenteLinhaForm> _componentes = [];
+
+    private List<IngredienteExpandidoDTO> _previa = [];
+    private bool _carregandoPrevia;
+    private bool _inicializado;
 
     // Classe interna para manter estado do autocomplete separado do DTO
     private class IngredienteLinhaForm
     {
         public ReceitaIngredientePersistenciaDTO Dto { get; set; } = new();
         public IngredienteListaDTO? Selecionado { get; set; }
+        public string Texto { get; set; } = string.Empty;
+        public bool Selecionada { get; set; }
     }
 
-    protected override void OnParametersSet()
+    private class ComponenteLinhaForm
     {
-        if (_linhas.Count == 0 && Dto.Ingredientes.Count > 0)
+        public ReceitaComponentePersistenciaDTO Dto { get; set; } = new();
+        public ReceitaListaDTO? Selecionado { get; set; }
+        public string Texto { get; set; } = string.Empty;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_inicializado) return;
+        _inicializado = true;
+
+        if (Dto.Ingredientes.Count > 0)
+            _linhas = Dto.Ingredientes.Select(CriarLinhaIngrediente).ToList();
+
+        if (Dto.Componentes.Count > 0)
         {
-            _linhas = Dto.Ingredientes.Select(d => new IngredienteLinhaForm { Dto = d }).ToList();
+            _componentes = Dto.Componentes.Select(d => new ComponenteLinhaForm
+            {
+                Dto         = d,
+                Texto       = d.NomeComponente,
+                Selecionado = new ReceitaListaDTO { Id = d.ReceitaComponenteId, Nome = d.NomeComponente },
+            }).ToList();
+            await AtualizarPrevia();
         }
     }
+
+    private static IngredienteLinhaForm CriarLinhaIngrediente(ReceitaIngredientePersistenciaDTO d)
+        => new()
+        {
+            Dto         = d,
+            Texto       = d.NomeIngrediente ?? string.Empty,
+            Selecionado = d.IngredienteId > 0
+                ? new IngredienteListaDTO { Id = d.IngredienteId, Nome = d.NomeIngrediente ?? string.Empty }
+                : null,
+        };
 
     private void AdicionarIngrediente()
     {
@@ -184,6 +334,7 @@
             var dto = new ReceitaIngredientePersistenciaDTO
             {
                 IngredienteId   = n.IngredienteId,
+                NomeIngrediente = n.NomeIngrediente,
                 Quantidade      = n.Quantidade,
                 UnidadeMedidaId = n.UnidadeMedidaId,
                 Observacao      = n.Observacao,
@@ -194,6 +345,7 @@
             _linhas.Add(new IngredienteLinhaForm
             {
                 Dto         = dto,
+                Texto       = n.NomeIngrediente,
                 Selecionado = new IngredienteListaDTO { Id = n.IngredienteId, Nome = n.NomeIngrediente },
             });
             adicionados++;
@@ -205,6 +357,8 @@
                 ? $"{adicionados} lançado(s), {mesclados} mesclado(s) a itens já na lista. Revise antes de salvar."
                 : $"{adicionados} ingrediente(s) lançado(s). Revise antes de salvar.",
             Severity.Success);
+
+        await AtualizarPrevia();
     }
 
     private static string? JuntarObs(string? a, string? b)
@@ -227,6 +381,8 @@
     {
         linha.Selecionado = selecionado;
         linha.Dto.IngredienteId = selecionado?.Id ?? 0;
+        linha.Dto.NomeIngrediente = selecionado?.Nome;
+        if (selecionado is not null) linha.Texto = selecionado.Nome;
         // Auto-preenche unidade padrão do ingrediente
         if (selecionado?.UnidadeMedidaPadraoId.HasValue == true)
             linha.Dto.UnidadeMedidaId = selecionado.UnidadeMedidaPadraoId.Value;
@@ -238,9 +394,172 @@
             _linhas[i].Dto.Ordem = i;
     }
 
+    // ── Componentes ────────────────────────────────────────────────────────────
+
+    private async Task<IEnumerable<ReceitaListaDTO>> BuscarReceitas(string texto, CancellationToken ct)
+    {
+        var excluir = Dto.Id == 0 ? (int?)null : Dto.Id;
+        var res = await ReceitaService.BuscarAutoCompleteAsync(texto, 10, excluir, ct);
+        var jaUsados = _componentes.Select(c => c.Dto.ReceitaComponenteId).ToHashSet();
+        return res.Where(r => !jaUsados.Contains(r.Id));
+    }
+
+    private void AdicionarComponente()
+    {
+        var novo = new ReceitaComponentePersistenciaDTO
+        {
+            PorcoesDesejadas = Math.Max(1, Dto.NumeroPorcoesBase),
+            Ordem            = _componentes.Count,
+        };
+        Dto.Componentes.Add(novo);
+        _componentes.Add(new ComponenteLinhaForm { Dto = novo });
+    }
+
+    private async Task AtualizarComponente(ComponenteLinhaForm linha, ReceitaListaDTO? sel)
+    {
+        if (sel is null)
+        {
+            linha.Selecionado = null;
+            linha.Dto.ReceitaComponenteId = 0;
+            linha.Dto.NomeComponente = string.Empty;
+            linha.Texto = string.Empty;
+            return;
+        }
+        if (Dto.Id != 0 && sel.Id == Dto.Id)
+        {
+            Snackbar.Add("Uma receita não pode ser componente de si mesma.", Severity.Warning);
+            return;
+        }
+        if (_componentes.Any(c => c != linha && c.Dto.ReceitaComponenteId == sel.Id))
+        {
+            Snackbar.Add("Esse componente já está na lista.", Severity.Warning);
+            return;
+        }
+
+        linha.Selecionado = sel;
+        linha.Texto = sel.Nome;
+        linha.Dto.ReceitaComponenteId = sel.Id;
+        linha.Dto.NomeComponente = sel.Nome;
+        if (linha.Dto.PorcoesDesejadas < 1)
+            linha.Dto.PorcoesDesejadas = Math.Max(1, sel.NumeroPorcoesBase);
+        await AtualizarPrevia();
+    }
+
+    private async Task RemoverComponente(ComponenteLinhaForm linha)
+    {
+        Dto.Componentes.Remove(linha.Dto);
+        _componentes.Remove(linha);
+        RecalcularOrdemComponentes();
+        await AtualizarPrevia();
+    }
+
+    private void RecalcularOrdemComponentes()
+    {
+        for (int i = 0; i < _componentes.Count; i++)
+            _componentes[i].Dto.Ordem = i;
+    }
+
+    private void AdicionarComponenteCriado(ComponenteCriado criado)
+    {
+        if (_componentes.Any(c => c.Dto.ReceitaComponenteId == criado.Id)) return;
+        var novo = new ReceitaComponentePersistenciaDTO
+        {
+            ReceitaComponenteId = criado.Id,
+            NomeComponente      = criado.Nome,
+            PorcoesDesejadas    = Math.Max(1, criado.Porcoes),
+            Ordem               = _componentes.Count,
+        };
+        Dto.Componentes.Add(novo);
+        _componentes.Add(new ComponenteLinhaForm
+        {
+            Dto         = novo,
+            Texto       = criado.Nome,
+            Selecionado = new ReceitaListaDTO { Id = criado.Id, Nome = criado.Nome },
+        });
+    }
+
+    private async Task CriarComponenteRapido()
+    {
+        var parameters = new DialogParameters<ComponenteRapidoDialog> { { x => x.Unidades, Unidades } };
+        var dialog = await DialogService.ShowAsync<ComponenteRapidoDialog>(
+            string.Empty, parameters, new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true });
+
+        var result = await dialog.Result;
+        if (result is null || result.Canceled || result.Data is not ComponenteCriado criado) return;
+
+        AdicionarComponenteCriado(criado);
+        await AtualizarPrevia();
+        Snackbar.Add($"Componente \"{criado.Nome}\" criado e adicionado.", Severity.Success);
+    }
+
+    private async Task ExtrairComponente()
+    {
+        var selecionadas = _linhas.Where(l => l.Selecionada && l.Dto.IngredienteId > 0).ToList();
+        if (selecionadas.Count == 0)
+        {
+            Snackbar.Add("Marque ao menos um ingrediente vinculado para extrair.", Severity.Warning);
+            return;
+        }
+
+        var parameters = new DialogParameters<ExtrairComponenteDialog>
+        {
+            { x => x.Ingredientes,     selecionadas.Select(l => l.Dto).ToList() },
+            { x => x.PorcoesSugeridas, Dto.NumeroPorcoesBase },
+        };
+        var dialog = await DialogService.ShowAsync<ExtrairComponenteDialog>(
+            string.Empty, parameters, new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true });
+
+        var result = await dialog.Result;
+        if (result is null || result.Canceled || result.Data is not ComponenteCriado criado) return;
+
+        foreach (var l in selecionadas)
+        {
+            Dto.Ingredientes.Remove(l.Dto);
+            _linhas.Remove(l);
+        }
+        RecalcularOrdem();
+        AdicionarComponenteCriado(criado);
+        await AtualizarPrevia();
+        Snackbar.Add($"\"{criado.Nome}\" extraído como componente.", Severity.Success);
+    }
+
+    // ── Prévia ─────────────────────────────────────────────────────────────────
+
+    private async Task AtualizarPrevia()
+    {
+        _carregandoPrevia = true;
+        try
+        {
+            var deComponentes = await ReceitaService.ExpandirComponentesAsync(Dto.Componentes);
+            var proprios = _linhas
+                .Where(l => l.Dto.IngredienteId > 0)
+                .Select(l => new IngredienteExpandidoDTO
+                {
+                    IngredienteId   = l.Dto.IngredienteId,
+                    NomeIngrediente = l.Selecionado?.Nome ?? string.Empty,
+                    Quantidade      = l.Dto.Quantidade,
+                    UnidadeMedidaId = l.Dto.UnidadeMedidaId,
+                    CodigoUnidade   = UnidadeCodigo(l.Dto.UnidadeMedidaId),
+                    NomeUnidade     = UnidadeNome(l.Dto.UnidadeMedidaId),
+                });
+            _previa = ExpansorReceita.Consolidar(proprios.Concat(deComponentes));
+        }
+        finally
+        {
+            _carregandoPrevia = false;
+        }
+    }
+
+    private string UnidadeCodigo(int id) => Unidades.FirstOrDefault(u => u.Id == id)?.Codigo ?? string.Empty;
+    private string UnidadeNome(int id) => Unidades.FirstOrDefault(u => u.Id == id)?.Nome ?? string.Empty;
+
+    private static string FormatarQtd(decimal v)
+        => v == Math.Truncate(v) ? v.ToString("0") : v.ToString("0.##");
+
     private async Task HandleSalvar()
     {
         RecalcularOrdem();
+        RecalcularOrdemComponentes();
         await OnSalvar.InvokeAsync();
     }
 }

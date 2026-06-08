@@ -75,6 +75,13 @@ else
                                      Icon="@Icons.Material.Filled.List">
                                 @r.TotalIngredientes ingr.
                             </MudChip>
+                            @if (r.TotalComponentes > 0)
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Primary"
+                                         Icon="@Icons.Material.Filled.Bolt">
+                                    @r.TotalComponentes componentes
+                                </MudChip>
+                            }
                         </MudStack>
                     </MudCardContent>
                     <MudCardActions>

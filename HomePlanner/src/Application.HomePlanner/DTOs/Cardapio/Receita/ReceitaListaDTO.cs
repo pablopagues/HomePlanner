@@ -8,5 +8,6 @@ public class ReceitaListaDTO
     public int? TempoPreparoMinutos { get; init; }
     public string? UrlImagem { get; init; }
     public int TotalIngredientes { get; init; }
+    public int TotalComponentes { get; init; }
     public DateTime DataCriacao { get; init; }
 }

@@ -64,11 +64,20 @@ else
                 {
                     Id              = i.Id,
                     IngredienteId   = i.IngredienteId,
+                    NomeIngrediente = i.NomeIngrediente,
                     Quantidade      = i.Quantidade,
                     UnidadeMedidaId = i.UnidadeMedidaId,
                     Observacao      = i.Observacao,
                     Opcional        = i.Opcional,
                     Ordem           = i.Ordem,
+                }).ToList(),
+                Componentes       = detalhe.Componentes.Select(c => new ReceitaComponentePersistenciaDTO
+                {
+                    Id                  = c.Id,
+                    ReceitaComponenteId = c.ComponenteId,
+                    NomeComponente      = c.Nome,
+                    PorcoesDesejadas    = c.PorcoesDesejadas,
+                    Ordem               = c.Ordem,
                 }).ToList(),
             };
 

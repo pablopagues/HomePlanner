@@ -11,4 +11,14 @@ public class ReceitaPersistenciaDTO
     public string? UrlImagem { get; set; }
     public string? Observacoes { get; set; }
     public List<ReceitaIngredientePersistenciaDTO> Ingredientes { get; set; } = [];
+    public List<ReceitaComponentePersistenciaDTO> Componentes { get; set; } = [];
+}
+
+public class ReceitaComponentePersistenciaDTO
+{
+    public int Id { get; set; }
+    public int ReceitaComponenteId { get; set; }
+    public string NomeComponente { get; set; } = string.Empty;
+    public int PorcoesDesejadas { get; set; }
+    public int Ordem { get; set; }
 }

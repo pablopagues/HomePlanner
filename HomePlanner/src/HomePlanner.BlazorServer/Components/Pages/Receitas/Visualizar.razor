@@ -57,49 +57,102 @@ else if (_dto is not null)
                          Icon="@Icons.Material.Filled.List">
                     @_dto.Ingredientes.Count ingr.
                 </MudChip>
+                @if (_dto.EhComposto)
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Primary"
+                             Icon="@Icons.Material.Filled.Bolt">
+                        @_dto.Componentes.Count componentes
+                    </MudChip>
+                }
             </MudStack>
 
-            <MudText Typo="Typo.h6" GutterBottom="true">Ingredientes</MudText>
-            @if (_dto.Ingredientes.Count == 0)
+            @if (_dto.EhComposto)
             {
-                <MudText Typo="Typo.body2" Color="Color.Secondary">
-                    Nenhum ingrediente cadastrado.
-                </MudText>
-            }
-            else
-            {
+                <MudText Typo="Typo.h6" GutterBottom="true">Componentes</MudText>
+                <MudList T="string" Dense="true" Class="mb-3">
+                    @foreach (var c in _dto.Componentes.OrderBy(x => x.Ordem))
+                    {
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.Restaurant"
+                                     IconSize="Size.Small" Href="@($"/receitas/{c.ComponenteId}")">
+                            <MudText Typo="Typo.body2">
+                                <strong>@c.Nome</strong>
+                                <MudText Component="@("span")" Typo="Typo.body2" Color="Color.Secondary">
+                                    — @c.PorcoesDesejadas porções
+                                </MudText>
+                            </MudText>
+                        </MudListItem>
+                    }
+                </MudList>
+
+                <MudText Typo="Typo.h6" GutterBottom="true">Ingredientes (prato completo)</MudText>
                 <MudList T="string" Dense="true">
-                    @foreach (var i in _dto.Ingredientes.OrderBy(x => x.Ordem))
+                    @foreach (var i in _dto.IngredientesExpandidos)
                     {
                         <MudListItem T="string" Icon="@Icons.Material.Filled.FiberManualRecord"
                                      IconSize="Size.Small">
                             <MudText Typo="Typo.body2">
                                 <strong>@FormatarQuantidade(i.Quantidade) @i.CodigoUnidade</strong>
                                 @i.NomeIngrediente
-                                @if (!string.IsNullOrWhiteSpace(i.Observacao))
-                                {
-                                    <MudText Component="@("span")" Typo="Typo.body2" Color="Color.Secondary">
-                                        — @i.Observacao
-                                    </MudText>
-                                }
-                                @if (i.Opcional)
-                                {
-                                    <MudChip T="string" Size="Size.Small" Color="Color.Secondary"
-                                             Variant="Variant.Text" Class="ml-1">opcional</MudChip>
-                                }
                             </MudText>
                         </MudListItem>
                     }
                 </MudList>
             }
+            else
+            {
+                <MudText Typo="Typo.h6" GutterBottom="true">Ingredientes</MudText>
+                @if (_dto.Ingredientes.Count == 0)
+                {
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        Nenhum ingrediente cadastrado.
+                    </MudText>
+                }
+                else
+                {
+                    <MudList T="string" Dense="true">
+                        @foreach (var i in _dto.Ingredientes.OrderBy(x => x.Ordem))
+                        {
+                            <MudListItem T="string" Icon="@Icons.Material.Filled.FiberManualRecord"
+                                         IconSize="Size.Small">
+                                <MudText Typo="Typo.body2">
+                                    <strong>@FormatarQuantidade(i.Quantidade) @i.CodigoUnidade</strong>
+                                    @i.NomeIngrediente
+                                    @if (!string.IsNullOrWhiteSpace(i.Observacao))
+                                    {
+                                        <MudText Component="@("span")" Typo="Typo.body2" Color="Color.Secondary">
+                                            — @i.Observacao
+                                        </MudText>
+                                    }
+                                    @if (i.Opcional)
+                                    {
+                                        <MudChip T="string" Size="Size.Small" Color="Color.Secondary"
+                                                 Variant="Variant.Text" Class="ml-1">opcional</MudChip>
+                                    }
+                                </MudText>
+                            </MudListItem>
+                        }
+                    </MudList>
+                }
+            }
         </MudItem>
     </MudGrid>
 
-    @if (!string.IsNullOrWhiteSpace(_dto.ModoPreparo))
+    @if (!string.IsNullOrWhiteSpace(_dto.ModoPreparo)
+         || _dto.Componentes.Any(c => !string.IsNullOrWhiteSpace(c.ModoPreparo)))
     {
         <MudDivider Class="my-4" />
         <MudText Typo="Typo.h6" GutterBottom="true">Modo de preparo</MudText>
-        <MudText Typo="Typo.body1" Style="white-space:pre-wrap; overflow-wrap:anywhere;">@_dto.ModoPreparo</MudText>
+        @if (!string.IsNullOrWhiteSpace(_dto.ModoPreparo))
+        {
+            <MudText Typo="Typo.body1" Style="white-space:pre-wrap; overflow-wrap:anywhere;">@_dto.ModoPreparo</MudText>
+        }
+        @foreach (var c in _dto.Componentes
+            .Where(c => !string.IsNullOrWhiteSpace(c.ModoPreparo)).OrderBy(c => c.Ordem))
+        {
+            <MudText Typo="Typo.subtitle2" Class="mt-3">@c.Nome</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary"
+                     Style="white-space:pre-wrap; overflow-wrap:anywhere;">@c.ModoPreparo</MudText>
+        }
     }
 
     @if (!string.IsNullOrWhiteSpace(_dto.Observacoes))

@@ -41,6 +41,7 @@ public class HomePlannerDbContext : IdentityDbContext<Usuario, Papel, string>
     public DbSet<Ingrediente> Ingredientes => Set<Ingrediente>();
     public DbSet<Receita> Receitas => Set<Receita>();
     public DbSet<ReceitaIngrediente> ReceitasIngredientes => Set<ReceitaIngrediente>();
+    public DbSet<ReceitaComponente> ReceitasComponentes => Set<ReceitaComponente>();
     public DbSet<PlanejamentoSemanal> PlanejamentosSemanais => Set<PlanejamentoSemanal>();
     public DbSet<RefeicaoDia> RefeicoesDia => Set<RefeicaoDia>();
     public DbSet<ModeloSemana> ModelosSemana => Set<ModeloSemana>();

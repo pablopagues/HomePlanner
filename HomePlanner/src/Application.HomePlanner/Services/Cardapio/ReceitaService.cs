@@ -47,10 +47,57 @@ public class ReceitaService : IReceitaService
         await _tenantAccessor.GarantirHidratadoAsync();
 
         var dto = await _repo.ObterDetalheAsync(id, ct);
-        return dto is null
-            ? ResultadoOperacao<ReceitaDetalheDTO>.Falha("Receita não encontrada.")
-            : ResultadoOperacao<ReceitaDetalheDTO>.Ok(dto);
+        if (dto is null)
+            return ResultadoOperacao<ReceitaDetalheDTO>.Falha("Receita não encontrada.");
+
+        // Prato composto: monta a lista de ingredientes do prato inteiro (própria + componentes).
+        if (dto.Componentes.Count > 0)
+        {
+            var proprios = dto.Ingredientes.Select(MapearParaExpandido);
+            var deComponentes = await ExpandirComponentesAsync(
+                dto.Componentes.Select(c => new ReceitaComponentePersistenciaDTO
+                {
+                    ReceitaComponenteId = c.ComponenteId,
+                    PorcoesDesejadas    = c.PorcoesDesejadas,
+                }).ToList(), ct);
+
+            dto.IngredientesExpandidos = ExpansorReceita.Consolidar(proprios.Concat(deComponentes));
+        }
+
+        return ResultadoOperacao<ReceitaDetalheDTO>.Ok(dto);
     }
+
+    public async Task<IReadOnlyList<ReceitaListaDTO>> BuscarAutoCompleteAsync(
+        string texto, int limite = 10, int? excluirId = null, CancellationToken ct = default)
+    {
+        await _tenantAccessor.GarantirHidratadoAsync();
+        // Texto vazio → retorna as primeiras receitas (mostra opções ao focar o campo).
+        var normalizado = string.IsNullOrWhiteSpace(texto) ? string.Empty : TextoHelper.NormalizarNome(texto);
+        return await _repo.BuscarAutoCompleteAsync(normalizado, limite, excluirId, ct);
+    }
+
+    /// <summary>Expande os componentes (cada um nas suas porções) e consolida em ingredientes.</summary>
+    public async Task<IReadOnlyList<IngredienteExpandidoDTO>> ExpandirComponentesAsync(
+        IReadOnlyList<ReceitaComponentePersistenciaDTO> componentes, CancellationToken ct = default)
+    {
+        await _tenantAccessor.GarantirHidratadoAsync();
+        if (componentes.Count == 0) return [];
+
+        var grafo = await _repo.ObterGrafoReceitasAsync(ct);
+        var linhas = componentes
+            .SelectMany(c => ExpansorReceita.Expandir(grafo, c.ReceitaComponenteId, c.PorcoesDesejadas));
+        return ExpansorReceita.Consolidar(linhas);
+    }
+
+    private static IngredienteExpandidoDTO MapearParaExpandido(ReceitaIngredienteDTO i) => new()
+    {
+        IngredienteId   = i.IngredienteId,
+        NomeIngrediente = i.NomeIngrediente,
+        Quantidade      = i.Quantidade,
+        UnidadeMedidaId = i.UnidadeMedidaId,
+        CodigoUnidade   = i.CodigoUnidade,
+        NomeUnidade     = i.NomeUnidade,
+    };
 
     public async Task<ResultadoOperacao<int>> SalvarAsync(
         ReceitaPersistenciaDTO dto, CancellationToken ct = default)
@@ -76,8 +123,22 @@ public class ReceitaService : IReceitaService
                 ?? throw new InvalidOperationException($"Receita {dto.Id} não encontrada para edição.");
         }
 
+        // Valida componentes (auto-referência / ciclo) antes de persistir.
+        if (dto.Componentes.Count > 0)
+        {
+            var grafo = await _repo.ObterGrafoReceitasAsync(ct);
+            foreach (var compId in dto.Componentes.Select(c => c.ReceitaComponenteId).Distinct())
+            {
+                if (compId == entidade.Id && entidade.Id != 0)
+                    return ResultadoOperacao<int>.Falha("Uma receita não pode ser componente de si mesma.");
+                if (entidade.Id != 0 && ExpansorReceita.CriariaCiclo(grafo, entidade.Id, compId))
+                    return ResultadoOperacao<int>.Falha("Esse componente criaria um ciclo (ele já usa este prato).");
+            }
+        }
+
         MapearDtoParaEntidade(dto, entidade);
         SincronizarIngredientes(dto, entidade);
+        SincronizarComponentes(dto, entidade);
 
         await _repo.SalvarAsync(ct);
         _logger.LogInformation("Receita {Id} '{Nome}' salva.", entidade.Id, entidade.Nome);
@@ -91,6 +152,13 @@ public class ReceitaService : IReceitaService
         var entidade = await _repo.ObterEntidadeComIngredientesAsync(id, ct);
         if (entidade is null)
             return ResultadoOperacao.Falha("Receita não encontrada.");
+
+        // Bloqueia se a receita ainda é usada como componente de outro prato.
+        var pais = await _repo.ObterPaisQueUsamAsync(id, ct);
+        if (pais.Count > 0)
+            return ResultadoOperacao.Falha(
+                $"Esta receita é usada como componente em: {string.Join(", ", pais)}. " +
+                "Remova-a desses pratos antes de excluir.");
 
         entidade.IsDeleted = true;
         await _repo.SalvarAsync(ct);
@@ -185,6 +253,44 @@ public class ReceitaService : IReceitaService
                     Observacao      = dtoRi.Observacao,
                     Opcional        = dtoRi.Opcional,
                     Ordem           = dtoRi.Ordem,
+                });
+            }
+        }
+    }
+
+    private static void SincronizarComponentes(ReceitaPersistenciaDTO dto, Receita entidade)
+    {
+        // Dedup por componente (índice único impede o mesmo componente duas vezes).
+        var linhas = dto.Componentes
+            .Where(c => c.ReceitaComponenteId > 0 && c.ReceitaComponenteId != entidade.Id)
+            .GroupBy(c => c.ReceitaComponenteId)
+            .Select(g => g.OrderByDescending(c => c.Id > 0).ThenBy(c => c.Ordem).First())
+            .ToList();
+
+        var idsNoDto = linhas.Where(c => c.Id > 0).Select(c => c.Id).ToHashSet();
+        foreach (var rc in entidade.Componentes.Where(c => !c.IsDeleted && !idsNoDto.Contains(c.Id)))
+            rc.IsDeleted = true;
+
+        foreach (var dtoRc in linhas)
+        {
+            var porcoes = Math.Max(1, dtoRc.PorcoesDesejadas);
+            if (dtoRc.Id > 0)
+            {
+                var existente = entidade.Componentes.FirstOrDefault(c => c.Id == dtoRc.Id);
+                if (existente is not null)
+                {
+                    existente.ReceitaComponenteId = dtoRc.ReceitaComponenteId;
+                    existente.PorcoesDesejadas    = porcoes;
+                    existente.Ordem               = dtoRc.Ordem;
+                }
+            }
+            else
+            {
+                entidade.Componentes.Add(new ReceitaComponente
+                {
+                    ReceitaComponenteId = dtoRc.ReceitaComponenteId,
+                    PorcoesDesejadas    = porcoes,
+                    Ordem               = dtoRc.Ordem,
                 });
             }
         }

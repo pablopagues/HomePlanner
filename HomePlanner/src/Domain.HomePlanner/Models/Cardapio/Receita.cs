@@ -28,6 +28,7 @@ public class Receita : ITenantEntity, IDeletableEntity, IAuditable
 
     // Navigation
     public ICollection<ReceitaIngrediente> Ingredientes { get; set; } = [];
+    public ICollection<ReceitaComponente> Componentes { get; set; } = [];
     public ICollection<RefeicaoDia> RefeicoesDia { get; set; } = [];
     public ICollection<RefeicaoModelo> RefeicoesModelo { get; set; } = [];
 }

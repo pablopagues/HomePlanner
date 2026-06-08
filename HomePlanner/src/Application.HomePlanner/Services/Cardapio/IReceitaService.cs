@@ -10,4 +10,10 @@ public interface IReceitaService
     Task<ResultadoOperacao<int>> SalvarAsync(ReceitaPersistenciaDTO dto, CancellationToken ct = default);
     Task<ResultadoOperacao> DeletarAsync(int id, CancellationToken ct = default);
     Task<ResultadoOperacao<int>> DuplicarAsync(int id, CancellationToken ct = default);
+
+    /// <summary>Receitas por texto (autocomplete de componentes), excluindo opcionalmente um id.</summary>
+    Task<IReadOnlyList<ReceitaListaDTO>> BuscarAutoCompleteAsync(string texto, int limite = 10, int? excluirId = null, CancellationToken ct = default);
+
+    /// <summary>Expande os componentes informados (cada um nas suas porções) em ingredientes consolidados.</summary>
+    Task<IReadOnlyList<IngredienteExpandidoDTO>> ExpandirComponentesAsync(IReadOnlyList<ReceitaComponentePersistenciaDTO> componentes, CancellationToken ct = default);
 }

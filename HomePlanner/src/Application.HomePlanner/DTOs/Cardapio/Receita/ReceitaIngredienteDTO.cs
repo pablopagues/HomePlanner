@@ -18,6 +18,8 @@ public class ReceitaIngredientePersistenciaDTO
 {
     public int Id { get; set; }
     public int IngredienteId { get; set; }
+    /// <summary>Nome do ingrediente — apenas para exibição no formulário (não persistido).</summary>
+    public string? NomeIngrediente { get; set; }
     public decimal Quantidade { get; set; }
     public int UnidadeMedidaId { get; set; }
     public string? Observacao { get; set; }

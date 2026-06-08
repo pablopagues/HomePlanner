@@ -1,6 +1,7 @@
 using Application.HomePlanner.Common;
 using Application.HomePlanner.DTOs.Cardapio.Ingrediente;
 using Application.HomePlanner.DTOs.ListaCompras;
+using Application.HomePlanner.Services.Cardapio;
 using Application.HomePlanner.Middleware;
 using Application.HomePlanner.Repositories.Cardapio;
 using Domain.HomePlanner.Models.Enums;
@@ -54,6 +55,9 @@ public class ListaComprasService : IListaComprasService
         var unidades = (await _unidadeRepo.ListarAtivasAsync(ct))
             .ToDictionary(u => u.Id);
 
+        // Grafo de receitas (carregado 1×) para expandir pratos compostos.
+        var grafo = await _receitaRepo.ObterGrafoReceitasAsync(ct);
+
         // 1ª passada: acumula por IngredienteId (antes de resolver o produto base).
         var porIngrediente = new Dictionary<int, ItemAcumulado>();
 
@@ -61,16 +65,16 @@ public class ListaComprasService : IListaComprasService
 
         foreach (var refeicao in refeicoes)
         {
-            var receitaDetalhe = await _receitaRepo.ObterDetalheAsync(refeicao.ReceitaId!.Value, ct);
-            if (receitaDetalhe is null) continue;
+            var receitaId = refeicao.ReceitaId!.Value;
+            if (!grafo.PorcoesBase.TryGetValue(receitaId, out var porcoesBase)) continue;
 
-            receitasProcessadas.Add(receitaDetalhe.Id);
+            receitasProcessadas.Add(receitaId);
 
-            var porcoes = refeicao.PorcoesDesejadas ?? receitaDetalhe.NumeroPorcoesBase;
-            if (porcoes <= 0) porcoes = receitaDetalhe.NumeroPorcoesBase;
-            var escala = (decimal)porcoes / Math.Max(1, receitaDetalhe.NumeroPorcoesBase);
+            var porcoes = refeicao.PorcoesDesejadas ?? porcoesBase;
+            if (porcoes <= 0) porcoes = porcoesBase;
 
-            foreach (var ing in receitaDetalhe.Ingredientes)
+            // Expande a receita (própria + componentes), já escalada para as porções.
+            foreach (var ing in ExpansorReceita.Expandir(grafo, receitaId, porcoes))
             {
                 if (!unidades.TryGetValue(ing.UnidadeMedidaId, out var unidade))
                 {
@@ -80,7 +84,7 @@ public class ListaComprasService : IListaComprasService
                 }
 
                 // Converte para unidade base (g, ml ou un)
-                var qtdBase = ing.Quantidade * escala * unidade.FatorParaBase;
+                var qtdBase = ing.Quantidade * unidade.FatorParaBase;
 
                 if (!porIngrediente.TryGetValue(ing.IngredienteId, out var item))
                 {
