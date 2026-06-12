@@ -156,48 +156,71 @@ public class ListaComprasService : IListaComprasService
         DateOnly dataInicio, CancellationToken ct = default)
     {
         await _tenantAccessor.GarantirHidratadoAsync();
-        return await _marcacaoRepo.ObterDaSemanaAsync(dataInicio, ct);
+        try
+        {
+            return await _marcacaoRepo.ObterDaSemanaAsync(dataInicio, ct);
+        }
+        catch (Exception ex)
+        {
+            // Não derruba a lista de compras se a tabela/migração ainda não existir no ambiente.
+            _logger.LogError(ex, "Falha ao obter marcações da semana {Semana} — seguindo sem marcações.", dataInicio);
+            return new Dictionary<int, bool>();
+        }
     }
 
     public async Task<ResultadoOperacao> MarcarItemAsync(
         DateOnly dataInicio, int ingredienteId, bool comprado, CancellationToken ct = default)
     {
         await _tenantAccessor.GarantirHidratadoAsync();
-
-        var existente = await _marcacaoRepo.ObterAsync(dataInicio, ingredienteId, ct);
-        if (existente is null)
+        try
         {
-            await _marcacaoRepo.AdicionarAsync(new MarcacaoCompra
+            var existente = await _marcacaoRepo.ObterAsync(dataInicio, ingredienteId, ct);
+            if (existente is null)
             {
-                DataInicioSemana = dataInicio,
-                IngredienteId    = ingredienteId,
-                Comprado         = comprado,
-                DataCompra       = comprado ? DateTime.UtcNow : null,
-            }, ct);
-        }
-        else
-        {
-            existente.Comprado   = comprado;
-            existente.DataCompra = comprado ? DateTime.UtcNow : null;
-        }
+                await _marcacaoRepo.AdicionarAsync(new MarcacaoCompra
+                {
+                    DataInicioSemana = dataInicio,
+                    IngredienteId    = ingredienteId,
+                    Comprado         = comprado,
+                    DataCompra       = comprado ? DateTime.UtcNow : null,
+                }, ct);
+            }
+            else
+            {
+                existente.Comprado   = comprado;
+                existente.DataCompra = comprado ? DateTime.UtcNow : null;
+            }
 
-        await _marcacaoRepo.SalvarAsync(ct);
-        return ResultadoOperacao.Ok();
+            await _marcacaoRepo.SalvarAsync(ct);
+            return ResultadoOperacao.Ok();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Falha ao marcar ingrediente {Id} na semana {Semana}.", ingredienteId, dataInicio);
+            return ResultadoOperacao.Falha("Não foi possível salvar a marcação.");
+        }
     }
 
     public async Task<ResultadoOperacao> LimparMarcacoesSemanaAsync(
         DateOnly dataInicio, CancellationToken ct = default)
     {
         await _tenantAccessor.GarantirHidratadoAsync();
-
-        var marcacoes = await _marcacaoRepo.ListarRastreadasDaSemanaAsync(dataInicio, ct);
-        foreach (var m in marcacoes.Where(m => m.Comprado))
+        try
         {
-            m.Comprado   = false;
-            m.DataCompra = null;
+            var marcacoes = await _marcacaoRepo.ListarRastreadasDaSemanaAsync(dataInicio, ct);
+            foreach (var m in marcacoes.Where(m => m.Comprado))
+            {
+                m.Comprado   = false;
+                m.DataCompra = null;
+            }
+            await _marcacaoRepo.SalvarAsync(ct);
+            return ResultadoOperacao.Ok();
         }
-        await _marcacaoRepo.SalvarAsync(ct);
-        return ResultadoOperacao.Ok();
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Falha ao limpar marcações da semana {Semana}.", dataInicio);
+            return ResultadoOperacao.Falha("Não foi possível limpar as marcações.");
+        }
     }
 
     // Converte qtdBase para a unidade mais legível
