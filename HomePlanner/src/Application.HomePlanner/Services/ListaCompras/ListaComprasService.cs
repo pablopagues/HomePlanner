@@ -4,6 +4,7 @@ using Application.HomePlanner.DTOs.ListaCompras;
 using Application.HomePlanner.Services.Cardapio;
 using Application.HomePlanner.Middleware;
 using Application.HomePlanner.Repositories.Cardapio;
+using Domain.HomePlanner.Models.Cardapio;
 using Domain.HomePlanner.Models.Enums;
 using Microsoft.Extensions.Logging;
 
@@ -15,6 +16,7 @@ public class ListaComprasService : IListaComprasService
     private readonly IReceitaRepository _receitaRepo;
     private readonly IUnidadeMedidaRepository _unidadeRepo;
     private readonly IIngredienteRepository _ingredienteRepo;
+    private readonly IMarcacaoCompraRepository _marcacaoRepo;
     private readonly TenantContextAccessor _tenantAccessor;
     private readonly ILogger<ListaComprasService> _logger;
 
@@ -23,6 +25,7 @@ public class ListaComprasService : IListaComprasService
         IReceitaRepository receitaRepo,
         IUnidadeMedidaRepository unidadeRepo,
         IIngredienteRepository ingredienteRepo,
+        IMarcacaoCompraRepository marcacaoRepo,
         TenantContextAccessor tenantAccessor,
         ILogger<ListaComprasService> logger)
     {
@@ -30,6 +33,7 @@ public class ListaComprasService : IListaComprasService
         _receitaRepo  = receitaRepo;
         _unidadeRepo  = unidadeRepo;
         _ingredienteRepo = ingredienteRepo;
+        _marcacaoRepo = marcacaoRepo;
         _tenantAccessor = tenantAccessor;
         _logger = logger;
     }
@@ -146,6 +150,54 @@ public class ListaComprasService : IListaComprasService
             TotalReceitas = receitasProcessadas.Count,
             Itens         = itens,
         });
+    }
+
+    public async Task<IReadOnlyDictionary<int, bool>> ObterMarcacoesSemanaAsync(
+        DateOnly dataInicio, CancellationToken ct = default)
+    {
+        await _tenantAccessor.GarantirHidratadoAsync();
+        return await _marcacaoRepo.ObterDaSemanaAsync(dataInicio, ct);
+    }
+
+    public async Task<ResultadoOperacao> MarcarItemAsync(
+        DateOnly dataInicio, int ingredienteId, bool comprado, CancellationToken ct = default)
+    {
+        await _tenantAccessor.GarantirHidratadoAsync();
+
+        var existente = await _marcacaoRepo.ObterAsync(dataInicio, ingredienteId, ct);
+        if (existente is null)
+        {
+            await _marcacaoRepo.AdicionarAsync(new MarcacaoCompra
+            {
+                DataInicioSemana = dataInicio,
+                IngredienteId    = ingredienteId,
+                Comprado         = comprado,
+                DataCompra       = comprado ? DateTime.UtcNow : null,
+            }, ct);
+        }
+        else
+        {
+            existente.Comprado   = comprado;
+            existente.DataCompra = comprado ? DateTime.UtcNow : null;
+        }
+
+        await _marcacaoRepo.SalvarAsync(ct);
+        return ResultadoOperacao.Ok();
+    }
+
+    public async Task<ResultadoOperacao> LimparMarcacoesSemanaAsync(
+        DateOnly dataInicio, CancellationToken ct = default)
+    {
+        await _tenantAccessor.GarantirHidratadoAsync();
+
+        var marcacoes = await _marcacaoRepo.ListarRastreadasDaSemanaAsync(dataInicio, ct);
+        foreach (var m in marcacoes.Where(m => m.Comprado))
+        {
+            m.Comprado   = false;
+            m.DataCompra = null;
+        }
+        await _marcacaoRepo.SalvarAsync(ct);
+        return ResultadoOperacao.Ok();
     }
 
     // Converte qtdBase para a unidade mais legível

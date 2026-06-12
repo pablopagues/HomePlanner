@@ -172,6 +172,7 @@ try
     builder.Services.AddScoped<IListaComprasService, ListaComprasService>();
     builder.Services.AddScoped<IPedidoCompraRepository, PedidoCompraRepository>();
     builder.Services.AddScoped<IPedidoCompraService, PedidoCompraService>();
+    builder.Services.AddScoped<IMarcacaoCompraRepository, MarcacaoCompraRepository>();
 
     // ── Planner / Tarefas ─────────────────────────────────────────────────────
     builder.Services.AddScoped<ITarefaRepository, TarefaRepository>();

@@ -148,9 +148,11 @@ else if (_lista is not null)
 
             @* ── Lista de itens ──────────────────────────────────────────── *@
             <MudGrid Spacing="2">
-                @foreach (var item in _lista.Itens)
+                @foreach (var item in _lista.Itens
+                    .OrderBy(i => _jaTenho.GetValueOrDefault(i.IngredienteId))
+                    .ThenBy(i => i.NomeIngrediente))
                 {
-                    var jaTenho = _jaTenho.TryGetValue(item.IngredienteId, out var v) && v;
+                    var jaTenho = _jaTenho.GetValueOrDefault(item.IngredienteId);
 
                     <MudItem xs="12" sm="6" md="4">
                         <MudPaper Class="pa-3"
@@ -272,13 +274,11 @@ else if (_lista is not null)
     private string? _novoQuantidade;
     private string? _novoSolicitante;
 
-    // Estado "já tenho" — carregado/persistido via localStorage
+    // Estado "já tenho" compartilhado — carregado/persistido no banco (por semana, tenant)
     private Dictionary<int, bool> _jaTenho = new();
 
     private double Progresso => _lista is null || _lista.Itens.Count == 0 ? 0
         : (double)_jaTenho.Count(kv => kv.Value) / _lista.Itens.Count * 100;
-
-    private bool _precisaCarregarJaTenho;
 
     protected override async Task OnInitializedAsync()
     {
@@ -296,15 +296,6 @@ else if (_lista is not null)
         await CarregarAsync();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (_precisaCarregarJaTenho)
-        {
-            _precisaCarregarJaTenho = false;
-            await CarregarJaTenhoAsync();
-        }
-    }
-
     private async Task CarregarAsync()
     {
         _carregando = true;
@@ -319,10 +310,19 @@ else if (_lista is not null)
 
         _grupos = (await PedidoService.ListarDaSemanaAsync(_dataInicio)).ToList();
 
-        _carregando = false;
-
+        // Marcações "já tenho" compartilhadas (banco), restritas aos itens atuais da lista.
         if (_lista is not null && !_lista.Vazia)
-            _precisaCarregarJaTenho = true;
+        {
+            var marcacoes = await Service.ObterMarcacoesSemanaAsync(_dataInicio);
+            _jaTenho = _lista.Itens.ToDictionary(
+                i => i.IngredienteId, i => marcacoes.GetValueOrDefault(i.IngredienteId));
+        }
+        else
+        {
+            _jaTenho = new();
+        }
+
+        _carregando = false;
     }
 
     private async Task RecarregarPedidos()
@@ -379,20 +379,6 @@ else if (_lista is not null)
             Snackbar.Add(string.Join(", ", res.Erros), Severity.Error);
     }
 
-    private async Task CarregarJaTenhoAsync()
-    {
-        if (_lista is null) return;
-        _jaTenho.Clear();
-
-        foreach (var item in _lista.Itens)
-        {
-            var val = await JS.InvokeAsync<string?>("appStorage.get",
-                ChaveStorage(item.IngredienteId));
-            _jaTenho[item.IngredienteId] = val == "1";
-        }
-        StateHasChanged();
-    }
-
     private async Task AbrirAgrupar(ItemComprasDTO item)
     {
         var parameters = new DialogParameters<AgruparIngredienteDialog>
@@ -423,9 +409,13 @@ else if (_lista is not null)
 
     private async Task TrocarJaTenho(int ingredienteId, bool valor)
     {
-        _jaTenho[ingredienteId] = valor;
-        await JS.InvokeVoidAsync("appStorage.set",
-            ChaveStorage(ingredienteId), valor ? "1" : "0");
+        _jaTenho[ingredienteId] = valor; // reflete na hora (reordena os marcados para o fim)
+        var r = await Service.MarcarItemAsync(_dataInicio, ingredienteId, valor);
+        if (!r.Sucesso)
+        {
+            _jaTenho[ingredienteId] = !valor; // desfaz em caso de erro
+            Snackbar.Add(r.Erros.FirstOrDefault() ?? "Não foi possível marcar o item.", Severity.Warning);
+        }
     }
 
     private async Task LimparSelecao()
@@ -433,12 +423,10 @@ else if (_lista is not null)
         foreach (var key in _jaTenho.Keys.ToList())
             _jaTenho[key] = false;
 
-        await JS.InvokeVoidAsync("appStorage.clearPrefix",
-            $"hp_tenho_{_dataInicio:yyyyMMdd}_");
+        var r = await Service.LimparMarcacoesSemanaAsync(_dataInicio);
+        if (!r.Sucesso)
+            Snackbar.Add(r.Erros.FirstOrDefault() ?? "Não foi possível limpar.", Severity.Warning);
     }
-
-    private string ChaveStorage(int ingredienteId)
-        => $"hp_tenho_{_dataInicio:yyyyMMdd}_{ingredienteId}";
 
     private void SemanaAnterior()
         => Nav.NavigateTo(Lang.U("/compras") + $"/{_dataInicio.AddDays(-7):yyyy-MM-dd}");

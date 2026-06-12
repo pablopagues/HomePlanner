@@ -48,6 +48,7 @@ public class HomePlannerDbContext : IdentityDbContext<Usuario, Papel, string>
     public DbSet<RefeicaoModelo> RefeicoesModelo => Set<RefeicaoModelo>();
     public DbSet<ConfiguracaoFamilia> ConfiguracoesFamilia => Set<ConfiguracaoFamilia>();
     public DbSet<PedidoCompra> PedidosCompra => Set<PedidoCompra>();
+    public DbSet<MarcacaoCompra> MarcacoesCompra => Set<MarcacaoCompra>();
 
     // Planner
     public DbSet<Tarefa> Tarefas => Set<Tarefa>();
