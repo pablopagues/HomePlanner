@@ -111,6 +111,14 @@
   <data name="Footer_Termos" xml:space="preserve"><value>Termos</value></data>
   <data name="Footer_Contato" xml:space="preserve"><value>Contato</value></data>
 
+  <!-- ── Consentimento de cookies (LGPD) ── -->
+  <data name="Cookie_Titulo" xml:space="preserve"><value>Este site usa cookies essenciais</value></data>
+  <data name="Cookie_Texto" xml:space="preserve"><value>Utilizamos apenas cookies estritamente necessários para o funcionamento do sistema (autenticação, sessão e preferências). Não usamos cookies de publicidade, analytics ou rastreamento.</value></data>
+  <data name="Cookie_SaibaMais" xml:space="preserve"><value>Saiba mais em nossa</value></data>
+  <data name="Cookie_E" xml:space="preserve"><value>e nossos</value></data>
+  <data name="Cookie_Aceitar" xml:space="preserve"><value>Aceitar e continuar</value></data>
+  <data name="Cookie_Revisar" xml:space="preserve"><value>Revisar consentimento de cookies</value></data>
+
   <!-- ── Landing ── -->
   <data name="Landing_NavSobre" xml:space="preserve"><value>Sobre</value></data>
   <data name="Landing_HeroTitulo" xml:space="preserve"><value>A semana da sua família, organizada com calma.</value></data>

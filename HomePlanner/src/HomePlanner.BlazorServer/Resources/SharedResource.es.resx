@@ -106,6 +106,14 @@
   <data name="Footer_Termos" xml:space="preserve"><value>Términos</value></data>
   <data name="Footer_Contato" xml:space="preserve"><value>Contacto</value></data>
 
+  <!-- ── Consentimiento de cookies (LGPD) ── -->
+  <data name="Cookie_Titulo" xml:space="preserve"><value>Este sitio usa cookies esenciales</value></data>
+  <data name="Cookie_Texto" xml:space="preserve"><value>Utilizamos solo cookies estrictamente necesarias para el funcionamiento del sistema (autenticación, sesión y preferencias). No usamos cookies de publicidad, analítica o seguimiento.</value></data>
+  <data name="Cookie_SaibaMais" xml:space="preserve"><value>Más información en nuestra</value></data>
+  <data name="Cookie_E" xml:space="preserve"><value>y nuestros</value></data>
+  <data name="Cookie_Aceitar" xml:space="preserve"><value>Aceptar y continuar</value></data>
+  <data name="Cookie_Revisar" xml:space="preserve"><value>Revisar consentimiento de cookies</value></data>
+
   <data name="Landing_NavSobre" xml:space="preserve"><value>Acerca</value></data>
   <data name="Landing_HeroTitulo" xml:space="preserve"><value>La semana de tu familia, organizada con calma.</value></data>
   <data name="Landing_HeroSubtitulo" xml:space="preserve"><value>Menú, lista de compras y tareas — todo en un solo lugar, simple y bonito.</value></data>

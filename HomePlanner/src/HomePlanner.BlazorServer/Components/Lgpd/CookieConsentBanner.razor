@@ -1,0 +1,229 @@
+@using Application.HomePlanner.Lgpd
+@using HomePlanner.BlazorServer
+@using HomePlanner.BlazorServer.Services
+@inject IStringLocalizer<SharedResource> L
+@inject PublicLanguageService Lang
+@inject IJSRuntime JS
+
+@* ─── Banner (aparece se ainda não consentiu OU se a versão mudou) ─── *@
+@if (_mostrarBanner)
+{
+    <div class="cookie-banner-container">
+        <div class="cookie-banner">
+            <div class="cookie-banner-icon">🍪</div>
+            <div class="cookie-banner-content">
+                <strong>@L["Cookie_Titulo"]</strong>
+                <p>@L["Cookie_Texto"]</p>
+                <p class="cookie-banner-links">
+                    @L["Cookie_SaibaMais"]
+                    <a href="@Lang.U("/privacidade")" target="_blank">@L["Footer_Privacidade"]</a>
+                    @L["Cookie_E"]
+                    <a href="@Lang.U("/termos")" target="_blank">@L["Footer_Termos"]</a>.
+                </p>
+            </div>
+            <div class="cookie-banner-actions">
+                <button class="cookie-btn-primary" @onclick="AceitarAsync">
+                    @L["Cookie_Aceitar"]
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@* ─── Ícone persistente (sempre visível após o aceite) ─── *@
+@if (_consentimentoSalvo && !_mostrarBanner)
+{
+    <button class="cookie-fab"
+            @onclick="AbrirRevisao"
+            title="@L["Cookie_Revisar"]"
+            aria-label="@L["Cookie_Revisar"]">
+        🍪
+    </button>
+}
+
+<style>
+    .cookie-banner-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 9998;
+        padding: 16px;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+    }
+
+    .cookie-banner {
+        max-width: 900px;
+        margin: 0 auto;
+        background: var(--mud-palette-surface, #ffffff);
+        border-radius: 12px;
+        padding: 20px 24px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .cookie-banner-icon {
+        font-size: 32px;
+        line-height: 1;
+        flex-shrink: 0;
+    }
+
+    .cookie-banner-content {
+        flex: 1;
+        min-width: 260px;
+    }
+
+    .cookie-banner-content strong {
+        display: block;
+        font-size: 16px;
+        margin-bottom: 6px;
+        color: var(--mud-palette-text-primary, #1a1a1a);
+    }
+
+    .cookie-banner-content p {
+        margin: 4px 0;
+        font-size: 13px;
+        line-height: 1.5;
+        color: var(--mud-palette-text-secondary, #555);
+    }
+
+    .cookie-banner-links a {
+        color: var(--mud-palette-primary, #4A6B5C);
+        text-decoration: underline;
+    }
+
+    .cookie-banner-actions {
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+    .cookie-btn-primary {
+        background: var(--mud-palette-primary, #4A6B5C);
+        color: var(--mud-palette-primary-text, #ffffff);
+        border: none;
+        padding: 10px 22px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: transform 0.1s, box-shadow 0.2s;
+    }
+
+    .cookie-btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Canto inferior-DIREITO para não colidir com o FeedbackButton (inferior-esquerdo). */
+    .cookie-fab {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        z-index: 9997;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--mud-palette-surface, rgba(255, 255, 255, 0.95));
+        border: 1px solid var(--mud-palette-lines-default, #e5e5e5);
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        transition: transform 0.15s, box-shadow 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+    }
+
+    .cookie-fab:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+    }
+
+    @@media (max-width: 600px) {
+        .cookie-banner {
+            flex-direction: column;
+            padding: 16px;
+        }
+
+        .cookie-banner-actions {
+            width: 100%;
+        }
+
+        .cookie-btn-primary {
+            width: 100%;
+        }
+    }
+</style>
+
+@code {
+    private bool _mostrarBanner;
+    private bool _consentimentoSalvo;
+    private bool _inicializado;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _inicializado) return;
+        _inicializado = true;
+
+        try
+        {
+            var valor = await JS.InvokeAsync<string>(
+                "lgpdCookies.get", LgpdConstants.CookieConsentName);
+
+            // Formato salvo: "v1|2026-06-15T...". Comparamos a versão antes do pipe.
+            var partes = valor?.Split('|') ?? Array.Empty<string>();
+            var versaoSalva = partes.Length > 0 ? partes[0] : "";
+
+            // Mostra o banner se nunca consentiu OU se a versão dos termos mudou.
+            if (string.IsNullOrEmpty(versaoSalva) || versaoSalva != LgpdConstants.VersaoAtual)
+            {
+                _mostrarBanner = true;
+                _consentimentoSalvo = false;
+            }
+            else
+            {
+                _mostrarBanner = false;
+                _consentimentoSalvo = true;
+            }
+
+            StateHasChanged();
+        }
+        catch
+        {
+            // Falha de JS (raro) — não trava a aplicação.
+        }
+    }
+
+    private async Task AceitarAsync()
+    {
+        var valor = $"{LgpdConstants.VersaoAtual}|{DateTime.UtcNow:O}";
+        try
+        {
+            await JS.InvokeVoidAsync(
+                "lgpdCookies.set",
+                LgpdConstants.CookieConsentName,
+                valor,
+                (int)LgpdConstants.CookieConsentDuration.TotalDays);
+        }
+        catch { /* idem */ }
+
+        _mostrarBanner = false;
+        _consentimentoSalvo = true;
+        StateHasChanged();
+    }
+
+    private void AbrirRevisao()
+    {
+        // Reabre o banner para o usuário revisar/revogar. Como só usamos cookies
+        // essenciais e o consentimento é all-or-nothing, reexibir o banner basta.
+        _mostrarBanner = true;
+        StateHasChanged();
+    }
+}

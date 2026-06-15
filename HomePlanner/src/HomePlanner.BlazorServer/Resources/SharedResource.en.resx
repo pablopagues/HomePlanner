@@ -106,6 +106,14 @@
   <data name="Footer_Termos" xml:space="preserve"><value>Terms</value></data>
   <data name="Footer_Contato" xml:space="preserve"><value>Contact</value></data>
 
+  <!-- ── Cookie consent (LGPD) ── -->
+  <data name="Cookie_Titulo" xml:space="preserve"><value>This site uses essential cookies</value></data>
+  <data name="Cookie_Texto" xml:space="preserve"><value>We use only strictly necessary cookies for the system to work (authentication, session and preferences). We do not use advertising, analytics or tracking cookies.</value></data>
+  <data name="Cookie_SaibaMais" xml:space="preserve"><value>Learn more in our</value></data>
+  <data name="Cookie_E" xml:space="preserve"><value>and our</value></data>
+  <data name="Cookie_Aceitar" xml:space="preserve"><value>Accept and continue</value></data>
+  <data name="Cookie_Revisar" xml:space="preserve"><value>Review cookie consent</value></data>
+
   <data name="Landing_NavSobre" xml:space="preserve"><value>About</value></data>
   <data name="Landing_HeroTitulo" xml:space="preserve"><value>Your family's week, calmly organized.</value></data>
   <data name="Landing_HeroSubtitulo" xml:space="preserve"><value>Meals, shopping list and tasks — all in one place, simple and beautiful.</value></data>
