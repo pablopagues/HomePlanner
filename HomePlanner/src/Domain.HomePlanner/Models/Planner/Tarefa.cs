@@ -21,6 +21,12 @@ public class Tarefa : ITenantEntity, IDeletableEntity, IAuditable
     public bool Concluida { get; set; }
     public DateTime? DataConclusao { get; set; }
 
+    /// <summary>
+    /// Quando (UTC) o lembrete de horário desta ocorrência foi disparado. Null = ainda não avisado.
+    /// Zerado ao reagendar uma tarefa recorrente, para avisar de novo no próximo ciclo.
+    /// </summary>
+    public DateTime? LembreteEnviadoEm { get; set; }
+
     public Recorrencia Recorrencia { get; set; } = Recorrencia.Nenhuma;
     public VisibilidadeTarefa Visibilidade { get; set; } = VisibilidadeTarefa.Familia;
 

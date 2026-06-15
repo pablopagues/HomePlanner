@@ -38,6 +38,11 @@ else
                 <MudSelectItem Value="@("Europe/Madrid")">Europe/Madrid (Espanha)</MudSelectItem>
             </MudSelect>
 
+            <MudNumericField @bind-Value="_dto.MinutosAntecedenciaLembrete"
+                             Label="@L["Cfg_Antecedencia"]" Min="0" Max="1440" Step="5"
+                             Variant="Variant.Outlined"
+                             HelperText="@L["Cfg_AntecedenciaAjuda"]" />
+
             <div>
                 <MudText Typo="Typo.subtitle2" Class="mb-2">@L["Onb_TiposRefeicao"]</MudText>
                 <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="2">

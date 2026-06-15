@@ -449,4 +449,28 @@
   <data name="Perfil_Foto_Sucesso" xml:space="preserve"><value>Foto atualizada com sucesso!</value></data>
   <data name="Perfil_Foto_Removida" xml:space="preserve"><value>Foto removida.</value></data>
   <data name="Perfil_Foto_MuitoGrande" xml:space="preserve"><value>A imagem excede o tamanho máximo permitido (2 MB).</value></data>
+
+  <!-- ── Perfil / Notificações push ── -->
+  <data name="Perfil_Push_Titulo" xml:space="preserve"><value>Notificações</value></data>
+  <data name="Perfil_Push_Desc" xml:space="preserve"><value>Receba lembretes de tarefas e avisos da família neste aparelho, mesmo com o app fechado.</value></data>
+  <data name="Perfil_Push_Toggle" xml:space="preserve"><value>Ativar notificações neste dispositivo</value></data>
+  <data name="Perfil_Push_AtivadoOk" xml:space="preserve"><value>Notificações ativadas neste dispositivo.</value></data>
+  <data name="Perfil_Push_DesativadoOk" xml:space="preserve"><value>Notificações desativadas neste dispositivo.</value></data>
+  <data name="Perfil_Push_Indisponivel" xml:space="preserve"><value>As notificações ainda não estão configuradas no servidor.</value></data>
+  <data name="Perfil_Push_NaoSuportado" xml:space="preserve"><value>Este navegador não suporta notificações push.</value></data>
+  <data name="Perfil_Push_PermissaoNegada" xml:space="preserve"><value>Permissão de notificações negada. Habilite nas configurações do navegador para este site.</value></data>
+  <data name="Perfil_Push_DicaIos" xml:space="preserve"><value>No iPhone/iPad é preciso primeiro adicionar o HomePlanner à Tela de Início (Compartilhar → Adicionar à Tela de Início) para receber notificações.</value></data>
+  <data name="Perfil_Push_Testar" xml:space="preserve"><value>Enviar notificação de teste</value></data>
+  <data name="Perfil_Push_TesteEnviado" xml:space="preserve"><value>Notificação de teste enviada!</value></data>
+  <data name="Perfil_Push_TesteTitulo" xml:space="preserve"><value>HomePlanner</value></data>
+  <data name="Perfil_Push_TesteCorpo" xml:space="preserve"><value>Funcionou! Suas notificações estão ativas. 🎉</value></data>
+
+  <!-- ── Configurações / Lembrete ── -->
+  <data name="Cfg_Antecedencia" xml:space="preserve"><value>Antecedência do lembrete (minutos)</value></data>
+  <data name="Cfg_AntecedenciaAjuda" xml:space="preserve"><value>Quantos minutos antes da hora da tarefa enviamos a notificação. Use 0 para avisar na hora exata. Vale para toda a família.</value></data>
+
+  <!-- ── Textos das notificações push ── -->
+  <data name="Push_Lembrete_Corpo" xml:space="preserve"><value>Começa às {0}.</value></data>
+  <data name="Push_TarefaAtribuida_Titulo" xml:space="preserve"><value>Nova tarefa para você</value></data>
+  <data name="Push_TarefaAtribuida_Corpo" xml:space="preserve"><value>Você recebeu: {0}</value></data>
 </root>

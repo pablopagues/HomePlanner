@@ -12,6 +12,7 @@ public class UsuarioConfiguration : IEntityTypeConfiguration<Usuario>
         builder.Property(u => u.VersaoTermosAceito).HasMaxLength(20);
         builder.Property(u => u.Foto).HasColumnType("varbinary(max)");
         builder.Property(u => u.FotoContentType).HasMaxLength(100);
+        builder.Property(u => u.Idioma).HasMaxLength(5);
         builder.HasIndex(u => u.TenantId);
     }
 }

@@ -9,6 +9,12 @@ public class ConfiguracaoFamilia : ITenantEntity, IAuditable
     public int TamanhoFamiliaPadrao { get; set; } = 4;
     public string FusoHorario { get; set; } = "America/Toronto";
 
+    /// <summary>
+    /// Antecedência, em minutos, com que os lembretes de horário são disparados antes da hora da tarefa.
+    /// Vale para todas as notificações com hora. Editável só pelo Owner. 0 = na hora exata.
+    /// </summary>
+    public int MinutosAntecedenciaLembrete { get; set; } = 15;
+
     // IAuditable
     public DateTime DataCriacao { get; set; }
     public DateTime? DataModificacao { get; set; }

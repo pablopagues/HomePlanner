@@ -8,6 +8,9 @@ public class Usuario : IdentityUser<string>, ITenantEntity, IDeletableEntity
     public Guid TenantId { get; set; }
     public string NomeCompleto { get; set; } = string.Empty;
     public bool Ativo { get; set; } = true;
+
+    /// <summary>Idioma preferido (pt/en/es). Usado para notificações fora de uma requisição. Null = padrão do app.</summary>
+    public string? Idioma { get; set; }
     public DateTime DataCriacao { get; set; }
     public DateTime? UltimoLogin { get; set; }
 

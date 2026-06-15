@@ -1,5 +1,6 @@
 using Application.HomePlanner.Middleware;
 using Domain.HomePlanner.Models.Cardapio;
+using Domain.HomePlanner.Models.Notificacoes;
 using Domain.HomePlanner.Models.Planner;
 using Domain.HomePlanner.Models.SaaS.Assinatura;
 using Domain.HomePlanner.Models.SaaS.Auditoria;
@@ -52,6 +53,9 @@ public class HomePlannerDbContext : IdentityDbContext<Usuario, Papel, string>
 
     // Planner
     public DbSet<Tarefa> Tarefas => Set<Tarefa>();
+
+    // Notificações
+    public DbSet<InscricaoPush> InscricoesPush => Set<InscricaoPush>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -41,9 +41,10 @@ public class ConfiguracaoFamiliaService : IConfiguracaoFamiliaService
 
         return new ConfiguracaoFamiliaDTO
         {
-            TamanhoFamiliaPadrao = config.TamanhoFamiliaPadrao,
-            FusoHorario          = config.FusoHorario,
-            TiposRefeicaoAtivos  = config.TiposRefeicaoAtivos.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList(),
+            TamanhoFamiliaPadrao         = config.TamanhoFamiliaPadrao,
+            FusoHorario                  = config.FusoHorario,
+            MinutosAntecedenciaLembrete  = config.MinutosAntecedenciaLembrete,
+            TiposRefeicaoAtivos          = config.TiposRefeicaoAtivos.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList(),
         };
     }
 
@@ -58,6 +59,8 @@ public class ConfiguracaoFamiliaService : IConfiguracaoFamiliaService
             return ResultadoOperacao.Falha("O tamanho da família deve ser ao menos 1.");
         if (dto.TiposRefeicaoAtivos.Count == 0)
             return ResultadoOperacao.Falha("Selecione ao menos um tipo de refeição.");
+        if (dto.MinutosAntecedenciaLembrete is < 0 or > 1440)
+            return ResultadoOperacao.Falha("A antecedência do lembrete deve estar entre 0 e 1440 minutos.");
 
         var config = await _db.ConfiguracoesFamilia
             .FirstOrDefaultAsync(c => c.TenantId == tenantId.Value, ct);
@@ -67,9 +70,10 @@ public class ConfiguracaoFamiliaService : IConfiguracaoFamiliaService
             config = new ConfiguracaoFamilia { TenantId = tenantId.Value };
             _db.ConfiguracoesFamilia.Add(config);
         }
-        config.TamanhoFamiliaPadrao = dto.TamanhoFamiliaPadrao;
-        config.FusoHorario          = dto.FusoHorario;
-        config.TiposRefeicaoAtivos  = string.Join(',', dto.TiposRefeicaoAtivos);
+        config.TamanhoFamiliaPadrao        = dto.TamanhoFamiliaPadrao;
+        config.FusoHorario                 = dto.FusoHorario;
+        config.MinutosAntecedenciaLembrete = dto.MinutosAntecedenciaLembrete;
+        config.TiposRefeicaoAtivos         = string.Join(',', dto.TiposRefeicaoAtivos);
 
         await _db.SaveChangesAsync(ct);
         _logger.LogInformation("Configuração da família atualizada para tenant {TenantId}.", tenantId.Value);

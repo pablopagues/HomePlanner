@@ -426,4 +426,28 @@
   <data name="Perfil_Foto_Sucesso" xml:space="preserve"><value>Photo updated successfully!</value></data>
   <data name="Perfil_Foto_Removida" xml:space="preserve"><value>Photo removed.</value></data>
   <data name="Perfil_Foto_MuitoGrande" xml:space="preserve"><value>The image exceeds the maximum allowed size (2 MB).</value></data>
+
+  <!-- ── Profile / Push notifications ── -->
+  <data name="Perfil_Push_Titulo" xml:space="preserve"><value>Notifications</value></data>
+  <data name="Perfil_Push_Desc" xml:space="preserve"><value>Get task reminders and family alerts on this device, even when the app is closed.</value></data>
+  <data name="Perfil_Push_Toggle" xml:space="preserve"><value>Enable notifications on this device</value></data>
+  <data name="Perfil_Push_AtivadoOk" xml:space="preserve"><value>Notifications enabled on this device.</value></data>
+  <data name="Perfil_Push_DesativadoOk" xml:space="preserve"><value>Notifications disabled on this device.</value></data>
+  <data name="Perfil_Push_Indisponivel" xml:space="preserve"><value>Notifications are not configured on the server yet.</value></data>
+  <data name="Perfil_Push_NaoSuportado" xml:space="preserve"><value>This browser does not support push notifications.</value></data>
+  <data name="Perfil_Push_PermissaoNegada" xml:space="preserve"><value>Notification permission denied. Enable it in your browser settings for this site.</value></data>
+  <data name="Perfil_Push_DicaIos" xml:space="preserve"><value>On iPhone/iPad you must first add HomePlanner to your Home Screen (Share → Add to Home Screen) to receive notifications.</value></data>
+  <data name="Perfil_Push_Testar" xml:space="preserve"><value>Send a test notification</value></data>
+  <data name="Perfil_Push_TesteEnviado" xml:space="preserve"><value>Test notification sent!</value></data>
+  <data name="Perfil_Push_TesteTitulo" xml:space="preserve"><value>HomePlanner</value></data>
+  <data name="Perfil_Push_TesteCorpo" xml:space="preserve"><value>It works! Your notifications are on. 🎉</value></data>
+
+  <!-- ── Settings / Reminder ── -->
+  <data name="Cfg_Antecedencia" xml:space="preserve"><value>Reminder lead time (minutes)</value></data>
+  <data name="Cfg_AntecedenciaAjuda" xml:space="preserve"><value>How many minutes before a task's time we send the notification. Use 0 to alert exactly on time. Applies to the whole family.</value></data>
+
+  <!-- ── Push notification texts ── -->
+  <data name="Push_Lembrete_Corpo" xml:space="preserve"><value>Starts at {0}.</value></data>
+  <data name="Push_TarefaAtribuida_Titulo" xml:space="preserve"><value>New task for you</value></data>
+  <data name="Push_TarefaAtribuida_Corpo" xml:space="preserve"><value>You were assigned: {0}</value></data>
 </root>

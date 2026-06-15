@@ -12,6 +12,7 @@ using Application.HomePlanner.Services.Email;
 using Application.HomePlanner.Services.Empresa;
 using Application.HomePlanner.Services.Familia;
 using Application.HomePlanner.Services.ListaCompras;
+using Application.HomePlanner.Services.Notificacoes;
 using Application.HomePlanner.Services.Onboarding;
 using Application.HomePlanner.Services.Perfil;
 using Application.HomePlanner.Services.Planner;
@@ -29,6 +30,7 @@ using Infrastructure.HomePlanner.Services.Contato;
 using Infrastructure.HomePlanner.Services.Email;
 using Infrastructure.HomePlanner.Services.Empresa;
 using Infrastructure.HomePlanner.Services.Familia;
+using Infrastructure.HomePlanner.Services.Notificacoes;
 using Infrastructure.HomePlanner.Services.Onboarding;
 using Infrastructure.HomePlanner.Services.Perfil;
 using Infrastructure.HomePlanner.Services.Seguranca;
@@ -74,6 +76,7 @@ try
     builder.Services.Configure<GmailOptions>(builder.Configuration.GetSection(GmailOptions.SectionName));
     builder.Services.Configure<AdminOptions>(builder.Configuration.GetSection(AdminOptions.SectionName));
     builder.Services.Configure<LocalizacaoOptions>(builder.Configuration.GetSection(LocalizacaoOptions.SectionName));
+    builder.Services.Configure<WebPushOptions>(builder.Configuration.GetSection(WebPushOptions.SectionName));
 
     // ── Localization (.resx em Resources/, 3 idiomas) ─────────────────────────
     builder.Services.AddLocalization(opts => opts.ResourcesPath = "Resources");
@@ -189,6 +192,13 @@ try
     builder.Services.AddScoped<IEmailService, EmailService>();
     builder.Services.AddScoped<IEmpresaService, EmpresaService>();
 
+    // ── Notificações Push (Web Push / VAPID) ──────────────────────────────────
+    builder.Services.AddScoped<IPushNotificationService, PushNotificationService>();
+    // Textos das notificações no idioma do destinatário (lê as SharedResource.resx).
+    builder.Services.AddSingleton<INotificacaoTextoService, HomePlanner.BlazorServer.Services.NotificacaoTextoService>();
+    // Lembretes de tarefa por horário (varre o banco e dispara push na hora).
+    builder.Services.AddHostedService<HomePlanner.BlazorServer.Services.LembreteTarefaBackgroundService>();
+
     // ── Contato (formulário público) ──────────────────────────────────────────
     builder.Services.Configure<ContatoOptions>(builder.Configuration.GetSection(ContatoOptions.SectionName));
     builder.Services.AddScoped<IContatoService, ContatoService>();
@@ -214,7 +224,11 @@ try
     }
 
     app.UseHttpsRedirection();
-    app.UseStaticFiles();
+
+    // Garante o MIME correto do manifest PWA (.webmanifest) — alguns hosts não o conhecem.
+    var provedorTiposEstaticos = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
+    provedorTiposEstaticos.Mappings[".webmanifest"] = "application/manifest+json";
+    app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = provedorTiposEstaticos });
 
     // ── Localization — PublicLangCookieProvider é o único árbitro ────────────
     app.UseRequestLocalization(opts =>
@@ -229,7 +243,7 @@ try
     });
 
     // ── Troca de idioma (GET /set-lang?lang=pt|en|es&returnUrl=/) ────────────
-    app.MapGet("/set-lang", (string? lang, string? returnUrl, HttpContext ctx) =>
+    app.MapGet("/set-lang", async (string? lang, string? returnUrl, HttpContext ctx, HomePlannerDbContext db) =>
     {
         if (PublicLanguageService.IsLangValida(lang))
         {
@@ -240,6 +254,18 @@ try
                 IsEssential = true,
                 Path = "/"
             });
+
+            // Usuário logado: persiste a escolha no perfil (usado pelas notificações fora de requisição).
+            var usuarioId = ctx.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(usuarioId))
+            {
+                var usuario = await db.Users.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Id == usuarioId);
+                if (usuario is not null && usuario.Idioma != lang)
+                {
+                    usuario.Idioma = lang;
+                    await db.SaveChangesAsync();
+                }
+            }
         }
 
         var redirect = returnUrl ?? "/";

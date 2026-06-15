@@ -1,0 +1,147 @@
+@using Application.HomePlanner.DTOs.Notificacoes
+@using Application.HomePlanner.Services.Notificacoes
+@inject IPushNotificationService Push
+@inject IJSRuntime JS
+@inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResource> L
+
+<MudPaper Class="pa-6 mb-4" Elevation="1" Style="border-radius:14px; max-width:620px;">
+    <MudText Typo="Typo.h6" Style="font-size:1rem;" Class="mb-1">@L["Perfil_Push_Titulo"]</MudText>
+    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">@L["Perfil_Push_Desc"]</MudText>
+
+    @if (!Push.Habilitado)
+    {
+        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true">
+            @L["Perfil_Push_Indisponivel"]
+        </MudAlert>
+    }
+    else if (_estado == "unsupported")
+    {
+        <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true">
+            @L["Perfil_Push_NaoSuportado"]
+        </MudAlert>
+    }
+    else
+    {
+        <MudStack Spacing="3">
+            <MudSwitch T="bool" Value="_ativo" ValueChanged="OnToggleAsync" Color="Color.Primary"
+                       Disabled="_processando" Label="@L["Perfil_Push_Toggle"]" />
+
+            @if (_estado == "denied")
+            {
+                <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Dense="true">
+                    @L["Perfil_Push_PermissaoNegada"]
+                </MudAlert>
+            }
+
+            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true">
+                @L["Perfil_Push_DicaIos"]
+            </MudAlert>
+
+            @if (_ativo)
+            {
+                <div>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.NotificationsActive"
+                               OnClick="EnviarTesteAsync" Disabled="_processando">
+                        @L["Perfil_Push_Testar"]
+                    </MudButton>
+                </div>
+            }
+        </MudStack>
+    }
+</MudPaper>
+
+@code {
+    private bool _ativo;
+    private bool _processando;
+    private string _estado = "default"; // unsupported | default | granted | denied
+    private bool _carregado;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _carregado || !Push.Habilitado) return;
+        _carregado = true;
+
+        try
+        {
+            _estado = await JS.InvokeAsync<string>("homePush.estado");
+            if (_estado != "unsupported")
+            {
+                var temServidor = await Push.UsuarioTemInscricaoAsync();
+                var endpointLocal = await JS.InvokeAsync<string?>("homePush.inscricaoAtual");
+                // Ativo só quando há assinatura no servidor E neste navegador.
+                _ativo = temServidor && endpointLocal is not null;
+            }
+        }
+        catch (Exception)
+        {
+            _estado = "unsupported";
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task OnToggleAsync(bool ligar)
+    {
+        _processando = true;
+        try
+        {
+            if (ligar)
+            {
+                var dto = await JS.InvokeAsync<InscricaoPushDTO?>("homePush.inscrever", Push.ChavePublica);
+                _estado = await JS.InvokeAsync<string>("homePush.estado");
+
+                if (dto is null)
+                {
+                    Snackbar.Add(L["Perfil_Push_PermissaoNegada"], Severity.Warning);
+                    _ativo = false;
+                    return;
+                }
+
+                var r = await Push.RegistrarInscricaoAsync(dto);
+                if (r.Sucesso)
+                {
+                    _ativo = true;
+                    Snackbar.Add(L["Perfil_Push_AtivadoOk"], Severity.Success);
+                }
+                else
+                {
+                    _ativo = false;
+                    Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+                }
+            }
+            else
+            {
+                var endpoint = await JS.InvokeAsync<string?>("homePush.cancelar");
+                if (!string.IsNullOrEmpty(endpoint))
+                    await Push.RemoverInscricaoAsync(endpoint);
+                _ativo = false;
+                Snackbar.Add(L["Perfil_Push_DesativadoOk"], Severity.Info);
+            }
+        }
+        catch (Exception)
+        {
+            Snackbar.Add(L["Perfil_Push_NaoSuportado"], Severity.Warning);
+        }
+        finally
+        {
+            _processando = false;
+        }
+    }
+
+    private async Task EnviarTesteAsync()
+    {
+        _processando = true;
+        try
+        {
+            var enviados = await Push.EnviarTesteAsync(L["Perfil_Push_TesteTitulo"], L["Perfil_Push_TesteCorpo"]);
+            Snackbar.Add(enviados > 0 ? L["Perfil_Push_TesteEnviado"] : L["Perfil_Push_PermissaoNegada"],
+                         enviados > 0 ? Severity.Success : Severity.Warning);
+        }
+        finally
+        {
+            _processando = false;
+        }
+    }
+}

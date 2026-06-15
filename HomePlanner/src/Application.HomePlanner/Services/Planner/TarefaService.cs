@@ -2,6 +2,7 @@ using Application.HomePlanner.Common;
 using Application.HomePlanner.DTOs.Planner;
 using Application.HomePlanner.Middleware;
 using Application.HomePlanner.Repositories.Planner;
+using Application.HomePlanner.Services.Notificacoes;
 using Domain.HomePlanner.Models.Enums;
 using Domain.HomePlanner.Models.Planner;
 using Microsoft.Extensions.Logging;
@@ -13,17 +14,20 @@ public class TarefaService : ITarefaService
     private readonly ITarefaRepository _repo;
     private readonly TenantContextAccessor _tenantAccessor;
     private readonly TenantContext _tenantContext;
+    private readonly IPushNotificationService _push;
     private readonly ILogger<TarefaService> _logger;
 
     public TarefaService(
         ITarefaRepository repo,
         TenantContextAccessor tenantAccessor,
         TenantContext tenantContext,
+        IPushNotificationService push,
         ILogger<TarefaService> logger)
     {
         _repo = repo;
         _tenantAccessor = tenantAccessor;
         _tenantContext = tenantContext;
+        _push = push;
         _logger = logger;
     }
 
@@ -103,10 +107,15 @@ public class TarefaService : ITarefaService
                 return ResultadoOperacao<int>.Falha("Você só pode editar as suas próprias tarefas.");
         }
 
+        var responsavelAnterior = entidade.ResponsavelUsuarioId;
+        var agendamentoMudou = entidade.DataPrevista != dto.DataPrevista || entidade.HoraInicio != dto.HoraInicio;
+
         entidade.Titulo               = dto.Titulo;
         entidade.Descricao            = dto.Descricao?.Trim();
         entidade.DataPrevista         = dto.DataPrevista;
         entidade.HoraInicio           = dto.HoraInicio;
+        // Reagendou? Esquece que já avisou, para o lembrete sair no novo horário.
+        if (agendamentoMudou) entidade.LembreteEnviadoEm = null;
         entidade.HoraFim              = dto.HoraFim;
         entidade.Recorrencia          = dto.Recorrencia;
         entidade.Visibilidade         = dto.Visibilidade;
@@ -116,6 +125,8 @@ public class TarefaService : ITarefaService
             : (string.IsNullOrWhiteSpace(dto.ResponsavelUsuarioId) ? null : dto.ResponsavelUsuarioId);
 
         await _repo.SalvarAsync(ct);
+
+        await NotificarAtribuicaoAsync(entidade, responsavelAnterior, ct);
         return ResultadoOperacao<int>.Ok(entidade.Id);
     }
 
@@ -137,9 +148,10 @@ public class TarefaService : ITarefaService
         if (concluida && entidade.Recorrencia != Recorrencia.Nenhuma && entidade.DataPrevista.HasValue)
         {
             var proxima = ProximaData(entidade.DataPrevista.Value, entidade.Recorrencia);
-            entidade.DataPrevista  = proxima;
-            entidade.Concluida     = false;
-            entidade.DataConclusao = null;
+            entidade.DataPrevista      = proxima;
+            entidade.Concluida         = false;
+            entidade.DataConclusao     = null;
+            entidade.LembreteEnviadoEm = null; // nova ocorrência → avisar de novo
             _logger.LogInformation("Tarefa recorrente {Id} reagendada para {Data}.", id, proxima);
         }
 
@@ -167,6 +179,33 @@ public class TarefaService : ITarefaService
     {
         await _tenantAccessor.GarantirHidratadoAsync();
         return await _repo.ListarMembrosFamiliaAsync(ct);
+    }
+
+    /// <summary>
+    /// Avisa o responsável por push quando a tarefa é atribuída a outra pessoa (não a si mesmo)
+    /// e a atribuição mudou. Falha de envio nunca quebra o salvamento.
+    /// </summary>
+    private async Task NotificarAtribuicaoAsync(Tarefa tarefa, string? responsavelAnterior, CancellationToken ct)
+    {
+        var novoResponsavel = tarefa.ResponsavelUsuarioId;
+        var tenantId = _tenantContext.TenantId;
+
+        // Só notifica nova atribuição a outra pessoa.
+        if (novoResponsavel is null
+            || tenantId is null
+            || novoResponsavel == _tenantContext.UsuarioId
+            || novoResponsavel == responsavelAnterior)
+            return;
+
+        try
+        {
+            // Texto resolvido no idioma do destinatário dentro do serviço de push.
+            await _push.EnviarTarefaAtribuidaAsync(tenantId.Value, novoResponsavel, tarefa.Titulo, tarefa.Id, ct);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Falha ao notificar atribuição da tarefa {Id}.", tarefa.Id);
+        }
     }
 
     /// <summary>Tarefa pertence ao usuário atual (é responsável OU criador). Usado nas guardas de papel restrito.</summary>
