@@ -1,0 +1,7 @@
+@inject NavigationManager Nav
+@code {
+    // Usuário autenticado, mas sem o papel/política exigido pela rota.
+    // Vai para "Acesso negado" — não para o login (que apenas o devolveria aqui).
+    protected override void OnInitialized()
+        => Nav.NavigateTo("Identity/Account/AccessDenied", forceLoad: true);
+}

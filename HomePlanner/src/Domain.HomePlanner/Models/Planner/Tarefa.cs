@@ -34,6 +34,12 @@ public class Tarefa : ITenantEntity, IDeletableEntity, IAuditable
     public string? ResponsavelUsuarioId { get; set; }
 
     /// <summary>
+    /// Quando true, o lembrete de horário também é enviado aos pais (Owner/Membro) da família,
+    /// além do responsável. Só tem efeito em tarefas com responsável e não-privadas.
+    /// </summary>
+    public bool NotificarResponsaveis { get; set; }
+
+    /// <summary>
     /// Usuário que criou a tarefa (Id do Usuario). Base da regra de visibilidade:
     /// tarefas <see cref="VisibilidadeTarefa.Privada"/> só aparecem para o criador.
     /// Diferente de <see cref="CriadoPor"/>, que é campo de auditoria e pode valer "system".

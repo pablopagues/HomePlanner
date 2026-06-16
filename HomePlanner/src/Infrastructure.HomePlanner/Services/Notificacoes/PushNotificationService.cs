@@ -143,6 +143,17 @@ public class PushNotificationService : IPushNotificationService
         }, ct);
     }
 
+    public async Task<int> EnviarLembreteTarefaPaisAsync(
+        Guid tenantId, string paiUsuarioId, string nomeResponsavel, string tituloTarefa, TimeOnly hora, int tarefaId, CancellationToken ct = default)
+    {
+        var idioma = await ObterIdiomaAsync(paiUsuarioId, ct);
+        var (titulo, corpo) = _texto.LembreteTarefaPais(idioma, tituloTarefa, nomeResponsavel, hora);
+        return await EnviarParaUsuarioAsync(tenantId, paiUsuarioId, new NotificacaoPushDTO
+        {
+            Titulo = titulo, Corpo = corpo, Url = "/calendario", Tag = $"lembrete-{tarefaId}-pais",
+        }, ct);
+    }
+
     public async Task<int> EnviarTarefaAtribuidaAsync(
         Guid tenantId, string usuarioId, string tituloTarefa, int tarefaId, CancellationToken ct = default)
     {

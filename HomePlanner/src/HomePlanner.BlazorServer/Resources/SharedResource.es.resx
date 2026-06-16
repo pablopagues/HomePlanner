@@ -458,4 +458,8 @@
   <data name="Push_Lembrete_Corpo" xml:space="preserve"><value>Empieza a las {0}.</value></data>
   <data name="Push_TarefaAtribuida_Titulo" xml:space="preserve"><value>Nueva tarea para ti</value></data>
   <data name="Push_TarefaAtribuida_Corpo" xml:space="preserve"><value>Te asignaron: {0}</value></data>
+  <data name="Push_Lembrete_Pais_Corpo" xml:space="preserve"><value>Tarea de {0} · empieza a las {1}.</value></data>
+
+  <!-- ── Planner / Notificar a los padres ── -->
+  <data name="Planner_NotificarPaisLabel" xml:space="preserve"><value>Avisar a un padre/madre en el recordatorio</value></data>
 </root>

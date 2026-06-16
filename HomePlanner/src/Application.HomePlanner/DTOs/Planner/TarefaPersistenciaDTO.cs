@@ -13,4 +13,5 @@ public class TarefaPersistenciaDTO
     public Recorrencia Recorrencia { get; set; } = Recorrencia.Nenhuma;
     public VisibilidadeTarefa Visibilidade { get; set; } = VisibilidadeTarefa.Familia;
     public string? ResponsavelUsuarioId { get; set; }
+    public bool NotificarResponsaveis { get; set; }
 }

@@ -15,6 +15,7 @@ public class TarefaListaDTO
     public VisibilidadeTarefa Visibilidade { get; init; }
     public string? ResponsavelUsuarioId { get; init; }
     public string? ResponsavelNome { get; init; }
+    public bool NotificarResponsaveis { get; init; }
 
     /// <summary>Usuário que criou a tarefa. Permite à UI distinguir tarefas próprias.</summary>
     public string? CriadoPorUsuarioId { get; init; }

@@ -1,4 +1,5 @@
 using Application.HomePlanner.Services.Notificacoes;
+using Domain.HomePlanner.Models.Enums;
 using Infrastructure.HomePlanner.Contexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -86,6 +87,8 @@ public class LembreteTarefaBackgroundService : BackgroundService
 
         var agoraUtc = DateTimeOffset.UtcNow;
         var houveMudanca = false;
+        var cachePais = new Dictionary<Guid, List<string>>();
+        var cacheNomes = new Dictionary<string, string>();
 
         foreach (var tarefa in candidatas)
         {
@@ -123,11 +126,64 @@ public class LembreteTarefaBackgroundService : BackgroundService
             await push.EnviarLembreteTarefaAsync(
                 tarefa.TenantId, tarefa.ResponsavelUsuarioId!, tarefa.Titulo, tarefa.HoraInicio.Value, tarefa.Id, ct);
 
+            // "Notificar pai/mãe": também avisa os Owner/Membro da família (sem duplicar o responsável).
+            if (tarefa.NotificarResponsaveis)
+            {
+                var paisIds = await ObterPaisAsync(db, tarefa.TenantId, cachePais, ct);
+                var nomeResponsavel = await ObterNomeAsync(db, tarefa.ResponsavelUsuarioId!, cacheNomes, ct);
+                foreach (var paiId in paisIds.Where(p => p != tarefa.ResponsavelUsuarioId))
+                {
+                    await push.EnviarLembreteTarefaPaisAsync(
+                        tarefa.TenantId, paiId, nomeResponsavel, tarefa.Titulo, tarefa.HoraInicio.Value, tarefa.Id, ct);
+                }
+            }
+
             tarefa.LembreteEnviadoEm = agoraUtc.UtcDateTime;
             houveMudanca = true;
         }
 
         if (houveMudanca)
             await db.SaveChangesAsync(ct);
+    }
+
+    /// <summary>IDs dos pais (Owner/Membro) de um tenant, com cache por ciclo.</summary>
+    private static async Task<List<string>> ObterPaisAsync(
+        HomePlannerDbContext db, Guid tenantId, Dictionary<Guid, List<string>> cache, CancellationToken ct)
+    {
+        if (cache.TryGetValue(tenantId, out var existente))
+            return existente;
+
+        // Papel é ITenantEntity (filtro global por tenant) → IgnoreQueryFilters fora de requisição.
+        var papeisIds = await db.Roles
+            .IgnoreQueryFilters()
+            .Where(p => p.TenantId == tenantId && (p.Tipo == PapelUsuario.Owner || p.Tipo == PapelUsuario.Membro))
+            .Select(p => p.Id)
+            .ToListAsync(ct);
+
+        var paisIds = await db.UserRoles
+            .Where(ur => papeisIds.Contains(ur.RoleId))
+            .Select(ur => ur.UserId)
+            .Distinct()
+            .ToListAsync(ct);
+
+        cache[tenantId] = paisIds;
+        return paisIds;
+    }
+
+    /// <summary>Nome do usuário, com cache por ciclo.</summary>
+    private static async Task<string> ObterNomeAsync(
+        HomePlannerDbContext db, string usuarioId, Dictionary<string, string> cache, CancellationToken ct)
+    {
+        if (cache.TryGetValue(usuarioId, out var existente))
+            return existente;
+
+        var nome = await db.Users
+            .IgnoreQueryFilters()
+            .Where(u => u.Id == usuarioId)
+            .Select(u => u.NomeCompleto)
+            .FirstOrDefaultAsync(ct) ?? string.Empty;
+
+        cache[usuarioId] = nome;
+        return nome;
     }
 }

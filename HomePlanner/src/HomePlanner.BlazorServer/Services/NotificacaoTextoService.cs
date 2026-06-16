@@ -29,6 +29,16 @@ public class NotificacaoTextoService : INotificacaoTextoService
         return (tituloTarefa, corpo);
     }
 
+    public (string Titulo, string Corpo) LembreteTarefaPais(string? idioma, string tituloTarefa, string nomeResponsavel, TimeOnly hora)
+    {
+        var c = Cultura(idioma);
+        var corpo = string.Format(c,
+            Rm.GetString("Push_Lembrete_Pais_Corpo", c) ?? "Tarefa de {0} · começa às {1}.",
+            nomeResponsavel,
+            hora.ToString("HH\\:mm", CultureInfo.InvariantCulture));
+        return (tituloTarefa, corpo);
+    }
+
     public (string Titulo, string Corpo) TarefaAtribuida(string? idioma, string tituloTarefa)
     {
         var c = Cultura(idioma);

@@ -3,12 +3,15 @@
 @attribute [Authorize]
 @using Application.HomePlanner.Services.Seguranca
 @using Application.HomePlanner.Services.Perfil
+@using Application.HomePlanner.Services.Empresa
 @using HomePlanner.BlazorServer.Services
 @using Microsoft.AspNetCore.Components.Forms
 @using QRCoder
 @inject IDoisFatoresService Service
 @inject IFotoUsuarioService Foto
+@inject IEmpresaService Empresa
 @inject EstadoFotoUsuario EstadoFoto
+@inject NavigationManager Nav
 @inject IStringLocalizer<SharedResource> L
 @inject ISnackbar Snackbar
 
@@ -20,6 +23,22 @@
 <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
     @L["Perfil_Subtitulo"]
 </MudText>
+
+@* ─── Confirmação de e-mail ──────────────────────────────────────── *@
+@if (!_emailConfirmado)
+{
+    <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined" Class="mb-4" Style="max-width:620px;">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween"
+                  Wrap="Wrap.Wrap" Spacing="2" Style="width:100%;">
+            <span>@L["Emp_EmailNaoConfirmado"]</span>
+            <MudButton Variant="Variant.Filled" Color="Color.Warning" Size="Size.Small"
+                       StartIcon="@Icons.Material.Filled.MarkEmailRead"
+                       OnClick="@ReenviarEmailAsync" Disabled="@_reenviando">
+                @(_reenviando ? L["Emp_Salvando"] : L["Emp_ReenviarConfirmacao"])
+            </MudButton>
+        </MudStack>
+    </MudAlert>
+}
 
 @* ─── Foto de perfil ─────────────────────────────────────────────── *@
 <MudPaper Class="pa-6 mb-4" Elevation="1" Style="border-radius:14px; max-width:620px;">
@@ -189,12 +208,35 @@ else
     private bool _enviandoFoto;
     private string? _versaoFoto;
 
+    private bool _emailConfirmado = true; // assume confirmado até carregar (evita flash do aviso)
+    private bool _reenviando;
+
     protected override async Task OnInitializedAsync()
     {
         _versaoFoto = await Foto.ObterVersaoFotoAsync();
         EstadoFoto.Definir(_versaoFoto);
         _ativo = await Service.EstaAtivoAsync();
+
+        try { _emailConfirmado = (await Empresa.ObterAsync()).EmailConfirmado; }
+        catch { _emailConfirmado = true; } // em caso de erro, não exibe o aviso
+
         _carregando = false;
+    }
+
+    private async Task ReenviarEmailAsync()
+    {
+        _reenviando = true;
+        try
+        {
+            var resultado = await Empresa.ReenviarConfirmacaoEmailAsync(Nav.BaseUri);
+            if (!resultado.Sucesso)
+            {
+                foreach (var e in resultado.Erros) Snackbar.Add(e, Severity.Info);
+                return;
+            }
+            Snackbar.Add(L["Emp_ConfirmacaoEnviada"], Severity.Success);
+        }
+        finally { _reenviando = false; }
     }
 
     private async Task OnFotoSelecionadaAsync(IBrowserFile? file)

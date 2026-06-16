@@ -15,6 +15,7 @@ public class TarefaConfiguration : IEntityTypeConfiguration<Tarefa>
         builder.Property(t => t.HoraInicio).HasColumnType("time");
         builder.Property(t => t.HoraFim).HasColumnType("time");
         builder.Property(t => t.ResponsavelUsuarioId).HasMaxLength(450);
+        builder.Property(t => t.NotificarResponsaveis).HasDefaultValue(false);
         builder.Property(t => t.CriadoPorUsuarioId).HasMaxLength(450);
         builder.Property(t => t.DeletedByUsuarioId).HasMaxLength(450);
         builder.Property(t => t.CriadoPor).HasMaxLength(450);

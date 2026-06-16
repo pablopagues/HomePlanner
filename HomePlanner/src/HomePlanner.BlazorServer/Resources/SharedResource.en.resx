@@ -458,4 +458,8 @@
   <data name="Push_Lembrete_Corpo" xml:space="preserve"><value>Starts at {0}.</value></data>
   <data name="Push_TarefaAtribuida_Titulo" xml:space="preserve"><value>New task for you</value></data>
   <data name="Push_TarefaAtribuida_Corpo" xml:space="preserve"><value>You were assigned: {0}</value></data>
+  <data name="Push_Lembrete_Pais_Corpo" xml:space="preserve"><value>{0}'s task · starts at {1}.</value></data>
+
+  <!-- ── Planner / Notify parents ── -->
+  <data name="Planner_NotificarPaisLabel" xml:space="preserve"><value>Notify a parent in the reminder</value></data>
 </root>

@@ -33,6 +33,9 @@ public interface IPushNotificationService
     /// <summary>Lembrete de horário de tarefa, no idioma do destinatário.</summary>
     Task<int> EnviarLembreteTarefaAsync(Guid tenantId, string usuarioId, string tituloTarefa, TimeOnly hora, int tarefaId, CancellationToken ct = default);
 
+    /// <summary>Lembrete de horário enviado a um pai (Owner/Membro), identificando o responsável.</summary>
+    Task<int> EnviarLembreteTarefaPaisAsync(Guid tenantId, string paiUsuarioId, string nomeResponsavel, string tituloTarefa, TimeOnly hora, int tarefaId, CancellationToken ct = default);
+
     /// <summary>Aviso de tarefa atribuída, no idioma do destinatário.</summary>
     Task<int> EnviarTarefaAtribuidaAsync(Guid tenantId, string usuarioId, string tituloTarefa, int tarefaId, CancellationToken ct = default);
 }

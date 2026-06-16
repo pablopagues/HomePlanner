@@ -481,4 +481,8 @@
   <data name="Push_Lembrete_Corpo" xml:space="preserve"><value>Começa às {0}.</value></data>
   <data name="Push_TarefaAtribuida_Titulo" xml:space="preserve"><value>Nova tarefa para você</value></data>
   <data name="Push_TarefaAtribuida_Corpo" xml:space="preserve"><value>Você recebeu: {0}</value></data>
+  <data name="Push_Lembrete_Pais_Corpo" xml:space="preserve"><value>Tarefa de {0} · começa às {1}.</value></data>
+
+  <!-- ── Planner / Notificar pais ── -->
+  <data name="Planner_NotificarPaisLabel" xml:space="preserve"><value>Notificar pai/mãe no lembrete</value></data>
 </root>

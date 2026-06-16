@@ -7,5 +7,9 @@ namespace Application.HomePlanner.Services.Notificacoes;
 public interface INotificacaoTextoService
 {
     (string Titulo, string Corpo) LembreteTarefa(string? idioma, string tituloTarefa, TimeOnly hora);
+
+    /// <summary>Lembrete enviado aos pais (Owner/Membro), identificando o responsável pela tarefa.</summary>
+    (string Titulo, string Corpo) LembreteTarefaPais(string? idioma, string tituloTarefa, string nomeResponsavel, TimeOnly hora);
+
     (string Titulo, string Corpo) TarefaAtribuida(string? idioma, string tituloTarefa);
 }

@@ -119,6 +119,8 @@ public class TarefaService : ITarefaService
         entidade.HoraFim              = dto.HoraFim;
         entidade.Recorrencia          = dto.Recorrencia;
         entidade.Visibilidade         = dto.Visibilidade;
+        // Tarefa privada nunca notifica os pais (não vaza para fora do criador).
+        entidade.NotificarResponsaveis = dto.NotificarResponsaveis && dto.Visibilidade != VisibilidadeTarefa.Privada;
         // Filho só pode atribuir tarefas a si mesmo; Owner/Membro atribuem a qualquer membro.
         entidade.ResponsavelUsuarioId = restrito
             ? _tenantContext.UsuarioId

@@ -22,10 +22,12 @@
             <MudStack Row="true" Spacing="3">
                 <MudTimePicker @bind-Time="_horaInicio" Label="@L["Planner_HoraInicioLabel"]"
                                Variant="Variant.Outlined" Editable="true" Clearable="true"
-                               AmPm="false" Class="flex-grow-1" />
+                               AmPm="false" PickerVariant="PickerVariant.Dialog" AutoClose="true"
+                               Class="flex-grow-1" />
                 <MudTimePicker @bind-Time="_horaFim" Label="@L["Planner_HoraFimLabel"]"
                                Variant="Variant.Outlined" Editable="true" Clearable="true"
-                               AmPm="false" Class="flex-grow-1" />
+                               AmPm="false" PickerVariant="PickerVariant.Dialog" AutoClose="true"
+                               Class="flex-grow-1" />
             </MudStack>
 
             @* Filho só atribui tarefas a si mesmo — o responsável é definido no servidor. *@
@@ -52,6 +54,13 @@
             <MudSwitch T="bool" Value="@_privada"
                        ValueChanged="@((bool v) => { _privada = v; Dto.Visibilidade = v ? VisibilidadeTarefa.Privada : VisibilidadeTarefa.Familia; })"
                        Label="@L["Planner_PrivadaLabel"]" Color="Color.Secondary" />
+
+            @* Notificar pais (Owner/Membro) no lembrete — não faz sentido em tarefa privada. *@
+            @if (!_privada)
+            {
+                <MudSwitch T="bool" @bind-Value="Dto.NotificarResponsaveis"
+                           Label="@L["Planner_NotificarPaisLabel"]" Color="Color.Primary" />
+            }
         </MudStack>
     </DialogContent>
     <DialogActions>

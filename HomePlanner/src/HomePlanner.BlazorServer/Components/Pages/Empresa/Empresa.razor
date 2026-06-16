@@ -6,7 +6,6 @@
 @using Application.HomePlanner.Services.Empresa
 @using Domain.HomePlanner.Models.Enums
 @inject IEmpresaService Service
-@inject NavigationManager Nav
 @inject ISnackbar Snackbar
 @inject IStringLocalizer<SharedResource> L
 
@@ -36,38 +35,13 @@ else
                               Disabled="@_salvando" />
             </MudItem>
 
-            @* E-mail (somente leitura) + status de confirmação *@
-            <MudItem xs="12" sm="8">
+            @* E-mail da conta (somente leitura) — a confirmação fica no Perfil do usuário *@
+            <MudItem xs="12">
                 <MudTextField Value="@_detalhe.Email"
                               Label="@L["Emp_Email"]"
                               Variant="Variant.Outlined"
                               ReadOnly="true" />
             </MudItem>
-            <MudItem xs="12" sm="4" Class="d-flex align-center">
-                @if (_detalhe.EmailConfirmado)
-                {
-                    <MudChip T="string" Color="Color.Success" Variant="Variant.Text"
-                             Icon="@Icons.Material.Filled.CheckCircle">
-                        @L["Emp_EmailConfirmado"]
-                    </MudChip>
-                }
-                else
-                {
-                    <MudButton Variant="Variant.Outlined" Color="Color.Warning" Size="Size.Small"
-                               StartIcon="@Icons.Material.Filled.MarkEmailRead"
-                               OnClick="@ReenviarAsync" Disabled="@_reenviando">
-                        @(_reenviando ? L["Emp_Salvando"] : L["Emp_ReenviarConfirmacao"])
-                    </MudButton>
-                }
-            </MudItem>
-            @if (!_detalhe.EmailConfirmado)
-            {
-                <MudItem xs="12" Class="pt-0">
-                    <MudText Typo="Typo.caption" Color="Color.Warning">
-                        @L["Emp_EmailNaoConfirmado"]
-                    </MudText>
-                </MudItem>
-            }
 
             @* País (não editável — determina os preços) *@
             <MudItem xs="12" sm="6">
@@ -113,7 +87,6 @@ else
 @code {
     private bool _carregando = true;
     private bool _salvando;
-    private bool _reenviando;
 
     private EmpresaDetalheDTO _detalhe = new();
     private AtualizarEmpresaDTO _dto = new();
@@ -158,21 +131,5 @@ else
             await CarregarAsync();
         }
         finally { _salvando = false; }
-    }
-
-    private async Task ReenviarAsync()
-    {
-        _reenviando = true;
-        try
-        {
-            var resultado = await Service.ReenviarConfirmacaoEmailAsync(Nav.BaseUri);
-            if (!resultado.Sucesso)
-            {
-                foreach (var e in resultado.Erros) Snackbar.Add(e, Severity.Info);
-                return;
-            }
-            Snackbar.Add(L["Emp_ConfirmacaoEnviada"], Severity.Success);
-        }
-        finally { _reenviando = false; }
     }
 }

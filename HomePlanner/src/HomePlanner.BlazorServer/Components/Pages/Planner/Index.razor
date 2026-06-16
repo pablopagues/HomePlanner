@@ -180,6 +180,7 @@ else
                 Recorrencia          = tarefa.Recorrencia,
                 Visibilidade         = tarefa.Visibilidade,
                 ResponsavelUsuarioId = tarefa.ResponsavelUsuarioId,
+                NotificarResponsaveis = tarefa.NotificarResponsaveis,
             };
 
         var parameters = new DialogParameters<TarefaEditor>
@@ -190,7 +191,7 @@ else
         };
 
         var dialog = await Dialog.ShowAsync<TarefaEditor>(string.Empty, parameters,
-            new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true });
+            new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, BackdropClick = false });
 
         var result = await dialog.Result;
         if (result is null || result.Canceled) return;

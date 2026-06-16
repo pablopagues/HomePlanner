@@ -251,6 +251,7 @@ else
         Recorrencia          = t.Recorrencia,
         Visibilidade         = t.Visibilidade,
         ResponsavelUsuarioId = t.ResponsavelUsuarioId,
+        NotificarResponsaveis = t.NotificarResponsaveis,
     });
 
     private async Task AbrirEditor(TarefaPersistenciaDTO dto)
@@ -264,7 +265,7 @@ else
         };
 
         var dialog = await Dialog.ShowAsync<TarefaEditor>(string.Empty, parameters,
-            new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true });
+            new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, BackdropClick = false });
 
         var result = await dialog.Result;
         if (result is null || result.Canceled) return;
