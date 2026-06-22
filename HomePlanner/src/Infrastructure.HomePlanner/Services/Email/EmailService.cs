@@ -71,7 +71,7 @@ public class EmailService : IEmailService
             <h1 style="font-weight:300; color:#4A6B5C; font-size:24px;">{{titulo}}</h1>
             <p style="font-size:15px; line-height:1.6; color:#2A3A33;">{{texto}}</p>
             <a href="{{link}}" style="display:inline-block; margin-top:16px; background:#C97B5A; color:#FFFFFF; padding:12px 28px; border-radius:8px; text-decoration:none; font-weight:500;">{{textoBotao}}</a>
-            <p style="font-size:12px; color:#7A8278; margin-top:32px;">HomePlanner — by Sideris</p>
+            <p style="font-size:12px; color:#7A8278; margin-top:32px;">HomePlanner — by SiderisX</p>
         </div>
         """;
 }

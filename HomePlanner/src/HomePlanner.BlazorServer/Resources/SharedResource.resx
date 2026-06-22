@@ -202,7 +202,7 @@
   <data name="Legal_Minuta" xml:space="preserve"><value>Este é um documento preliminar, sujeito a revisão jurídica.</value></data>
   <data name="Priv_Titulo" xml:space="preserve"><value>Política de Privacidade</value></data>
   <data name="Priv_Versao" xml:space="preserve"><value>Versão 1.0</value></data>
-  <data name="Priv_Corpo" xml:space="preserve"><value>O HomePlanner (Sideris) trata seus dados pessoais (nome, e-mail e dados de uso) apenas para operar o serviço de planejamento familiar. &lt;br/&gt;&lt;br/&gt;Não vendemos seus dados. Compartilhamos somente com provedores essenciais (Stripe para pagamentos, hospedagem e e-mail). &lt;br/&gt;&lt;br/&gt;Você pode solicitar acesso, correção ou exclusão dos seus dados a qualquer momento pelo nosso canal de contato.</value></data>
+  <data name="Priv_Corpo" xml:space="preserve"><value>O HomePlanner (SiderisX) trata seus dados pessoais (nome, e-mail e dados de uso) apenas para operar o serviço de planejamento familiar. &lt;br/&gt;&lt;br/&gt;Não vendemos seus dados. Compartilhamos somente com provedores essenciais (Stripe para pagamentos, hospedagem e e-mail). &lt;br/&gt;&lt;br/&gt;Você pode solicitar acesso, correção ou exclusão dos seus dados a qualquer momento pelo nosso canal de contato.</value></data>
   <data name="Termos_Titulo" xml:space="preserve"><value>Termos de Uso</value></data>
   <data name="Termos_Versao" xml:space="preserve"><value>Versão 1.0</value></data>
   <data name="Termos_Corpo" xml:space="preserve"><value>Ao usar o HomePlanner você concorda com estes termos. O serviço é oferecido por assinatura, com período de teste gratuito de 30 dias. &lt;br/&gt;&lt;br/&gt;Você é responsável por manter sua senha segura e pelo uso da sua conta. Os dados que você cadastra pertencem a você. &lt;br/&gt;&lt;br/&gt;O serviço é fornecido &quot;como está&quot;. Podemos atualizar estes termos com aviso prévio de 15 dias.</value></data>
@@ -279,7 +279,7 @@
   <data name="Landing_SubTitulo" xml:space="preserve"><value>Organize a semana da sua família. Cardápio, compras e tarefas — tudo em um só lugar.</value></data>
   <data name="Landing_ComecarGratis" xml:space="preserve"><value>Começar grátis</value></data>
   <data name="Landing_Entrar" xml:space="preserve"><value>Entrar</value></data>
-  <data name="Landing_BySideris" xml:space="preserve"><value>by Sideris</value></data>
+  <data name="Landing_BySideris" xml:space="preserve"><value>by SiderisX</value></data>
 
   <!-- ── Dashboard ── -->
   <data name="Dashboard_Saudacao" xml:space="preserve"><value>Olá! Vamos planejar a semana?</value></data>

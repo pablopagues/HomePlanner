@@ -193,7 +193,7 @@
   <data name="Legal_Minuta" xml:space="preserve"><value>This is a preliminary document, subject to legal review.</value></data>
   <data name="Priv_Titulo" xml:space="preserve"><value>Privacy Policy</value></data>
   <data name="Priv_Versao" xml:space="preserve"><value>Version 1.0</value></data>
-  <data name="Priv_Corpo" xml:space="preserve"><value>HomePlanner (Sideris) processes your personal data (name, email and usage data) only to operate the family planning service. &lt;br/&gt;&lt;br/&gt;We do not sell your data. We share it only with essential providers (Stripe for payments, hosting and email). &lt;br/&gt;&lt;br/&gt;You may request access, correction or deletion of your data at any time through our contact channel.</value></data>
+  <data name="Priv_Corpo" xml:space="preserve"><value>HomePlanner (SiderisX) processes your personal data (name, email and usage data) only to operate the family planning service. &lt;br/&gt;&lt;br/&gt;We do not sell your data. We share it only with essential providers (Stripe for payments, hosting and email). &lt;br/&gt;&lt;br/&gt;You may request access, correction or deletion of your data at any time through our contact channel.</value></data>
   <data name="Termos_Titulo" xml:space="preserve"><value>Terms of Use</value></data>
   <data name="Termos_Versao" xml:space="preserve"><value>Version 1.0</value></data>
   <data name="Termos_Corpo" xml:space="preserve"><value>By using HomePlanner you agree to these terms. The service is offered by subscription, with a 30-day free trial. &lt;br/&gt;&lt;br/&gt;You are responsible for keeping your password safe and for the use of your account. The data you enter belongs to you. &lt;br/&gt;&lt;br/&gt;The service is provided &quot;as is&quot;. We may update these terms with 15 days' notice.</value></data>
@@ -265,7 +265,7 @@
   <data name="Landing_SubTitulo" xml:space="preserve"><value>Organize your family's week. Meals, shopping and tasks — all in one place.</value></data>
   <data name="Landing_ComecarGratis" xml:space="preserve"><value>Start for free</value></data>
   <data name="Landing_Entrar" xml:space="preserve"><value>Sign in</value></data>
-  <data name="Landing_BySideris" xml:space="preserve"><value>by Sideris</value></data>
+  <data name="Landing_BySideris" xml:space="preserve"><value>by SiderisX</value></data>
 
   <data name="Dashboard_Saudacao" xml:space="preserve"><value>Hello! Let's plan the week?</value></data>
   <data name="Dashboard_CardapioDesc" xml:space="preserve"><value>Plan the week's meals</value></data>

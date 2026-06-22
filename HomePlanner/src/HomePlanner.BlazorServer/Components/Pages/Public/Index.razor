@@ -21,7 +21,8 @@
                 @L["Landing_NavSobre"]
             </MudButton>
             <LanguageToggle />
-            <MudButton Href="/Identity/Account/Login" Variant="Variant.Text" Style="color:#4A6B5C;">
+            <MudButton Href="/Identity/Account/Login" Variant="Variant.Outlined"
+                       Style="color:#4A6B5C; border-color:#4A6B5C;">
                 @L["Landing_Entrar"]
             </MudButton>
             <MudButton Href="/Identity/Account/Registro" Variant="Variant.Filled"
@@ -163,6 +164,21 @@
     }
     .landing-nav { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
     .landing-hero { background:#FAF7F2; }
+
+    /* Mobile: empilha logo acima do menu e centraliza a navegação,
+       para a quebra de linha ficar equilibrada em vez de jogar só o CTA para baixo. */
+    @@media (max-width: 640px) {
+        .landing-header {
+            flex-direction: column;
+            padding: 12px 16px;
+            gap: 10px;
+        }
+        .landing-nav {
+            width: 100%;
+            justify-content: center;
+            gap: 6px;
+        }
+    }
 </style>
 
 @code {
