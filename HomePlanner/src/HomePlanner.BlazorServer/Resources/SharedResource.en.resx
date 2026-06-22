@@ -203,6 +203,8 @@
   <data name="Compras_Itens" xml:space="preserve"><value>items</value></data>
   <data name="Compras_JaTenho" xml:space="preserve"><value>already have</value></data>
   <data name="Compras_LimparSelecao" xml:space="preserve"><value>Clear selection</value></data>
+  <data name="Compras_OcultarComprados" xml:space="preserve"><value>Hide purchased</value></data>
+  <data name="Compras_TudoComprado" xml:space="preserve"><value>All purchased here ✓</value></data>
   <data name="Compras_Atualizar" xml:space="preserve"><value>Refresh</value></data>
   <data name="Compras_SemItens" xml:space="preserve"><value>No recipes in this week's menu yet.</value></data>
   <data name="Compras_IrCardapio" xml:space="preserve"><value>Go to menu</value></data>

@@ -100,6 +100,15 @@ else if (_lista is not null)
         ? _grupos
         : _grupos.Where(g => g.SolicitanteUsuarioId == _membroFiltro).ToList();
 
+    @if (mostrarCardapio || gruposVisiveis.Count > 0)
+    {
+        <MudStack Row="true" Justify="Justify.FlexEnd" AlignItems="AlignItems.Center" Class="mb-3">
+            <MudSwitch T="bool" Value="_ocultarComprados"
+                       ValueChanged="@((bool v) => TrocarOcultarComprados(v))"
+                       Color="Color.Primary" Label='@L["Compras_OcultarComprados"]' />
+        </MudStack>
+    }
+
     @if (!mostrarCardapio && gruposVisiveis.Count == 0)
     {
         <MudAlert Severity="Severity.Info">
@@ -147,10 +156,14 @@ else if (_lista is not null)
             </MudStack>
 
             @* ── Lista de itens ──────────────────────────────────────────── *@
+            @if (ItensCardapioVisiveis().Count == 0)
+            {
+                <MudText Typo="Typo.body2" Color="Color.Secondary">@L["Compras_TudoComprado"]</MudText>
+            }
+            else
+            {
             <MudGrid Spacing="2">
-                @foreach (var item in _lista.Itens
-                    .OrderBy(i => _jaTenho.GetValueOrDefault(i.IngredienteId))
-                    .ThenBy(i => i.NomeIngrediente))
+                @foreach (var item in ItensCardapioVisiveis())
                 {
                     var jaTenho = _jaTenho.GetValueOrDefault(item.IngredienteId);
 
@@ -185,6 +198,7 @@ else if (_lista is not null)
                     </MudItem>
                 }
             </MudGrid>
+            }
 
             @* ── Resumo do progresso ─────────────────────────────────────── *@
             <MudPaper Class="pa-4 mt-4" Elevation="0"
@@ -204,6 +218,12 @@ else if (_lista is not null)
     @* ── Categorias: pedidos por membro ─────────────────────────────────── *@
     @foreach (var grupo in gruposVisiveis)
     {
+        var itensGrupo = _ocultarComprados
+            ? grupo.Itens.Where(p => !p.Comprado).ToList()
+            : grupo.Itens;
+
+        @if (itensGrupo.Count > 0)
+        {
         <MudPaper Class="pa-4 mb-4" Elevation="0"
                   Style="border:1px solid var(--mud-palette-lines-default); border-radius:10px;">
             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
@@ -218,7 +238,7 @@ else if (_lista is not null)
             </MudStack>
 
             <MudGrid Spacing="2">
-                @foreach (var pedido in grupo.Itens)
+                @foreach (var pedido in itensGrupo)
                 {
                     <MudItem xs="12" sm="6" md="4">
                         <MudPaper Class="pa-3"
@@ -253,6 +273,7 @@ else if (_lista is not null)
                 }
             </MudGrid>
         </MudPaper>
+        }
     }
 }
 
@@ -268,6 +289,7 @@ else if (_lista is not null)
     private string? _erro;
     private bool _restrito;
     private string? _membroFiltro;
+    private bool _ocultarComprados;
 
     // Formulário de novo pedido
     private string? _novoDescricao;
@@ -285,6 +307,36 @@ else if (_lista is not null)
         _restrito = PedidoService.UsuarioRestritoAsProprias;
         if (!_restrito)
             _membros = (await PedidoService.ListarMembrosFamiliaAsync()).ToList();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        // Preferência de visualização (lembrada por dispositivo).
+        var v = await JS.InvokeAsync<string?>("appStorage.get", "hp_ocultar_comprados");
+        if (v == "1")
+        {
+            _ocultarComprados = true;
+            StateHasChanged();
+        }
+    }
+
+    // Itens do cardápio respeitando o filtro "ocultar comprados" e a ordenação.
+    private List<ItemComprasDTO> ItensCardapioVisiveis()
+    {
+        if (_lista is null) return [];
+        var q = _ocultarComprados
+            ? _lista.Itens.Where(i => !_jaTenho.GetValueOrDefault(i.IngredienteId))
+            : _lista.Itens;
+        return q.OrderBy(i => _jaTenho.GetValueOrDefault(i.IngredienteId))
+                .ThenBy(i => i.NomeIngrediente)
+                .ToList();
+    }
+
+    private async Task TrocarOcultarComprados(bool valor)
+    {
+        _ocultarComprados = valor;
+        await JS.InvokeVoidAsync("appStorage.set", "hp_ocultar_comprados", valor ? "1" : "0");
     }
 
     protected override async Task OnParametersSetAsync()
