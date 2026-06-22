@@ -3,6 +3,8 @@
 @using Domain.HomePlanner.Models.Enums
 @inject IDialogService DialogService
 @inject IReceitaService ReceitaService
+@inject ITradutorReceitaIA Tradutor
+@inject ICotaImportacaoService Cota
 @inject ISnackbar Snackbar
 
 <MudGrid Spacing="3">
@@ -325,8 +327,9 @@ else
 
         var result = await dialog.Result;
         if (result is null || result.Canceled
-            || result.Data is not List<IngredienteParseadoDTO> novos) return;
+            || result.Data is not LancamentoIngredientesDTO lancamento) return;
 
+        var novos = lancamento.Ingredientes;
         int adicionados = 0, mesclados = 0;
         foreach (var n in novos)
         {
@@ -369,7 +372,34 @@ else
                 : $"{adicionados} ingrediente(s) lançado(s). Revise antes de salvar.",
             Severity.Success);
 
+        // Se o usuário pediu tradução, traduz também o texto livre da receita.
+        if (lancamento.IdiomaTraducao is string idioma)
+            await TraduzirTextoReceitaAsync(idioma);
+
         await AtualizarPrevia();
+    }
+
+    // Traduz nome + modo de preparo + observações da receita para o idioma escolhido.
+    private async Task TraduzirTextoReceitaAsync(string idioma)
+    {
+        var throttle = await Cota.VerificarThrottleIAAsync();
+        if (!throttle.Sucesso)
+        {
+            Snackbar.Add(throttle.Erros.FirstOrDefault() ?? "Tente novamente em instantes.", Severity.Warning);
+            return;
+        }
+
+        var t = await Tradutor.TraduzirAsync(Dto.Nome, Dto.ModoPreparo, Dto.Observacoes, idioma);
+        if (t is null)
+        {
+            Snackbar.Add("Não foi possível traduzir o texto da receita; mantive o original.", Severity.Warning);
+            return;
+        }
+
+        Dto.Nome        = t.Nome ?? Dto.Nome;
+        Dto.ModoPreparo = t.ModoPreparo ?? Dto.ModoPreparo;
+        Dto.Observacoes = t.Observacoes ?? Dto.Observacoes;
+        StateHasChanged();
     }
 
     private static string? JuntarObs(string? a, string? b)

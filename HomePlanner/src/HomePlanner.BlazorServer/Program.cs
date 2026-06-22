@@ -176,6 +176,7 @@ try
     // ── Parsing de ingredientes por IA (Claude) + cota de importação ──────────
     builder.Services.AddMemoryCache(); // usado pelo throttle anti-abuso da IA
     builder.Services.AddScoped<IParserIngredientesIA, ParserIngredientesIAService>();
+    builder.Services.AddScoped<ITradutorReceitaIA, TradutorReceitaIAService>();
     builder.Services.AddScoped<ICotaImportacaoService, CotaImportacaoService>();
 
     // ── Lista de Compras ──────────────────────────────────────────────────────

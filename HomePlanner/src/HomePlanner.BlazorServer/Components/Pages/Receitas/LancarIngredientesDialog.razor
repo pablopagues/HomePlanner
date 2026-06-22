@@ -4,6 +4,7 @@
 @inject IImportadorReceitaService Importador
 @inject IIngredienteService IngService
 @inject ICotaImportacaoService Cota
+@inject PublicLanguageService Lang
 @inject ISnackbar Snackbar
 
 <MudDialog>
@@ -19,7 +20,13 @@
         </MudText>
 
         <MudTextField @bind-Value="_texto" Label="Texto dos ingredientes"
-                      Lines="6" AutoGrow="true" Variant="Variant.Outlined" Class="mb-3" />
+                      Lines="6" AutoGrow="true" Variant="Variant.Outlined" Class="mb-2" />
+
+        <MudCheckBox @bind-Value="_traduzir" Color="Color.Primary" Dense="true" Class="mb-2"
+                     Label="@($"Traduzir a receita para o meu idioma ({IdiomaLabel})")" />
+        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="d-block mb-3">
+            Traduz os ingredientes, o nome e o modo de preparo. Fica gravado nesse idioma — não é possível traduzir de novo depois.
+        </MudText>
 
         <MudButton StartIcon="@Icons.Material.Filled.AutoFixHigh" Variant="Variant.Outlined"
                    Color="Color.Primary" OnClick="Analisar" Class="mb-3">
@@ -116,8 +123,16 @@
     private string _texto = string.Empty;
     private bool _analisou;
     private bool _aplicando;
+    private bool _traduzir;
     private SistemaMedida _sistema = SistemaMedida.Metrico;
     private readonly List<LinhaPreview> _linhas = [];
+
+    private string IdiomaLabel => Lang.Lang switch
+    {
+        "en" => "English",
+        "es" => "español",
+        _    => "português",
+    };
 
     protected override void OnInitialized() => _texto = TextoInicial;
 
@@ -133,7 +148,8 @@
             return;
         }
 
-        foreach (var p in await Importador.ParsearTextoAsync(_texto))
+        var idioma = _traduzir ? Lang.Lang : null;
+        foreach (var p in await Importador.ParsearTextoAsync(_texto, idioma))
         {
             var linha = new LinhaPreview
             {
@@ -216,7 +232,11 @@
             Snackbar.Add("Nenhum ingrediente pôde ser lançado.", Severity.Warning);
             return;
         }
-        MudDialog.Close(DialogResult.Ok(resultado));
+        MudDialog.Close(DialogResult.Ok(new LancamentoIngredientesDTO
+        {
+            Ingredientes   = resultado,
+            IdiomaTraducao = _traduzir ? Lang.Lang : null,
+        }));
     }
 
     // Retorna o id do ingrediente (existente ou recém-criado) e seu nome; 0 se falhar.

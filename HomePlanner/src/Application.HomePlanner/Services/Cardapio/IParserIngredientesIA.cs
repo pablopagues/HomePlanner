@@ -12,6 +12,10 @@ public interface IParserIngredientesIA
     /// <summary>true quando há chave de API configurada.</summary>
     bool Habilitado { get; }
 
+    /// <param name="idiomaAlvo">
+    /// Quando informado ("pt"/"en"/"es"), os campos <c>nome</c> e <c>preparo</c>
+    /// retornam traduzidos para esse idioma (o <c>textoOriginal</c> fica intacto).
+    /// </param>
     Task<IReadOnlyList<IngredienteImportadoDTO>?> ParsearAsync(
-        IReadOnlyList<string> linhas, CancellationToken ct = default);
+        IReadOnlyList<string> linhas, string? idiomaAlvo = null, CancellationToken ct = default);
 }

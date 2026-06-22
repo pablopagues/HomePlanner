@@ -18,6 +18,7 @@ public interface IImportadorReceitaService
     /// Igual ao <see cref="ParsearTexto"/>, mas usa a IA (Claude) quando habilitada,
     /// funcionando em qualquer idioma; cai no regex se a IA falhar ou estiver desligada.
     /// </summary>
+    /// <param name="idiomaAlvo">Se informado ("pt"/"en"/"es"), traduz os ingredientes para esse idioma.</param>
     Task<IReadOnlyList<IngredienteImportadoDTO>> ParsearTextoAsync(
-        string? texto, CancellationToken ct = default);
+        string? texto, string? idiomaAlvo = null, CancellationToken ct = default);
 }

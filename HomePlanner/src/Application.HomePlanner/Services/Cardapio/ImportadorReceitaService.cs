@@ -121,8 +121,8 @@ public class ImportadorReceitaService : IImportadorReceitaService
         => SepararLinhas(texto).Select(ParsearLinhaIngrediente).ToList();
 
     public async Task<IReadOnlyList<IngredienteImportadoDTO>> ParsearTextoAsync(
-        string? texto, CancellationToken ct = default)
-        => await ParsearLinhasAsync(SepararLinhas(texto), ct);
+        string? texto, string? idiomaAlvo = null, CancellationToken ct = default)
+        => await ParsearLinhasAsync(SepararLinhas(texto), idiomaAlvo, ct);
 
     // Quebra um texto livre de ingredientes em linhas limpas (sem marcadores/cabeçalhos).
     private static IReadOnlyList<string> SepararLinhas(string? texto)
@@ -140,14 +140,15 @@ public class ImportadorReceitaService : IImportadorReceitaService
     }
 
     // Parseia linhas via IA (qualquer idioma); cai no regex se a IA falhar/estiver desligada.
+    // idiomaAlvo opcional traduz os ingredientes para esse idioma.
     private async Task<IReadOnlyList<IngredienteImportadoDTO>> ParsearLinhasAsync(
-        IReadOnlyList<string> linhas, CancellationToken ct)
+        IReadOnlyList<string> linhas, string? idiomaAlvo, CancellationToken ct)
     {
         if (linhas.Count == 0) return [];
 
         if (_parserIA.Habilitado)
         {
-            var ia = await _parserIA.ParsearAsync(linhas, ct);
+            var ia = await _parserIA.ParsearAsync(linhas, idiomaAlvo, ct);
             if (ia is not null)
             {
                 _logger.LogInformation(

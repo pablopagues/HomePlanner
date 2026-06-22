@@ -42,7 +42,7 @@ public class ParserIngredientesIAService : IParserIngredientesIA
     public bool Habilitado => _options.IsEnabled;
 
     public async Task<IReadOnlyList<IngredienteImportadoDTO>?> ParsearAsync(
-        IReadOnlyList<string> linhas, CancellationToken ct = default)
+        IReadOnlyList<string> linhas, string? idiomaAlvo = null, CancellationToken ct = default)
     {
         if (_client is null) return null;
 
@@ -60,7 +60,7 @@ public class ParserIngredientesIAService : IParserIngredientesIA
             {
                 Model = _options.Model,
                 MaxTokens = 4096,
-                System = SystemPrompt,
+                System = MontarSystemPrompt(idiomaAlvo),
                 Messages = [new() { Role = Role.User, Content = MontarUserPrompt(limpas) }],
                 OutputConfig = new OutputConfig { Format = new JsonOutputFormat { Schema = MontarSchema() } },
             };
@@ -103,6 +103,23 @@ public class ParserIngredientesIAService : IParserIngredientesIA
         "- preparo: termo de preparo/estado separado do nome ('picada', 'em cubos', 'derretida'), ou null.\n" +
         "- opcional: true se a linha indicar 'opcional'/'a gosto'/'to taste' etc.\n" +
         "- textoOriginal: a linha original recebida, sem alterações.";
+
+    // Mapa de código de idioma → nome legível para a instrução de tradução.
+    internal static string NomeIdioma(string idioma) => idioma?.ToLowerInvariant() switch
+    {
+        "en" => "inglês (English)",
+        "es" => "espanhol (español)",
+        _    => "português",
+    };
+
+    private static string MontarSystemPrompt(string? idiomaAlvo)
+    {
+        if (string.IsNullOrWhiteSpace(idiomaAlvo)) return SystemPrompt;
+        return SystemPrompt +
+            $"\n\nIMPORTANTE: traduza os campos 'nome' e 'preparo' para {NomeIdioma(idiomaAlvo)}. " +
+            "Use o termo culinário usual de ingrediente nesse idioma. O 'textoOriginal' permanece " +
+            "exatamente como recebido (não traduza).";
+    }
 
     private static string MontarUserPrompt(IReadOnlyList<string> linhas)
         => "Ingredientes:\n" + string.Join("\n", linhas);
