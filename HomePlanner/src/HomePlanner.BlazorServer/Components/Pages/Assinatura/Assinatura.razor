@@ -5,6 +5,7 @@
 @using Application.HomePlanner.DTOs.Assinatura
 @using Application.HomePlanner.Services.Assinatura
 @using Domain.HomePlanner.Models.Enums
+@using Domain.HomePlanner.Models.SaaS.Options
 @inject IAssinaturaService Service
 @inject NavigationManager Nav
 @inject ISnackbar Snackbar
@@ -48,6 +49,10 @@ else if (_atual is not null)
                     <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined"
                              Icon="@Icons.Material.Filled.People">
                         @_atual.LimiteMembros @L["Assin_Membros"]
+                    </MudChip>
+                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined"
+                             Icon="@Icons.Material.Filled.Download">
+                        @_atual.LimiteImportacoesReceita @L["Assin_ImportacoesReceita"]
                     </MudChip>
                 </MudStack>
             </div>
@@ -112,6 +117,14 @@ else if (_atual is not null)
                             <MudText Typo="Typo.caption" Color="Color.Secondary" Class="d-inline">
                                 /@PeriodoDe(p)
                             </MudText>
+                        </MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="d-block">
+                            <MudIcon Icon="@Icons.Material.Filled.People" Size="Size.Small" Class="mr-1" />
+                            @LimitesPorPlano.Membros(p) @L["Assin_Membros"]
+                        </MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="d-block">
+                            <MudIcon Icon="@Icons.Material.Filled.Download" Size="Size.Small" Class="mr-1" />
+                            @LimitesPorPlano.ImportacoesReceitaMes(p) @L["Assin_ImportacoesReceita"]
                         </MudText>
                     </MudCardContent>
                     <MudCardActions>

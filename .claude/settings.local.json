@@ -51,7 +51,11 @@
       "PowerShell(dotnet user-secrets --project $proj set \"WebPush:PublicKey\" \"BFvtdq4ozVqmcfjhg59NzKCrufh3WvEhx5WY6TywbYEAWVFi1EY_n_JbyzaeBIiiV9nX3CmSXXOCjdtYU2tb-Ig\")",
       "PowerShell(dotnet user-secrets --project $proj set \"WebPush:PrivateKey\" \"q606kej5e9eQQ4S4LhsukGm8Vqi4a4lZ4FhGjh5T94k\")",
       "PowerShell($proj = \"D:\\\\_MeuCodigoDotNet\\\\HomePlanner\\\\HomePlanner\\\\HomePlanner\\\\src\\\\HomePlanner.BlazorServer\\\\HomePlanner.BlazorServer.csproj\")",
-      "PowerShell(dotnet build \"D:\\\\_MeuCodigoDotNet\\\\HomePlanner\\\\HomePlanner\\\\HomePlanner\\\\src\\\\HomePlanner.BlazorServer\\\\HomePlanner.BlazorServer.csproj\" -clp:ErrorsOnly --nologo)"
+      "PowerShell(dotnet build \"D:\\\\_MeuCodigoDotNet\\\\HomePlanner\\\\HomePlanner\\\\HomePlanner\\\\src\\\\HomePlanner.BlazorServer\\\\HomePlanner.BlazorServer.csproj\" -clp:ErrorsOnly --nologo)",
+      "Skill(claude-api)",
+      "Skill(claude-api:*)",
+      "PowerShell(dotnet add \"src\\\\Infrastructure.HomePlanner\\\\Infrastructure.HomePlanner.csproj\" package Anthropic)",
+      "PowerShell(dotnet add \"d:\\\\_MeuCodigoDotNet\\\\HomePlanner\\\\HomePlanner\\\\HomePlanner\\\\src\\\\Infrastructure.HomePlanner\\\\Infrastructure.HomePlanner.csproj\" package Anthropic)"
     ]
   }
 }

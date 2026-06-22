@@ -22,6 +22,9 @@ public class AssinaturaAtualDTO
     /// <summary>Limite de membros da família no plano atual.</summary>
     public int LimiteMembros { get; set; }
 
+    /// <summary>Limite de importações de receita por mês no plano atual.</summary>
+    public int LimiteImportacoesReceita { get; set; }
+
     /// <summary>Dias restantes no trial (null se já é paga).</summary>
     public int? DiasRestantesTrial { get; set; }
 

@@ -14,7 +14,7 @@ public class ImportadorReceitaParserTests
     private static IReadOnlyList<IngredienteImportadoDTO> Parse(string linha)
     {
         var svc = new ImportadorReceitaService(
-            http: null!, unidadeRepo: null!,
+            http: null!, unidadeRepo: null!, parserIA: null!,
             logger: NullLogger<ImportadorReceitaService>.Instance);
         return svc.ParsearTexto(linha);
     }

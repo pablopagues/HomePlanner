@@ -82,6 +82,7 @@
   <data name="Assin_Subtitulo" xml:space="preserve"><value>Gestiona tu plan y método de pago.</value></data>
   <data name="Assin_PlanoAtual" xml:space="preserve"><value>Plan actual</value></data>
   <data name="Assin_Membros" xml:space="preserve"><value>miembros</value></data>
+  <data name="Assin_ImportacoesReceita" xml:space="preserve"><value>importaciones/mes</value></data>
   <data name="Assin_Gerenciar" xml:space="preserve"><value>Gestionar pago</value></data>
   <data name="Assin_DiasTrial" xml:space="preserve"><value>Días restantes (prueba)</value></data>
   <data name="Assin_ProximaCobranca" xml:space="preserve"><value>Próximo cobro</value></data>
@@ -131,10 +132,12 @@
   <data name="Landing_StdItem1" xml:space="preserve"><value>Hasta 5 miembros</value></data>
   <data name="Landing_StdItem2" xml:space="preserve"><value>Menú + lista de compras</value></data>
   <data name="Landing_StdItem3" xml:space="preserve"><value>Importación de recetas</value></data>
+  <data name="Landing_StdItem4" xml:space="preserve"><value>Hasta 50 importaciones de recetas/mes</value></data>
   <data name="Landing_ProPreco" xml:space="preserve"><value>R$45</value></data>
   <data name="Landing_ProItem1" xml:space="preserve"><value>Hasta 10 miembros</value></data>
   <data name="Landing_ProItem2" xml:space="preserve"><value>Todo lo de Standard</value></data>
   <data name="Landing_ProItem3" xml:space="preserve"><value>Plantillas de semana ilimitadas</value></data>
+  <data name="Landing_ProItem4" xml:space="preserve"><value>Hasta 200 importaciones de recetas/mes</value></data>
   <data name="Landing_ProPopular" xml:space="preserve"><value>Más popular</value></data>
   <data name="Landing_PrecosRodape" xml:space="preserve"><value>Planes anuales con descuento. Cancela cuando quieras.</value></data>
 

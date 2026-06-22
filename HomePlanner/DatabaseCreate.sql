@@ -499,7 +499,13 @@ USING (VALUES
     (9,  'un',     'Unidade',        'UnidadeMedida_Unidade',     3, 1.000000),
     (10, 'dente',  'Dente',          'UnidadeMedida_Dente',       3, 1.000000),
     (11, 'fatia',  'Fatia',          'UnidadeMedida_Fatia',       3, 1.000000),
-    (12, 'pacote', 'Pacote',         'UnidadeMedida_Pacote',      3, 1.000000)
+    (12, 'pacote', 'Pacote',         'UnidadeMedida_Pacote',      3, 1.000000),
+    (13, 'oz',     'Onça',           'UnidadeMedida_Onca',        1, 28.349523),
+    (14, 'lb',     'Libra',          'UnidadeMedida_Libra',       1, 453.592370),
+    (15, 'floz',   'Onça líquida',   'UnidadeMedida_OncaLiquida', 2, 29.573530),
+    (16, 'cup',    'Cup (US 237ml)', 'UnidadeMedida_Cup',         2, 236.588236),
+    (17, 'pint',   'Pint',           'UnidadeMedida_Pint',        2, 473.176473),
+    (18, 'quart',  'Quart',          'UnidadeMedida_Quart',       2, 946.352946)
 ) AS source (Id, Codigo, Nome, ChaveTraducao, Tipo, FatorParaBase)
 ON target.Id = source.Id
 WHEN NOT MATCHED THEN

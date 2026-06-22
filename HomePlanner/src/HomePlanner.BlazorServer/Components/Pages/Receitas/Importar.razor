@@ -14,6 +14,26 @@
     Cole a URL de qualquer site que use o formato schema.org/Recipe (Tudo Gostoso, AllRecipes, Tasty, etc.)
 </MudText>
 
+@if (_uso is not null)
+{
+    @if (_uso.AtingiuLimite)
+    {
+        <MudAlert Severity="Severity.Warning" Class="mb-4">
+            Você atingiu o limite de @_uso.Limite importações de receita este mês no seu plano.
+            <MudButton Variant="Variant.Text" Color="Color.Primary" Class="ml-2"
+                       OnClick="@(() => Nav.NavigateTo("/assinatura"))">
+                Fazer upgrade
+            </MudButton>
+        </MudAlert>
+    }
+    else
+    {
+        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2 d-block">
+            Importações este mês: @_uso.Usado de @_uso.Limite
+        </MudText>
+    }
+}
+
 <MudPaper Class="pa-4 mb-4" Elevation="1" Style="border-radius:10px;">
     <MudGrid Spacing="2" Class="align-end">
         <MudItem xs="12" md="9">
@@ -107,6 +127,7 @@
 @code {
     [Inject] IImportadorReceitaService Importador { get; set; } = null!;
     [Inject] IReceitaService Service { get; set; } = null!;
+    [Inject] ICotaImportacaoService Cota { get; set; } = null!;
     [Inject] ISnackbar Snackbar { get; set; } = null!;
     [Inject] NavigationManager Nav { get; set; } = null!;
 
@@ -116,6 +137,10 @@
     private string? _erro;
     private ReceitaImportadaPreviewDTO? _preview;
     private ReceitaPersistenciaDTO _dto = new();
+    private UsoCotaImportacaoDTO? _uso;
+
+    protected override async Task OnInitializedAsync()
+        => _uso = await Cota.ObterUsoAsync();
 
     private async Task ImportarAsync()
     {
@@ -125,6 +150,14 @@
         if (string.IsNullOrWhiteSpace(_url))
         {
             _erro = "Informe uma URL válida.";
+            return;
+        }
+
+        // Pré-check da cota mensal (não gasta IA se já bateu o limite).
+        var cota = await Cota.VerificarPodeImportarAsync();
+        if (!cota.Sucesso)
+        {
+            _erro = cota.Erros.FirstOrDefault() ?? "Limite de importações atingido.";
             return;
         }
 
@@ -157,15 +190,20 @@
     {
         _salvando = true;
         var r = await Service.SalvarAsync(_dto);
-        _salvando = false;
 
         if (r.Sucesso)
         {
+            // Conta a importação na cota mensal apenas ao salvar com sucesso.
+            await Cota.RegistrarImportacaoAsync();
+            _salvando = false;
             Snackbar.Add("Receita importada e salva!", Severity.Success);
             Nav.NavigateTo($"/receitas/editar/{r.Valor}");
         }
         else
+        {
+            _salvando = false;
             Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+        }
     }
 
     private void LimparPreview()

@@ -13,6 +13,7 @@ public class ImportadorReceitaService : IImportadorReceitaService
 {
     private readonly HttpClient _http;
     private readonly IUnidadeMedidaRepository _unidadeRepo;
+    private readonly IParserIngredientesIA _parserIA;
     private readonly ILogger<ImportadorReceitaService> _logger;
 
     // Mapeamento de unidades comuns em inglês/português → codigo interno
@@ -70,10 +71,12 @@ public class ImportadorReceitaService : IImportadorReceitaService
     public ImportadorReceitaService(
         HttpClient http,
         IUnidadeMedidaRepository unidadeRepo,
+        IParserIngredientesIA parserIA,
         ILogger<ImportadorReceitaService> logger)
     {
         _http = http;
         _unidadeRepo = unidadeRepo;
+        _parserIA = parserIA;
         _logger = logger;
     }
 
@@ -115,17 +118,50 @@ public class ImportadorReceitaService : IImportadorReceitaService
     // ─── Parsing de texto livre ───────────────────────────────────────────────
 
     public IReadOnlyList<IngredienteImportadoDTO> ParsearTexto(string? texto)
+        => SepararLinhas(texto).Select(ParsearLinhaIngrediente).ToList();
+
+    public async Task<IReadOnlyList<IngredienteImportadoDTO>> ParsearTextoAsync(
+        string? texto, CancellationToken ct = default)
+        => await ParsearLinhasAsync(SepararLinhas(texto), ct);
+
+    // Quebra um texto livre de ingredientes em linhas limpas (sem marcadores/cabeçalhos).
+    private static IReadOnlyList<string> SepararLinhas(string? texto)
     {
         if (string.IsNullOrWhiteSpace(texto)) return [];
 
-        var resultado = new List<IngredienteImportadoDTO>();
+        var linhas = new List<string>();
         foreach (var bruta in texto.Split('\n'))
         {
             var linha = bruta.Trim().TrimStart('-', '•', '*', '·', '–', '—', ' ').Trim();
             if (linha.Length == 0 || EhCabecalho(linha)) continue;
-            resultado.Add(ParsearLinhaIngrediente(linha));
+            linhas.Add(linha);
         }
-        return resultado;
+        return linhas;
+    }
+
+    // Parseia linhas via IA (qualquer idioma); cai no regex se a IA falhar/estiver desligada.
+    private async Task<IReadOnlyList<IngredienteImportadoDTO>> ParsearLinhasAsync(
+        IReadOnlyList<string> linhas, CancellationToken ct)
+    {
+        if (linhas.Count == 0) return [];
+
+        if (_parserIA.Habilitado)
+        {
+            var ia = await _parserIA.ParsearAsync(linhas, ct);
+            if (ia is not null)
+            {
+                _logger.LogInformation(
+                    "Ingredientes parseados via IA (Claude): {Total} de {Linhas} linha(s).",
+                    ia.Count, linhas.Count);
+                return ia;
+            }
+            _logger.LogInformation("Parser IA habilitado, mas retornou nulo — usando regex de fallback.");
+        }
+        else
+        {
+            _logger.LogInformation("Parser IA desabilitado (sem API key) — usando regex.");
+        }
+        return linhas.Select(ParsearLinhaIngrediente).ToList();
     }
 
     // Linhas tipo "Ingredientes originais:" ou "Ingredientes:" não são itens.
@@ -170,8 +206,11 @@ public class ImportadorReceitaService : IImportadorReceitaService
                     }
                 }
 
-                // Objeto simples
-                return TentarMapearReceita(raiz, urlOrigem);
+                // Objeto simples: só retorna se for de fato uma Recipe; caso contrário
+                // continua para o próximo bloco (sites põem Article/WebPage/Organization
+                // antes do bloco da receita).
+                var simples = TentarMapearReceita(raiz, urlOrigem);
+                if (simples is not null) return simples;
             }
             catch (JsonException ex)
             {
@@ -282,12 +321,12 @@ public class ImportadorReceitaService : IImportadorReceitaService
     private static ReceitaImportadaPreviewDTO? ExtrairHeuristico(string html, string urlOrigem)
     {
         // Tenta extrair título via og:title ou title
-        var titulo = Regex.Match(html, @"og:title[^>]*content=[""']([^""']+)[""']", RegexOptions.IgnoreCase).Groups[1].Value.Trim();
+        var titulo = LerMetaOpenGraph(html, "og:title");
         if (string.IsNullOrWhiteSpace(titulo))
             titulo = Regex.Match(html, @"<title[^>]*>([^<]+)</title>", RegexOptions.IgnoreCase).Groups[1].Value.Trim();
         if (string.IsNullOrWhiteSpace(titulo)) return null;
 
-        var imagem = Regex.Match(html, @"og:image[^>]*content=[""']([^""']+)[""']", RegexOptions.IgnoreCase).Groups[1].Value.Trim();
+        var imagem = LerMetaOpenGraph(html, "og:image");
 
         return new ReceitaImportadaPreviewDTO
         {
@@ -298,6 +337,20 @@ public class ImportadorReceitaService : IImportadorReceitaService
             IngredientesTexto = [],
             IngredientesParseados = [],
         };
+    }
+
+    // Lê uma meta Open Graph aceitando as duas ordens de atributo:
+    // <meta property="og:x" content="..."> ou <meta content="..." property="og:x">.
+    private static string LerMetaOpenGraph(string html, string propriedade)
+    {
+        var prop = Regex.Escape(propriedade);
+        var depois = Regex.Match(html,
+            $@"{prop}[""'][^>]*?content=[""']([^""']+)[""']", RegexOptions.IgnoreCase);
+        if (depois.Success) return depois.Groups[1].Value.Trim();
+
+        var antes = Regex.Match(html,
+            $@"content=[""']([^""']+)[""'][^>]*?(?:property|name)=[""']{prop}[""']", RegexOptions.IgnoreCase);
+        return antes.Success ? antes.Groups[1].Value.Trim() : string.Empty;
     }
 
     // ─── Parsers auxiliares ───────────────────────────────────────────────────

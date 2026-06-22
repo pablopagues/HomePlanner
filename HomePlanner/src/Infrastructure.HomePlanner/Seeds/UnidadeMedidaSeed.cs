@@ -19,5 +19,12 @@ public static class UnidadeMedidaSeed
         new() { Id = 10, Codigo = "dente",  Nome = "Dente",          ChaveTraducao = "UnidadeMedida_Dente",       Tipo = TipoUnidadeMedida.Unidade,  FatorParaBase = 1m },
         new() { Id = 11, Codigo = "fatia",  Nome = "Fatia",          ChaveTraducao = "UnidadeMedida_Fatia",       Tipo = TipoUnidadeMedida.Unidade,  FatorParaBase = 1m },
         new() { Id = 12, Codigo = "pacote", Nome = "Pacote",         ChaveTraducao = "UnidadeMedida_Pacote",      Tipo = TipoUnidadeMedida.Unidade,  FatorParaBase = 1m },
+        // Unidades imperiais (receitas em inglês). Massa em g, Volume em ml.
+        new() { Id = 13, Codigo = "oz",     Nome = "Onça",           ChaveTraducao = "UnidadeMedida_Onca",        Tipo = TipoUnidadeMedida.Massa,    FatorParaBase = 28.349523m },
+        new() { Id = 14, Codigo = "lb",     Nome = "Libra",          ChaveTraducao = "UnidadeMedida_Libra",       Tipo = TipoUnidadeMedida.Massa,    FatorParaBase = 453.592370m },
+        new() { Id = 15, Codigo = "floz",   Nome = "Onça líquida",   ChaveTraducao = "UnidadeMedida_OncaLiquida", Tipo = TipoUnidadeMedida.Volume,   FatorParaBase = 29.573530m },
+        new() { Id = 16, Codigo = "cup",    Nome = "Cup (US 237ml)", ChaveTraducao = "UnidadeMedida_Cup",         Tipo = TipoUnidadeMedida.Volume,   FatorParaBase = 236.588236m },
+        new() { Id = 17, Codigo = "pint",   Nome = "Pint",           ChaveTraducao = "UnidadeMedida_Pint",        Tipo = TipoUnidadeMedida.Volume,   FatorParaBase = 473.176473m },
+        new() { Id = 18, Codigo = "quart",  Nome = "Quart",          ChaveTraducao = "UnidadeMedida_Quart",       Tipo = TipoUnidadeMedida.Volume,   FatorParaBase = 946.352946m },
     ];
 }

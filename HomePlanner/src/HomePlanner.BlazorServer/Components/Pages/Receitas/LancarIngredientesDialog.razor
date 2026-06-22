@@ -1,7 +1,9 @@
 @* Diálogo: parseia um texto livre de ingredientes e lança como linhas estruturadas *@
 @using Application.HomePlanner.Helpers
+@using Domain.HomePlanner.Models.Enums
 @inject IImportadorReceitaService Importador
 @inject IIngredienteService IngService
+@inject ICotaImportacaoService Cota
 @inject ISnackbar Snackbar
 
 <MudDialog>
@@ -27,9 +29,16 @@
         @if (_linhas.Count > 0)
         {
             <MudDivider Class="mb-3" />
-            <MudText Typo="Typo.subtitle2" Class="mb-2">
-                @_linhas.Count item(ns) — @_linhas.Count(l => l.Selecionado is null) será(ão) criado(s) no cadastro
-            </MudText>
+            <div class="d-flex justify-space-between align-center mb-2 flex-wrap">
+                <MudText Typo="Typo.subtitle2">
+                    @_linhas.Count item(ns) — @_linhas.Count(l => l.Selecionado is null) será(ão) criado(s) no cadastro
+                </MudText>
+                <MudToggleGroup T="SistemaMedida" Value="_sistema" ValueChanged="TrocarSistema"
+                                Size="Size.Small" Color="Color.Primary" CheckMark="true">
+                    <MudToggleItem Value="SistemaMedida.Metrico" Text="Métrico" />
+                    <MudToggleItem Value="SistemaMedida.Imperial" Text="Imperial" />
+                </MudToggleGroup>
+            </div>
 
             @foreach (var linha in _linhas)
             {
@@ -107,6 +116,7 @@
     private string _texto = string.Empty;
     private bool _analisou;
     private bool _aplicando;
+    private SistemaMedida _sistema = SistemaMedida.Metrico;
     private readonly List<LinhaPreview> _linhas = [];
 
     protected override void OnInitialized() => _texto = TextoInicial;
@@ -116,7 +126,14 @@
         _analisou = true;
         _linhas.Clear();
 
-        foreach (var p in Importador.ParsearTexto(_texto))
+        var throttle = await Cota.VerificarThrottleIAAsync();
+        if (!throttle.Sucesso)
+        {
+            Snackbar.Add(throttle.Erros.FirstOrDefault() ?? "Tente novamente em instantes.", Severity.Warning);
+            return;
+        }
+
+        foreach (var p in await Importador.ParsearTextoAsync(_texto))
         {
             var linha = new LinhaPreview
             {
@@ -128,6 +145,20 @@
             };
             linha.Selecionado = await ResolverIngredienteExistente(linha.Nome);
             _linhas.Add(linha);
+        }
+    }
+
+    // Alterna métrico/imperial: converte qtde+unidade de cada linha (mesma dimensão).
+    private void TrocarSistema(SistemaMedida novo)
+    {
+        if (novo == _sistema) return;
+        _sistema = novo;
+        foreach (var l in _linhas)
+        {
+            if (l.Quantidade is not decimal q || l.UnidadeMedidaId == 0) continue;
+            var (nq, nu) = ConversorSistemaMedida.Converter(q, l.UnidadeMedidaId, _sistema, Unidades);
+            l.Quantidade = nq;
+            l.UnidadeMedidaId = nu;
         }
     }
 

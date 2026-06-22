@@ -25,6 +25,7 @@ using Infrastructure.HomePlanner.Repositories.Assinatura;
 using Infrastructure.HomePlanner.Repositories.Cardapio;
 using Infrastructure.HomePlanner.Repositories.Planner;
 using Infrastructure.HomePlanner.Services.Auth;
+using Infrastructure.HomePlanner.Services.Cardapio;
 using Infrastructure.HomePlanner.Services.Configuracao;
 using Infrastructure.HomePlanner.Services.Contato;
 using Infrastructure.HomePlanner.Services.Email;
@@ -77,6 +78,7 @@ try
     builder.Services.Configure<AdminOptions>(builder.Configuration.GetSection(AdminOptions.SectionName));
     builder.Services.Configure<LocalizacaoOptions>(builder.Configuration.GetSection(LocalizacaoOptions.SectionName));
     builder.Services.Configure<WebPushOptions>(builder.Configuration.GetSection(WebPushOptions.SectionName));
+    builder.Services.Configure<AnthropicOptions>(builder.Configuration.GetSection(AnthropicOptions.SectionName));
 
     // ── Localization (.resx em Resources/, 3 idiomas) ─────────────────────────
     builder.Services.AddLocalization(opts => opts.ResourcesPath = "Resources");
@@ -170,6 +172,11 @@ try
     {
         client.Timeout = TimeSpan.FromSeconds(15);
     });
+
+    // ── Parsing de ingredientes por IA (Claude) + cota de importação ──────────
+    builder.Services.AddMemoryCache(); // usado pelo throttle anti-abuso da IA
+    builder.Services.AddScoped<IParserIngredientesIA, ParserIngredientesIAService>();
+    builder.Services.AddScoped<ICotaImportacaoService, CotaImportacaoService>();
 
     // ── Lista de Compras ──────────────────────────────────────────────────────
     builder.Services.AddScoped<IListaComprasService, ListaComprasService>();

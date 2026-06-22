@@ -16,4 +16,16 @@ public static class LimitesPorPlano
         PlanoAssinatura.ProMensal      or PlanoAssinatura.ProAnual      => 10,
         _                                                              => 1
     };
+
+    /// <summary>
+    /// Limite de importações de receita (via URL, com parsing por IA) por mês-calendário.
+    /// O trial (Grátis) ganha uma cota pequena para experimentar o recurso.
+    /// </summary>
+    public static int ImportacoesReceitaMes(PlanoAssinatura plano) => plano switch
+    {
+        PlanoAssinatura.Gratis                                          => 10,
+        PlanoAssinatura.StandardMensal or PlanoAssinatura.StandardAnual => 50,
+        PlanoAssinatura.ProMensal      or PlanoAssinatura.ProAnual      => 200,
+        _                                                              => 0
+    };
 }

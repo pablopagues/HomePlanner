@@ -11,7 +11,7 @@ public class ReceitaImportadaPreviewDTO
     public string? UrlOrigem { get; init; }
     public string? UrlImagem { get; init; }
     public IReadOnlyList<string> IngredientesTexto { get; init; } = [];
-    public IReadOnlyList<IngredienteImportadoDTO> IngredientesParseados { get; init; } = [];
+    public IReadOnlyList<IngredienteImportadoDTO> IngredientesParseados { get; set; } = [];
 
     public static ReceitaImportadaPreviewDTO Erro(string mensagem) =>
         new() { Sucesso = false, MensagemErro = mensagem };
