@@ -35,6 +35,7 @@ public sealed class PublicLanguageService
             var primary = acceptLang.Split(',')[0].Split(';')[0].Trim().ToLowerInvariant();
             if (primary.StartsWith("en")) _lang = "en";
             else if (primary.StartsWith("es")) _lang = "es";
+            else if (primary.StartsWith("fr")) _lang = "fr";
         }
     }
 
@@ -42,6 +43,7 @@ public sealed class PublicLanguageService
     public bool IsPortugues => _lang == "pt";
     public bool IsIngles    => _lang == "en";
     public bool IsEspanhol  => _lang == "es";
+    public bool IsFrances   => _lang == "fr";
 
     /// Retorna a URL traduzida para o idioma atual.
     public string U(string ptUrl) => UrlMap.Get(_lang, ptUrl);
@@ -60,9 +62,10 @@ public sealed class PublicLanguageService
     {
         "en" => new CultureInfo("en-US"),
         "es" => new CultureInfo("es-ES"),
+        "fr" => new CultureInfo("fr-FR"),
         _    => new CultureInfo("pt-BR"),
     };
 
     public static bool IsLangValida(string? lang)
-        => lang is "pt" or "en" or "es";
+        => lang is "pt" or "en" or "es" or "fr";
 }

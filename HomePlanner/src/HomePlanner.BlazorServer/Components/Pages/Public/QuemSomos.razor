@@ -1,40 +1,359 @@
 @page "/quem-somos"
 @page "/about"
 @page "/acerca"
+@page "/a-propos"
 @layout HomePlanner.BlazorServer.Components.Layout.PublicLayout
 @attribute [AllowAnonymous]
 @using HomePlanner.BlazorServer.Services
+@using HomePlanner.BlazorServer.Components.Shared
 @inject IStringLocalizer<SharedResource> L
 @inject PublicLanguageService Lang
 
 <PageTitle>@L["Sobre_Titulo"] — HomePlanner</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Small" Class="py-8">
-    <MudButton Href="/" StartIcon="@Icons.Material.Filled.ArrowBack" Variant="Variant.Text" Class="mb-3"
-               Style="color:#4A6B5C;">
-        @L["Ct_Voltar"]
-    </MudButton>
+<div class="sobre-page">
 
-    <MudText Typo="Typo.h4" Class="mb-4" Style="font-family:'Fraunces',serif; font-weight:300; color:#4A6B5C;">
-        @L["Sobre_Titulo"]
-    </MudText>
+    @* ── Header ─────────────────────────────────────────────── *@
+    <header class="sobre-header">
+        <a href="/" class="sobre-logo">HomePlanner</a>
+        <nav class="sobre-nav">
+            <MudButton Href="@Lang.U("/quem-somos")" Variant="Variant.Text"
+                       Style="color:#4A6B5C; font-weight:600;">
+                @L["Landing_NavSobre"]
+            </MudButton>
+            <LanguageToggle />
+            <MudButton Href="/Identity/Account/Login" Variant="Variant.Outlined"
+                       Style="color:#4A6B5C; border-color:#4A6B5C;">
+                @L["Landing_Entrar"]
+            </MudButton>
+            <MudButton Href="/Identity/Account/Registro" Variant="Variant.Filled"
+                       Style="background-color:#C97B5A; color:white;">
+                @L["Landing_ComecarGratis"]
+            </MudButton>
+        </nav>
+    </header>
 
-    <MudText Typo="Typo.body1" Class="mb-4" Style="color:#2A3A33; line-height:1.7;">
-        @L["Sobre_P1"]
-    </MudText>
-    <MudText Typo="Typo.body1" Class="mb-4" Style="color:#2A3A33; line-height:1.7;">
-        @L["Sobre_P2"]
-    </MudText>
+    @* ── Hero ────────────────────────────────────────────────── *@
+    <section class="sobre-hero">
+        <div class="sobre-inner">
+            <span class="sobre-hero-eyebrow">@L["Sobre_HeroEyebrow"]</span>
+            <h1>@L["Sobre_HeroTitulo"]</h1>
+            <p class="sobre-hero-subtitle">@L["Sobre_HeroSubtitulo"]</p>
+            <div class="sobre-hero-stats">
+                <div class="sobre-stat">
+                    <strong>@L["Sobre_Stat1Valor"]</strong>
+                    <span>@L["Sobre_Stat1Label"]</span>
+                </div>
+                <div class="sobre-stat">
+                    <strong>@L["Sobre_Stat2Valor"]</strong>
+                    <span>@L["Sobre_Stat2Label"]</span>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <MudPaper Class="pa-5 mt-4" Elevation="0" Style="background:#F5F0EA; border-radius:12px;">
-        <MudText Typo="Typo.subtitle1" Style="font-weight:600; color:#4A6B5C;">@L["Sobre_MissaoTitulo"]</MudText>
-        <MudText Typo="Typo.body2" Class="mt-1" Style="color:#7A8278;">@L["Sobre_MissaoTexto"]</MudText>
-    </MudPaper>
+    @* ── Missão / o que é o HomePlanner ─────────────────────── *@
+    <section class="sobre-missao">
+        <div class="sobre-inner sobre-inner--narrow">
+            <p class="sobre-texto">@L["Sobre_P1"]</p>
+            <p class="sobre-texto">@L["Sobre_P2"]</p>
+            <div class="sobre-missao-card">
+                <span class="sobre-missao-label">@L["Sobre_MissaoTitulo"]</span>
+                <p>@L["Sobre_MissaoTexto"]</p>
+            </div>
+        </div>
+    </section>
 
-    <MudText Typo="Typo.caption" Class="mt-6 d-block" Style="color:#7A8278;">
-        HomePlanner @L["Landing_BySideris"] · siderisx.ca
-    </MudText>
-</MudContainer>
+    @* ── Perfil do fundador ─────────────────────────────────── *@
+    <section class="sobre-perfil">
+        <div class="sobre-inner">
+            <div class="perfil-grid">
+                <div class="perfil-foto-col">
+                    <div class="perfil-foto-wrap">
+                        <img src="img/pablo-pagues.jpg"
+                             alt="Pablo Pagués — @L["Sobre_FounderAlt"]"
+                             class="perfil-foto"
+                             loading="lazy" />
+                    </div>
+                    <div class="perfil-badges">
+                        <span class="badge-mtac" title="Microsoft Technical Audience Contributor">
+                            🏆 Microsoft MTAC
+                        </span>
+                    </div>
+                    <div class="perfil-idiomas" aria-label="@L["Sobre_IdiomasLabel"]">
+                        <span class="lang-chip" title="@L["Sobre_LangPT"]">🇧🇷 PT</span>
+                        <span class="lang-chip" title="@L["Sobre_LangES"]">🇺🇾 ES</span>
+                        <span class="lang-chip" title="@L["Sobre_LangEN"]">🇬🇧 EN</span>
+                        <span class="lang-chip" title="@L["Sobre_LangFR"]">🇫🇷 FR</span>
+                    </div>
+                </div>
+
+                <div class="perfil-texto-col">
+                    <span class="perfil-eyebrow">@L["Sobre_FounderEyebrow"]</span>
+                    <h2>Pablo Pagués</h2>
+                    <p class="perfil-cargo">@L["Sobre_FounderCargo"]</p>
+
+                    <p class="perfil-bio">@L["Sobre_FounderBio1"]</p>
+                    <p class="perfil-bio">@L["Sobre_FounderBio2"]</p>
+                    <p class="perfil-bio">@L["Sobre_FounderBio3"]</p>
+                    <p class="perfil-bio">@L["Sobre_FounderBio4"]</p>
+
+                    <div class="perfil-redes">
+                        <a href="https://www.linkedin.com/in/pablopagues"
+                           target="_blank" rel="noopener noreferrer"
+                           class="rede-btn rede-linkedin"
+                           aria-label="LinkedIn de Pablo Pagués">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+                                <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.78C.8 0 0 .77 0 1.73v20.54C0 23.23.8 24 1.78 24h20.44c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/>
+                            </svg>
+                            LinkedIn
+                        </a>
+                        <a href="https://www.youtube.com/@@PabloPagues"
+                           target="_blank" rel="noopener noreferrer"
+                           class="rede-btn rede-youtube"
+                           aria-label="Canal de YouTube de Pablo Pagués">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+                                <path d="M23.5 6.2a3.02 3.02 0 0 0-2.13-2.13C19.49 3.55 12 3.55 12 3.55s-7.49 0-9.37.52A3.02 3.02 0 0 0 .5 6.2C0 8.08 0 12 0 12s0 3.92.5 5.8a3.02 3.02 0 0 0 2.13 2.13c1.88.52 9.37.52 9.37.52s7.49 0 9.37-.52a3.02 3.02 0 0 0 2.13-2.13C24 15.92 24 12 24 12s0-3.92-.5-5.8zM9.6 15.6V8.4l6.24 3.6-6.24 3.6z"/>
+                            </svg>
+                            YouTube
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    @* ── Diferenciais ───────────────────────────────────────── *@
+    <section class="sobre-diferenciais">
+        <div class="sobre-inner">
+            <h2>@L["Sobre_DifTitulo"]</h2>
+            <p class="sobre-section-subtitle">@L["Sobre_DifSubtitulo"]</p>
+            <div class="dif-grid">
+                <div class="dif-card">
+                    <div class="dif-icon">🏗️</div>
+                    <h3>@L["Sobre_Dif1Titulo"]</h3>
+                    <p>@L["Sobre_Dif1Desc"]</p>
+                </div>
+                <div class="dif-card">
+                    <div class="dif-icon">🏡</div>
+                    <h3>@L["Sobre_Dif2Titulo"]</h3>
+                    <p>@L["Sobre_Dif2Desc"]</p>
+                </div>
+                <div class="dif-card">
+                    <div class="dif-icon">🌎</div>
+                    <h3>@L["Sobre_Dif3Titulo"]</h3>
+                    <p>@L["Sobre_Dif3Desc"]</p>
+                </div>
+                <div class="dif-card">
+                    <div class="dif-icon">🎓</div>
+                    <h3>@L["Sobre_Dif4Titulo"]</h3>
+                    <p>@L["Sobre_Dif4Desc"]</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    @* ── CTA final ──────────────────────────────────────────── *@
+    <section class="sobre-cta">
+        <div class="sobre-inner">
+            <h2>@L["Sobre_CtaTitulo"]</h2>
+            <p>@L["Sobre_CtaSubtitulo"]</p>
+            <a href="@Lang.U("/contato")" class="sobre-cta-btn">@L["Sobre_CtaBtn"]</a>
+        </div>
+    </section>
+</div>
+
+<style>
+    .sobre-page {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        color: #2A3A33;
+    }
+    .sobre-page * { box-sizing: border-box; }
+
+    .sobre-inner {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+    .sobre-inner--narrow { max-width: 720px; }
+
+    /* ── Header ── */
+    .sobre-header {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 16px 32px; background: #FFFFFF; border-bottom: 1px solid #E8DDD1;
+        flex-wrap: wrap; gap: 12px; position: sticky; top: 0; z-index: 100;
+    }
+    .sobre-logo {
+        font-family: 'Fraunces', serif; font-weight: 400; font-size: 1.4rem;
+        color: #4A6B5C; text-decoration: none;
+    }
+    .sobre-nav { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    /* ── Hero ── */
+    .sobre-hero {
+        background: linear-gradient(135deg, #4A6B5C 0%, #3A5648 100%);
+        color: #FFFFFF; padding: 84px 0 92px; position: relative; overflow: hidden;
+    }
+    .sobre-hero::before {
+        content: ""; position: absolute; top: -50%; right: -8%;
+        width: 560px; height: 560px;
+        background: radial-gradient(circle, rgba(255,255,255,0.07) 0%, transparent 70%);
+        border-radius: 50%; pointer-events: none;
+    }
+    .sobre-hero .sobre-inner { position: relative; z-index: 1; max-width: 780px; }
+    .sobre-hero-eyebrow {
+        display: inline-block; background: rgba(255,255,255,0.15); color: #F5F0EA;
+        padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500;
+        letter-spacing: .3px; margin-bottom: 18px; backdrop-filter: blur(4px);
+    }
+    .sobre-hero h1 {
+        font-family: 'Fraunces', serif; font-weight: 300;
+        font-size: 44px; line-height: 1.15; margin: 0 0 20px; letter-spacing: -0.5px;
+    }
+    .sobre-hero-subtitle {
+        font-size: 18px; line-height: 1.6; color: #E8DDD1; margin: 0 0 36px; max-width: 660px;
+    }
+    .sobre-hero-stats { display: flex; gap: 40px; flex-wrap: wrap; }
+    .sobre-stat { display: flex; flex-direction: column; gap: 2px; }
+    .sobre-stat strong {
+        font-family: 'Fraunces', serif; font-size: 34px; font-weight: 400;
+        color: #E9A583; line-height: 1;
+    }
+    .sobre-stat span { font-size: 13px; color: #E8DDD1; }
+
+    /* ── Missão ── */
+    .sobre-missao { padding: 72px 0; background: #FAF7F2; }
+    .sobre-texto { font-size: 16.5px; line-height: 1.8; color: #2A3A33; margin: 0 0 18px; }
+    .sobre-missao-card {
+        margin-top: 12px; background: #FFFFFF; border: 1px solid #E8DDD1;
+        border-left: 4px solid #C97B5A; border-radius: 12px; padding: 22px 26px;
+    }
+    .sobre-missao-label {
+        display: block; font-weight: 700; color: #4A6B5C; margin-bottom: 6px; font-size: 15px;
+    }
+    .sobre-missao-card p { margin: 0; color: #7A8278; font-size: 15.5px; line-height: 1.7; }
+
+    /* ── Perfil ── */
+    .sobre-perfil { padding: 80px 0; background: #FFFFFF; }
+    .perfil-grid {
+        display: grid; grid-template-columns: 320px 1fr; gap: 56px; align-items: start;
+    }
+    .perfil-foto-col { text-align: center; }
+    .perfil-foto-wrap {
+        width: 280px; height: 280px; margin: 0 auto 18px; border-radius: 50%;
+        overflow: hidden; box-shadow: 0 14px 40px rgba(74,107,92,0.28);
+        border: 6px solid #FFFFFF; background: linear-gradient(135deg, #4A6B5C, #3A5648);
+    }
+    .perfil-foto { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .perfil-badges {
+        margin-top: 14px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;
+    }
+    .badge-mtac {
+        background: linear-gradient(135deg, #F5E9E2, #EED8C8); color: #A85838;
+        padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600;
+        border: 1px solid #E8C9B8;
+    }
+    .perfil-idiomas {
+        display: flex; justify-content: center; gap: 6px; margin-top: 14px; flex-wrap: wrap;
+    }
+    .lang-chip {
+        background: #F5F0EA; color: #4A6B5C; padding: 5px 11px; border-radius: 14px;
+        font-size: 12px; font-weight: 600; border: 1px solid #E8DDD1; cursor: help;
+    }
+    .perfil-eyebrow {
+        display: inline-block; color: #C97B5A; font-size: 13px; font-weight: 700;
+        text-transform: uppercase; letter-spacing: .8px; margin-bottom: 10px;
+    }
+    .perfil-texto-col h2 {
+        font-family: 'Fraunces', serif; font-weight: 300; font-size: 40px;
+        color: #2A3A33; margin: 0 0 6px; letter-spacing: -0.5px;
+    }
+    .perfil-cargo { font-size: 16px; color: #7A8278; margin: 0 0 24px; font-weight: 500; }
+    .perfil-bio { font-size: 15.5px; line-height: 1.78; color: #3A4A42; margin: 0 0 16px; }
+
+    .perfil-redes { display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap; }
+    .rede-btn {
+        display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px;
+        border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none;
+        transition: transform .15s, box-shadow .15s;
+    }
+    .rede-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.12); }
+    .rede-linkedin { background: #0a66c2; color: #FFFFFF; }
+    .rede-youtube { background: #ff0000; color: #FFFFFF; }
+
+    /* ── Diferenciais ── */
+    .sobre-diferenciais { padding: 76px 0; background: #FAF7F2; }
+    .sobre-diferenciais h2 {
+        text-align: center; font-family: 'Fraunces', serif; font-weight: 300;
+        font-size: 34px; color: #4A6B5C; margin: 0 0 10px; letter-spacing: -0.3px;
+    }
+    .sobre-section-subtitle {
+        text-align: center; font-size: 16px; color: #7A8278; margin: 0 0 48px;
+    }
+    .dif-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
+    .dif-card {
+        background: #FFFFFF; border-radius: 12px; padding: 28px 24px;
+        border: 1px solid #E8DDD1; transition: transform .2s, box-shadow .2s, border-color .2s;
+    }
+    .dif-card:hover {
+        transform: translateY(-4px); box-shadow: 0 12px 28px rgba(74,107,92,0.12);
+        border-color: #C97B5A;
+    }
+    .dif-icon { font-size: 36px; margin-bottom: 14px; line-height: 1; }
+    .dif-card h3 { font-size: 17px; font-weight: 700; color: #2A3A33; margin: 0 0 10px; }
+    .dif-card p { font-size: 14px; line-height: 1.6; color: #7A8278; margin: 0; }
+
+    /* ── CTA ── */
+    .sobre-cta {
+        padding: 80px 0; text-align: center; color: #FFFFFF; position: relative; overflow: hidden;
+        background: linear-gradient(135deg, #4A6B5C 0%, #3A5648 100%);
+    }
+    .sobre-cta::before {
+        content: ""; position: absolute; bottom: -40%; left: -8%;
+        width: 480px; height: 480px;
+        background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+        border-radius: 50%; pointer-events: none;
+    }
+    .sobre-cta h2 {
+        font-family: 'Fraunces', serif; font-weight: 300; font-size: 34px;
+        margin: 0 0 16px; position: relative; z-index: 1;
+    }
+    .sobre-cta p { font-size: 18px; color: #E8DDD1; margin: 0 0 36px; position: relative; z-index: 1; }
+    .sobre-cta-btn {
+        display: inline-block; background: #C97B5A; color: #FFFFFF; padding: 14px 36px;
+        border-radius: 8px; font-size: 16px; font-weight: 700; text-decoration: none;
+        transition: transform .15s, box-shadow .15s; position: relative; z-index: 1;
+    }
+    .sobre-cta-btn:hover {
+        transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.2); color: #FFFFFF;
+    }
+
+    /* ── Responsivo ── */
+    @@media (max-width: 960px) {
+        .perfil-grid { grid-template-columns: 1fr; gap: 36px; text-align: center; }
+        .perfil-texto-col { text-align: left; }
+        .perfil-redes { justify-content: flex-start; }
+        .dif-grid { grid-template-columns: repeat(2, 1fr); }
+        .sobre-hero h1 { font-size: 36px; }
+    }
+    @@media (max-width: 640px) {
+        .sobre-header { flex-direction: column; padding: 12px 16px; gap: 10px; }
+        .sobre-nav { width: 100%; justify-content: center; gap: 6px; }
+        .sobre-hero { padding: 60px 0 70px; }
+        .sobre-hero h1 { font-size: 30px; }
+        .sobre-hero-subtitle { font-size: 16px; }
+        .sobre-hero-stats { gap: 26px; }
+        .perfil-foto-wrap { width: 220px; height: 220px; }
+        .perfil-texto-col h2 { font-size: 32px; }
+        .dif-grid { grid-template-columns: 1fr; }
+        .sobre-missao, .sobre-perfil, .sobre-diferenciais, .sobre-cta { padding: 52px 0; }
+    }
+    @@media (max-width: 380px) {
+        .sobre-hero h1 { font-size: 26px; }
+        .perfil-redes { flex-direction: column; }
+        .rede-btn { justify-content: center; }
+    }
+</style>
 
 @code {
     protected override void OnInitialized() => Lang.SetLang(Lang.Lang);

@@ -1,6 +1,7 @@
 @page "/"
 @page "/en"
 @page "/es"
+@page "/fr"
 @layout HomePlanner.BlazorServer.Components.Layout.PublicLayout
 @attribute [AllowAnonymous]
 @using HomePlanner.BlazorServer.Services
@@ -70,6 +71,23 @@
                                  Titulo="@L["Landing_Feat3Titulo"]" Descricao="@L["Landing_Feat3Desc"]" />
                 </MudItem>
             </MudGrid>
+        </MudContainer>
+    </section>
+
+    @* ── IA Claude ──────────────────────────────────────────── *@
+    <section class="landing-ai">
+        <MudContainer MaxWidth="MaxWidth.Medium" Class="py-16 text-center">
+            <span class="landing-ai-badge">
+                <MudIcon Icon="@Icons.Material.Filled.AutoAwesome" Size="Size.Small" Class="mr-1" />
+                @L["Landing_AiBadge"]
+            </span>
+            <MudText Typo="Typo.h3" Class="mt-4 mb-4"
+                     Style="font-family:'Fraunces',serif; font-weight:300; color:#FFFFFF;">
+                @L["Landing_AiTitulo"]
+            </MudText>
+            <MudText Typo="Typo.body1" Class="mb-2" Style="color:#E8DDD1; max-width:640px; margin:0 auto;">
+                @L["Landing_AiDesc"]
+            </MudText>
         </MudContainer>
     </section>
 
@@ -164,6 +182,16 @@
     }
     .landing-nav { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
     .landing-hero { background:#FAF7F2; }
+
+    .landing-ai {
+        background: linear-gradient(135deg, #4A6B5C 0%, #3A5648 100%);
+    }
+    .landing-ai-badge {
+        display:inline-flex; align-items:center;
+        background: rgba(201,123,90,0.95); color:#FFFFFF;
+        font-size:0.8rem; font-weight:600; letter-spacing:0.5px;
+        padding:6px 16px; border-radius:999px; text-transform:uppercase;
+    }
 
     /* Mobile: empilha logo acima do menu e centraliza a navegação,
        para a quebra de linha ficar equilibrada em vez de jogar só o CTA para baixo. */

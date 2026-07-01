@@ -126,14 +126,17 @@
   <data name="Landing_Feat2Desc" xml:space="preserve"><value>La lista nace del menú, sumando ingredientes y ajustando porciones automáticamente.</value></data>
   <data name="Landing_Feat3Titulo" xml:space="preserve"><value>Importa recetas de cualquier sitio</value></data>
   <data name="Landing_Feat3Desc" xml:space="preserve"><value>Pega el enlace, mira la vista previa y guarda. Sin fricción, sin reescribir todo.</value></data>
+  <data name="Landing_AiBadge" xml:space="preserve"><value>Con inteligencia artificial Claude</value></data>
+  <data name="Landing_AiTitulo" xml:space="preserve"><value>Recetas que se organizan solas, con IA</value></data>
+  <data name="Landing_AiDesc" xml:space="preserve"><value>Pega el enlace de cualquier receta y Claude, la inteligencia artificial de Anthropic, lee la página, entiende los ingredientes y lo organiza todo por ti — cantidades, porciones y lista de compras. Tecnología de punta al servicio de tu cocina.</value></data>
   <data name="Landing_PrecosTitulo" xml:space="preserve"><value>Planes simples</value></data>
   <data name="Landing_PrecosSubtitulo" xml:space="preserve"><value>Empieza gratis. Mejora cuando la familia crezca.</value></data>
-  <data name="Landing_StdPreco" xml:space="preserve"><value>R$25</value></data>
+  <data name="Landing_StdPreco" xml:space="preserve"><value>CA$10</value></data>
   <data name="Landing_StdItem1" xml:space="preserve"><value>Hasta 5 miembros</value></data>
   <data name="Landing_StdItem2" xml:space="preserve"><value>Menú + lista de compras</value></data>
   <data name="Landing_StdItem3" xml:space="preserve"><value>Importación de recetas</value></data>
   <data name="Landing_StdItem4" xml:space="preserve"><value>Hasta 50 importaciones de recetas/mes</value></data>
-  <data name="Landing_ProPreco" xml:space="preserve"><value>R$45</value></data>
+  <data name="Landing_ProPreco" xml:space="preserve"><value>CA$18</value></data>
   <data name="Landing_ProItem1" xml:space="preserve"><value>Hasta 10 miembros</value></data>
   <data name="Landing_ProItem2" xml:space="preserve"><value>Todo lo de Standard</value></data>
   <data name="Landing_ProItem3" xml:space="preserve"><value>Plantillas de semana ilimitadas</value></data>
@@ -186,9 +189,41 @@
 
   <data name="Sobre_Titulo" xml:space="preserve"><value>Acerca de HomePlanner</value></data>
   <data name="Sobre_P1" xml:space="preserve"><value>HomePlanner nació de una necesidad real: organizar la rutina de una familia — qué cocinar, qué comprar y qué necesita hacer cada uno — sin saltar entre varias apps confusas.</value></data>
-  <data name="Sobre_P2" xml:space="preserve"><value>Creemos que planificar la semana debería ser tranquilo e incluso placentero. Por eso creamos una herramienta bonita, simple y en tres idiomas, pensada para familias reales.</value></data>
+  <data name="Sobre_P2" xml:space="preserve"><value>Creemos que planificar la semana debería ser tranquilo e incluso placentero. Por eso creamos una herramienta bonita, simple y multilingüe, pensada para familias reales.</value></data>
   <data name="Sobre_MissaoTitulo" xml:space="preserve"><value>Nuestra misión</value></data>
   <data name="Sobre_MissaoTexto" xml:space="preserve"><value>Devolver tiempo y tranquilidad a las familias, un menú a la vez.</value></data>
+  <data name="Sobre_HeroEyebrow" xml:space="preserve"><value>La empresa detrás</value></data>
+  <data name="Sobre_HeroTitulo" xml:space="preserve"><value>Software hecho por quien entiende lo que hace</value></data>
+  <data name="Sobre_HeroSubtitulo" xml:space="preserve"><value>SiderisX construye software confiable y bien arquitectado. HomePlanner fue creado desde cero para organizar la rutina de familias de verdad — con la calidad de quien tiene 25 años de experiencia.</value></data>
+  <data name="Sobre_Stat1Valor" xml:space="preserve"><value>25+</value></data>
+  <data name="Sobre_Stat1Label" xml:space="preserve"><value>años de experiencia</value></data>
+  <data name="Sobre_Stat2Valor" xml:space="preserve"><value>10+</value></data>
+  <data name="Sobre_Stat2Label" xml:space="preserve"><value>países atendidos</value></data>
+  <data name="Sobre_FounderAlt" xml:space="preserve"><value>Fundador de SiderisX</value></data>
+  <data name="Sobre_FounderEyebrow" xml:space="preserve"><value>Quién está detrás</value></data>
+  <data name="Sobre_FounderCargo" xml:space="preserve"><value>Fundador de SiderisX · Arquitecto de Software</value></data>
+  <data name="Sobre_FounderBio1" xml:space="preserve"><value>Más de 25 años como desarrollador y los últimos 5 como arquitecto de software. A lo largo de mi carrera, atendí a clientes en varios países — incluyendo trabajo como consultor para IBM Canadá — en proyectos de todos los tamaños, desde startups hasta el ámbito corporativo.</value></data>
+  <data name="Sobre_FounderBio2" xml:space="preserve"><value>Tengo liderazgo de equipo forjado en roles de Scrum Master, Tech Lead y gestor. Me adapto bien a distintos entornos y trabajo continuamente para crecer técnica y personalmente.</value></data>
+  <data name="Sobre_FounderBio3" xml:space="preserve"><value>Fui reconocido por el programa Microsoft MTAC (Microsoft Technical Audience Contributor), que reúne a profesionales que presentan tecnologías Microsoft en conferencias, artículos de blog y eventos. También fui profesor de programación, lo que afinó mi comunicación con grupos y equipos multidisciplinarios.</value></data>
+  <data name="Sobre_FounderBio4" xml:space="preserve"><value>Hablo y escribo portugués y español como nativo, e inglés y francés en nivel avanzado.</value></data>
+  <data name="Sobre_IdiomasLabel" xml:space="preserve"><value>Idiomas</value></data>
+  <data name="Sobre_LangPT" xml:space="preserve"><value>Portugués (nativo)</value></data>
+  <data name="Sobre_LangES" xml:space="preserve"><value>Español (nativo)</value></data>
+  <data name="Sobre_LangEN" xml:space="preserve"><value>Inglés (avanzado)</value></data>
+  <data name="Sobre_LangFR" xml:space="preserve"><value>Francés (avanzado)</value></data>
+  <data name="Sobre_DifTitulo" xml:space="preserve"><value>Por qué confiar en HomePlanner</value></data>
+  <data name="Sobre_DifSubtitulo" xml:space="preserve"><value>Un sistema construido con arquitectura sólida, por quien tiene décadas de experiencia real.</value></data>
+  <data name="Sobre_Dif1Titulo" xml:space="preserve"><value>Arquitectura de Software</value></data>
+  <data name="Sobre_Dif1Desc" xml:space="preserve"><value>Sistema escalable y multi-tenant, con capas bien diseñadas y los datos de cada familia aislados y seguros.</value></data>
+  <data name="Sobre_Dif2Titulo" xml:space="preserve"><value>Hecho para Familias de Verdad</value></data>
+  <data name="Sobre_Dif2Desc" xml:space="preserve"><value>Cada funcionalidad fue pensada para el día a día de un hogar. Sin complejidad innecesaria, sin recursos que no sirven para nada.</value></data>
+  <data name="Sobre_Dif3Titulo" xml:space="preserve"><value>Experiencia Internacional</value></data>
+  <data name="Sobre_Dif3Desc" xml:space="preserve"><value>Clientes en varios países, incluyendo consultoría para IBM Canadá. Confiabilidad probada en proyectos de todos los tamaños.</value></data>
+  <data name="Sobre_Dif4Titulo" xml:space="preserve"><value>Comprometido con la Calidad</value></data>
+  <data name="Sobre_Dif4Desc" xml:space="preserve"><value>Reconocido por el programa Microsoft MTAC. Formación docente que garantiza documentación clara, soporte de calidad y evolución continua del sistema.</value></data>
+  <data name="Sobre_CtaTitulo" xml:space="preserve"><value>¿Tienes alguna duda o quieres saber más?</value></data>
+  <data name="Sobre_CtaSubtitulo" xml:space="preserve"><value>Ponte en contacto — respondemos en hasta 1 día hábil.</value></data>
+  <data name="Sobre_CtaBtn" xml:space="preserve"><value>Habla con nosotros</value></data>
 
   <data name="Legal_Minuta" xml:space="preserve"><value>Este es un documento preliminar, sujeto a revisión legal.</value></data>
   <data name="Priv_Titulo" xml:space="preserve"><value>Política de Privacidad</value></data>
@@ -233,6 +268,9 @@
   <data name="Planner_PrivadaLabel" xml:space="preserve"><value>Tarea privada (solo yo la veo)</value></data>
   <data name="Planner_HoraInicioLabel" xml:space="preserve"><value>Hora de inicio</value></data>
   <data name="Planner_HoraFimLabel" xml:space="preserve"><value>Hora de fin</value></data>
+  <data name="Planner_Detalhes" xml:space="preserve"><value>Detalles de la tarea</value></data>
+  <data name="Planner_StatusConcluida" xml:space="preserve"><value>Completada</value></data>
+  <data name="Planner_StatusPendente" xml:space="preserve"><value>Pendiente</value></data>
 
   <data name="Cal_Titulo" xml:space="preserve"><value>Calendario</value></data>
   <data name="Cal_Semana" xml:space="preserve"><value>Semana</value></data>

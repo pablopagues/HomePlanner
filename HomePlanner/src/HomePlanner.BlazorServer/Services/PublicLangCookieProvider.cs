@@ -17,6 +17,7 @@ public sealed class PublicLangCookieProvider : IRequestCultureProvider
         {
             "en" => new ProviderCultureResult("en", "en"),
             "es" => new ProviderCultureResult("es", "es"),
+            "fr" => new ProviderCultureResult("fr", "fr"),
             _    => new ProviderCultureResult("pt-BR", "pt-BR"),
         };
 

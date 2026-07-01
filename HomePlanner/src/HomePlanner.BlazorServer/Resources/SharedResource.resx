@@ -132,6 +132,9 @@
   <data name="Landing_Feat2Desc" xml:space="preserve"><value>A lista nasce do cardápio, somando ingredientes e ajustando porções automaticamente.</value></data>
   <data name="Landing_Feat3Titulo" xml:space="preserve"><value>Importe receitas de qualquer site</value></data>
   <data name="Landing_Feat3Desc" xml:space="preserve"><value>Cole o link, veja o preview e salve. Sem fricção, sem digitar tudo de novo.</value></data>
+  <data name="Landing_AiBadge" xml:space="preserve"><value>Com inteligência artificial Claude</value></data>
+  <data name="Landing_AiTitulo" xml:space="preserve"><value>Receitas que se organizam sozinhas, com IA</value></data>
+  <data name="Landing_AiDesc" xml:space="preserve"><value>Cole o link de qualquer receita e a inteligência artificial Claude, da Anthropic, lê a página, entende os ingredientes e organiza tudo para você — quantidades, porções e lista de compras. Tecnologia de ponta a serviço da sua cozinha.</value></data>
   <data name="Landing_PrecosTitulo" xml:space="preserve"><value>Planos simples</value></data>
   <data name="Landing_PrecosSubtitulo" xml:space="preserve"><value>Comece grátis. Faça upgrade quando a família crescer.</value></data>
   <data name="Landing_StdPreco" xml:space="preserve"><value>R$25</value></data>
@@ -194,9 +197,41 @@
   <!-- ── Sobre ── -->
   <data name="Sobre_Titulo" xml:space="preserve"><value>Sobre o HomePlanner</value></data>
   <data name="Sobre_P1" xml:space="preserve"><value>O HomePlanner nasceu de uma necessidade real: organizar a rotina de uma família — o que cozinhar, o que comprar e o que cada um precisa fazer — sem pular entre vários aplicativos confusos.</value></data>
-  <data name="Sobre_P2" xml:space="preserve"><value>Acreditamos que planejar a semana deveria ser calmo e até prazeroso. Por isso criamos uma ferramenta bonita, simples e em três idiomas, pensada para famílias de verdade.</value></data>
+  <data name="Sobre_P2" xml:space="preserve"><value>Acreditamos que planejar a semana deveria ser calmo e até prazeroso. Por isso criamos uma ferramenta bonita, simples e multilíngue, pensada para famílias de verdade.</value></data>
   <data name="Sobre_MissaoTitulo" xml:space="preserve"><value>Nossa missão</value></data>
   <data name="Sobre_MissaoTexto" xml:space="preserve"><value>Devolver tempo e tranquilidade às famílias, um cardápio de cada vez.</value></data>
+  <data name="Sobre_HeroEyebrow" xml:space="preserve"><value>A empresa por trás</value></data>
+  <data name="Sobre_HeroTitulo" xml:space="preserve"><value>Software feito por quem entende o que faz</value></data>
+  <data name="Sobre_HeroSubtitulo" xml:space="preserve"><value>A SiderisX constrói software confiável e bem arquitetado. O HomePlanner foi criado do zero para organizar a rotina de famílias de verdade — com a qualidade de quem tem 25 anos de experiência.</value></data>
+  <data name="Sobre_Stat1Valor" xml:space="preserve"><value>25+</value></data>
+  <data name="Sobre_Stat1Label" xml:space="preserve"><value>anos de experiência</value></data>
+  <data name="Sobre_Stat2Valor" xml:space="preserve"><value>10+</value></data>
+  <data name="Sobre_Stat2Label" xml:space="preserve"><value>países atendidos</value></data>
+  <data name="Sobre_FounderAlt" xml:space="preserve"><value>Fundador da SiderisX</value></data>
+  <data name="Sobre_FounderEyebrow" xml:space="preserve"><value>Quem está por trás</value></data>
+  <data name="Sobre_FounderCargo" xml:space="preserve"><value>Fundador da SiderisX · Arquiteto de Software</value></data>
+  <data name="Sobre_FounderBio1" xml:space="preserve"><value>Mais de 25 anos como desenvolvedor e os últimos 5 atuando como arquiteto de software. Ao longo da carreira, atendi clientes em diversos países — incluindo trabalho como consultor para a IBM Canadá — em projetos de todos os portes, do startup ao corporativo.</value></data>
+  <data name="Sobre_FounderBio2" xml:space="preserve"><value>Tenho liderança de equipe forjada em papéis de Scrum Master, Tech Lead e gestor. Adapto-me bem a ambientes diferentes e trabalho continuamente pra evoluir técnica e pessoalmente.</value></data>
+  <data name="Sobre_FounderBio3" xml:space="preserve"><value>Fui reconhecido pelo programa Microsoft MTAC (Microsoft Technical Audience Contributor), que reúne profissionais que apresentam tecnologias Microsoft em conferências, blog posts e eventos. Também atuei como professor de programação, o que afiou minha comunicação com grupos e times multidisciplinares.</value></data>
+  <data name="Sobre_FounderBio4" xml:space="preserve"><value>Falo e escrevo português e espanhol como nativo, e inglês e francês em nível avançado.</value></data>
+  <data name="Sobre_IdiomasLabel" xml:space="preserve"><value>Idiomas</value></data>
+  <data name="Sobre_LangPT" xml:space="preserve"><value>Português (nativo)</value></data>
+  <data name="Sobre_LangES" xml:space="preserve"><value>Espanhol (nativo)</value></data>
+  <data name="Sobre_LangEN" xml:space="preserve"><value>Inglês (avançado)</value></data>
+  <data name="Sobre_LangFR" xml:space="preserve"><value>Francês (avançado)</value></data>
+  <data name="Sobre_DifTitulo" xml:space="preserve"><value>Por que confiar no HomePlanner</value></data>
+  <data name="Sobre_DifSubtitulo" xml:space="preserve"><value>Um sistema construído com arquitetura sólida, por quem tem décadas de experiência real.</value></data>
+  <data name="Sobre_Dif1Titulo" xml:space="preserve"><value>Arquitetura de Software</value></data>
+  <data name="Sobre_Dif1Desc" xml:space="preserve"><value>Sistema escalável e multi-tenant, com camadas bem desenhadas e os dados de cada família isolados e seguros.</value></data>
+  <data name="Sobre_Dif2Titulo" xml:space="preserve"><value>Feito para Famílias de Verdade</value></data>
+  <data name="Sobre_Dif2Desc" xml:space="preserve"><value>Cada funcionalidade foi pensada para o dia a dia de uma casa. Sem complexidade desnecessária, sem recursos que não servem para nada.</value></data>
+  <data name="Sobre_Dif3Titulo" xml:space="preserve"><value>Experiência Internacional</value></data>
+  <data name="Sobre_Dif3Desc" xml:space="preserve"><value>Clientes em vários países, incluindo consultoria para a IBM Canadá. Confiabilidade testada em projetos de todos os portes.</value></data>
+  <data name="Sobre_Dif4Titulo" xml:space="preserve"><value>Comprometido com Qualidade</value></data>
+  <data name="Sobre_Dif4Desc" xml:space="preserve"><value>Reconhecido pelo programa Microsoft MTAC. Background docente que garante documentação clara, suporte de qualidade e evolução contínua do sistema.</value></data>
+  <data name="Sobre_CtaTitulo" xml:space="preserve"><value>Tem alguma dúvida ou quer saber mais?</value></data>
+  <data name="Sobre_CtaSubtitulo" xml:space="preserve"><value>Entre em contato — respondemos em até 1 dia útil.</value></data>
+  <data name="Sobre_CtaBtn" xml:space="preserve"><value>Fale com a gente</value></data>
 
   <!-- ── Legal ── -->
   <data name="Legal_Minuta" xml:space="preserve"><value>Este é um documento preliminar, sujeito a revisão jurídica.</value></data>
@@ -244,6 +279,9 @@
   <data name="Planner_PrivadaLabel" xml:space="preserve"><value>Tarefa privada (só eu vejo)</value></data>
   <data name="Planner_HoraInicioLabel" xml:space="preserve"><value>Hora de início</value></data>
   <data name="Planner_HoraFimLabel" xml:space="preserve"><value>Hora de fim</value></data>
+  <data name="Planner_Detalhes" xml:space="preserve"><value>Detalhes da tarefa</value></data>
+  <data name="Planner_StatusConcluida" xml:space="preserve"><value>Concluída</value></data>
+  <data name="Planner_StatusPendente" xml:space="preserve"><value>Pendente</value></data>
 
   <data name="Cal_Titulo" xml:space="preserve"><value>Calendário</value></data>
   <data name="Cal_Semana" xml:space="preserve"><value>Semana</value></data>

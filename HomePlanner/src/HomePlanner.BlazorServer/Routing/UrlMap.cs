@@ -1,38 +1,39 @@
 namespace HomePlanner.BlazorServer.Routing;
 
 /// <summary>
-/// Mapeamento bidirecional de URLs por idioma (PT ↔ EN ↔ ES).
+/// Mapeamento bidirecional de URLs por idioma (PT ↔ EN ↔ ES ↔ FR).
 /// PT é o idioma canônico — as URLs PT são as chaves do mapa.
 /// </summary>
 public static class UrlMap
 {
     // ── Páginas públicas ──────────────────────────────────────────────────────
-    private static readonly Dictionary<string, (string En, string Es)> _ptParaOutros =
+    private static readonly Dictionary<string, (string En, string Es, string Fr)> _ptParaOutros =
         new(StringComparer.OrdinalIgnoreCase)
         {
-            ["/"]              = ("/en",         "/es"),
-            ["/privacidade"]   = ("/privacy",    "/privacidad"),
-            ["/termos"]        = ("/terms",       "/terminos"),
-            ["/contato"]       = ("/contact",     "/contacto"),
-            ["/quem-somos"]    = ("/about",       "/acerca"),
-            ["/assinatura"]    = ("/subscription", "/suscripcion"),
-            ["/perfil"]        = ("/profile",     "/perfil"),
+            ["/"]              = ("/en",         "/es",          "/fr"),
+            ["/privacidade"]   = ("/privacy",    "/privacidad",  "/confidentialite"),
+            ["/termos"]        = ("/terms",       "/terminos",    "/conditions"),
+            ["/contato"]       = ("/contact",     "/contacto",    "/nous-contacter"),
+            ["/quem-somos"]    = ("/about",       "/acerca",      "/a-propos"),
+            ["/assinatura"]    = ("/subscription", "/suscripcion", "/abonnement"),
+            ["/perfil"]        = ("/profile",     "/perfil",      "/profil"),
             // ── Páginas autenticadas (URL única, idioma via cookie) ──────────
-            ["/dashboard"]     = ("/dashboard",   "/dashboard"),
-            ["/cardapio"]      = ("/menu",        "/menu"),
-            ["/receitas"]      = ("/recipes",     "/recetas"),
-            ["/modelos"]       = ("/templates",   "/plantillas"),
-            ["/compras"]       = ("/shopping",    "/compras"),
-            ["/planner"]       = ("/tasks",       "/tareas"),
-            ["/calendario"]    = ("/calendar",    "/calendario"),
-            ["/configuracoes"] = ("/settings",    "/configuracion"),
-            ["/familia"]       = ("/family",      "/familia"),
-            ["/empresa"]       = ("/company",     "/empresa"),
+            ["/dashboard"]     = ("/dashboard",   "/dashboard",   "/dashboard"),
+            ["/cardapio"]      = ("/menu",        "/menu",        "/menu"),
+            ["/receitas"]      = ("/recipes",     "/recetas",     "/recipes"),
+            ["/modelos"]       = ("/templates",   "/plantillas",  "/templates"),
+            ["/compras"]       = ("/shopping",    "/compras",     "/shopping"),
+            ["/planner"]       = ("/tasks",       "/tareas",      "/tasks"),
+            ["/calendario"]    = ("/calendar",    "/calendario",  "/calendar"),
+            ["/configuracoes"] = ("/settings",    "/configuracion", "/settings"),
+            ["/familia"]       = ("/family",      "/familia",     "/family"),
+            ["/empresa"]       = ("/company",     "/empresa",     "/company"),
         };
 
     // Mapas inversos calculados a partir do mapa principal
     private static readonly Dictionary<string, string> _enParaPt;
     private static readonly Dictionary<string, string> _esParaPt;
+    private static readonly Dictionary<string, string> _frParaPt;
 
     static UrlMap()
     {
@@ -40,6 +41,8 @@ public static class UrlMap
             .ToDictionary(kv => kv.Value.En, kv => kv.Key, StringComparer.OrdinalIgnoreCase);
         _esParaPt = _ptParaOutros
             .ToDictionary(kv => kv.Value.Es, kv => kv.Key, StringComparer.OrdinalIgnoreCase);
+        _frParaPt = _ptParaOutros
+            .ToDictionary(kv => kv.Value.Fr, kv => kv.Key, StringComparer.OrdinalIgnoreCase);
     }
 
     /// <summary>Retorna a URL no idioma solicitado, usando PT como canônico.</summary>
@@ -50,6 +53,7 @@ public static class UrlMap
         {
             "en" => outros.En,
             "es" => outros.Es,
+            "fr" => outros.Fr,
             _    => ptUrl,
         };
     }
@@ -65,6 +69,7 @@ public static class UrlMap
         {
             "en" => _enParaPt.TryGetValue(path, out var pt1) ? pt1 : path,
             "es" => _esParaPt.TryGetValue(path, out var pt2) ? pt2 : path,
+            "fr" => _frParaPt.TryGetValue(path, out var pt3) ? pt3 : path,
             _    => path,
         };
 

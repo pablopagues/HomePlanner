@@ -109,6 +109,7 @@ public class ParserIngredientesIAService : IParserIngredientesIA
     {
         "en" => "inglês (English)",
         "es" => "espanhol (español)",
+        "fr" => "francês (français)",
         _    => "português",
     };
 

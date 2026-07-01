@@ -1,0 +1,508 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="xml:space" use="optional" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter</value></resheader>
+
+  <data name="Btn_Salvar" xml:space="preserve"><value>Enregistrer</value></data>
+  <data name="Btn_Cancelar" xml:space="preserve"><value>Annuler</value></data>
+  <data name="Btn_Excluir" xml:space="preserve"><value>Supprimer</value></data>
+  <data name="Btn_Editar" xml:space="preserve"><value>Modifier</value></data>
+  <data name="Btn_Duplicar" xml:space="preserve"><value>Dupliquer</value></data>
+  <data name="Btn_Importar" xml:space="preserve"><value>Importer</value></data>
+  <data name="Btn_Adicionar" xml:space="preserve"><value>Ajouter</value></data>
+  <data name="Btn_Confirmar" xml:space="preserve"><value>Confirmer</value></data>
+  <data name="Btn_Salvando" xml:space="preserve"><value>Enregistrement...</value></data>
+  <data name="Btn_Importando" xml:space="preserve"><value>Importation...</value></data>
+  <data name="Btn_Aplicar" xml:space="preserve"><value>Appliquer</value></data>
+  <data name="Btn_Voltar" xml:space="preserve"><value>Retour</value></data>
+  <data name="Btn_Fechar" xml:space="preserve"><value>Fermer</value></data>
+
+  <data name="Msg_SalvoOk" xml:space="preserve"><value>Enregistré avec succès !</value></data>
+  <data name="Msg_ExcluidoOk" xml:space="preserve"><value>Supprimé avec succès.</value></data>
+  <data name="Msg_ErroGenerico" xml:space="preserve"><value>Une erreur s'est produite. Réessayez.</value></data>
+  <data name="Msg_CampoObrigatorio" xml:space="preserve"><value>Champ obligatoire.</value></data>
+  <data name="Msg_NaoEncontrado" xml:space="preserve"><value>Élément introuvable.</value></data>
+  <data name="Confirmacao_Titulo" xml:space="preserve"><value>Confirmer la suppression</value></data>
+
+  <data name="Nav_Dashboard" xml:space="preserve"><value>Tableau de bord</value></data>
+  <data name="Nav_Cardapio" xml:space="preserve"><value>Menu</value></data>
+  <data name="Nav_Receitas" xml:space="preserve"><value>Recettes</value></data>
+  <data name="Nav_ListaCompras" xml:space="preserve"><value>Liste de courses</value></data>
+  <data name="Nav_Familia" xml:space="preserve"><value>Famille</value></data>
+  <data name="Nav_Configuracoes" xml:space="preserve"><value>Paramètres</value></data>
+  <data name="Nav_Modelos" xml:space="preserve"><value>Modèles</value></data>
+  <data name="Nav_Planner" xml:space="preserve"><value>Tâches</value></data>
+  <data name="Nav_Calendario" xml:space="preserve"><value>Calendrier</value></data>
+  <data name="Nav_Assinatura" xml:space="preserve"><value>Abonnement</value></data>
+  <data name="Nav_Empresa" xml:space="preserve"><value>Mon compte</value></data>
+
+  <!-- ── Dashboard : avis e-mail ── -->
+  <data name="Dashboard_EmailNaoConfirmado" xml:space="preserve"><value>Votre adresse e-mail n'a pas encore été confirmée. Confirmez-la pour garantir l'accès et la récupération de votre compte.</value></data>
+  <data name="Dashboard_ConfirmarAgora" xml:space="preserve"><value>Confirmer maintenant</value></data>
+
+  <!-- ── Compte / Données du compte ── -->
+  <data name="Emp_Titulo" xml:space="preserve"><value>Mon compte</value></data>
+  <data name="Emp_Subtitulo" xml:space="preserve"><value>Les données de votre compte HomePlanner.</value></data>
+  <data name="Emp_SecaoDados" xml:space="preserve"><value>Données d'inscription</value></data>
+  <data name="Emp_NomeResponsavel" xml:space="preserve"><value>Nom du responsable</value></data>
+  <data name="Emp_Email" xml:space="preserve"><value>E-mail (connexion)</value></data>
+  <data name="Emp_EmailConfirmado" xml:space="preserve"><value>E-mail confirmé</value></data>
+  <data name="Emp_EmailNaoConfirmado" xml:space="preserve"><value>Votre adresse e-mail n'a pas encore été confirmée. Cliquez sur renvoyer pour recevoir le lien de confirmation.</value></data>
+  <data name="Emp_ReenviarConfirmacao" xml:space="preserve"><value>Renvoyer la confirmation</value></data>
+  <data name="Emp_Pais" xml:space="preserve"><value>Pays</value></data>
+  <data name="Emp_PaisHelperText" xml:space="preserve"><value>Détermine les prix de l'abonnement et ne peut pas être modifié.</value></data>
+  <data name="Emp_Cpf" xml:space="preserve"><value>CPF</value></data>
+  <data name="Emp_Province" xml:space="preserve"><value>Province</value></data>
+  <data name="Emp_Salvar" xml:space="preserve"><value>Enregistrer</value></data>
+  <data name="Emp_Salvando" xml:space="preserve"><value>Enregistrement...</value></data>
+  <data name="Emp_SalvoOk" xml:space="preserve"><value>Données enregistrées avec succès.</value></data>
+  <data name="Emp_ConfirmacaoEnviada" xml:space="preserve"><value>E-mail de confirmation envoyé. Vérifiez votre boîte de réception.</value></data>
+  <data name="Emp_ErroCarregar" xml:space="preserve"><value>Erreur lors du chargement des données : {0}</value></data>
+
+  <data name="Assin_Titulo" xml:space="preserve"><value>Votre abonnement</value></data>
+  <data name="Assin_Subtitulo" xml:space="preserve"><value>Gérez votre forfait et votre moyen de paiement.</value></data>
+  <data name="Assin_PlanoAtual" xml:space="preserve"><value>Forfait actuel</value></data>
+  <data name="Assin_Membros" xml:space="preserve"><value>membres</value></data>
+  <data name="Assin_ImportacoesReceita" xml:space="preserve"><value>importations/mois</value></data>
+  <data name="Assin_Gerenciar" xml:space="preserve"><value>Gérer le paiement</value></data>
+  <data name="Assin_DiasTrial" xml:space="preserve"><value>Jours restants (essai)</value></data>
+  <data name="Assin_ProximaCobranca" xml:space="preserve"><value>Prochain prélèvement</value></data>
+  <data name="Assin_Cartao" xml:space="preserve"><value>Carte</value></data>
+  <data name="Assin_CancelamentoAgendado" xml:space="preserve"><value>Votre abonnement sera annulé à la fin de la période en cours.</value></data>
+  <data name="Assin_PlanosDisponiveis" xml:space="preserve"><value>Forfaits disponibles</value></data>
+  <data name="Assin_SeuPlano" xml:space="preserve"><value>Votre forfait</value></data>
+  <data name="Assin_Assinar" xml:space="preserve"><value>S'abonner</value></data>
+  <data name="Assin_PagamentoOk" xml:space="preserve"><value>Paiement confirmé ! Votre abonnement est actif.</value></data>
+  <data name="Assin_PagamentoCancelado" xml:space="preserve"><value>Paiement annulé. Aucun montant n'a été débité.</value></data>
+  <data name="Assin_Mes" xml:space="preserve"><value>mois</value></data>
+  <data name="Assin_Ano" xml:space="preserve"><value>an</value></data>
+  <data name="Assin_Mensal" xml:space="preserve"><value>mensuel</value></data>
+  <data name="Assin_Anual" xml:space="preserve"><value>annuel</value></data>
+  <data name="Assin_PlanoGratis" xml:space="preserve"><value>Gratuit</value></data>
+  <data name="Assin_StatusTrial" xml:space="preserve"><value>Essai</value></data>
+  <data name="Assin_StatusAtivo" xml:space="preserve"><value>Actif</value></data>
+  <data name="Assin_StatusSuspenso" xml:space="preserve"><value>Suspendu</value></data>
+  <data name="Assin_StatusCancelado" xml:space="preserve"><value>Annulé</value></data>
+
+  <data name="Footer_Privacidade" xml:space="preserve"><value>Confidentialité</value></data>
+  <data name="Footer_Termos" xml:space="preserve"><value>Conditions</value></data>
+  <data name="Footer_Contato" xml:space="preserve"><value>Contact</value></data>
+
+  <!-- ── Consentement aux cookies (LGPD) ── -->
+  <data name="Cookie_Titulo" xml:space="preserve"><value>Ce site utilise des cookies essentiels</value></data>
+  <data name="Cookie_Texto" xml:space="preserve"><value>Nous utilisons uniquement des cookies strictement nécessaires au fonctionnement du système (authentification, session et préférences). Nous n'utilisons pas de cookies publicitaires, d'analyse ou de suivi.</value></data>
+  <data name="Cookie_SaibaMais" xml:space="preserve"><value>En savoir plus dans notre</value></data>
+  <data name="Cookie_E" xml:space="preserve"><value>et nos</value></data>
+  <data name="Cookie_Aceitar" xml:space="preserve"><value>Accepter et continuer</value></data>
+  <data name="Cookie_Revisar" xml:space="preserve"><value>Revoir le consentement aux cookies</value></data>
+
+  <data name="Landing_NavSobre" xml:space="preserve"><value>À propos</value></data>
+  <data name="Landing_HeroTitulo" xml:space="preserve"><value>La semaine de votre famille, organisée en toute sérénité.</value></data>
+  <data name="Landing_HeroSubtitulo" xml:space="preserve"><value>Menu, liste de courses et tâches — tout au même endroit, simple et beau.</value></data>
+  <data name="Landing_HeroCta" xml:space="preserve"><value>Commencer gratuitement</value></data>
+  <data name="Landing_HeroLegenda" xml:space="preserve"><value>30 jours gratuits · sans carte bancaire</value></data>
+  <data name="Landing_Feat1Titulo" xml:space="preserve"><value>Menu de la semaine</value></data>
+  <data name="Landing_Feat1Desc" xml:space="preserve"><value>Planifiez les repas de la semaine dans une grille aérée — sans tableurs confus.</value></data>
+  <data name="Landing_Feat2Titulo" xml:space="preserve"><value>Liste de courses automatique</value></data>
+  <data name="Landing_Feat2Desc" xml:space="preserve"><value>La liste est générée à partir du menu, en additionnant les ingrédients et en ajustant les portions automatiquement.</value></data>
+  <data name="Landing_Feat3Titulo" xml:space="preserve"><value>Importez des recettes de n'importe quel site</value></data>
+  <data name="Landing_Feat3Desc" xml:space="preserve"><value>Collez le lien, prévisualisez et enregistrez. Sans friction, sans tout réécrire.</value></data>
+  <data name="Landing_AiBadge" xml:space="preserve"><value>Avec l'intelligence artificielle Claude</value></data>
+  <data name="Landing_AiTitulo" xml:space="preserve"><value>Des recettes qui s'organisent toutes seules, avec l'IA</value></data>
+  <data name="Landing_AiDesc" xml:space="preserve"><value>Collez le lien de n'importe quelle recette et Claude, l'intelligence artificielle d'Anthropic, lit la page, comprend les ingrédients et organise tout pour vous — quantités, portions et liste de courses. Une technologie de pointe au service de votre cuisine.</value></data>
+  <data name="Landing_PrecosTitulo" xml:space="preserve"><value>Des forfaits simples</value></data>
+  <data name="Landing_PrecosSubtitulo" xml:space="preserve"><value>Commencez gratuitement. Évoluez quand la famille s'agrandit.</value></data>
+  <data name="Landing_StdPreco" xml:space="preserve"><value>CA$10</value></data>
+  <data name="Landing_StdItem1" xml:space="preserve"><value>Jusqu'à 5 membres</value></data>
+  <data name="Landing_StdItem2" xml:space="preserve"><value>Menu + liste de courses</value></data>
+  <data name="Landing_StdItem3" xml:space="preserve"><value>Importation de recettes</value></data>
+  <data name="Landing_StdItem4" xml:space="preserve"><value>Jusqu'à 50 importations de recettes/mois</value></data>
+  <data name="Landing_ProPreco" xml:space="preserve"><value>CA$18</value></data>
+  <data name="Landing_ProItem1" xml:space="preserve"><value>Jusqu'à 10 membres</value></data>
+  <data name="Landing_ProItem2" xml:space="preserve"><value>Tout ce qui est inclus dans Standard</value></data>
+  <data name="Landing_ProItem3" xml:space="preserve"><value>Modèles de semaine illimités</value></data>
+  <data name="Landing_ProItem4" xml:space="preserve"><value>Jusqu'à 200 importations de recettes/mois</value></data>
+  <data name="Landing_ProPopular" xml:space="preserve"><value>Le plus populaire</value></data>
+  <data name="Landing_PrecosRodape" xml:space="preserve"><value>Forfaits annuels à prix réduit. Annulez à tout moment.</value></data>
+
+  <data name="Ct_Titulo" xml:space="preserve"><value>Contactez-nous</value></data>
+  <data name="Ct_Intro" xml:space="preserve"><value>Des questions, des suggestions ou des problèmes ? Écrivez-nous — nous répondons rapidement.</value></data>
+  <data name="Ct_Voltar" xml:space="preserve"><value>Retour</value></data>
+  <data name="Ct_Nome" xml:space="preserve"><value>Nom</value></data>
+  <data name="Ct_Email" xml:space="preserve"><value>E-mail</value></data>
+  <data name="Ct_Telefone" xml:space="preserve"><value>Téléphone (facultatif)</value></data>
+  <data name="Ct_Assunto" xml:space="preserve"><value>Sujet</value></data>
+  <data name="Ct_AssuntoDuvida" xml:space="preserve"><value>Question sur le système</value></data>
+  <data name="Ct_AssuntoPlanos" xml:space="preserve"><value>Forfaits et prix</value></data>
+  <data name="Ct_AssuntoTecnico" xml:space="preserve"><value>Problème technique</value></data>
+  <data name="Ct_AssuntoCobranca" xml:space="preserve"><value>Facturation ou annulation</value></data>
+  <data name="Ct_AssuntoLgpd" xml:space="preserve"><value>Confidentialité / données</value></data>
+  <data name="Ct_AssuntoOutro" xml:space="preserve"><value>Autre</value></data>
+  <data name="Ct_Mensagem" xml:space="preserve"><value>Message</value></data>
+  <data name="Ct_Enviar" xml:space="preserve"><value>Envoyer le message</value></data>
+  <data name="Ct_Enviando" xml:space="preserve"><value>Envoi...</value></data>
+  <data name="Ct_Privacidade" xml:space="preserve"><value>En envoyant, vous acceptez notre politique de confidentialité.</value></data>
+  <data name="Ct_SucessoTitulo" xml:space="preserve"><value>Message envoyé !</value></data>
+  <data name="Ct_SucessoCorpo" xml:space="preserve"><value>Nous avons bien reçu votre message et nous répondrons bientôt à {0}.</value></data>
+  <data name="Ct_EnviarOutra" xml:space="preserve"><value>Envoyer un autre message</value></data>
+  <data name="Ct_SuporteTitulo" xml:space="preserve"><value>Support</value></data>
+  <data name="Ct_SuporteDesc" xml:space="preserve"><value>Vous préférez un e-mail direct ? Écrivez à notre équipe de support.</value></data>
+
+  <!-- ── Feedback (FAB in-app) ── -->
+  <data name="Fb_Tooltip" xml:space="preserve"><value>Envoyer un commentaire</value></data>
+  <data name="Fb_Titulo" xml:space="preserve"><value>Envoyer un commentaire</value></data>
+  <data name="Fb_Intro" xml:space="preserve"><value>Vous avez trouvé un bug ? Vous avez une idée ? Quelque chose vous a plu ? Dites-le-nous.</value></data>
+  <data name="Fb_Tipo" xml:space="preserve"><value>Type</value></data>
+  <data name="Fb_TipoBug" xml:space="preserve"><value>Bug — quelque chose ne fonctionne pas</value></data>
+  <data name="Fb_TipoSugestao" xml:space="preserve"><value>Suggestion — une idée d'amélioration</value></data>
+  <data name="Fb_TipoElogio" xml:space="preserve"><value>Compliment — quelque chose qui va bien</value></data>
+  <data name="Fb_TipoOutro" xml:space="preserve"><value>Autre</value></data>
+  <data name="Fb_Mensagem" xml:space="preserve"><value>Message</value></data>
+  <data name="Fb_MensagemAjuda" xml:space="preserve"><value>Entre 10 et 2000 caractères.</value></data>
+  <data name="Fb_MensagemPlaceholder" xml:space="preserve"><value>Décrivez-le avec le plus de détails possible...</value></data>
+  <data name="Fb_AvisoMetadados" xml:space="preserve"><value>Avec votre message, nous enverrons automatiquement : votre nom, l'écran sur lequel vous étiez et la version de l'application — pour nous aider à enquêter.</value></data>
+  <data name="Fb_Enviar" xml:space="preserve"><value>Envoyer</value></data>
+  <data name="Fb_Enviando" xml:space="preserve"><value>Envoi...</value></data>
+  <data name="Fb_SucessoTitulo" xml:space="preserve"><value>Merci pour votre commentaire !</value></data>
+  <data name="Fb_SucessoCorpo" xml:space="preserve"><value>Votre message a été envoyé à notre équipe. Nous l'examinerons avec soin.</value></data>
+  <data name="Fb_ErroMin" xml:space="preserve"><value>Le message doit contenir au moins 10 caractères.</value></data>
+  <data name="Fb_ErroMax" xml:space="preserve"><value>Le message ne peut pas dépasser 2000 caractères.</value></data>
+
+  <data name="Sobre_Titulo" xml:space="preserve"><value>À propos de HomePlanner</value></data>
+  <data name="Sobre_P1" xml:space="preserve"><value>HomePlanner est né d'un besoin réel : organiser le quotidien d'une famille — quoi cuisiner, quoi acheter et ce que chacun doit faire — sans jongler entre plusieurs applications confuses.</value></data>
+  <data name="Sobre_P2" xml:space="preserve"><value>Nous pensons que planifier la semaine devrait être serein, voire agréable. C'est pourquoi nous avons créé un outil beau, simple et multilingue, pensé pour les vraies familles.</value></data>
+  <data name="Sobre_MissaoTitulo" xml:space="preserve"><value>Notre mission</value></data>
+  <data name="Sobre_MissaoTexto" xml:space="preserve"><value>Redonner du temps et de la sérénité aux familles, un menu à la fois.</value></data>
+  <data name="Sobre_HeroEyebrow" xml:space="preserve"><value>L'entreprise derrière</value></data>
+  <data name="Sobre_HeroTitulo" xml:space="preserve"><value>Un logiciel conçu par quelqu'un qui sait ce qu'il fait</value></data>
+  <data name="Sobre_HeroSubtitulo" xml:space="preserve"><value>SiderisX conçoit des logiciels fiables et bien architecturés. HomePlanner a été créé de zéro pour organiser le quotidien de vraies familles — avec la qualité de quelqu'un qui a 25 ans d'expérience.</value></data>
+  <data name="Sobre_Stat1Valor" xml:space="preserve"><value>25+</value></data>
+  <data name="Sobre_Stat1Label" xml:space="preserve"><value>ans d'expérience</value></data>
+  <data name="Sobre_Stat2Valor" xml:space="preserve"><value>10+</value></data>
+  <data name="Sobre_Stat2Label" xml:space="preserve"><value>pays desservis</value></data>
+  <data name="Sobre_FounderAlt" xml:space="preserve"><value>Fondateur de SiderisX</value></data>
+  <data name="Sobre_FounderEyebrow" xml:space="preserve"><value>Qui se cache derrière</value></data>
+  <data name="Sobre_FounderCargo" xml:space="preserve"><value>Fondateur de SiderisX · Architecte Logiciel</value></data>
+  <data name="Sobre_FounderBio1" xml:space="preserve"><value>Plus de 25 ans comme développeur et les 5 dernières années comme architecte logiciel. Tout au long de ma carrière, j'ai servi des clients dans plusieurs pays — y compris en tant que consultant pour IBM Canada — sur des projets de toutes tailles, de la startup à l'entreprise.</value></data>
+  <data name="Sobre_FounderBio2" xml:space="preserve"><value>J'ai une expérience de leadership d'équipe forgée dans des rôles de Scrum Master, Tech Lead et gestionnaire. Je m'adapte bien à différents environnements et je travaille continuellement à évoluer techniquement et personnellement.</value></data>
+  <data name="Sobre_FounderBio3" xml:space="preserve"><value>J'ai été reconnu par le programme Microsoft MTAC (Microsoft Technical Audience Contributor), qui réunit des professionnels présentant les technologies Microsoft lors de conférences, d'articles de blog et d'événements. J'ai aussi été professeur de programmation, ce qui a affiné ma communication avec des groupes et des équipes multidisciplinaires.</value></data>
+  <data name="Sobre_FounderBio4" xml:space="preserve"><value>Je parle et écris le portugais et l'espagnol en langue maternelle, et l'anglais et le français à un niveau avancé.</value></data>
+  <data name="Sobre_IdiomasLabel" xml:space="preserve"><value>Langues</value></data>
+  <data name="Sobre_LangPT" xml:space="preserve"><value>Portugais (natif)</value></data>
+  <data name="Sobre_LangES" xml:space="preserve"><value>Espagnol (natif)</value></data>
+  <data name="Sobre_LangEN" xml:space="preserve"><value>Anglais (avancé)</value></data>
+  <data name="Sobre_LangFR" xml:space="preserve"><value>Français (avancé)</value></data>
+  <data name="Sobre_DifTitulo" xml:space="preserve"><value>Pourquoi faire confiance à HomePlanner</value></data>
+  <data name="Sobre_DifSubtitulo" xml:space="preserve"><value>Un système bâti sur une architecture solide, par quelqu'un avec des décennies d'expérience réelle.</value></data>
+  <data name="Sobre_Dif1Titulo" xml:space="preserve"><value>Architecture Logicielle</value></data>
+  <data name="Sobre_Dif1Desc" xml:space="preserve"><value>Un système évolutif et multi-tenant, aux couches bien conçues, gardant les données de chaque famille isolées et sécurisées.</value></data>
+  <data name="Sobre_Dif2Titulo" xml:space="preserve"><value>Conçu pour de Vraies Familles</value></data>
+  <data name="Sobre_Dif2Desc" xml:space="preserve"><value>Chaque fonctionnalité a été pensée pour le quotidien d'un foyer. Sans complexité inutile, sans fonctions qui ne servent à rien.</value></data>
+  <data name="Sobre_Dif3Titulo" xml:space="preserve"><value>Expérience Internationale</value></data>
+  <data name="Sobre_Dif3Desc" xml:space="preserve"><value>Des clients dans plusieurs pays, dont du conseil pour IBM Canada. Une fiabilité éprouvée sur des projets de toutes tailles.</value></data>
+  <data name="Sobre_Dif4Titulo" xml:space="preserve"><value>Engagé pour la Qualité</value></data>
+  <data name="Sobre_Dif4Desc" xml:space="preserve"><value>Reconnu par le programme Microsoft MTAC. Un parcours d'enseignant qui garantit une documentation claire, un support de qualité et une évolution continue du système.</value></data>
+  <data name="Sobre_CtaTitulo" xml:space="preserve"><value>Vous avez des questions ou souhaitez en savoir plus ?</value></data>
+  <data name="Sobre_CtaSubtitulo" xml:space="preserve"><value>Contactez-nous — nous répondons sous 1 jour ouvrable.</value></data>
+  <data name="Sobre_CtaBtn" xml:space="preserve"><value>Parlez-nous</value></data>
+
+  <data name="Legal_Minuta" xml:space="preserve"><value>Ceci est un document préliminaire, susceptible de révision juridique.</value></data>
+  <data name="Priv_Titulo" xml:space="preserve"><value>Politique de confidentialité</value></data>
+  <data name="Priv_Versao" xml:space="preserve"><value>Version 1.0</value></data>
+  <data name="Priv_Corpo" xml:space="preserve"><value>HomePlanner (SiderisX) traite vos données personnelles (nom, e-mail et données d'utilisation) uniquement pour faire fonctionner le service de planification familiale. &lt;br/&gt;&lt;br/&gt;Nous ne vendons pas vos données. Nous ne les partageons qu'avec des prestataires essentiels (Stripe pour les paiements, l'hébergement et l'e-mail). &lt;br/&gt;&lt;br/&gt;Vous pouvez demander l'accès, la correction ou la suppression de vos données à tout moment via notre canal de contact.</value></data>
+  <data name="Termos_Titulo" xml:space="preserve"><value>Conditions d'utilisation</value></data>
+  <data name="Termos_Versao" xml:space="preserve"><value>Version 1.0</value></data>
+  <data name="Termos_Corpo" xml:space="preserve"><value>En utilisant HomePlanner, vous acceptez ces conditions. Le service est proposé par abonnement, avec une période d'essai gratuite de 30 jours. &lt;br/&gt;&lt;br/&gt;Vous êtes responsable de la sécurité de votre mot de passe et de l'utilisation de votre compte. Les données que vous saisissez vous appartiennent. &lt;br/&gt;&lt;br/&gt;Le service est fourni &quot;tel quel&quot;. Nous pouvons mettre à jour ces conditions avec un préavis de 15 jours.</value></data>
+
+  <data name="Compras_Semana" xml:space="preserve"><value>Semaine du</value></data>
+  <data name="Compras_Receitas" xml:space="preserve"><value>recettes</value></data>
+  <data name="Compras_Itens" xml:space="preserve"><value>articles</value></data>
+  <data name="Compras_JaTenho" xml:space="preserve"><value>j'ai déjà</value></data>
+  <data name="Compras_LimparSelecao" xml:space="preserve"><value>Effacer la sélection</value></data>
+  <data name="Compras_OcultarComprados" xml:space="preserve"><value>Masquer les articles achetés</value></data>
+  <data name="Compras_TudoComprado" xml:space="preserve"><value>Tout est acheté ✓</value></data>
+  <data name="Compras_Atualizar" xml:space="preserve"><value>Actualiser</value></data>
+  <data name="Compras_SemItens" xml:space="preserve"><value>Aucune recette dans le menu de cette semaine pour l'instant.</value></data>
+  <data name="Compras_IrCardapio" xml:space="preserve"><value>Aller au menu</value></data>
+  <data name="Compras_CategoriaCardapio" xml:space="preserve"><value>Menu de la semaine</value></data>
+  <data name="Compras_NovoPedido" xml:space="preserve"><value>Quoi ajouter ?</value></data>
+  <data name="Compras_Quantidade" xml:space="preserve"><value>Quantité</value></data>
+  <data name="Compras_Solicitante" xml:space="preserve"><value>Pour</value></data>
+  <data name="Compras_AdicionarPedido" xml:space="preserve"><value>Ajouter</value></data>
+  <data name="Compras_Comprado" xml:space="preserve"><value>acheté</value></data>
+  <data name="Compras_SemSolicitante" xml:space="preserve"><value>Aucun membre</value></data>
+  <data name="Compras_RemoverPedidoConfirm" xml:space="preserve"><value>Retirer cette demande de la liste ?</value></data>
+
+  <data name="Planner_Titulo" xml:space="preserve"><value>Tâches de la famille</value></data>
+  <data name="Planner_Nova" xml:space="preserve"><value>Nouvelle tâche</value></data>
+  <data name="Planner_Editar" xml:space="preserve"><value>Modifier la tâche</value></data>
+  <data name="Planner_Pendentes" xml:space="preserve"><value>En attente</value></data>
+  <data name="Planner_Concluidas" xml:space="preserve"><value>Terminées</value></data>
+  <data name="Planner_Todas" xml:space="preserve"><value>Toutes</value></data>
+  <data name="Planner_Nenhuma" xml:space="preserve"><value>Aucune tâche ici. Pourquoi ne pas en créer une ?</value></data>
+  <data name="Planner_ExcluirConfirm" xml:space="preserve"><value>Supprimer cette tâche ?</value></data>
+  <data name="Planner_TituloLabel" xml:space="preserve"><value>Titre</value></data>
+  <data name="Planner_DescricaoLabel" xml:space="preserve"><value>Description</value></data>
+  <data name="Planner_DataLabel" xml:space="preserve"><value>Date prévue</value></data>
+  <data name="Planner_ResponsavelLabel" xml:space="preserve"><value>Responsable</value></data>
+  <data name="Planner_RecorrenciaLabel" xml:space="preserve"><value>Récurrence</value></data>
+  <data name="Planner_PrivadaLabel" xml:space="preserve"><value>Tâche privée (visible par moi seul)</value></data>
+  <data name="Planner_HoraInicioLabel" xml:space="preserve"><value>Heure de début</value></data>
+  <data name="Planner_HoraFimLabel" xml:space="preserve"><value>Heure de fin</value></data>
+  <data name="Planner_Detalhes" xml:space="preserve"><value>Détails de la tâche</value></data>
+  <data name="Planner_StatusConcluida" xml:space="preserve"><value>Terminée</value></data>
+  <data name="Planner_StatusPendente" xml:space="preserve"><value>En attente</value></data>
+
+  <data name="Cal_Titulo" xml:space="preserve"><value>Calendrier</value></data>
+  <data name="Cal_Semana" xml:space="preserve"><value>Semaine</value></data>
+  <data name="Cal_Mes" xml:space="preserve"><value>Mois</value></data>
+  <data name="Cal_Hoje" xml:space="preserve"><value>Aujourd'hui</value></data>
+  <data name="Cal_Membro" xml:space="preserve"><value>Membre</value></data>
+  <data name="Cal_TodosMembros" xml:space="preserve"><value>Tous</value></data>
+  <data name="Cal_SomenteMinhas" xml:space="preserve"><value>Vous ne voyez que vos propres tâches.</value></data>
+  <data name="Mural_Entrar" xml:space="preserve"><value>Mode Écran</value></data>
+  <data name="Mural_Titulo" xml:space="preserve"><value>Mode Écran</value></data>
+  <data name="Mural_Sair" xml:space="preserve"><value>Quitter le Mode Écran</value></data>
+  <data name="Mural_Senha" xml:space="preserve"><value>Votre mot de passe</value></data>
+  <data name="Mural_SenhaPrompt" xml:space="preserve"><value>Saisissez le mot de passe de votre compte pour quitter le Mode Écran.</value></data>
+  <data name="Mural_SenhaInvalida" xml:space="preserve"><value>Mot de passe incorrect.</value></data>
+  <data name="Mural_Bloqueado" xml:space="preserve"><value>Trop de tentatives. Réessayez plus tard.</value></data>
+  <data name="Mural_Confirmar" xml:space="preserve"><value>Quitter</value></data>
+
+  <data name="Recorrencia_Nenhuma" xml:space="preserve"><value>Pas de répétition</value></data>
+  <data name="Recorrencia_Diaria" xml:space="preserve"><value>Quotidienne</value></data>
+  <data name="Recorrencia_Semanal" xml:space="preserve"><value>Hebdomadaire</value></data>
+  <data name="Recorrencia_Mensal" xml:space="preserve"><value>Mensuelle</value></data>
+
+  <data name="Onb_Titulo" xml:space="preserve"><value>Configurez votre famille</value></data>
+  <data name="Onb_Subtitulo" xml:space="preserve"><value>Encore une étape avant de commencer à planifier.</value></data>
+  <data name="Onb_TamanhoFamilia" xml:space="preserve"><value>Combien de personnes dans la famille ?</value></data>
+  <data name="Onb_TamanhoFamiliaAjuda" xml:space="preserve"><value>Nous l'utilisons pour suggérer des portions dans les recettes.</value></data>
+  <data name="Onb_FusoHorario" xml:space="preserve"><value>Fuseau horaire</value></data>
+  <data name="Onb_TiposRefeicao" xml:space="preserve"><value>Quels repas voulez-vous planifier ?</value></data>
+  <data name="Onb_Finalizar" xml:space="preserve"><value>Terminer et commencer</value></data>
+
+  <data name="Landing_Titulo" xml:space="preserve"><value>HomePlanner</value></data>
+  <data name="Landing_SubTitulo" xml:space="preserve"><value>Organisez la semaine de votre famille. Menu, courses et tâches — tout au même endroit.</value></data>
+  <data name="Landing_ComecarGratis" xml:space="preserve"><value>Commencer gratuitement</value></data>
+  <data name="Landing_Entrar" xml:space="preserve"><value>Se connecter</value></data>
+  <data name="Landing_BySideris" xml:space="preserve"><value>by SiderisX</value></data>
+
+  <data name="Dashboard_Saudacao" xml:space="preserve"><value>Bonjour ! On planifie la semaine ?</value></data>
+  <data name="Dashboard_CardapioDesc" xml:space="preserve"><value>Planifiez les repas de la semaine</value></data>
+  <data name="Dashboard_ReceitasDesc" xml:space="preserve"><value>recettes enregistrées</value></data>
+  <data name="Dashboard_ModelosDesc" xml:space="preserve"><value>Semaines favorites à réutiliser</value></data>
+  <data name="Dashboard_ListaComprasDesc" xml:space="preserve"><value>Liste de courses</value></data>
+  <data name="Dashboard_EmBreve" xml:space="preserve"><value>Bientôt disponible</value></data>
+  <data name="Dashboard_EstaSemana" xml:space="preserve"><value>Cette semaine</value></data>
+  <data name="Dashboard_VerCardapio" xml:space="preserve"><value>Voir le menu de la semaine</value></data>
+
+  <data name="Receita_Titulo" xml:space="preserve"><value>Recettes</value></data>
+  <data name="Receita_Nova" xml:space="preserve"><value>Nouvelle recette</value></data>
+  <data name="Receita_ImportarUrl" xml:space="preserve"><value>Importer depuis une URL</value></data>
+  <data name="Receita_Buscar" xml:space="preserve"><value>Rechercher des recettes...</value></data>
+  <data name="Receita_Nenhuma" xml:space="preserve"><value>Aucune recette trouvée.</value></data>
+  <data name="Receita_PrimeiraCriar" xml:space="preserve"><value>Créez la première !</value></data>
+  <data name="Receita_Porcoes" xml:space="preserve"><value>portions</value></data>
+  <data name="Receita_Min" xml:space="preserve"><value>min</value></data>
+  <data name="Receita_Ingr" xml:space="preserve"><value>ingr.</value></data>
+  <data name="Receita_NovaTitle" xml:space="preserve"><value>Nouvelle recette</value></data>
+  <data name="Receita_NomeLabel" xml:space="preserve"><value>Nom de la recette</value></data>
+  <data name="Receita_NumPorcoesLabel" xml:space="preserve"><value>Portions</value></data>
+  <data name="Receita_TempoLabel" xml:space="preserve"><value>Temps (min)</value></data>
+  <data name="Receita_UrlImagemLabel" xml:space="preserve"><value>URL de l'image (facultatif)</value></data>
+  <data name="Receita_ModoPreparoLabel" xml:space="preserve"><value>Préparation</value></data>
+  <data name="Receita_ObservacoesLabel" xml:space="preserve"><value>Remarques</value></data>
+  <data name="Receita_SalvoOk" xml:space="preserve"><value>Recette enregistrée !</value></data>
+  <data name="Receita_CriadaOk" xml:space="preserve"><value>Recette créée avec succès !</value></data>
+  <data name="Receita_ExcluidaOk" xml:space="preserve"><value>Recette supprimée.</value></data>
+  <data name="Receita_DuplicadaOk" xml:space="preserve"><value>Recette dupliquée !</value></data>
+  <data name="Receita_ExcluirConfirm" xml:space="preserve"><value>Supprimer cette recette ?</value></data>
+  <data name="Receita_SalvarBtn" xml:space="preserve"><value>Enregistrer la recette</value></data>
+
+  <data name="Ing_Label" xml:space="preserve"><value>Ingrédients</value></data>
+  <data name="Ing_IngredienteLabel" xml:space="preserve"><value>Ingrédient</value></data>
+  <data name="Ing_Qtde" xml:space="preserve"><value>Qté</value></data>
+  <data name="Ing_Unidade" xml:space="preserve"><value>Unité</value></data>
+  <data name="Ing_Obs" xml:space="preserve"><value>Note</value></data>
+  <data name="Ing_Opcional" xml:space="preserve"><value>Fac.</value></data>
+  <data name="Ing_Nenhum" xml:space="preserve"><value>Aucun ingrédient ajouté.</value></data>
+  <data name="Ing_Adicionar" xml:space="preserve"><value>Ajouter</value></data>
+
+  <data name="Importar_Titulo" xml:space="preserve"><value>Importer une recette depuis un site web</value></data>
+  <data name="Importar_Descricao" xml:space="preserve"><value>Collez l'URL de n'importe quel site utilisant le format schema.org/Recipe (AllRecipes, Tasty, etc.)</value></data>
+  <data name="Importar_UrlLabel" xml:space="preserve"><value>URL de la recette</value></data>
+  <data name="Importar_Preview" xml:space="preserve"><value>Aperçu de la recette importée</value></data>
+  <data name="Importar_IngTexto" xml:space="preserve"><value>Ingrédients importés</value></data>
+  <data name="Importar_IngAviso" xml:space="preserve"><value>Les ingrédients seront enregistrés sous forme de texte. Vous pouvez les associer au catalogue en modifiant la recette.</value></data>
+  <data name="Importar_SalvoOk" xml:space="preserve"><value>Recette importée et enregistrée !</value></data>
+  <data name="Importar_UrlInvalida" xml:space="preserve"><value>Saisissez une URL valide.</value></data>
+
+  <data name="Cardapio_Titulo" xml:space="preserve"><value>Menu de la semaine</value></data>
+  <data name="Cardapio_EstaSemana" xml:space="preserve"><value>Cette semaine</value></data>
+  <data name="Cardapio_Hoje" xml:space="preserve"><value>Aujourd'hui</value></data>
+  <data name="Cardapio_CopiarSemana" xml:space="preserve"><value>Copier vers la semaine prochaine</value></data>
+  <data name="Cardapio_SalvarModelo" xml:space="preserve"><value>Enregistrer comme modèle</value></data>
+  <data name="Cardapio_NomeModelo" xml:space="preserve"><value>Nom du modèle :</value></data>
+  <data name="Cardapio_SemanaCopiada" xml:space="preserve"><value>Semaine copiée !</value></data>
+  <data name="Cardapio_ModeloSalvo" xml:space="preserve"><value>Modèle enregistré !</value></data>
+
+  <data name="Dia_Segunda" xml:space="preserve"><value>Lun</value></data>
+  <data name="Dia_Terca" xml:space="preserve"><value>Mar</value></data>
+  <data name="Dia_Quarta" xml:space="preserve"><value>Mer</value></data>
+  <data name="Dia_Quinta" xml:space="preserve"><value>Jeu</value></data>
+  <data name="Dia_Sexta" xml:space="preserve"><value>Ven</value></data>
+  <data name="Dia_Sabado" xml:space="preserve"><value>Sam</value></data>
+  <data name="Dia_Domingo" xml:space="preserve"><value>Dim</value></data>
+
+  <data name="Refeicao_CafeManha" xml:space="preserve"><value>Petit-déjeuner</value></data>
+  <data name="Refeicao_Almoco" xml:space="preserve"><value>Déjeuner</value></data>
+  <data name="Refeicao_Lanche" xml:space="preserve"><value>Goûter</value></data>
+  <data name="Refeicao_Jantar" xml:space="preserve"><value>Dîner</value></data>
+  <data name="Refeicao_Ceia" xml:space="preserve"><value>Souper</value></data>
+
+  <data name="Seletor_Buscar" xml:space="preserve"><value>Rechercher une recette...</value></data>
+  <data name="Seletor_Porcoes" xml:space="preserve"><value>Portions souhaitées</value></data>
+  <data name="Seletor_LimparSlot" xml:space="preserve"><value>Vider l'emplacement</value></data>
+  <data name="Seletor_PorcoesBase" xml:space="preserve"><value>portions de base</value></data>
+  <data name="Seletor_Nenhuma" xml:space="preserve"><value>Aucune recette trouvée.</value></data>
+
+  <data name="Modelo_Titulo" xml:space="preserve"><value>Modèles de semaine</value></data>
+  <data name="Modelo_Descricao" xml:space="preserve"><value>Enregistrez vos semaines favorites comme modèles pour les réutiliser facilement.</value></data>
+  <data name="Modelo_Nenhum" xml:space="preserve"><value>Aucun modèle pour l'instant. Planifiez une semaine dans le menu et enregistrez-la comme modèle !</value></data>
+  <data name="Modelo_Aplicar" xml:space="preserve"><value>Appliquer à la semaine</value></data>
+  <data name="Modelo_AplicadoOk" xml:space="preserve"><value>Modèle appliqué avec succès !</value></data>
+  <data name="Modelo_ExcluidoOk" xml:space="preserve"><value>Modèle supprimé.</value></data>
+  <data name="Modelo_ExcluirConfirm" xml:space="preserve"><value>Supprimer ce modèle ?</value></data>
+  <data name="Modelo_Refeicoes" xml:space="preserve"><value>repas</value></data>
+  <data name="Modelo_CriarDica" xml:space="preserve"><value>Pour créer un modèle, allez dans le Menu et cliquez sur « Enregistrer comme modèle ».</value></data>
+
+  <!-- ── Paramètres ── -->
+  <data name="Cfg_Titulo" xml:space="preserve"><value>Paramètres</value></data>
+  <data name="Cfg_Subtitulo" xml:space="preserve"><value>Ajustez les préférences de votre famille.</value></data>
+
+  <!-- ── Famille ── -->
+  <data name="Fam_Titulo" xml:space="preserve"><value>Famille</value></data>
+  <data name="Fam_Subtitulo" xml:space="preserve"><value>Gérez qui fait partie de la famille et accède à HomePlanner.</value></data>
+  <data name="Fam_Adicionar" xml:space="preserve"><value>Ajouter un membre</value></data>
+  <data name="Fam_NovoMembro" xml:space="preserve"><value>Nouveau membre</value></data>
+  <data name="Fam_Nome" xml:space="preserve"><value>Nom</value></data>
+  <data name="Fam_Email" xml:space="preserve"><value>E-mail (connexion)</value></data>
+  <data name="Fam_Papel" xml:space="preserve"><value>Rôle</value></data>
+  <data name="Fam_PapelOwner" xml:space="preserve"><value>Administrateur</value></data>
+  <data name="Fam_PapelPai" xml:space="preserve"><value>Parent / Responsable</value></data>
+  <data name="Fam_PapelFilho" xml:space="preserve"><value>Enfant</value></data>
+  <data name="Fam_ConviteAjuda" xml:space="preserve"><value>Les parents ont un accès complet ; les enfants ont un accès restreint. Le membre reçoit une invitation par e-mail pour définir son mot de passe et se connecter.</value></data>
+  <data name="Fam_EnviarConvite" xml:space="preserve"><value>Envoyer l'invitation</value></data>
+  <data name="Fam_ConviteEnviado" xml:space="preserve"><value>Invitation envoyée par e-mail !</value></data>
+  <data name="Fam_MembroCriado" xml:space="preserve"><value>Membre créé. Partagez le lien d'invitation ci-dessous.</value></data>
+  <data name="Fam_LinkGerado" xml:space="preserve"><value>Lien d'invitation généré.</value></data>
+  <data name="Fam_LinkConviteManual" xml:space="preserve"><value>E-mail non configuré — partagez ce lien avec le membre pour qu'il définisse son mot de passe :</value></data>
+  <data name="Fam_Status" xml:space="preserve"><value>Statut</value></data>
+  <data name="Fam_Acoes" xml:space="preserve"><value>Actions</value></data>
+  <data name="Fam_Ativo" xml:space="preserve"><value>Actif</value></data>
+  <data name="Fam_Pendente" xml:space="preserve"><value>Invitation en attente</value></data>
+  <data name="Fam_Desativado" xml:space="preserve"><value>Désactivé</value></data>
+  <data name="Fam_ReenviarConvite" xml:space="preserve"><value>Renvoyer l'invitation</value></data>
+  <data name="Fam_Editar" xml:space="preserve"><value>Modifier les données</value></data>
+  <data name="Fam_EditarMembro" xml:space="preserve"><value>Modifier le membre</value></data>
+  <data name="Fam_EditarAjuda" xml:space="preserve"><value>Corrigez le nom ou l'e-mail. En changeant l'e-mail, renvoyez l'invitation à la bonne adresse.</value></data>
+  <data name="Fam_Remover" xml:space="preserve"><value>Supprimer le membre</value></data>
+  <data name="Fam_RemoverTitulo" xml:space="preserve"><value>Supprimer le membre</value></data>
+  <data name="Fam_RemoverConfirm" xml:space="preserve"><value>Supprimer « {0} » de la famille ? Cette action libère la place du forfait et est irréversible.</value></data>
+  <data name="Fam_MembroRemovido" xml:space="preserve"><value>Membre supprimé.</value></data>
+  <data name="Fam_TornarPai" xml:space="preserve"><value>Définir comme Parent / Responsable</value></data>
+  <data name="Fam_TornarFilho" xml:space="preserve"><value>Définir comme Enfant</value></data>
+  <data name="Fam_Desativar" xml:space="preserve"><value>Désactiver l'accès</value></data>
+  <data name="Fam_Reativar" xml:space="preserve"><value>Réactiver l'accès</value></data>
+  <data name="Fam_DesativarTitulo" xml:space="preserve"><value>Désactiver le membre</value></data>
+  <data name="Fam_DesativarConfirm" xml:space="preserve"><value>Le membre ne pourra pas se connecter jusqu'à sa réactivation. Continuer ?</value></data>
+  <data name="Fam_Uso" xml:space="preserve"><value>{0} sur {1} membres</value></data>
+  <data name="Fam_LimiteAtingido" xml:space="preserve"><value>Vous avez atteint la limite de {0} membre(s) de votre forfait actuel.</value></data>
+  <data name="Fam_VerPlanos" xml:space="preserve"><value>Voir les forfaits</value></data>
+
+  <!-- ── Compte / Navigation ── -->
+  <data name="Nav_Perfil" xml:space="preserve"><value>Mon profil</value></data>
+  <data name="Nav_Sair" xml:space="preserve"><value>Se déconnecter</value></data>
+  <data name="Nav_Tema" xml:space="preserve"><value>Thème</value></data>
+
+  <!-- ── Profil / Sécurité (2FA) ── -->
+  <data name="Perfil_Titulo" xml:space="preserve"><value>Sécurité du compte</value></data>
+  <data name="Perfil_Subtitulo" xml:space="preserve"><value>Protégez votre compte avec la vérification en deux étapes.</value></data>
+  <data name="Perfil_2FA_Ativado" xml:space="preserve"><value>Vérification en deux étapes activée. Votre compte bénéficie d'une couche de sécurité supplémentaire.</value></data>
+  <data name="Perfil_2FA_Desativado" xml:space="preserve"><value>Vérification en deux étapes désactivée. Activez-la pour renforcer la sécurité de votre compte.</value></data>
+  <data name="Perfil_2FA_AppTitulo" xml:space="preserve"><value>Application d'authentification</value></data>
+  <data name="Perfil_2FA_AppDesc" xml:space="preserve"><value>Utilisez Google Authenticator, Microsoft Authenticator ou une autre application compatible TOTP pour générer un code à chaque connexion.</value></data>
+  <data name="Perfil_2FA_Configurar" xml:space="preserve"><value>Configurer l'application d'authentification</value></data>
+  <data name="Perfil_2FA_PassoScan" xml:space="preserve"><value>Scannez le code QR avec votre application d'authentification, puis saisissez le code à 6 chiffres.</value></data>
+  <data name="Perfil_2FA_ChaveManual" xml:space="preserve"><value>Impossible de scanner ? Saisissez cette clé manuellement :</value></data>
+  <data name="Perfil_2FA_CodigoLabel" xml:space="preserve"><value>Code de l'authentificateur</value></data>
+  <data name="Perfil_2FA_VerificarAtivar" xml:space="preserve"><value>Vérifier et activer</value></data>
+  <data name="Perfil_2FA_InformeCodigo" xml:space="preserve"><value>Saisissez le code de votre application d'authentification.</value></data>
+  <data name="Perfil_2FA_AtivadoOk" xml:space="preserve"><value>Vérification en deux étapes activée avec succès !</value></data>
+  <data name="Perfil_2FA_Gerenciar" xml:space="preserve"><value>Gérer la vérification en deux étapes</value></data>
+  <data name="Perfil_2FA_NovosCodigos" xml:space="preserve"><value>Générer de nouveaux codes de récupération</value></data>
+  <data name="Perfil_2FA_NovosCodigosOk" xml:space="preserve"><value>Nouveaux codes de récupération générés. Enregistrez-les maintenant !</value></data>
+  <data name="Perfil_2FA_Desativar" xml:space="preserve"><value>Désactiver la vérification en deux étapes</value></data>
+  <data name="Perfil_2FA_DesativarConfirm" xml:space="preserve"><value>Êtes-vous sûr ? Votre compte ne sera protégé que par le mot de passe.</value></data>
+  <data name="Perfil_2FA_DesativadoOk" xml:space="preserve"><value>Vérification en deux étapes désactivée.</value></data>
+  <data name="Perfil_2FA_SalveCodigos" xml:space="preserve"><value>Enregistrez ces codes de récupération maintenant !</value></data>
+  <data name="Perfil_2FA_CodigosAjuda" xml:space="preserve"><value>Chaque code ne peut être utilisé qu'une seule fois. Conservez-les en lieu sûr — ils vous permettent d'accéder à votre compte si vous perdez votre application d'authentification.</value></data>
+
+  <!-- ── Profil / Photo ── -->
+  <data name="Perfil_Foto_Titulo" xml:space="preserve"><value>Photo de profil</value></data>
+  <data name="Perfil_Foto_Desc" xml:space="preserve"><value>Ajoutez une photo pour personnaliser votre compte. JPG, PNG, WEBP ou GIF, jusqu'à 2 Mo.</value></data>
+  <data name="Perfil_Foto_Enviar" xml:space="preserve"><value>Téléverser une photo</value></data>
+  <data name="Perfil_Foto_Alterar" xml:space="preserve"><value>Changer la photo</value></data>
+  <data name="Perfil_Foto_Remover" xml:space="preserve"><value>Supprimer la photo</value></data>
+  <data name="Perfil_Foto_Sucesso" xml:space="preserve"><value>Photo mise à jour avec succès !</value></data>
+  <data name="Perfil_Foto_Removida" xml:space="preserve"><value>Photo supprimée.</value></data>
+  <data name="Perfil_Foto_MuitoGrande" xml:space="preserve"><value>L'image dépasse la taille maximale autorisée (2 Mo).</value></data>
+
+  <!-- ── Profil / Notifications push ── -->
+  <data name="Perfil_Push_Titulo" xml:space="preserve"><value>Notifications</value></data>
+  <data name="Perfil_Push_Desc" xml:space="preserve"><value>Recevez des rappels de tâches et des avis de la famille sur cet appareil, même lorsque l'application est fermée.</value></data>
+  <data name="Perfil_Push_Toggle" xml:space="preserve"><value>Activer les notifications sur cet appareil</value></data>
+  <data name="Perfil_Push_AtivadoOk" xml:space="preserve"><value>Notifications activées sur cet appareil.</value></data>
+  <data name="Perfil_Push_DesativadoOk" xml:space="preserve"><value>Notifications désactivées sur cet appareil.</value></data>
+  <data name="Perfil_Push_Indisponivel" xml:space="preserve"><value>Les notifications ne sont pas encore configurées sur le serveur.</value></data>
+  <data name="Perfil_Push_NaoSuportado" xml:space="preserve"><value>Ce navigateur ne prend pas en charge les notifications push.</value></data>
+  <data name="Perfil_Push_PermissaoNegada" xml:space="preserve"><value>Autorisation des notifications refusée. Activez-la dans les paramètres du navigateur pour ce site.</value></data>
+  <data name="Perfil_Push_DicaIos" xml:space="preserve"><value>Sur iPhone/iPad, vous devez d'abord ajouter HomePlanner à l'écran d'accueil (Partager → Sur l'écran d'accueil) pour recevoir des notifications.</value></data>
+  <data name="Perfil_Push_Testar" xml:space="preserve"><value>Envoyer une notification de test</value></data>
+  <data name="Perfil_Push_TesteEnviado" xml:space="preserve"><value>Notification de test envoyée !</value></data>
+  <data name="Perfil_Push_TesteTitulo" xml:space="preserve"><value>HomePlanner</value></data>
+  <data name="Perfil_Push_TesteCorpo" xml:space="preserve"><value>Ça a marché ! Vos notifications sont actives. 🎉</value></data>
+
+  <!-- ── Paramètres / Rappel ── -->
+  <data name="Cfg_Antecedencia" xml:space="preserve"><value>Délai du rappel (minutes)</value></data>
+  <data name="Cfg_AntecedenciaAjuda" xml:space="preserve"><value>Combien de minutes avant l'heure de la tâche nous envoyons la notification. Utilisez 0 pour avertir à l'heure pile. S'applique à toute la famille.</value></data>
+
+  <!-- ── Textes des notifications push ── -->
+  <data name="Push_Lembrete_Corpo" xml:space="preserve"><value>Commence à {0}.</value></data>
+  <data name="Push_TarefaAtribuida_Titulo" xml:space="preserve"><value>Nouvelle tâche pour vous</value></data>
+  <data name="Push_TarefaAtribuida_Corpo" xml:space="preserve"><value>Tâche assignée : {0}</value></data>
+  <data name="Push_Lembrete_Pais_Corpo" xml:space="preserve"><value>Tâche de {0} · commence à {1}.</value></data>
+
+  <!-- ── Planner / Avertir les parents ── -->
+  <data name="Planner_NotificarPaisLabel" xml:space="preserve"><value>Avertir un parent dans le rappel</value></data>
+</root>

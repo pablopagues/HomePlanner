@@ -241,7 +241,7 @@ try
     // ── Localization — PublicLangCookieProvider é o único árbitro ────────────
     app.UseRequestLocalization(opts =>
     {
-        var suportados = new[] { "pt-BR", "en", "es" };
+        var suportados = new[] { "pt-BR", "en", "es", "fr" };
         opts.SetDefaultCulture("pt-BR")
             .AddSupportedCultures(suportados)
             .AddSupportedUICultures(suportados);
@@ -250,7 +250,7 @@ try
         opts.RequestCultureProviders.Add(new PublicLangCookieProvider());
     });
 
-    // ── Troca de idioma (GET /set-lang?lang=pt|en|es&returnUrl=/) ────────────
+    // ── Troca de idioma (GET /set-lang?lang=pt|en|es|fr&returnUrl=/) ─────────
     app.MapGet("/set-lang", async (string? lang, string? returnUrl, HttpContext ctx, HomePlannerDbContext db) =>
     {
         if (PublicLanguageService.IsLangValida(lang))

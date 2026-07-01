@@ -1,0 +1,105 @@
+@* Dialog somente-leitura para visualizar os detalhes de uma tarefa *@
+@using Application.HomePlanner.DTOs.Planner
+@using Domain.HomePlanner.Models.Enums
+@inject IStringLocalizer<SharedResource> L
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">@L["Planner_Detalhes"]</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudStack Spacing="3">
+            <div>
+                <MudText Typo="Typo.h6" Style="font-weight:500;">@Tarefa.Titulo</MudText>
+                <MudChip T="string" Size="Size.Small"
+                         Color="@(Tarefa.Concluida ? Color.Success : Color.Default)"
+                         Icon="@(Tarefa.Concluida ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.Schedule)">
+                    @(Tarefa.Concluida ? L["Planner_StatusConcluida"] : L["Planner_StatusPendente"])
+                </MudChip>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(Tarefa.Descricao))
+            {
+                <div>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">@L["Planner_DescricaoLabel"]</MudText>
+                    <MudText Typo="Typo.body2" Style="white-space:pre-wrap;">@Tarefa.Descricao</MudText>
+                </div>
+            }
+
+            @if (Tarefa.DataPrevista.HasValue)
+            {
+                <div>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">@L["Planner_DataLabel"]</MudText>
+                    <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
+                        <MudIcon Icon="@Icons.Material.Filled.Event" Size="Size.Small" />
+                        <MudText Typo="Typo.body2">
+                            @Tarefa.DataPrevista.Value.ToString("dd/MM/yyyy")
+                            @if (Tarefa.HoraInicio.HasValue)
+                            {
+                                <span> · @FormatarHorario(Tarefa.HoraInicio, Tarefa.HoraFim)</span>
+                            }
+                        </MudText>
+                    </MudStack>
+                </div>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(Tarefa.ResponsavelNome))
+            {
+                <div>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">@L["Planner_ResponsavelLabel"]</MudText>
+                    <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
+                        <AvatarUsuario UsuarioId="@Tarefa.ResponsavelUsuarioId" Nome="@Tarefa.ResponsavelNome"
+                                       Versao="@Tarefa.ResponsavelFotoVersao" Px="24" />
+                        <MudText Typo="Typo.body2">@Tarefa.ResponsavelNome</MudText>
+                    </MudStack>
+                </div>
+            }
+
+            <div>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">@L["Planner_RecorrenciaLabel"]</MudText>
+                <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
+                    @if (Tarefa.Recorrencia != Recorrencia.Nenhuma)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Repeat" Size="Size.Small" />
+                    }
+                    <MudText Typo="Typo.body2">@NomeRecorrencia(Tarefa.Recorrencia)</MudText>
+                </MudStack>
+            </div>
+
+            @if (Tarefa.Visibilidade == VisibilidadeTarefa.Privada)
+            {
+                <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
+                    <MudIcon Icon="@Icons.Material.Filled.Lock" Size="Size.Small" Color="Color.Secondary" />
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">@L["Planner_PrivadaLabel"]</MudText>
+                </MudStack>
+            }
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Fechar">@L["Btn_Fechar"]</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter, EditorRequired] public TarefaListaDTO Tarefa { get; set; } = null!;
+
+    private void Fechar() => MudDialog.Close();
+
+    private static string FormatarHorario(TimeOnly? inicio, TimeOnly? fim)
+    {
+        if (!inicio.HasValue) return string.Empty;
+        return fim.HasValue
+            ? $"{inicio.Value:HH\\:mm}–{fim.Value:HH\\:mm}"
+            : inicio.Value.ToString("HH\\:mm");
+    }
+
+    private string NomeRecorrencia(Recorrencia r) => r switch
+    {
+        Recorrencia.Diaria  => L["Recorrencia_Diaria"],
+        Recorrencia.Semanal => L["Recorrencia_Semanal"],
+        Recorrencia.Mensal  => L["Recorrencia_Mensal"],
+        _                   => L["Recorrencia_Nenhuma"],
+    };
+}

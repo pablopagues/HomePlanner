@@ -55,7 +55,14 @@
       "Skill(claude-api)",
       "Skill(claude-api:*)",
       "PowerShell(dotnet add \"src\\\\Infrastructure.HomePlanner\\\\Infrastructure.HomePlanner.csproj\" package Anthropic)",
-      "PowerShell(dotnet add \"d:\\\\_MeuCodigoDotNet\\\\HomePlanner\\\\HomePlanner\\\\HomePlanner\\\\src\\\\Infrastructure.HomePlanner\\\\Infrastructure.HomePlanner.csproj\" package Anthropic)"
+      "PowerShell(dotnet add \"d:\\\\_MeuCodigoDotNet\\\\HomePlanner\\\\HomePlanner\\\\HomePlanner\\\\src\\\\Infrastructure.HomePlanner\\\\Infrastructure.HomePlanner.csproj\" package Anthropic)",
+      "PowerShell($f='HomePlanner\\\\src\\\\HomePlanner.BlazorServer\\\\Resources\\\\SharedResource.es.resx'; \\([regex]::Matches\\(\\(Get-Content $f -Raw\\),'<data '\\)\\).Count)",
+      "PowerShell($es='HomePlanner\\\\src\\\\HomePlanner.BlazorServer\\\\Resources\\\\SharedResource.es.resx'; $pt='HomePlanner\\\\src\\\\HomePlanner.BlazorServer\\\\Resources\\\\SharedResource.resx'; $en='HomePlanner\\\\src\\\\HomePlanner.BlazorServer\\\\Resources\\\\SharedResource.en.resx'; \"es lines: $\\(\\(Get-Content $es\\).Count\\)  data: $\\(\\([regex]::Matches\\(\\(Get-Content $es -Raw\\),'<data name'\\)\\).Count\\)\"; \"pt lines: $\\(\\(Get-Content $pt\\).Count\\)  data: $\\(\\([regex]::Matches\\(\\(Get-Content $pt -Raw\\),'<data name'\\)\\).Count\\)\"; \"en lines: $\\(\\(Get-Content $en\\).Count\\)  data: $\\(\\([regex]::Matches\\(\\(Get-Content $en -Raw\\),'<data name'\\)\\).Count\\)\")",
+      "PowerShell($es='HomePlanner\\\\src\\\\HomePlanner.BlazorServer\\\\Resources\\\\SharedResource.es.resx'; $fr='HomePlanner\\\\src\\\\HomePlanner.BlazorServer\\\\Resources\\\\SharedResource.fr.resx'; $esk=\\([regex]::Matches\\(\\(Get-Content $es -Raw\\),'<data name=\"\\([^\"]+\\)\"'\\) | ForEach-Object { $_.Groups[1].Value }\\); $frk=\\([regex]::Matches\\(\\(Get-Content $fr -Raw\\),'<data name=\"\\([^\"]+\\)\"'\\) | ForEach-Object { $_.Groups[1].Value }\\); \"es=$\\($esk.Count\\) fr=$\\($frk.Count\\)\"; \"Faltando no FR:\"; \\(Compare-Object $esk $frk | Where-Object SideIndicator -eq '<='\\).InputObject; \"Extra no FR:\"; \\(Compare-Object $esk $frk | Where-Object SideIndicator -eq '=>'\\).InputObject; \"Duplicadas no FR:\"; \\($frk | Group-Object | Where-Object Count -gt 1 | ForEach-Object Name\\))",
+      "PowerShell(dotnet build HomePlanner\\\\src\\\\HomePlanner.BlazorServer\\\\HomePlanner.BlazorServer.csproj -nologo -clp:ErrorsOnly)",
+      "PowerShell(dotnet build \"src\\\\HomePlanner.BlazorServer\\\\HomePlanner.BlazorServer.csproj\" -c Debug --nologo -v q 2>$null)",
+      "PowerShell(dotnet build \"HomePlanner\\\\src\\\\HomePlanner.BlazorServer\\\\HomePlanner.BlazorServer.csproj\" -c Debug --nologo -v q 2>$null)",
+      "PowerShell(dotnet build $proj -c Debug --nologo -v q 2>&1)"
     ]
   }
 }

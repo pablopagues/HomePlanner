@@ -3,33 +3,48 @@
 @using HomePlanner.BlazorServer.Routing
 @using HomePlanner.BlazorServer.Services
 
-<MudStack Row="true" Spacing="0" AlignItems="AlignItems.Center">
-    <MudButton Size="Size.Small"
-               Variant="@(Lang.IsPortugues ? Variant.Filled : Variant.Text)"
-               Color="@(Lang.IsPortugues ? Color.Primary : Color.Default)"
-               Style="min-width:36px; padding:4px 8px; font-size:0.75rem;"
-               OnClick="@(() => TrocarIdioma("pt"))">
-        PT
-    </MudButton>
-    <MudButton Size="Size.Small"
-               Variant="@(Lang.IsIngles ? Variant.Filled : Variant.Text)"
-               Color="@(Lang.IsIngles ? Color.Primary : Color.Default)"
-               Style="min-width:36px; padding:4px 8px; font-size:0.75rem;"
-               OnClick="@(() => TrocarIdioma("en"))">
-        EN
-    </MudButton>
-    <MudButton Size="Size.Small"
-               Variant="@(Lang.IsEspanhol ? Variant.Filled : Variant.Text)"
-               Color="@(Lang.IsEspanhol ? Color.Primary : Color.Default)"
-               Style="min-width:36px; padding:4px 8px; font-size:0.75rem;"
-               OnClick="@(() => TrocarIdioma("es"))">
-        ES
-    </MudButton>
-</MudStack>
+<MudMenu AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft" Dense="true">
+    <ActivatorContent>
+        <MudButton Size="Size.Small"
+                   Variant="Variant.Text"
+                   Color="Color.Inherit"
+                   StartIcon="@Icons.Material.Filled.Language"
+                   EndIcon="@Icons.Material.Filled.ArrowDropDown"
+                   Style="min-width:64px; padding:4px 8px; font-size:0.75rem;">
+            @CodigoAtual
+        </MudButton>
+    </ActivatorContent>
+    <ChildContent>
+        @foreach (var idioma in _idiomas)
+        {
+            <MudMenuItem OnClick="@(() => TrocarIdioma(idioma.Codigo))">
+                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                    <span>@idioma.Nome</span>
+                    @if (idioma.Codigo == Lang.Lang)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" Color="Color.Primary" />
+                    }
+                </MudStack>
+            </MudMenuItem>
+        }
+    </ChildContent>
+</MudMenu>
 
 @code {
+    private readonly (string Codigo, string Rotulo, string Nome)[] _idiomas =
+    [
+        ("pt", "PT", "Português"),
+        ("en", "EN", "English"),
+        ("es", "ES", "Español"),
+        ("fr", "FR", "Français"),
+    ];
+
+    private string CodigoAtual =>
+        _idiomas.FirstOrDefault(i => i.Codigo == Lang.Lang).Rotulo ?? "PT";
+
     private void TrocarIdioma(string novoLang)
     {
+        if (novoLang == Lang.Lang) return;
         var currentPath = "/" + Nav.ToBaseRelativePath(Nav.Uri).Split('?')[0];
         var targetPath  = UrlMap.Translate(currentPath, Lang.Lang, novoLang);
         Nav.NavigateTo(
