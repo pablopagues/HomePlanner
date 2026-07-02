@@ -37,6 +37,7 @@ public class PedidoCompraRepository : IPedidoCompraRepository
                 SolicitanteNome             = p.Solicitante != null ? p.Solicitante.NomeCompleto : string.Empty,
                 SolicitanteFotoAtualizadaEm = p.Solicitante != null ? p.Solicitante.FotoAtualizadaEm : null,
                 Comprado                    = p.Comprado,
+                ListaId                     = p.ListaId,
             })
             .ToListAsync(ct);
     }

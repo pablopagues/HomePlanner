@@ -11,6 +11,9 @@ public class PedidoCompraDTO
     public DateTime? SolicitanteFotoAtualizadaEm { get; init; }
     public bool Comprado { get; init; }
 
+    /// <summary>Lista/loja para onde o pedido foi remanejado (null = balde "Geral").</summary>
+    public int? ListaId { get; set; }
+
     /// <summary>Usuário atual pode editar/remover este pedido (Owner/Membro ou o próprio solicitante).</summary>
     public bool PodeEditar { get; set; }
 

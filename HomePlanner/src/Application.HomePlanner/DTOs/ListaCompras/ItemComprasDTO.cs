@@ -12,6 +12,9 @@ public class ItemComprasDTO
     public string NomeUnidade { get; init; } = string.Empty;
     public TipoUnidadeMedida Tipo { get; init; }
 
+    /// <summary>Loja para onde o item foi remanejado (preferência do ingrediente; null = "Geral").</summary>
+    public int? ListaId { get; set; }
+
     public string QuantidadeFormatada =>
         Quantidade == Math.Floor(Quantidade)
             ? $"{(int)Quantidade} {CodigoUnidade}"

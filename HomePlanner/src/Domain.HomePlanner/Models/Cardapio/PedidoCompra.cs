@@ -30,6 +30,9 @@ public class PedidoCompra : ITenantEntity, IDeletableEntity, IAuditable
     public bool Comprado { get; set; }
     public DateTime? DataCompra { get; set; }
 
+    /// <summary>Lista/loja para onde o pedido foi remanejado (null = balde "Geral").</summary>
+    public int? ListaId { get; set; }
+
     // IDeletableEntity
     public bool IsDeleted { get; set; }
     public DateTime? DeletedAt { get; set; }
@@ -43,4 +46,5 @@ public class PedidoCompra : ITenantEntity, IDeletableEntity, IAuditable
 
     // Navigation
     public Usuario? Solicitante { get; set; }
+    public ListaCompra? Lista { get; set; }
 }

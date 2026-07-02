@@ -17,6 +17,7 @@ public class ListaComprasService : IListaComprasService
     private readonly IUnidadeMedidaRepository _unidadeRepo;
     private readonly IIngredienteRepository _ingredienteRepo;
     private readonly IMarcacaoCompraRepository _marcacaoRepo;
+    private readonly IListaCompraRepository _listaRepo;
     private readonly TenantContextAccessor _tenantAccessor;
     private readonly ILogger<ListaComprasService> _logger;
 
@@ -26,6 +27,7 @@ public class ListaComprasService : IListaComprasService
         IUnidadeMedidaRepository unidadeRepo,
         IIngredienteRepository ingredienteRepo,
         IMarcacaoCompraRepository marcacaoRepo,
+        IListaCompraRepository listaRepo,
         TenantContextAccessor tenantAccessor,
         ILogger<ListaComprasService> logger)
     {
@@ -34,6 +36,7 @@ public class ListaComprasService : IListaComprasService
         _unidadeRepo  = unidadeRepo;
         _ingredienteRepo = ingredienteRepo;
         _marcacaoRepo = marcacaoRepo;
+        _listaRepo    = listaRepo;
         _tenantAccessor = tenantAccessor;
         _logger = logger;
     }
@@ -127,6 +130,9 @@ public class ListaComprasService : IListaComprasService
             alvo.QtdBase += item.QtdBase;
         }
 
+        // Loja padrão (preferência) de cada ingrediente para já posicionar o item na loja certa.
+        var preferencias = await _listaRepo.ObterPreferenciasAsync(ct);
+
         var itens = acumulador.Values
             .OrderBy(i => i.Nome)
             .Select(a =>
@@ -140,6 +146,7 @@ public class ListaComprasService : IListaComprasService
                     CodigoUnidade   = codigo,
                     NomeUnidade     = nome,
                     Tipo            = a.Tipo,
+                    ListaId         = preferencias.TryGetValue(a.IngredienteId, out var lid) ? lid : null,
                 };
             })
             .ToList();

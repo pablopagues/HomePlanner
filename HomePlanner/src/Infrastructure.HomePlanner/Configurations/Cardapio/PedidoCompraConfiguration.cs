@@ -24,5 +24,10 @@ public class PedidoCompraConfiguration : IEntityTypeConfiguration<PedidoCompra>
             .WithMany()
             .HasForeignKey(p => p.SolicitanteUsuarioId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(p => p.Lista)
+            .WithMany()
+            .HasForeignKey(p => p.ListaId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

@@ -1,0 +1,34 @@
+@* Menu compacto para remanejar um item de compra para uma loja/lista (ou "Geral"). *@
+@using Application.HomePlanner.DTOs.ListaCompras
+@inject IStringLocalizer<SharedResource> L
+
+<MudMenu Icon="@Icons.Material.Filled.MoveToInbox" Size="Size.Small" Dense="true"
+         AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft"
+         Tooltip="@L["Compras_MoverPara"]">
+    @foreach (var loja in Lojas)
+    {
+        <MudMenuItem OnClick="@(() => Mover(loja.Id))"
+                     Disabled="@(loja.Id == ListaAtualId)"
+                     Icon="@IconesLoja.Resolver(loja.Icone)"
+                     IconColor="Color.Primary">
+            @loja.Nome
+        </MudMenuItem>
+    }
+    @if (Lojas.Count > 0)
+    {
+        <MudDivider />
+    }
+    <MudMenuItem OnClick="@(() => Mover(null))"
+                 Disabled="@(ListaAtualId is null)"
+                 Icon="@Icons.Material.Filled.Inbox">
+        @L["Compras_LojaGeral"]
+    </MudMenuItem>
+</MudMenu>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<ListaCompraDTO> Lojas { get; set; } = [];
+    [Parameter] public int? ListaAtualId { get; set; }
+    [Parameter] public EventCallback<int?> OnMover { get; set; }
+
+    private Task Mover(int? listaId) => OnMover.InvokeAsync(listaId);
+}

@@ -261,6 +261,18 @@
   <data name="Compras_Comprado" xml:space="preserve"><value>comprado</value></data>
   <data name="Compras_SemSolicitante" xml:space="preserve"><value>Sem membro</value></data>
   <data name="Compras_RemoverPedidoConfirm" xml:space="preserve"><value>Deseja remover este pedido da lista?</value></data>
+  <data name="Compras_MoverPara" xml:space="preserve"><value>Mover para</value></data>
+  <data name="Compras_LojaGeral" xml:space="preserve"><value>Geral</value></data>
+  <data name="Compras_GerenciarLojas" xml:space="preserve"><value>Gerenciar listas</value></data>
+  <data name="Compras_GerenciarLojasAjuda" xml:space="preserve"><value>Crie listas por loja (Walmart, Costco, farmácia…) e remaneje os itens para organizar onde comprar.</value></data>
+  <data name="Compras_LojaIcone" xml:space="preserve"><value>Ícone</value></data>
+  <data name="Compras_LojaCor" xml:space="preserve"><value>Cor</value></data>
+  <data name="Compras_NovaLoja" xml:space="preserve"><value>Nova lista</value></data>
+  <data name="Compras_AdicionarLoja" xml:space="preserve"><value>Adicionar</value></data>
+  <data name="Compras_ExcluirLojaConfirm" xml:space="preserve"><value>Excluir esta lista? Os itens voltam para o balde Geral.</value></data>
+  <data name="Compras_PorMembro" xml:space="preserve"><value>Por membro</value></data>
+  <data name="Compras_PorLoja" xml:space="preserve"><value>Por loja</value></data>
+  <data name="Compras_Agrupar" xml:space="preserve"><value>Agrupar sob um produto base</value></data>
 
   <!-- ── Planner / Tarefas ── -->
   <data name="Planner_Titulo" xml:space="preserve"><value>Tarefas da família</value></data>

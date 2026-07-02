@@ -1,0 +1,168 @@
+@* Diálogo: cria/edita/exclui as listas (lojas) de compra do tenant. *@
+@using Application.HomePlanner.DTOs.ListaCompras
+@using Application.HomePlanner.Services.ListaCompras
+@inject IListaCompraService LojaService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResource> L
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">@L["Compras_GerenciarLojas"]</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
+            @L["Compras_GerenciarLojasAjuda"]
+        </MudText>
+
+        @foreach (var loja in _lojas)
+        {
+            <MudPaper Class="pa-2 mb-2" Elevation="0"
+                      Style="border:1px solid var(--mud-palette-lines-default); border-radius:8px;">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                    <MudAvatar Style="@($"height:32px;width:32px;flex:none;background:{loja.Cor ?? "var(--mud-palette-primary)"};")">
+                        <MudIcon Icon="@IconesLoja.Resolver(loja.Icone)" Size="Size.Small" Style="color:#fff;" />
+                    </MudAvatar>
+
+                    <MudTextField T="string" @bind-Value="loja.Nome" Variant="Variant.Text"
+                                  Margin="Margin.Dense" Style="flex:1;"
+                                  OnBlur="@(() => SalvarLoja(loja))" />
+
+                    @* Ícone *@
+                    <MudMenu Icon="@Icons.Material.Filled.EmojiSymbols" Size="Size.Small"
+                             Tooltip="@L["Compras_LojaIcone"]" Dense="true">
+                        @foreach (var chave in IconesLoja.Presets.Keys)
+                        {
+                            <MudMenuItem OnClick="@(() => DefinirIcone(loja, chave))" Icon="@IconesLoja.Resolver(chave)" />
+                        }
+                    </MudMenu>
+
+                    @* Cor *@
+                    <MudMenu Icon="@Icons.Material.Filled.Palette" Size="Size.Small"
+                             Tooltip="@L["Compras_LojaCor"]" Dense="true">
+                        <div style="display:flex;flex-wrap:wrap;gap:6px;padding:8px;max-width:180px;">
+                            @foreach (var cor in _cores)
+                            {
+                                <div @onclick="@(() => DefinirCor(loja, cor))"
+                                     style="@($"width:24px;height:24px;border-radius:50%;cursor:pointer;background:{cor};border:2px solid {(loja.Cor == cor ? "var(--mud-palette-text-primary)" : "transparent")};")"></div>
+                            }
+                        </div>
+                    </MudMenu>
+
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                                   OnClick="@(() => ExcluirLoja(loja))" />
+                </MudStack>
+            </MudPaper>
+        }
+
+        @* ── Nova loja ─────────────────────────────────────────────── *@
+        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center" Class="mt-4">
+            <MudTextField @bind-Value="_novoNome" Label="@L["Compras_NovaLoja"]"
+                          Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true"
+                          Style="flex:1;"
+                          OnKeyDown="@(async (e) => { if (e.Key == "Enter") await CriarLoja(); })" />
+            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add" OnClick="CriarLoja">
+                @L["Compras_AdicionarLoja"]
+            </MudButton>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Fechar">@L["Btn_Fechar"]</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+
+    private List<LojaEdit> _lojas = [];
+    private string? _novoNome;
+    private bool _mudou;
+
+    private static readonly string[] _cores =
+    {
+        "#2E7D32", "#1565C0", "#6A1B9A", "#C62828", "#EF6C00",
+        "#00838F", "#AD1457", "#4E342E", "#37474F", "#558B2F",
+    };
+
+    protected override async Task OnInitializedAsync() => await CarregarAsync();
+
+    private async Task CarregarAsync()
+    {
+        var listas = await LojaService.ListarAsync();
+        _lojas = listas.Select(l => new LojaEdit
+        {
+            Id = l.Id, Nome = l.Nome, Icone = l.Icone, Cor = l.Cor,
+        }).ToList();
+    }
+
+    private async Task CriarLoja()
+    {
+        if (string.IsNullOrWhiteSpace(_novoNome)) return;
+        var res = await LojaService.CriarAsync(new ListaCompraPersistenciaDTO
+        {
+            Nome  = _novoNome,
+            Icone = IconesLoja.Padrao,
+            Cor   = _cores[0],
+        });
+        if (res.Sucesso)
+        {
+            _novoNome = null;
+            _mudou = true;
+            await CarregarAsync();
+        }
+        else
+            Snackbar.Add(string.Join(", ", res.Erros), Severity.Error);
+    }
+
+    private async Task SalvarLoja(LojaEdit loja)
+    {
+        if (string.IsNullOrWhiteSpace(loja.Nome)) { await CarregarAsync(); return; }
+        var res = await LojaService.AtualizarAsync(loja.Id, new ListaCompraPersistenciaDTO
+        {
+            Nome = loja.Nome, Icone = loja.Icone, Cor = loja.Cor,
+        });
+        if (res.Sucesso) _mudou = true;
+        else Snackbar.Add(string.Join(", ", res.Erros), Severity.Error);
+    }
+
+    private async Task DefinirIcone(LojaEdit loja, string chave)
+    {
+        loja.Icone = chave;
+        await SalvarLoja(loja);
+    }
+
+    private async Task DefinirCor(LojaEdit loja, string cor)
+    {
+        loja.Cor = cor;
+        await SalvarLoja(loja);
+    }
+
+    private async Task ExcluirLoja(LojaEdit loja)
+    {
+        var confirm = await DialogService.ShowMessageBox(
+            L["Confirmacao_Titulo"],
+            L["Compras_ExcluirLojaConfirm"],
+            yesText: L["Btn_Excluir"], cancelText: L["Btn_Cancelar"]);
+        if (confirm != true) return;
+
+        var res = await LojaService.ExcluirAsync(loja.Id);
+        if (res.Sucesso)
+        {
+            _mudou = true;
+            await CarregarAsync();
+        }
+        else
+            Snackbar.Add(string.Join(", ", res.Erros), Severity.Error);
+    }
+
+    private void Fechar() => MudDialog.Close(DialogResult.Ok(_mudou));
+
+    private class LojaEdit
+    {
+        public int Id { get; set; }
+        public string Nome { get; set; } = string.Empty;
+        public string? Icone { get; set; }
+        public string? Cor { get; set; }
+    }
+}

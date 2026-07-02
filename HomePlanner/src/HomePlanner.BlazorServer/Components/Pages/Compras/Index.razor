@@ -8,6 +8,7 @@
 @using Application.HomePlanner.Services.ListaCompras
 @inject IListaComprasService Service
 @inject IPedidoCompraService PedidoService
+@inject IListaCompraService LojaService
 @inject IIngredienteService IngService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
@@ -80,6 +81,35 @@
     </MudPaper>
 }
 
+@* ── Barra: agrupar por membro/loja + gerenciar lojas ───────────────────── *@
+@if (!Mural.Ativo)
+{
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4" Wrap="Wrap.Wrap">
+        <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small">
+            <MudButton Variant="@(_agruparPorLoja ? Variant.Outlined : Variant.Filled)"
+                       Color="@(_agruparPorLoja ? Color.Default : Color.Primary)"
+                       StartIcon="@Icons.Material.Filled.Groups"
+                       OnClick="@(() => _agruparPorLoja = false)">
+                @L["Compras_PorMembro"]
+            </MudButton>
+            <MudButton Variant="@(_agruparPorLoja ? Variant.Filled : Variant.Outlined)"
+                       Color="@(_agruparPorLoja ? Color.Primary : Color.Default)"
+                       StartIcon="@Icons.Material.Filled.Storefront"
+                       OnClick="@(() => _agruparPorLoja = true)">
+                @L["Compras_PorLoja"]
+            </MudButton>
+        </MudButtonGroup>
+
+        @if (_podeGerenciar)
+        {
+            <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Store" OnClick="AbrirGerenciarLojas">
+                @L["Compras_GerenciarLojas"]
+            </MudButton>
+        }
+    </MudStack>
+}
+
 @if (_carregando)
 {
     <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
@@ -119,6 +149,35 @@ else if (_lista is not null)
         </MudAlert>
     }
 
+    @* ═══ Visão agrupada por LOJA ═══════════════════════════════════════ *@
+    @if (_agruparPorLoja)
+    {
+        var grupos = AgruparPorLoja();
+        @if (grupos.Count == 0)
+        {
+            <MudText Typo="Typo.body2" Color="Color.Secondary">@L["Compras_TudoComprado"]</MudText>
+        }
+        @foreach (var g in grupos)
+        {
+            <MudPaper Class="pa-4 mb-4" Elevation="0"
+                      Style="border:1px solid var(--mud-palette-lines-default); border-radius:10px;">
+                @RenderCabecalhoLoja(g.Loja, g.Cardapio.Count + g.Pedidos.Count)
+                <MudGrid Spacing="2">
+                    @foreach (var item in g.Cardapio)
+                    {
+                        @RenderItemCardapio(item, true)
+                    }
+                    @foreach (var pedido in g.Pedidos)
+                    {
+                        @RenderPedido(pedido, true)
+                    }
+                </MudGrid>
+            </MudPaper>
+        }
+    }
+    else
+    {
+    @* ═══ Visão agrupada por MEMBRO (padrão) ════════════════════════════ *@
     @* ── Categoria: Cardápio da semana ──────────────────────────────────── *@
     @if (mostrarCardapio)
     {
@@ -165,37 +224,7 @@ else if (_lista is not null)
             <MudGrid Spacing="2">
                 @foreach (var item in ItensCardapioVisiveis())
                 {
-                    var jaTenho = _jaTenho.GetValueOrDefault(item.IngredienteId);
-
-                    <MudItem xs="12" sm="6" md="4">
-                        <MudPaper Class="pa-3"
-                                  Style="@($"border-radius:8px; border:1px solid {(jaTenho ? "var(--mud-palette-success)" : "var(--mud-palette-lines-default)")}; background:{(jaTenho ? "var(--mud-palette-success-hover)" : "var(--mud-palette-surface)")}; transition:all 200ms;")"
-                                  Elevation="0">
-                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                                <MudCheckBox T="bool"
-                                             Value="@jaTenho"
-                                             ValueChanged="@(async (bool val) => await TrocarJaTenho(item.IngredienteId, val))"
-                                             ReadOnly="Mural.Ativo" Color="Color.Success" />
-                                <MudStack Spacing="0" Style="flex:1; min-width:0;">
-                                    <MudText Typo="Typo.body2"
-                                             Style="@(jaTenho ? "text-decoration:line-through; opacity:0.55;" : "font-weight:500;")">
-                                        @item.NomeIngrediente
-                                    </MudText>
-                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
-                                        @item.QuantidadeFormatada
-                                    </MudText>
-                                </MudStack>
-                                @if (!Mural.Ativo)
-                                {
-                                    <MudTooltip Text="Agrupar sob um produto base">
-                                        <MudIconButton Icon="@Icons.Material.Filled.Merge"
-                                                       Size="Size.Small" Color="Color.Default"
-                                                       OnClick="@(() => AbrirAgrupar(item))" />
-                                    </MudTooltip>
-                                }
-                            </MudStack>
-                        </MudPaper>
-                    </MudItem>
+                    @RenderItemCardapio(item, false)
                 }
             </MudGrid>
             }
@@ -240,40 +269,12 @@ else if (_lista is not null)
             <MudGrid Spacing="2">
                 @foreach (var pedido in itensGrupo)
                 {
-                    <MudItem xs="12" sm="6" md="4">
-                        <MudPaper Class="pa-3"
-                                  Style="@($"border-radius:8px; border:1px solid {(pedido.Comprado ? "var(--mud-palette-success)" : "var(--mud-palette-lines-default)")}; background:{(pedido.Comprado ? "var(--mud-palette-success-hover)" : "var(--mud-palette-surface)")}; transition:all 200ms;")"
-                                  Elevation="0">
-                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                                <MudCheckBox T="bool"
-                                             Value="@pedido.Comprado"
-                                             ValueChanged="@(async (bool val) => await TrocarComprado(pedido, val))"
-                                             ReadOnly="@(Mural.Ativo || !pedido.PodeEditar)" Color="Color.Success" />
-                                <MudStack Spacing="0" Style="flex:1; min-width:0;">
-                                    <MudText Typo="Typo.body2"
-                                             Style="@(pedido.Comprado ? "text-decoration:line-through; opacity:0.55;" : "font-weight:500;")">
-                                        @pedido.Descricao
-                                    </MudText>
-                                    @if (!string.IsNullOrWhiteSpace(pedido.Quantidade))
-                                    {
-                                        <MudText Typo="Typo.caption" Color="Color.Secondary">
-                                            @pedido.Quantidade
-                                        </MudText>
-                                    }
-                                </MudStack>
-                                @if (!Mural.Ativo && pedido.PodeEditar)
-                                {
-                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
-                                                   Color="Color.Error"
-                                                   OnClick="@(() => ConfirmarExclusao(pedido))" />
-                                }
-                            </MudStack>
-                        </MudPaper>
-                    </MudItem>
+                    @RenderPedido(pedido, false)
                 }
             </MudGrid>
         </MudPaper>
         }
+    }
     }
 }
 
@@ -285,11 +286,14 @@ else if (_lista is not null)
     private ListaComprasDTO? _lista;
     private List<PedidoMembroGrupoDTO> _grupos = [];
     private List<MembroFamiliaDTO> _membros = [];
+    private List<ListaCompraDTO> _lojas = [];
     private bool _carregando = true;
     private string? _erro;
     private bool _restrito;
+    private bool _podeGerenciar;
     private string? _membroFiltro;
     private bool _ocultarComprados;
+    private bool _agruparPorLoja;
 
     // Formulário de novo pedido
     private string? _novoDescricao;
@@ -302,11 +306,15 @@ else if (_lista is not null)
     private double Progresso => _lista is null || _lista.Itens.Count == 0 ? 0
         : (double)_jaTenho.Count(kv => kv.Value) / _lista.Itens.Count * 100;
 
+    private bool JaTenho(int ingredienteId) => _jaTenho.GetValueOrDefault(ingredienteId);
+
     protected override async Task OnInitializedAsync()
     {
         _restrito = PedidoService.UsuarioRestritoAsProprias;
+        _podeGerenciar = LojaService.PodeGerenciar;
         if (!_restrito)
             _membros = (await PedidoService.ListarMembrosFamiliaAsync()).ToList();
+        _lojas = (await LojaService.ListarAsync()).ToList();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -333,10 +341,34 @@ else if (_lista is not null)
                 .ToList();
     }
 
-    private async Task TrocarOcultarComprados(bool valor)
+    // Agrupa cardápio + pedidos por loja (na ordem das lojas; "Geral"/null por último).
+    private List<GrupoLoja> AgruparPorLoja()
     {
-        _ocultarComprados = valor;
-        await JS.InvokeVoidAsync("appStorage.set", "hp_ocultar_comprados", valor ? "1" : "0");
+        var cardapio = _membroFiltro is null ? ItensCardapioVisiveis() : new List<ItemComprasDTO>();
+        var pedidos = _grupos
+            .Where(g => _membroFiltro is null || g.SolicitanteUsuarioId == _membroFiltro)
+            .SelectMany(g => g.Itens)
+            .Where(p => !_ocultarComprados || !p.Comprado)
+            .ToList();
+
+        var idsValidos = _lojas.Select(l => l.Id).ToHashSet();
+        var resultado = new List<GrupoLoja>();
+
+        foreach (var loja in _lojas)
+        {
+            var c = cardapio.Where(i => i.ListaId == loja.Id).ToList();
+            var p = pedidos.Where(x => x.ListaId == loja.Id).ToList();
+            if (c.Count > 0 || p.Count > 0)
+                resultado.Add(new GrupoLoja(loja, c, p));
+        }
+
+        // Balde "Geral" (sem loja atribuída, ou apontando para lista já excluída).
+        var geralC = cardapio.Where(i => i.ListaId is null || !idsValidos.Contains(i.ListaId.Value)).ToList();
+        var geralP = pedidos.Where(x => x.ListaId is null || !idsValidos.Contains(x.ListaId.Value)).ToList();
+        if (geralC.Count > 0 || geralP.Count > 0)
+            resultado.Add(new GrupoLoja(null, geralC, geralP));
+
+        return resultado;
     }
 
     protected override async Task OnParametersSetAsync()
@@ -480,6 +512,46 @@ else if (_lista is not null)
             Snackbar.Add(r.Erros.FirstOrDefault() ?? "Não foi possível limpar.", Severity.Warning);
     }
 
+    // ── Remanejar itens entre lojas ──────────────────────────────────────
+    private async Task MoverItemCardapio(ItemComprasDTO item, int? listaId)
+    {
+        var anterior = item.ListaId;
+        item.ListaId = listaId; // otimista
+        var r = await LojaService.AtribuirItemCardapioAsync(item.IngredienteId, listaId);
+        if (!r.Sucesso)
+        {
+            item.ListaId = anterior;
+            Snackbar.Add(r.Erros.FirstOrDefault() ?? "Não foi possível mover o item.", Severity.Warning);
+        }
+    }
+
+    private async Task MoverPedido(PedidoCompraDTO pedido, int? listaId)
+    {
+        var anterior = pedido.ListaId;
+        pedido.ListaId = listaId; // otimista
+        var r = await LojaService.AtribuirPedidoAsync(pedido.Id, listaId);
+        if (!r.Sucesso)
+        {
+            pedido.ListaId = anterior;
+            Snackbar.Add(r.Erros.FirstOrDefault() ?? "Não foi possível mover o pedido.", Severity.Warning);
+        }
+    }
+
+    private async Task AbrirGerenciarLojas()
+    {
+        var dialog = await DialogService.ShowAsync<GerenciarLojasDialog>(
+            string.Empty, new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true });
+        var result = await dialog.Result;
+        if (result is not null && !result.Canceled && result.Data is true)
+            _lojas = (await LojaService.ListarAsync()).ToList();
+    }
+
+    private async Task TrocarOcultarComprados(bool valor)
+    {
+        _ocultarComprados = valor;
+        await JS.InvokeVoidAsync("appStorage.set", "hp_ocultar_comprados", valor ? "1" : "0");
+    }
+
     private void SemanaAnterior()
         => Nav.NavigateTo(Lang.U("/compras") + $"/{_dataInicio.AddDays(-7):yyyy-MM-dd}");
 
@@ -495,4 +567,87 @@ else if (_lista is not null)
         var diasAteSegunda = ((int)hoje.DayOfWeek - 1 + 7) % 7;
         return hoje.AddDays(-diasAteSegunda);
     }
+
+    private record GrupoLoja(ListaCompraDTO? Loja, List<ItemComprasDTO> Cardapio, List<PedidoCompraDTO> Pedidos);
+
+    private static string EstiloCartao(bool destacado) =>
+        $"border-radius:8px; border:1px solid {(destacado ? "var(--mud-palette-success)" : "var(--mud-palette-lines-default)")}; " +
+        $"background:{(destacado ? "var(--mud-palette-success-hover)" : "var(--mud-palette-surface)")}; transition:all 200ms;";
+
+    // ── Cartões reutilizados nas duas visões ─────────────────────────────
+    private RenderFragment RenderCabecalhoLoja(ListaCompraDTO? loja, int total) =>@<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
+        <MudAvatar Style="@($"height:28px;width:28px;flex:none;background:{(loja?.Cor ?? "var(--mud-palette-background-gray)")};")">
+            <MudIcon Icon="@(loja is null ? Icons.Material.Filled.Inbox : IconesLoja.Resolver(loja.Icone))"
+                     Size="Size.Small" Style="@(loja is null ? "" : "color:#fff;")" />
+        </MudAvatar>
+        <MudText Typo="Typo.subtitle1" Style="font-weight:600;">
+            @(loja?.Nome ?? L["Compras_LojaGeral"])
+        </MudText>
+        <MudText Typo="Typo.caption" Color="Color.Secondary">@total @L["Compras_Itens"]</MudText>
+    </MudStack>;
+
+    private RenderFragment RenderItemCardapio(ItemComprasDTO item, bool mostrarOrigem) =>@<MudItem xs="12" sm="6" md="4">
+        <MudPaper Class="pa-3" Style="@EstiloCartao(JaTenho(item.IngredienteId))" Elevation="0">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                <MudCheckBox T="bool" Value="@JaTenho(item.IngredienteId)"
+                             ValueChanged="@(async (bool val) => await TrocarJaTenho(item.IngredienteId, val))"
+                             ReadOnly="Mural.Ativo" Color="Color.Success" />
+                <MudStack Spacing="0" Style="flex:1; min-width:0;">
+                    <MudText Typo="Typo.body2"
+                             Style="@(JaTenho(item.IngredienteId) ? "text-decoration:line-through; opacity:0.55;" : "font-weight:500;")">
+                        @item.NomeIngrediente
+                    </MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                        @item.QuantidadeFormatada@(mostrarOrigem ? " · " + L["Compras_CategoriaCardapio"] : "")
+                    </MudText>
+                </MudStack>
+                @if (!Mural.Ativo)
+                {
+                    @if (_lojas.Count > 0)
+                    {
+                        <MenuMoverLoja Lojas="_lojas" ListaAtualId="item.ListaId"
+                                       OnMover="@(id => MoverItemCardapio(item, id))" />
+                    }
+                    <MudTooltip Text="@L["Compras_Agrupar"]">
+                        <MudIconButton Icon="@Icons.Material.Filled.Merge" Size="Size.Small"
+                                       Color="Color.Default" OnClick="@(() => AbrirAgrupar(item))" />
+                    </MudTooltip>
+                }
+            </MudStack>
+        </MudPaper>
+    </MudItem>;
+
+    private RenderFragment RenderPedido(PedidoCompraDTO pedido, bool mostrarOrigem) =>@<MudItem xs="12" sm="6" md="4">
+        <MudPaper Class="pa-3" Style="@EstiloCartao(pedido.Comprado)" Elevation="0">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                <MudCheckBox T="bool" Value="@pedido.Comprado"
+                             ValueChanged="@(async (bool val) => await TrocarComprado(pedido, val))"
+                             ReadOnly="@(Mural.Ativo || !pedido.PodeEditar)" Color="Color.Success" />
+                <MudStack Spacing="0" Style="flex:1; min-width:0;">
+                    <MudText Typo="Typo.body2"
+                             Style="@(pedido.Comprado ? "text-decoration:line-through; opacity:0.55;" : "font-weight:500;")">
+                        @pedido.Descricao
+                    </MudText>
+                    @if (!string.IsNullOrWhiteSpace(pedido.Quantidade) || (mostrarOrigem && !string.IsNullOrWhiteSpace(pedido.SolicitanteNome)))
+                    {
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                            @pedido.Quantidade@(mostrarOrigem && !string.IsNullOrWhiteSpace(pedido.SolicitanteNome)
+                                ? (string.IsNullOrWhiteSpace(pedido.Quantidade) ? "" : " · ") + pedido.SolicitanteNome
+                                : "")
+                        </MudText>
+                    }
+                </MudStack>
+                @if (!Mural.Ativo && pedido.PodeEditar)
+                {
+                    @if (_lojas.Count > 0)
+                    {
+                        <MenuMoverLoja Lojas="_lojas" ListaAtualId="pedido.ListaId"
+                                       OnMover="@(id => MoverPedido(pedido, id))" />
+                    }
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                                   Color="Color.Error" OnClick="@(() => ConfirmarExclusao(pedido))" />
+                }
+            </MudStack>
+        </MudPaper>
+    </MudItem>;
 }
