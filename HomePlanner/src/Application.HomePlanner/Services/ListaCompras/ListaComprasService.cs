@@ -46,11 +46,11 @@ public class ListaComprasService : IListaComprasService
     {
         await _tenantAccessor.GarantirHidratadoAsync();
 
+        // Sem cardápio na semana não é erro: a lista fica vazia e os pedidos avulsos
+        // (lista pessoal / de membros) continuam aparecendo normalmente.
         var cardapio = await _cardapioRepo.ObterCardapioSemanaAsync(dataInicio, ct);
-        if (cardapio is null)
-            return ResultadoOperacao<ListaComprasDTO>.Falha("Semana não encontrada. Abra o cardápio e crie a semana primeiro.");
 
-        var refeicoes = cardapio.Refeicoes.Where(r => r.ReceitaId.HasValue).ToList();
+        var refeicoes = cardapio?.Refeicoes.Where(r => r.ReceitaId.HasValue).ToList() ?? [];
         if (!refeicoes.Any())
             return ResultadoOperacao<ListaComprasDTO>.Ok(new ListaComprasDTO
             {
