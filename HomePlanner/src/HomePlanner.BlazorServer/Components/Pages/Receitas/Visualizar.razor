@@ -31,16 +31,16 @@ else if (_dto is not null)
     </MudStack>
 
     <MudGrid Spacing="4">
-        @if (!string.IsNullOrWhiteSpace(_dto.UrlImagem))
+        @if (!string.IsNullOrWhiteSpace(_dto.ImagemSrc))
         {
             <MudItem xs="12" md="5">
-                <MudImage Src="@_dto.UrlImagem" Alt="@_dto.Nome" Fluid="true"
+                <MudImage Src="@_dto.ImagemSrc" Alt="@_dto.Nome" Fluid="true"
                           ObjectFit="ObjectFit.Cover"
                           Style="width:100%; max-height:320px; border-radius:10px;" />
             </MudItem>
         }
 
-        <MudItem xs="12" md="@(string.IsNullOrWhiteSpace(_dto.UrlImagem) ? 12 : 7)">
+        <MudItem xs="12" md="@(string.IsNullOrWhiteSpace(_dto.ImagemSrc) ? 12 : 7)">
             <MudStack Row="true" Spacing="1" Wrap="Wrap.Wrap" Class="mb-4">
                 <MudChip T="string" Size="Size.Small" Color="Color.Default"
                          Icon="@Icons.Material.Filled.People">

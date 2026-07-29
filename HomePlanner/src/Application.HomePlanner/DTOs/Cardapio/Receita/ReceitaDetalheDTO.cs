@@ -9,8 +9,13 @@ public class ReceitaDetalheDTO
     public int? TempoPreparoMinutos { get; init; }
     public string? UrlOrigem { get; init; }
     public string? UrlImagem { get; init; }
+    public bool TemFoto { get; init; }
+    public DateTime? FotoAtualizadaEm { get; init; }
     public string? Observacoes { get; init; }
     public DateTime DataCriacao { get; init; }
+
+    /// <summary>URL efetiva da imagem (foto enviada tem precedência sobre UrlImagem).</summary>
+    public string? ImagemSrc => ReceitaImagemHelper.ResolverSrc(Id, TemFoto, FotoAtualizadaEm, UrlImagem);
     public IReadOnlyList<ReceitaIngredienteDTO> Ingredientes { get; init; } = [];
 
     /// <summary>Componentes (outras receitas) que compõem este prato, se houver.</summary>

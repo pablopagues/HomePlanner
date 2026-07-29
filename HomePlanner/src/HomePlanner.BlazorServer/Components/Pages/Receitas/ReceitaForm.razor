@@ -1,8 +1,10 @@
 @* Componente de formulário compartilhado entre Criar e Editar *@
 @using Application.HomePlanner.Helpers
 @using Domain.HomePlanner.Models.Enums
+@using Microsoft.AspNetCore.Components.Forms
 @inject IDialogService DialogService
 @inject IReceitaService ReceitaService
+@inject IImagemReceitaProcessor ImagemProcessor
 @inject ITradutorReceitaIA Tradutor
 @inject ICotaImportacaoService Cota
 @inject ISnackbar Snackbar
@@ -22,9 +24,48 @@
     </MudItem>
 
     <MudItem xs="12">
+        <MudText Typo="Typo.subtitle2" Class="mb-2">Foto da receita</MudText>
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="4" Wrap="Wrap.Wrap" Class="mb-2">
+            @if (PreviewSrc is not null)
+            {
+                <MudImage Src="@PreviewSrc" Alt="Foto da receita" ObjectFit="ObjectFit.Cover"
+                          Width="120" Height="120" Style="border-radius:10px;" />
+            }
+            else
+            {
+                <MudPaper Class="d-flex align-center justify-center"
+                          Style="width:120px; height:120px; border-radius:10px; background:var(--mud-palette-background-gray);"
+                          Elevation="0">
+                    <MudIcon Icon="@Icons.Material.Filled.Image" Color="Color.Secondary" Size="Size.Large" />
+                </MudPaper>
+            }
+            <MudStack Spacing="2">
+                <MudFileUpload T="IBrowserFile" FilesChanged="OnFotoSelecionadaAsync"
+                               Accept="image/png,image/jpeg,image/webp" MaximumFileCount="1">
+                    <ActivatorContent>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.PhotoCamera" Disabled="_enviandoFoto">
+                            @(PreviewSrc is null ? "Enviar foto" : "Trocar foto")
+                        </MudButton>
+                    </ActivatorContent>
+                </MudFileUpload>
+                @if (PreviewSrc is not null)
+                {
+                    <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small"
+                               StartIcon="@Icons.Material.Filled.Delete"
+                               OnClick="RemoverFoto" Disabled="_enviandoFoto">
+                        Remover foto
+                    </MudButton>
+                }
+                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                    A foto é reduzida automaticamente. Uma foto por receita — enviar outra substitui a atual.
+                </MudText>
+            </MudStack>
+        </MudStack>
         <MudTextField @bind-Value="Dto.UrlImagem" Label="URL da imagem (opcional)"
                       Variant="Variant.Outlined" Adornment="Adornment.Start"
-                      AdornmentIcon="@Icons.Material.Filled.Image" />
+                      AdornmentIcon="@Icons.Material.Filled.Link"
+                      HelperText="Para receitas de sites. Se você enviar uma foto acima, ela tem preferência." />
     </MudItem>
 
     <MudItem xs="12">
@@ -256,6 +297,17 @@ else
     private bool _carregandoPrevia;
     private bool _inicializado;
 
+    // Data URI da foto recém-enviada (prévia imediata, antes de salvar).
+    private string? _novaFotoPreview;
+    private bool _enviandoFoto;
+
+    // Foto a exibir: recém-enviada > foto já gravada (a menos que marcada p/ remoção).
+    private string? PreviewSrc =>
+        _novaFotoPreview
+        ?? (Dto.TemFotoAtual && !Dto.RemoverFoto && Dto.Id > 0
+            ? $"/receita/{Dto.Id}/foto?v={(Dto.FotoAtualizadaEm ?? DateTime.UnixEpoch).Ticks}"
+            : null);
+
     // Classe interna para manter estado do autocomplete separado do DTO
     private class IngredienteLinhaForm
     {
@@ -301,6 +353,59 @@ else
                 ? new IngredienteListaDTO { Id = d.IngredienteId, Nome = d.NomeIngrediente ?? string.Empty }
                 : null,
         };
+
+    // ── Foto ─────────────────────────────────────────────────────────────────
+    private async Task OnFotoSelecionadaAsync(IBrowserFile? file)
+    {
+        if (file is null) return;
+
+        if (file.Size > ImagemProcessor.TamanhoMaximoEntradaBytes)
+        {
+            Snackbar.Add(
+                $"Imagem muito grande. Máximo {ImagemProcessor.TamanhoMaximoEntradaBytes / (1024 * 1024)} MB.",
+                Severity.Warning);
+            return;
+        }
+
+        _enviandoFoto = true;
+        try
+        {
+            using var ms = new MemoryStream();
+            await using (var stream = file.OpenReadStream(ImagemProcessor.TamanhoMaximoEntradaBytes))
+                await stream.CopyToAsync(ms);
+
+            var r = await ImagemProcessor.ProcessarAsync(ms.ToArray(), file.ContentType);
+            if (!r.Sucesso || r.Valor is null)
+            {
+                Snackbar.Add(r.Erros.FirstOrDefault() ?? "Não foi possível processar a imagem.", Severity.Error);
+                return;
+            }
+
+            Dto.FotoConteudo = r.Valor.Conteudo;
+            Dto.FotoContentType = r.Valor.ContentType;
+            Dto.RemoverFoto = false;
+            _novaFotoPreview = $"data:{r.Valor.ContentType};base64,{Convert.ToBase64String(r.Valor.Conteudo)}";
+            Snackbar.Add("Foto pronta. Clique em Salvar para confirmar.", Severity.Success);
+        }
+        catch (IOException)
+        {
+            Snackbar.Add("Não foi possível ler o arquivo. Tente novamente.", Severity.Warning);
+        }
+        finally
+        {
+            _enviandoFoto = false;
+        }
+    }
+
+    private void RemoverFoto()
+    {
+        _novaFotoPreview = null;
+        Dto.FotoConteudo = null;
+        Dto.FotoContentType = null;
+        // Se havia foto gravada, marca p/ remoção no save. Se era só uma foto nova
+        // ainda não salva, basta ter limpado FotoConteudo acima.
+        Dto.RemoverFoto = Dto.TemFotoAtual;
+    }
 
     private void AdicionarIngrediente()
     {

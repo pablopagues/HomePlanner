@@ -15,6 +15,13 @@ public class Receita : ITenantEntity, IDeletableEntity, IAuditable
     public string? UrlImagem { get; set; }
     public string? Observacoes { get; set; }
 
+    // Foto enviada pelo usuário (uma por receita), já redimensionada/comprimida.
+    // Tem precedência sobre UrlImagem na exibição. UrlImagem continua servindo
+    // receitas importadas de sites (imagem hotlinkada).
+    public byte[]? Foto { get; set; }
+    public string? FotoContentType { get; set; }
+    public DateTime? FotoAtualizadaEm { get; set; }
+
     // IDeletableEntity
     public bool IsDeleted { get; set; }
     public DateTime? DeletedAt { get; set; }

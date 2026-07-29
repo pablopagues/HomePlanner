@@ -53,6 +53,8 @@ public class PlanejamentoSemanalRepository : IPlanejamentoSemanalRepository
                         ReceitaId       = r.ReceitaId,
                         ReceitaNome     = r.Receita != null ? r.Receita.Nome : null,
                         ReceitaUrlImagem = r.Receita != null ? r.Receita.UrlImagem : null,
+                        ReceitaTemFoto  = r.Receita != null && r.Receita.Foto != null,
+                        ReceitaFotoAtualizadaEm = r.Receita != null ? r.Receita.FotoAtualizadaEm : null,
                         PorcoesDesejadas = r.PorcoesDesejadas,
                         Observacao      = r.Observacao,
                     })

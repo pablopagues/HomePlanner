@@ -164,6 +164,7 @@ try
     builder.Services.AddScoped<IConversorUnidadeService, ConversorUnidadeService>();
     builder.Services.AddScoped<IIngredienteService, IngredienteService>();
     builder.Services.AddScoped<IReceitaService, ReceitaService>();
+    builder.Services.AddScoped<IImagemReceitaProcessor, ImagemReceitaProcessor>();
     builder.Services.AddScoped<ICardapioService, CardapioService>();
     builder.Services.AddScoped<IModeloSemanaService, ModeloSemanaService>();
 
@@ -186,6 +187,8 @@ try
     builder.Services.AddScoped<IMarcacaoCompraRepository, MarcacaoCompraRepository>();
     builder.Services.AddScoped<IListaCompraRepository, ListaCompraRepository>();
     builder.Services.AddScoped<IListaCompraService, ListaCompraService>();
+    builder.Services.AddScoped<IProdutoRecorrenteRepository, ProdutoRecorrenteRepository>();
+    builder.Services.AddScoped<IProdutoRecorrenteService, ProdutoRecorrenteService>();
 
     // ── Planner / Tarefas ─────────────────────────────────────────────────────
     builder.Services.AddScoped<ITarefaRepository, TarefaRepository>();
@@ -305,6 +308,17 @@ try
     app.MapGet("/usuario/{usuarioId}/foto", async (string usuarioId, IFotoUsuarioService svc, CancellationToken ct) =>
     {
         var foto = await svc.ObterConteudoFotoAsync(usuarioId, ct);
+        if (foto is null) return Results.NotFound();
+
+        var etag = new Microsoft.Net.Http.Headers.EntityTagHeaderValue($"\"{foto.Versao}\"");
+        return Results.File(foto.Conteudo, foto.ContentType, entityTag: etag);
+    }).RequireAuthorization();
+
+    // ── Foto de uma receita (GET /receita/{id}/foto) ─────────────────────────
+    // O serviço aplica o filtro de tenant: só serve fotos de receitas da própria família.
+    app.MapGet("/receita/{id:int}/foto", async (int id, IReceitaService svc, CancellationToken ct) =>
+    {
+        var foto = await svc.ObterFotoAsync(id, ct);
         if (foto is null) return Results.NotFound();
 
         var etag = new Microsoft.Net.Http.Headers.EntityTagHeaderValue($"\"{foto.Versao}\"");

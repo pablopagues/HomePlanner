@@ -9,6 +9,10 @@ public interface IReceitaRepository
     Task<IReadOnlyList<ReceitaListaDTO>> ListarAsync(ReceitaFiltroDTO filtro, CancellationToken ct = default);
     Task<int> ContarAsync(ReceitaFiltroDTO filtro, CancellationToken ct = default);
     Task<ReceitaDetalheDTO?> ObterDetalheAsync(int id, CancellationToken ct = default);
+
+    /// <summary>Conteúdo da foto da receita (escopo de tenant via query filter), ou null se não houver.</summary>
+    Task<ReceitaFotoDTO?> ObterFotoAsync(int id, CancellationToken ct = default);
+
     Task<Receita?> ObterEntidadeComIngredientesAsync(int id, CancellationToken ct = default);
 
     /// <summary>Carrega o grafo de receitas do tenant (porções base, ingredientes próprios e componentes).</summary>

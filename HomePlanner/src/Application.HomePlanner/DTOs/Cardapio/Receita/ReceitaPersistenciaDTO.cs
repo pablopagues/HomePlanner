@@ -12,6 +12,20 @@ public class ReceitaPersistenciaDTO
     public string? Observacoes { get; set; }
     public List<ReceitaIngredientePersistenciaDTO> Ingredientes { get; set; } = [];
     public List<ReceitaComponentePersistenciaDTO> Componentes { get; set; } = [];
+
+    // ── Foto (uma por receita) ─────────────────────────────────────────────
+    // Bytes já redimensionados/comprimidos de uma nova foto. Quando != null, o
+    // save substitui a foto existente. Vazio = sem alteração.
+    public byte[]? FotoConteudo { get; set; }
+    public string? FotoContentType { get; set; }
+
+    /// <summary>Pedido explícito de remoção da foto existente (ignora FotoConteudo).</summary>
+    public bool RemoverFoto { get; set; }
+
+    // Estado da foto já gravada (preenchido ao abrir a edição) — usado só pela UI
+    // para exibir a prévia e os botões "alterar/remover".
+    public bool TemFotoAtual { get; set; }
+    public DateTime? FotoAtualizadaEm { get; set; }
 }
 
 public class ReceitaComponentePersistenciaDTO

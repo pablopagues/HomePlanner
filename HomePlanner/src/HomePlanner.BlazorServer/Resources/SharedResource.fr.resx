@@ -263,6 +263,24 @@
   <data name="Compras_PorMembro" xml:space="preserve"><value>Par membre</value></data>
   <data name="Compras_PorLoja" xml:space="preserve"><value>Par magasin</value></data>
   <data name="Compras_Agrupar" xml:space="preserve"><value>Regrouper sous un produit de base</value></data>
+  <data name="Compras_ProdutosRecorrentes" xml:space="preserve"><value>Produits récurrents</value></data>
+  <data name="Compras_ProdutosRecorrentesAjuda" xml:space="preserve"><value>Enregistrez les produits que votre famille achète souvent pour les ajouter rapidement à la liste de la semaine.</value></data>
+  <data name="Compras_RecorrentesSelecionar" xml:space="preserve"><value>Sélectionner</value></data>
+  <data name="Compras_RecorrentesGerenciar" xml:space="preserve"><value>Gérer</value></data>
+  <data name="Compras_RecorrentesNenhum" xml:space="preserve"><value>Aucun produit récurrent pour l'instant. Ajoutez-en dans l'onglet Gérer.</value></data>
+  <data name="Compras_SelecionarTodos" xml:space="preserve"><value>Tout sélectionner</value></data>
+  <data name="Compras_RecorrentesAdicionarSemana" xml:space="preserve"><value>Ajouter à la semaine</value></data>
+  <data name="Compras_RecorrentesResultado" xml:space="preserve"><value>{0} ajouté(s), {1} déjà dans la liste.</value></data>
+  <data name="Compras_RecorrenteNovo" xml:space="preserve"><value>Nouveau produit</value></data>
+  <data name="Compras_RecorrenteLoja" xml:space="preserve"><value>Magasin</value></data>
+  <data name="Compras_RecorrenteAtivo" xml:space="preserve"><value>Actif</value></data>
+  <data name="Compras_RecorrenteAdicionar" xml:space="preserve"><value>Ajouter</value></data>
+  <data name="Compras_RecorrenteExcluirConfirm" xml:space="preserve"><value>Supprimer ce produit récurrent ?</value></data>
+  <data name="Compras_ImportarHistorico" xml:space="preserve"><value>Importer depuis l'historique</value></data>
+  <data name="Compras_ImportarHistoricoAjuda" xml:space="preserve"><value>Cochez des produits déjà achetés pour les ajouter au catalogue.</value></data>
+  <data name="Compras_ImportarSelecionados" xml:space="preserve"><value>Importer la sélection</value></data>
+  <data name="Compras_ImportarNenhum" xml:space="preserve"><value>Rien à importer dans l'historique.</value></data>
+  <data name="Compras_ImportarResultado" xml:space="preserve"><value>{0} produit(s) importé(s).</value></data>
 
   <data name="Planner_Titulo" xml:space="preserve"><value>Tâches de la famille</value></data>
   <data name="Planner_Nova" xml:space="preserve"><value>Nouvelle tâche</value></data>

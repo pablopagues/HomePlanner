@@ -18,6 +18,39 @@
 
 <body>
     <Routes @rendermode="InteractiveServer" />
+
+    <div id="components-reconnect-modal" class="hp-reconnect-modal">
+        <div class="hp-reconnect-card">
+            <div class="hp-reconnect-spinner" aria-hidden="true"></div>
+
+            <div class="hp-reconnect-text hp-reconnect-text--show">
+                <h2>Reconectando…</h2>
+                <p>A conexão caiu. Tentando restabelecer automaticamente.</p>
+            </div>
+
+            <div class="hp-reconnect-text hp-reconnect-text--failed">
+                <h2>Sem conexão</h2>
+                <p>Não foi possível reconectar automaticamente.</p>
+            </div>
+
+            <div class="hp-reconnect-text hp-reconnect-text--rejected">
+                <h2>Sessão expirada</h2>
+                <p>Precisamos recarregar a página para continuar.</p>
+            </div>
+
+            <div class="hp-reconnect-actions">
+                <button type="button" class="hp-reconnect-btn hp-reconnect-btn--retry"
+                        onclick="window.Blazor.reconnect()">
+                    Tentar novamente
+                </button>
+                <button type="button" class="hp-reconnect-btn hp-reconnect-btn--reload"
+                        onclick="location.reload()">
+                    Recarregar página
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="_framework/blazor.web.js"></script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
     <script src="js/app.js"></script>

@@ -1,0 +1,370 @@
+@* Diálogo: catálogo de produtos recorrentes (só pais). Aba Selecionar envia itens para a
+   semana; aba Gerenciar faz CRUD e importa do histórico de pedidos. *@
+@using Application.HomePlanner.DTOs.ListaCompras
+@using Application.HomePlanner.Services.ListaCompras
+@inject IProdutoRecorrenteService Service
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResource> L
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">@L["Compras_ProdutosRecorrentes"]</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small" Class="mb-4">
+            <MudButton Variant="@(_aba == Aba.Selecionar ? Variant.Filled : Variant.Outlined)"
+                       Color="@(_aba == Aba.Selecionar ? Color.Primary : Color.Default)"
+                       StartIcon="@Icons.Material.Filled.PlaylistAddCheck"
+                       OnClick="@(() => _aba = Aba.Selecionar)">
+                @L["Compras_RecorrentesSelecionar"]
+            </MudButton>
+            <MudButton Variant="@(_aba == Aba.Gerenciar ? Variant.Filled : Variant.Outlined)"
+                       Color="@(_aba == Aba.Gerenciar ? Color.Primary : Color.Default)"
+                       StartIcon="@Icons.Material.Filled.Tune"
+                       OnClick="@(() => _aba = Aba.Gerenciar)">
+                @L["Compras_RecorrentesGerenciar"]
+            </MudButton>
+        </MudButtonGroup>
+
+        @if (_carregando)
+        {
+            <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+        }
+        else if (_aba == Aba.Selecionar)
+        {
+            @* ═══ Aba: selecionar e enviar para a semana ═══════════════════ *@
+            var ativos = _produtos.Where(p => p.Ativo).ToList();
+            @if (ativos.Count == 0)
+            {
+                <MudAlert Severity="Severity.Info">@L["Compras_RecorrentesNenhum"]</MudAlert>
+            }
+            else
+            {
+                <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-2">
+                    <MudCheckBox T="bool" Value="@(_selecionados.Count == ativos.Count)"
+                                 ValueChanged="@(v => AlternarTodos(ativos, v))"
+                                 Color="Color.Primary" Dense="true" Label="@L["Compras_SelecionarTodos"]" />
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                        @_selecionados.Count / @ativos.Count
+                    </MudText>
+                </MudStack>
+
+                @foreach (var p in ativos)
+                {
+                    <MudPaper Class="pa-2 mb-2" Elevation="0"
+                              Style="border:1px solid var(--mud-palette-lines-default); border-radius:8px;">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                            <MudCheckBox T="bool" Value="@_selecionados.Contains(p.Id)"
+                                         ValueChanged="@(v => AlternarSelecao(p.Id, v))"
+                                         Color="Color.Primary" Dense="true" />
+                            <MudStack Spacing="0" Style="flex:1; min-width:0;">
+                                <MudText Typo="Typo.body2" Style="font-weight:500;">@p.Descricao</MudText>
+                                @if (!string.IsNullOrWhiteSpace(p.Quantidade))
+                                {
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">@p.Quantidade</MudText>
+                                }
+                            </MudStack>
+                            @RenderChipLoja(p.ListaId)
+                        </MudStack>
+                    </MudPaper>
+                }
+
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-2"
+                           StartIcon="@Icons.Material.Filled.AddShoppingCart"
+                           Disabled="@(_selecionados.Count == 0 || _enviando)"
+                           OnClick="AdicionarASemana">
+                    @L["Compras_RecorrentesAdicionarSemana"] (@_selecionados.Count)
+                </MudButton>
+            }
+        }
+        else
+        {
+            @* ═══ Aba: gerenciar (CRUD) + importar ═════════════════════════ *@
+            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
+                @L["Compras_ProdutosRecorrentesAjuda"]
+            </MudText>
+
+            @foreach (var p in _produtos)
+            {
+                <MudPaper Class="pa-2 mb-2" Elevation="0"
+                          Style="border:1px solid var(--mud-palette-lines-default); border-radius:8px;">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Wrap="Wrap.Wrap">
+                        <MudTextField T="string" @bind-Value="p.Descricao" Variant="Variant.Text"
+                                      Margin="Margin.Dense" Style="flex:1; min-width:120px;"
+                                      OnBlur="@(() => SalvarProduto(p))" />
+                        <MudTextField T="string" @bind-Value="p.Quantidade" Placeholder="@L["Compras_Quantidade"]"
+                                      Variant="Variant.Text" Margin="Margin.Dense" Style="width:110px;"
+                                      OnBlur="@(() => SalvarProduto(p))" />
+                        <MudSelect T="int?" Value="p.ListaId" Dense="true" Margin="Margin.Dense"
+                                   Variant="Variant.Text" Style="min-width:130px; max-width:160px;"
+                                   ValueChanged="@(v => { p.ListaId = v; return SalvarProduto(p); })">
+                            <MudSelectItem T="int?" Value="@((int?)null)">@L["Compras_LojaGeral"]</MudSelectItem>
+                            @foreach (var loja in Lojas)
+                            {
+                                <MudSelectItem T="int?" Value="@((int?)loja.Id)">@loja.Nome</MudSelectItem>
+                            }
+                        </MudSelect>
+                        <MudTooltip Text="@L["Compras_RecorrenteAtivo"]">
+                            <MudSwitch T="bool" Value="p.Ativo" Color="Color.Primary" Dense="true"
+                                       ValueChanged="@(v => { p.Ativo = v; return SalvarProduto(p); })" />
+                        </MudTooltip>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                                       OnClick="@(() => ExcluirProduto(p))" />
+                    </MudStack>
+                </MudPaper>
+            }
+
+            @* ── Novo produto ─────────────────────────────────────────── *@
+            <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center" Class="mt-3" Wrap="Wrap.Wrap">
+                <MudTextField @bind-Value="_novoDescricao" Label="@L["Compras_RecorrenteNovo"]"
+                              Variant="Variant.Outlined" Margin="Margin.Dense" Immediate="true"
+                              Style="flex:1; min-width:140px;"
+                              OnKeyDown="@(async (e) => { if (e.Key == "Enter") await CriarProduto(); })" />
+                <MudTextField @bind-Value="_novoQuantidade" Label="@L["Compras_Quantidade"]"
+                              Variant="Variant.Outlined" Margin="Margin.Dense" Style="width:110px;" />
+                <MudSelect T="int?" @bind-Value="_novoListaId" Dense="true" Margin="Margin.Dense"
+                           Label="@L["Compras_RecorrenteLoja"]" Variant="Variant.Outlined"
+                           Style="min-width:130px; max-width:160px;">
+                    <MudSelectItem T="int?" Value="@((int?)null)">@L["Compras_LojaGeral"]</MudSelectItem>
+                    @foreach (var loja in Lojas)
+                    {
+                        <MudSelectItem T="int?" Value="@((int?)loja.Id)">@loja.Nome</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Add" OnClick="CriarProduto">
+                    @L["Compras_RecorrenteAdicionar"]
+                </MudButton>
+            </MudStack>
+
+            @* ── Importar do histórico ────────────────────────────────── *@
+            <MudDivider Class="my-4" />
+            <MudButton Variant="Variant.Text" Color="Color.Primary"
+                       StartIcon="@(_mostrarImport ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.History)"
+                       OnClick="AlternarImport">
+                @L["Compras_ImportarHistorico"]
+            </MudButton>
+
+            @if (_mostrarImport)
+            {
+                <MudPaper Class="pa-3 mt-2" Elevation="0"
+                          Style="background:var(--mud-palette-background-gray); border-radius:8px;">
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-2">
+                        @L["Compras_ImportarHistoricoAjuda"]
+                    </MudText>
+                    @if (_sugestoes.Count == 0)
+                    {
+                        <MudText Typo="Typo.body2">@L["Compras_ImportarNenhum"]</MudText>
+                    }
+                    else
+                    {
+                        <div style="max-height:220px; overflow-y:auto;">
+                            @foreach (var d in _sugestoes)
+                            {
+                                <MudCheckBox T="bool" Value="@_importSelecao.Contains(d)"
+                                             ValueChanged="@(v => AlternarImportSelecao(d, v))"
+                                             Color="Color.Primary" Dense="true" Label="@d" />
+                            }
+                        </div>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-2"
+                                   StartIcon="@Icons.Material.Filled.LibraryAdd"
+                                   Disabled="@(_importSelecao.Count == 0 || _importando)"
+                                   OnClick="Importar">
+                            @L["Compras_ImportarSelecionados"] (@_importSelecao.Count)
+                        </MudButton>
+                    }
+                </MudPaper>
+            }
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Fechar">@L["Btn_Fechar"]</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter, EditorRequired] public IReadOnlyList<ListaCompraDTO> Lojas { get; set; } = [];
+    [Parameter, EditorRequired] public DateOnly DataInicio { get; set; }
+
+    private enum Aba { Selecionar, Gerenciar }
+    private Aba _aba = Aba.Selecionar;
+
+    private bool _carregando = true;
+    private bool _enviando;
+    private bool _importando;
+    private bool _adicionouNaSemana;
+
+    private List<ProdutoRow> _produtos = [];
+    private readonly HashSet<int> _selecionados = [];
+
+    // Novo produto
+    private string? _novoDescricao;
+    private string? _novoQuantidade;
+    private int? _novoListaId;
+
+    // Importar
+    private bool _mostrarImport;
+    private List<string> _sugestoes = [];
+    private readonly HashSet<string> _importSelecao = new(StringComparer.OrdinalIgnoreCase);
+
+    protected override async Task OnInitializedAsync() => await CarregarAsync();
+
+    private async Task CarregarAsync()
+    {
+        _carregando = true;
+        var produtos = await Service.ListarAsync();
+        _produtos = produtos.Select(p => new ProdutoRow
+        {
+            Id = p.Id, Descricao = p.Descricao, Quantidade = p.Quantidade,
+            ListaId = p.ListaId, Ativo = p.Ativo,
+        }).ToList();
+        _selecionados.RemoveWhere(id => _produtos.All(p => p.Id != id));
+        _carregando = false;
+    }
+
+    // ── Aba Selecionar ───────────────────────────────────────────────────
+    private void AlternarSelecao(int id, bool valor)
+    {
+        if (valor) _selecionados.Add(id);
+        else _selecionados.Remove(id);
+    }
+
+    private void AlternarTodos(List<ProdutoRow> ativos, bool valor)
+    {
+        _selecionados.Clear();
+        if (valor)
+            foreach (var p in ativos) _selecionados.Add(p.Id);
+    }
+
+    private async Task AdicionarASemana()
+    {
+        _enviando = true;
+        var res = await Service.AdicionarASemanaAsync(_selecionados.ToList(), DataInicio);
+        _enviando = false;
+
+        if (!res.Sucesso)
+        {
+            Snackbar.Add(string.Join(", ", res.Erros), Severity.Error);
+            return;
+        }
+
+        _adicionouNaSemana = res.Valor!.Adicionados > 0;
+        Snackbar.Add(L["Compras_RecorrentesResultado", res.Valor.Adicionados, res.Valor.Pulados],
+            _adicionouNaSemana ? Severity.Success : Severity.Info);
+        MudDialog.Close(DialogResult.Ok(_adicionouNaSemana));
+    }
+
+    // ── Aba Gerenciar ────────────────────────────────────────────────────
+    private async Task CriarProduto()
+    {
+        if (string.IsNullOrWhiteSpace(_novoDescricao)) return;
+        var res = await Service.CriarAsync(new ProdutoRecorrentePersistenciaDTO
+        {
+            Descricao = _novoDescricao, Quantidade = _novoQuantidade, ListaId = _novoListaId,
+        });
+        if (res.Sucesso)
+        {
+            _novoDescricao = null;
+            _novoQuantidade = null;
+            _novoListaId = null;
+            await CarregarAsync();
+            if (_mostrarImport) await CarregarSugestoesAsync();
+        }
+        else
+            Snackbar.Add(string.Join(", ", res.Erros), Severity.Error);
+    }
+
+    private async Task SalvarProduto(ProdutoRow p)
+    {
+        if (string.IsNullOrWhiteSpace(p.Descricao)) { await CarregarAsync(); return; }
+        var res = await Service.AtualizarAsync(p.Id, new ProdutoRecorrentePersistenciaDTO
+        {
+            Descricao = p.Descricao, Quantidade = p.Quantidade, ListaId = p.ListaId, Ativo = p.Ativo,
+        });
+        if (!res.Sucesso)
+        {
+            Snackbar.Add(string.Join(", ", res.Erros), Severity.Error);
+            await CarregarAsync();
+        }
+    }
+
+    private async Task ExcluirProduto(ProdutoRow p)
+    {
+        var confirm = await DialogService.ShowMessageBox(
+            L["Confirmacao_Titulo"],
+            L["Compras_RecorrenteExcluirConfirm"],
+            yesText: L["Btn_Excluir"], cancelText: L["Btn_Cancelar"]);
+        if (confirm != true) return;
+
+        var res = await Service.ExcluirAsync(p.Id);
+        if (res.Sucesso)
+        {
+            _selecionados.Remove(p.Id);
+            await CarregarAsync();
+        }
+        else
+            Snackbar.Add(string.Join(", ", res.Erros), Severity.Error);
+    }
+
+    // ── Importar do histórico ────────────────────────────────────────────
+    private async Task AlternarImport()
+    {
+        _mostrarImport = !_mostrarImport;
+        if (_mostrarImport) await CarregarSugestoesAsync();
+    }
+
+    private async Task CarregarSugestoesAsync()
+    {
+        _sugestoes = (await Service.ListarSugestoesHistoricoAsync()).ToList();
+        _importSelecao.RemoveWhere(d => !_sugestoes.Contains(d, StringComparer.OrdinalIgnoreCase));
+    }
+
+    private void AlternarImportSelecao(string descricao, bool valor)
+    {
+        if (valor) _importSelecao.Add(descricao);
+        else _importSelecao.Remove(descricao);
+    }
+
+    private async Task Importar()
+    {
+        _importando = true;
+        var res = await Service.ImportarDoHistoricoAsync(_importSelecao.ToList());
+        _importando = false;
+
+        if (!res.Sucesso)
+        {
+            Snackbar.Add(string.Join(", ", res.Erros), Severity.Error);
+            return;
+        }
+
+        Snackbar.Add(L["Compras_ImportarResultado", res.Valor], Severity.Success);
+        _importSelecao.Clear();
+        await CarregarAsync();
+        await CarregarSugestoesAsync();
+    }
+
+    private RenderFragment RenderChipLoja(int? listaId) =>@<text>
+        @{
+            var loja = listaId is null ? null : Lojas.FirstOrDefault(l => l.Id == listaId.Value);
+        }
+        <MudChip T="string" Size="Size.Small" Variant="Variant.Text"
+                 Icon="@(loja is null ? Icons.Material.Filled.Inbox : IconesLoja.Resolver(loja.Icone))"
+                 Style="@(loja?.Cor is not null ? $"color:{loja.Cor};" : "")">
+            @(loja?.Nome ?? L["Compras_LojaGeral"])
+        </MudChip>
+    </text>;
+
+    private void Fechar() => MudDialog.Close(DialogResult.Ok(_adicionouNaSemana));
+
+    private class ProdutoRow
+    {
+        public int Id { get; set; }
+        public string Descricao { get; set; } = string.Empty;
+        public string? Quantidade { get; set; }
+        public int? ListaId { get; set; }
+        public bool Ativo { get; set; }
+    }
+}

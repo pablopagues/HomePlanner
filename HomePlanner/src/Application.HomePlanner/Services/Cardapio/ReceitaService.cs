@@ -67,6 +67,12 @@ public class ReceitaService : IReceitaService
         return ResultadoOperacao<ReceitaDetalheDTO>.Ok(dto);
     }
 
+    public async Task<ReceitaFotoDTO?> ObterFotoAsync(int id, CancellationToken ct = default)
+    {
+        await _tenantAccessor.GarantirHidratadoAsync();
+        return await _repo.ObterFotoAsync(id, ct);
+    }
+
     public async Task<IReadOnlyList<ReceitaListaDTO>> BuscarAutoCompleteAsync(
         string texto, int limite = 10, int? excluirId = null, CancellationToken ct = default)
     {
@@ -137,6 +143,7 @@ public class ReceitaService : IReceitaService
         }
 
         MapearDtoParaEntidade(dto, entidade);
+        AplicarFoto(dto, entidade);
         SincronizarIngredientes(dto, entidade);
         SincronizarComponentes(dto, entidade);
 
@@ -183,6 +190,9 @@ public class ReceitaService : IReceitaService
             UrlOrigem          = original.UrlOrigem,
             UrlImagem          = original.UrlImagem,
             Observacoes        = original.Observacoes,
+            Foto               = original.Foto,
+            FotoContentType    = original.FotoContentType,
+            FotoAtualizadaEm   = original.Foto is null ? null : DateTime.UtcNow,
         };
 
         foreach (var ri in original.Ingredientes.Where(i => !i.IsDeleted))
@@ -201,6 +211,24 @@ public class ReceitaService : IReceitaService
         await _repo.AdicionarAsync(copia, ct);
         await _repo.SalvarAsync(ct);
         return ResultadoOperacao<int>.Ok(copia.Id);
+    }
+
+    // Uma foto por receita: nova foto substitui a anterior; remoção limpa o blob;
+    // sem alteração mantém o que já estava gravado (não recarrega/reescreve o blob).
+    private static void AplicarFoto(ReceitaPersistenciaDTO dto, Receita entidade)
+    {
+        if (dto.RemoverFoto)
+        {
+            entidade.Foto = null;
+            entidade.FotoContentType = null;
+            entidade.FotoAtualizadaEm = null;
+        }
+        else if (dto.FotoConteudo is { Length: > 0 })
+        {
+            entidade.Foto = dto.FotoConteudo;
+            entidade.FotoContentType = dto.FotoContentType;
+            entidade.FotoAtualizadaEm = DateTime.UtcNow;
+        }
     }
 
     private static void MapearDtoParaEntidade(ReceitaPersistenciaDTO dto, Receita entidade)

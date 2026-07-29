@@ -77,3 +77,127 @@ body.theme-carbon {
 /* Tema escuro: scrollbar adaptada */
 body.theme-carbon ::-webkit-scrollbar-track { background: #1e2228; }
 body.theme-carbon ::-webkit-scrollbar-thumb { background: #4dc9a0; }
+
+/* =============================================
+   Modal de reconexão customizado
+   O Blazor alterna estas classes no #components-reconnect-modal:
+     .components-reconnect-show      -> tentando reconectar
+     .components-reconnect-failed    -> falhou (permite Blazor.reconnect())
+     .components-reconnect-rejected  -> sessão perdida (precisa recarregar)
+   ============================================= */
+#components-reconnect-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(20, 24, 30, 0.55);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+/* Qualquer um dos estados exibe o overlay */
+#components-reconnect-modal.components-reconnect-show,
+#components-reconnect-modal.components-reconnect-failed,
+#components-reconnect-modal.components-reconnect-rejected {
+    display: flex;
+}
+
+.hp-reconnect-card {
+    background: var(--mud-palette-surface, #ffffff);
+    color: var(--mud-palette-text-primary, #2A3A33);
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    padding: 28px 24px;
+    max-width: 360px;
+    width: 100%;
+    text-align: center;
+}
+
+.hp-reconnect-card h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 1.35rem;
+    margin: 0 0 6px;
+}
+
+.hp-reconnect-card p {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--mud-palette-text-secondary, #7A8278);
+}
+
+/* Spinner */
+.hp-reconnect-spinner {
+    width: 38px;
+    height: 38px;
+    margin: 0 auto 18px;
+    border: 3px solid var(--mud-palette-lines-default, #E8DDD1);
+    border-top-color: var(--mud-palette-primary, #7A8278);
+    border-radius: 50%;
+    animation: hp-reconnect-spin 0.9s linear infinite;
+}
+
+@keyframes hp-reconnect-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Texto por estado: esconde todos e mostra só o do estado ativo */
+.hp-reconnect-text { display: none; }
+.components-reconnect-show    .hp-reconnect-text--show,
+.components-reconnect-failed  .hp-reconnect-text--failed,
+.components-reconnect-rejected .hp-reconnect-text--rejected {
+    display: block;
+}
+
+/* Spinner só enquanto tenta reconectar automaticamente */
+.components-reconnect-failed .hp-reconnect-spinner,
+.components-reconnect-rejected .hp-reconnect-spinner {
+    display: none;
+}
+
+/* Botões */
+.hp-reconnect-actions {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Mostra os botões quando a reconexão automática falhou ou foi rejeitada */
+.components-reconnect-failed .hp-reconnect-actions,
+.components-reconnect-rejected .hp-reconnect-actions {
+    display: flex;
+}
+
+.hp-reconnect-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 11px 16px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: filter 150ms ease, opacity 150ms ease;
+}
+
+.hp-reconnect-btn:active { filter: brightness(0.95); }
+
+.hp-reconnect-btn--reload {
+    background: var(--mud-palette-primary, #7A8278);
+    color: var(--mud-palette-primary-text, #ffffff);
+}
+
+.hp-reconnect-btn--retry {
+    background: transparent;
+    color: var(--mud-palette-primary, #7A8278);
+    border: 1px solid var(--mud-palette-lines-default, #E8DDD1);
+}
+
+/* "Tentar novamente" (Blazor.reconnect) só faz sentido no estado failed;
+   em rejected a única saída é recarregar. */
+.components-reconnect-rejected .hp-reconnect-btn--retry {
+    display: none;
+}

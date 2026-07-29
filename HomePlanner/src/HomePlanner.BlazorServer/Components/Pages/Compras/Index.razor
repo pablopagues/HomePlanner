@@ -102,10 +102,16 @@
 
         @if (_podeGerenciar)
         {
-            <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary"
-                       StartIcon="@Icons.Material.Filled.Store" OnClick="AbrirGerenciarLojas">
-                @L["Compras_GerenciarLojas"]
-            </MudButton>
+            <MudStack Row="true" Spacing="1">
+                <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Repeat" OnClick="AbrirProdutosRecorrentes">
+                    @L["Compras_ProdutosRecorrentes"]
+                </MudButton>
+                <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Store" OnClick="AbrirGerenciarLojas">
+                    @L["Compras_GerenciarLojas"]
+                </MudButton>
+            </MudStack>
         }
     </MudStack>
 }
@@ -535,6 +541,22 @@ else if (_lista is not null)
             pedido.ListaId = anterior;
             Snackbar.Add(r.Erros.FirstOrDefault() ?? "Não foi possível mover o pedido.", Severity.Warning);
         }
+    }
+
+    private async Task AbrirProdutosRecorrentes()
+    {
+        var parameters = new DialogParameters<ProdutosRecorrentesDialog>
+        {
+            { x => x.Lojas,      _lojas },
+            { x => x.DataInicio, _dataInicio },
+        };
+
+        var dialog = await DialogService.ShowAsync<ProdutosRecorrentesDialog>(
+            string.Empty, parameters, new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true });
+
+        var result = await dialog.Result;
+        if (result is not null && !result.Canceled && result.Data is true)
+            await RecarregarPedidos();
     }
 
     private async Task AbrirGerenciarLojas()

@@ -62,7 +62,10 @@
       "PowerShell(dotnet build HomePlanner\\\\src\\\\HomePlanner.BlazorServer\\\\HomePlanner.BlazorServer.csproj -nologo -clp:ErrorsOnly)",
       "PowerShell(dotnet build \"src\\\\HomePlanner.BlazorServer\\\\HomePlanner.BlazorServer.csproj\" -c Debug --nologo -v q 2>$null)",
       "PowerShell(dotnet build \"HomePlanner\\\\src\\\\HomePlanner.BlazorServer\\\\HomePlanner.BlazorServer.csproj\" -c Debug --nologo -v q 2>$null)",
-      "PowerShell(dotnet build $proj -c Debug --nologo -v q 2>&1)"
+      "PowerShell(dotnet build $proj -c Debug --nologo -v q 2>&1)",
+      "PowerShell(dotnet build \"HomePlanner\\\\src\\\\HomePlanner.BlazorServer\\\\HomePlanner.BlazorServer.csproj\" -nologo -clp:NoSummary 2>&1)",
+      "PowerShell($f = \"C:\\\\Users\\\\pablo\\\\.claude\\\\projects\\\\d---MeuCodigoDotNet-HomePlanner-HomePlanner\\\\9dc4d53e-82b2-4748-ace4-98cf36900c18\\\\tool-results\\\\bdwczdsdx.txt\"; Select-String -Path $f -Pattern \"error|Build succeeded|Build FAILED|Compila\" | Select-Object -First 40 | ForEach-Object { $_.Line })",
+      "PowerShell(dotnet list \"HomePlanner\\\\src\\\\Application.HomePlanner\\\\Application.HomePlanner.csproj\" package 2>&1 | Select-String -Pattern \"ImageSharp\" | ForEach-Object { $_.Line.Trim\\(\\) })"
     ]
   }
 }

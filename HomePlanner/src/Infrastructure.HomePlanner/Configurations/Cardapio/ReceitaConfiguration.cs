@@ -14,6 +14,7 @@ public class ReceitaConfiguration : IEntityTypeConfiguration<Receita>
         builder.Property(r => r.NomeNormalizado).HasMaxLength(300).IsRequired();
         builder.Property(r => r.UrlOrigem).HasMaxLength(2000);
         builder.Property(r => r.UrlImagem).HasMaxLength(2000);
+        builder.Property(r => r.FotoContentType).HasMaxLength(100);
         builder.Property(r => r.DeletedByUsuarioId).HasMaxLength(450);
         builder.Property(r => r.CriadoPor).HasMaxLength(450);
         builder.Property(r => r.ModificadoPor).HasMaxLength(450);

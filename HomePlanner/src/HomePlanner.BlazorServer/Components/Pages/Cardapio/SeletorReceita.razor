@@ -31,10 +31,10 @@
                               Style='@($"cursor:pointer; border-radius:8px; border: 2px solid {(_selecionadoId == r.Id ? "var(--mud-palette-primary)" : "transparent")}; background:{(_selecionadoId == r.Id ? "var(--mud-palette-primary-hover)" : "var(--mud-palette-surface)")};")'
                               Elevation="0">
                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                            @if (!string.IsNullOrWhiteSpace(r.UrlImagem))
+                            @if (!string.IsNullOrWhiteSpace(r.ImagemSrc))
                             {
                                 <MudAvatar Style="width:48px;height:48px;border-radius:6px;">
-                                    <MudImage Src="@r.UrlImagem" Style="object-fit:cover;" />
+                                    <MudImage Src="@r.ImagemSrc" Style="object-fit:cover;" />
                                 </MudAvatar>
                             }
                             <MudStack Spacing="0">

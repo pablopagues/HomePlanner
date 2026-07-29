@@ -33,6 +33,8 @@ public class ReceitaRepository : IReceitaRepository
                 NumeroPorcoesBase = r.NumeroPorcoesBase,
                 TempoPreparoMinutos = r.TempoPreparoMinutos,
                 UrlImagem         = r.UrlImagem,
+                TemFoto           = r.Foto != null,   // IS NOT NULL — não transfere o blob
+                FotoAtualizadaEm  = r.FotoAtualizadaEm,
                 TotalIngredientes = r.Ingredientes.Count(ri => !ri.IsDeleted),
                 TotalComponentes  = r.Componentes.Count(rc => !rc.IsDeleted),
                 DataCriacao       = r.DataCriacao,
@@ -60,6 +62,8 @@ public class ReceitaRepository : IReceitaRepository
                 TempoPreparoMinutos = r.TempoPreparoMinutos,
                 UrlOrigem         = r.UrlOrigem,
                 UrlImagem         = r.UrlImagem,
+                TemFoto           = r.Foto != null,   // IS NOT NULL — não transfere o blob
+                FotoAtualizadaEm  = r.FotoAtualizadaEm,
                 Observacoes       = r.Observacoes,
                 DataCriacao       = r.DataCriacao,
                 Ingredientes      = r.Ingredientes
@@ -183,11 +187,36 @@ public class ReceitaRepository : IReceitaRepository
                 NumeroPorcoesBase = r.NumeroPorcoesBase,
                 TempoPreparoMinutos = r.TempoPreparoMinutos,
                 UrlImagem         = r.UrlImagem,
+                TemFoto           = r.Foto != null,   // IS NOT NULL — não transfere o blob
+                FotoAtualizadaEm  = r.FotoAtualizadaEm,
                 TotalIngredientes = r.Ingredientes.Count(ri => !ri.IsDeleted),
                 TotalComponentes  = r.Componentes.Count(rc => !rc.IsDeleted),
                 DataCriacao       = r.DataCriacao,
             })
             .ToListAsync(ct);
+    }
+
+    public async Task<ReceitaFotoDTO?> ObterFotoAsync(int id, CancellationToken ct = default)
+    {
+        await using var db = await _dbFactory.CreateDbContextAsync(ct);
+        // db.Receitas já vem filtrado por tenant + não-deletado (query filter global):
+        // só serve a foto de receitas da própria família.
+        var info = await db.Receitas
+            .Where(r => r.Id == id)
+            .Select(r => new { r.Foto, r.FotoContentType, r.FotoAtualizadaEm })
+            .FirstOrDefaultAsync(ct);
+
+        if (info?.Foto is null || info.Foto.Length == 0)
+            return null;
+
+        return new ReceitaFotoDTO
+        {
+            Conteudo = info.Foto,
+            ContentType = string.IsNullOrWhiteSpace(info.FotoContentType)
+                ? "application/octet-stream"
+                : info.FotoContentType,
+            Versao = (info.FotoAtualizadaEm ?? DateTime.UnixEpoch).Ticks.ToString(),
+        };
     }
 
     public async Task<Receita?> ObterEntidadeComIngredientesAsync(int id, CancellationToken ct = default)
