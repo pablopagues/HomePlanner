@@ -19,6 +19,7 @@ using Application.HomePlanner.Services.Planner;
 using Application.HomePlanner.Services.Seguranca;
 using Domain.HomePlanner.Models.SaaS.Identity;
 using Domain.HomePlanner.Models.SaaS.Options;
+using Google.Apis.Auth.OAuth2;
 using HomePlanner.BlazorServer.Services;
 using Infrastructure.HomePlanner.Contexts;
 using Infrastructure.HomePlanner.Repositories.Assinatura;
@@ -79,6 +80,8 @@ try
     builder.Services.Configure<LocalizacaoOptions>(builder.Configuration.GetSection(LocalizacaoOptions.SectionName));
     builder.Services.Configure<WebPushOptions>(builder.Configuration.GetSection(WebPushOptions.SectionName));
     builder.Services.Configure<AnthropicOptions>(builder.Configuration.GetSection(AnthropicOptions.SectionName));
+    builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
+    builder.Services.Configure<FcmOptions>(builder.Configuration.GetSection(FcmOptions.SectionName));
 
     // ── Localization (.resx em Resources/, 3 idiomas) ─────────────────────────
     builder.Services.AddLocalization(opts => opts.ResourcesPath = "Resources");
@@ -139,6 +142,42 @@ try
     builder.Services.Configure<CookieAuthenticationOptions>(
         IdentityConstants.TwoFactorRememberMeScheme,
         opts => opts.ExpireTimeSpan = TimeSpan.FromDays(30));
+
+    // ── JWT Bearer (API mobile) ────────────────────────────────────────────────
+    // Esquema ADICIONAL — o cookie continua sendo o esquema padrão do Blazor.
+    // A API opta pelo Bearer via [Authorize(AuthenticationSchemes = "Bearer")].
+    var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new JwtOptions();
+    if (jwtOptions.EstaConfigurado)
+    {
+        builder.Services.AddAuthentication()
+            .AddJwtBearer(opts =>
+            {
+                opts.MapInboundClaims = true; // "nameid"/"role" → ClaimTypes.* (igual ao cookie)
+                opts.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtOptions.Issuer,
+                    ValidateAudience = true,
+                    ValidAudience = jwtOptions.Audience,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+                        System.Text.Encoding.UTF8.GetBytes(jwtOptions.SecretKey)),
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.FromSeconds(30),
+                    NameClaimType = System.Security.Claims.ClaimTypes.Name,
+                    RoleClaimType = System.Security.Claims.ClaimTypes.Role,
+                };
+            });
+
+        // CORS liberado para o app (WebView/nativo). Ajuste as origens em produção se necessário.
+        builder.Services.AddCors(o => o.AddPolicy("ApiMobile", p =>
+            p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
+
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+    }
+
+    builder.Services.AddScoped<IAuthTokenService, AuthTokenService>();
 
     // ── Authorization Policies ────────────────────────────────────────────────
     builder.Services.AddAuthorization(PoliciesAutorizacao.Registrar);
@@ -207,6 +246,20 @@ try
 
     // ── Notificações Push (Web Push / VAPID) ──────────────────────────────────
     builder.Services.AddScoped<IPushNotificationService, PushNotificationService>();
+    // Push nativo (FCM) para os apps MAUI — convive com o Web Push no mesmo funil.
+    builder.Services.AddScoped<IDispositivoPushService, DispositivoPushService>();
+
+    // FirebaseApp default (uma vez) — só quando o FCM está configurado.
+    var fcmOptions = builder.Configuration.GetSection(FcmOptions.SectionName).Get<FcmOptions>() ?? new FcmOptions();
+    if (fcmOptions.EstaConfigurado && FirebaseAdmin.FirebaseApp.DefaultInstance is null)
+    {
+        var credencial = !string.IsNullOrWhiteSpace(fcmOptions.CredentialsJson)
+            ? GoogleCredential.FromJson(fcmOptions.CredentialsJson)
+            : GoogleCredential.FromFile(fcmOptions.CredentialsPath!);
+
+        FirebaseAdmin.FirebaseApp.Create(new FirebaseAdmin.AppOptions { Credential = credencial });
+        Log.Information("Firebase (FCM) inicializado — push nativo habilitado.");
+    }
     // Textos das notificações no idioma do destinatário (lê as SharedResource.resx).
     builder.Services.AddSingleton<INotificacaoTextoService, HomePlanner.BlazorServer.Services.NotificacaoTextoService>();
     // Lembretes de tarefa por horário (varre o banco e dispara push na hora).
@@ -286,7 +339,16 @@ try
         return Results.Redirect(redirect);
     }).AllowAnonymous();
 
+    // ── Swagger da API (somente quando o JWT está configurado) ───────────────
+    if (jwtOptions.EstaConfigurado)
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
     app.UseRouting();
+    if (jwtOptions.EstaConfigurado)
+        app.UseCors("ApiMobile");
     app.UseAuthentication();
     app.UseTenantContext();
     app.UseOnboardingRequired();

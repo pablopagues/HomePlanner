@@ -25,6 +25,7 @@ public class PushNotificationService : IPushNotificationService
     private readonly TenantContext _tenantContext;
     private readonly TenantContextAccessor _tenantAccessor;
     private readonly INotificacaoTextoService _texto;
+    private readonly IDispositivoPushService _fcm;
     private readonly WebPushOptions _options;
     private readonly ILogger<PushNotificationService> _logger;
     private readonly WebPushClient _client = new();
@@ -34,6 +35,7 @@ public class PushNotificationService : IPushNotificationService
         TenantContext tenantContext,
         TenantContextAccessor tenantAccessor,
         INotificacaoTextoService texto,
+        IDispositivoPushService fcm,
         IOptions<WebPushOptions> options,
         ILogger<PushNotificationService> logger)
     {
@@ -41,6 +43,7 @@ public class PushNotificationService : IPushNotificationService
         _tenantContext = tenantContext;
         _tenantAccessor = tenantAccessor;
         _texto = texto;
+        _fcm = fcm;
         _options = options.Value;
         _logger = logger;
     }
@@ -174,12 +177,24 @@ public class PushNotificationService : IPushNotificationService
     public async Task<int> EnviarParaUsuarioAsync(
         Guid tenantId, string usuarioId, NotificacaoPushDTO notificacao, CancellationToken ct = default)
     {
-        if (!_options.EstaConfigurado)
-        {
-            _logger.LogWarning("Push desabilitado (chaves VAPID ausentes) — notificação não enviada.");
-            return 0;
-        }
+        var enviados = 0;
 
+        // ── Web Push (site/PWA) — só se as chaves VAPID estiverem configuradas ──
+        if (_options.EstaConfigurado)
+            enviados += await EnviarWebPushAsync(tenantId, usuarioId, notificacao, ct);
+
+        // ── Push nativo (apps MAUI via FCM) — independente do Web Push ──
+        enviados += await _fcm.EnviarParaUsuarioAsync(tenantId, usuarioId, notificacao, ct);
+
+        if (!_options.EstaConfigurado && !_fcm.Habilitado)
+            _logger.LogWarning("Nenhum canal de push configurado (VAPID/FCM) — notificação não enviada.");
+
+        return enviados;
+    }
+
+    private async Task<int> EnviarWebPushAsync(
+        Guid tenantId, string usuarioId, NotificacaoPushDTO notificacao, CancellationToken ct)
+    {
         // IgnoreQueryFilters: pode rodar fora do contexto de requisição (background), sem tenant atual.
         var inscricoes = await _db.InscricoesPush
             .IgnoreQueryFilters()

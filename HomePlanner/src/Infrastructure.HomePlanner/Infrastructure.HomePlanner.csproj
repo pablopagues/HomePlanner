@@ -16,6 +16,8 @@
     <PackageReference Include="Stripe.net" Version="46.*" />
     <PackageReference Include="MailKit" Version="4.*" />
     <PackageReference Include="WebPush" Version="1.0.12" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.*" />
+    <PackageReference Include="FirebaseAdmin" Version="3.*" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Domain.HomePlanner\Domain.HomePlanner.csproj" />

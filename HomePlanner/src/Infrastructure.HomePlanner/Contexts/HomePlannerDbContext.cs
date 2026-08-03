@@ -60,6 +60,10 @@ public class HomePlannerDbContext : IdentityDbContext<Usuario, Papel, string>
 
     // Notificações
     public DbSet<InscricaoPush> InscricoesPush => Set<InscricaoPush>();
+    public DbSet<DispositivoPush> DispositivosPush => Set<DispositivoPush>();
+
+    // Auth / API (mobile)
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

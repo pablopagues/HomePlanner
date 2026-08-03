@@ -15,6 +15,7 @@ public class OnboardingRequiredMiddleware
         "/onboarding",
         "/set-lang",
         "/health",
+        "/api",        // API mobile: onboarding é tratado pelos próprios endpoints, nunca por redirect
         "/Identity",
         "/_blazor",
         "/_framework",
