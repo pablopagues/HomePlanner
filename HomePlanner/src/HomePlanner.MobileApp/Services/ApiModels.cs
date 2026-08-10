@@ -108,6 +108,8 @@ public class ReceitaDetalheDTO
     public int NumeroPorcoesBase { get; set; }
     public int? TempoPreparoMinutos { get; set; }
     public string? Observacoes { get; set; }
+    public bool TemFoto { get; set; }
+    public string? UrlImagem { get; set; }
     public List<ReceitaIngredienteDTO> Ingredientes { get; set; } = new();
     public List<ReceitaComponenteDetalheDTO> Componentes { get; set; } = new();
 }
@@ -180,6 +182,41 @@ public class IngredientePersistenciaRequest
     public string Nome { get; set; } = string.Empty;
     public string? Categoria { get; set; }
     public int? UnidadeMedidaPadraoId { get; set; }
+}
+
+// ── Lojas / Produtos recorrentes ──────────────────────────────────────────
+public class LojaDTO
+{
+    public int Id { get; set; }
+    public string Nome { get; set; } = string.Empty;
+    public string? Icone { get; set; }
+    public string? Cor { get; set; }
+    public int Ordem { get; set; }
+}
+
+public class LojaPersistenciaRequest
+{
+    public string Nome { get; set; } = string.Empty;
+    public string? Icone { get; set; }
+    public string? Cor { get; set; }
+}
+
+public class ProdutoRecorrenteDTO
+{
+    public int Id { get; set; }
+    public string Descricao { get; set; } = string.Empty;
+    public string? Quantidade { get; set; }
+    public int? ListaId { get; set; }
+    public bool Ativo { get; set; }
+    public int Ordem { get; set; }
+}
+
+public class ProdutoRecorrentePersistReq
+{
+    public string Descricao { get; set; } = string.Empty;
+    public string? Quantidade { get; set; }
+    public int? ListaId { get; set; }
+    public bool Ativo { get; set; } = true;
 }
 
 // ── Modelos de semana ─────────────────────────────────────────────────────

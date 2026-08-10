@@ -15,6 +15,10 @@ else if (erro is not null)
 }
 else if (r is not null)
 {
+    @if (_imgSrc is not null)
+    {
+        <img src="@_imgSrc" alt="@r.Nome" style="width:100%;max-height:220px;object-fit:cover;border-radius:10px;margin-bottom:.6rem" />
+    }
     <div class="barra-topo"><h2>@r.Nome</h2></div>
     <p class="muted">
         @r.NumeroPorcoesBase porções
@@ -73,14 +77,23 @@ else if (r is not null)
     private bool carregando = true;
     private string? erro;
     private string? acaoErro;
+    private string? _imgSrc;
 
     protected override async Task OnParametersSetAsync()
     {
-        carregando = true; erro = null;
+        carregando = true; erro = null; _imgSrc = null;
         var (dados, err) = await Api.ObterReceitaAsync(Id);
         carregando = false;
         if (err is not null) { erro = err; return; }
         r = dados;
+
+        if (r is not null)
+        {
+            if (r.TemFoto)
+                _imgSrc = await Api.ObterImagemDataUrlAsync($"/api/receitas/{r.Id}/foto");
+            else if (r.UrlImagem is not null && r.UrlImagem.StartsWith("http"))
+                _imgSrc = r.UrlImagem;
+        }
     }
 
     private async Task DuplicarAsync()

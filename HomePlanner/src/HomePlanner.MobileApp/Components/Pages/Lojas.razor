@@ -1,0 +1,89 @@
+@page "/lojas"
+@using HomePlanner.MobileApp.Services
+@inject ApiClient Api
+
+<div class="barra-topo"><h2>Lojas</h2></div>
+<p class="muted">Organize as compras por loja (Walmart, Costco, farmácia...).</p>
+
+@if (carregando) { <p class="muted">Carregando...</p> }
+else if (erro is not null) { <p class="erro">@erro</p> }
+else if (_lojas.Count == 0) { <p class="muted">Nenhuma loja cadastrada.</p> }
+else
+{
+    @foreach (var l in _lojas)
+    {
+        <div class="card-hp">
+            <div class="linha">
+                <h3>@l.Nome</h3>
+                <div class="linha" style="gap:.3rem">
+                    <button class="link" style="width:auto" @onclick="() => Editar(l)">Editar</button>
+                    <button class="link" style="width:auto;color:var(--hp-danger)" @onclick="() => Excluir(l.Id)">Excluir</button>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+<button class="fab" @onclick="() => AbrirNova()">+</button>
+
+@if (_modalAberto)
+{
+    <div class="modal-fundo" @onclick="() => _modalAberto = false">
+        <div class="modal" @onclick:stopPropagation="true">
+            <h3>@(_editId.HasValue ? "Editar loja" : "Nova loja")</h3>
+            <label>Nome</label>
+            <input @bind="_nome" />
+            <button class="btn-acao" @onclick="SalvarAsync" disabled="@_salvando">
+                @(_salvando ? "Salvando..." : "Salvar")
+            </button>
+            <button class="link" @onclick="() => _modalAberto = false">Cancelar</button>
+            @if (_erroModal is not null) { <p class="erro">@_erroModal</p> }
+        </div>
+    </div>
+}
+
+@code {
+    private List<LojaDTO> _lojas = new();
+    private bool carregando = true;
+    private string? erro;
+
+    private bool _modalAberto, _salvando;
+    private int? _editId;
+    private string _nome = "";
+    private string? _erroModal;
+
+    protected override async Task OnInitializedAsync() => await CarregarAsync();
+
+    private async Task CarregarAsync()
+    {
+        carregando = true; erro = null;
+        var (dados, err) = await Api.ListarLojasAsync();
+        carregando = false;
+        if (err is not null) { erro = err; return; }
+        _lojas = dados ?? new();
+    }
+
+    private void AbrirNova() { _editId = null; _nome = ""; _erroModal = null; _modalAberto = true; }
+    private void Editar(LojaDTO l) { _editId = l.Id; _nome = l.Nome; _erroModal = null; _modalAberto = true; }
+
+    private async Task SalvarAsync()
+    {
+        _erroModal = null;
+        if (string.IsNullOrWhiteSpace(_nome)) { _erroModal = "Informe o nome."; return; }
+        _salvando = true;
+        var dto = new LojaPersistenciaRequest { Nome = _nome.Trim() };
+        _erroModal = _editId.HasValue
+            ? await Api.AtualizarLojaAsync(_editId.Value, dto)
+            : (await Api.CriarLojaAsync(dto)).erro;
+        _salvando = false;
+        if (_erroModal is not null) return;
+        _modalAberto = false;
+        await CarregarAsync();
+    }
+
+    private async Task Excluir(int id)
+    {
+        erro = await Api.ExcluirLojaAsync(id);
+        await CarregarAsync();
+    }
+}

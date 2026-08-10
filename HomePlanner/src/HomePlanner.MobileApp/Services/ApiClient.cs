@@ -58,6 +58,20 @@ public class ApiClient
         catch (Exception ex) { return (default, $"Falha de conexão: {ex.Message}"); }
     }
 
+    /// <summary>Busca uma imagem autenticada (Bearer) e devolve como data URL para usar em &lt;img src&gt;.</summary>
+    public async Task<string?> ObterImagemDataUrlAsync(string caminho, CancellationToken ct = default)
+    {
+        try
+        {
+            var resp = await _http.GetAsync(Url(caminho), ct);
+            if (!resp.IsSuccessStatusCode) return null;
+            var bytes = await resp.Content.ReadAsByteArrayAsync(ct);
+            var tipo = resp.Content.Headers.ContentType?.MediaType ?? "image/jpeg";
+            return $"data:{tipo};base64,{Convert.ToBase64String(bytes)}";
+        }
+        catch { return null; }
+    }
+
     // ── Cardápio ──────────────────────────────────────────────────────────
     public Task<(CardapioSemanaDTO? dados, string? erro)> ObterCardapioSemanaAsync(DateOnly segunda, CancellationToken ct = default)
         => GetAsync<CardapioSemanaDTO>($"/api/cardapio/semana/{segunda:yyyy-MM-dd}", ct);
@@ -106,6 +120,32 @@ public class ApiClient
 
     public Task<string?> DeletarModeloAsync(int id, CancellationToken ct = default)
         => EnviarAsync(HttpMethod.Delete, $"/api/modelos/{id}", null, ct);
+
+    // ── Lojas ──────────────────────────────────────────────────────────────
+    public Task<(List<LojaDTO>? dados, string? erro)> ListarLojasAsync(CancellationToken ct = default)
+        => GetAsync<List<LojaDTO>>("/api/lojas", ct);
+
+    public Task<(int dados, string? erro)> CriarLojaAsync(LojaPersistenciaRequest dto, CancellationToken ct = default)
+        => EnviarAsync<int>(HttpMethod.Post, "/api/lojas", dto, ct);
+
+    public Task<string?> AtualizarLojaAsync(int id, LojaPersistenciaRequest dto, CancellationToken ct = default)
+        => EnviarAsync(HttpMethod.Put, $"/api/lojas/{id}", dto, ct);
+
+    public Task<string?> ExcluirLojaAsync(int id, CancellationToken ct = default)
+        => EnviarAsync(HttpMethod.Delete, $"/api/lojas/{id}", null, ct);
+
+    // ── Produtos recorrentes ───────────────────────────────────────────────
+    public Task<(List<ProdutoRecorrenteDTO>? dados, string? erro)> ListarRecorrentesAsync(bool apenasAtivos = false, CancellationToken ct = default)
+        => GetAsync<List<ProdutoRecorrenteDTO>>($"/api/produtosrecorrentes?apenasAtivos={apenasAtivos}", ct);
+
+    public Task<(int dados, string? erro)> CriarRecorrenteAsync(ProdutoRecorrentePersistReq dto, CancellationToken ct = default)
+        => EnviarAsync<int>(HttpMethod.Post, "/api/produtosrecorrentes", dto, ct);
+
+    public Task<string?> ExcluirRecorrenteAsync(int id, CancellationToken ct = default)
+        => EnviarAsync(HttpMethod.Delete, $"/api/produtosrecorrentes/{id}", null, ct);
+
+    public Task<string?> AdicionarRecorrentesSemanaAsync(List<int> ids, DateOnly segunda, CancellationToken ct = default)
+        => EnviarAsync(HttpMethod.Post, $"/api/produtosrecorrentes/adicionar-semana?dataInicio={segunda:yyyy-MM-dd}", ids, ct);
 
     // ── 2FA ────────────────────────────────────────────────────────────────
     public Task<(StatusDoisFatores? dados, string? erro)> StatusDoisFatoresAsync(CancellationToken ct = default)

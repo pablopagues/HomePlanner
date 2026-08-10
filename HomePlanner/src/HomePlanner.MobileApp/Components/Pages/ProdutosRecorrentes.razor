@@ -1,0 +1,121 @@
+@page "/recorrentes"
+@using HomePlanner.MobileApp.Services
+@inject ApiClient Api
+
+<div class="barra-topo"><h2>Produtos recorrentes</h2></div>
+<p class="muted">Itens que você compra sempre — envie os selecionados para a semana atual.</p>
+
+@if (carregando) { <p class="muted">Carregando...</p> }
+else if (erro is not null) { <p class="erro">@erro</p> }
+else if (_produtos.Count == 0) { <p class="muted">Nenhum produto recorrente.</p> }
+else
+{
+    @foreach (var p in _produtos)
+    {
+        <div class="card-hp">
+            <div class="item-check" style="border:none">
+                <input type="checkbox" checked="@_selecionados.Contains(p.Id)"
+                       @onchange="e => Selecionar(p.Id, (bool)e.Value!)" />
+                <div style="flex:1">
+                    <div><strong>@p.Descricao</strong></div>
+                    @if (!string.IsNullOrWhiteSpace(p.Quantidade)) { <div class="muted">@p.Quantidade</div> }
+                </div>
+                <button class="menu-btn" style="color:var(--hp-danger)" @onclick="() => Excluir(p.Id)">✕</button>
+            </div>
+        </div>
+    }
+
+    <button class="btn-acao" @onclick="AdicionarSelecionados" disabled="@(_selecionados.Count == 0 || _enviando)">
+        @(_enviando ? "Enviando..." : $"Adicionar {_selecionados.Count} à semana")
+    </button>
+}
+
+@if (mensagem is not null) { <p class="@(sucesso ? "muted" : "erro")">@mensagem</p> }
+
+<button class="fab" @onclick="() => _modalAberto = true">+</button>
+
+@if (_modalAberto)
+{
+    <div class="modal-fundo" @onclick="() => _modalAberto = false">
+        <div class="modal" @onclick:stopPropagation="true">
+            <h3>Novo produto recorrente</h3>
+            <label>Descrição</label>
+            <input @bind="_novo.Descricao" />
+            <label>Quantidade (opcional)</label>
+            <input @bind="_novo.Quantidade" />
+            <button class="btn-acao" @onclick="CriarAsync" disabled="@_salvando">
+                @(_salvando ? "Salvando..." : "Salvar")
+            </button>
+            <button class="link" @onclick="() => _modalAberto = false">Cancelar</button>
+            @if (_erroModal is not null) { <p class="erro">@_erroModal</p> }
+        </div>
+    </div>
+}
+
+@code {
+    private List<ProdutoRecorrenteDTO> _produtos = new();
+    private HashSet<int> _selecionados = new();
+    private DateOnly _segunda;
+    private bool carregando = true, sucesso, _enviando;
+    private string? erro, mensagem;
+
+    private bool _modalAberto, _salvando;
+    private ProdutoRecorrentePersistReq _novo = new();
+    private string? _erroModal;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _segunda = SegundaDe(DateOnly.FromDateTime(DateTime.Today));
+        await CarregarAsync();
+    }
+
+    private async Task CarregarAsync()
+    {
+        carregando = true; erro = null;
+        var (dados, err) = await Api.ListarRecorrentesAsync(true);
+        carregando = false;
+        if (err is not null) { erro = err; return; }
+        _produtos = dados ?? new();
+    }
+
+    private void Selecionar(int id, bool sel)
+    {
+        if (sel) _selecionados.Add(id); else _selecionados.Remove(id);
+    }
+
+    private async Task AdicionarSelecionados()
+    {
+        mensagem = null; _enviando = true;
+        var err = await Api.AdicionarRecorrentesSemanaAsync(_selecionados.ToList(), _segunda);
+        _enviando = false;
+        sucesso = err is null;
+        mensagem = err ?? $"{_selecionados.Count} item(ns) adicionado(s) à semana!";
+        if (err is null) _selecionados.Clear();
+    }
+
+    private async Task CriarAsync()
+    {
+        _erroModal = null;
+        if (string.IsNullOrWhiteSpace(_novo.Descricao)) { _erroModal = "Informe a descrição."; return; }
+        _salvando = true;
+        var (_, err) = await Api.CriarRecorrenteAsync(_novo);
+        _salvando = false;
+        if (err is not null) { _erroModal = err; return; }
+        _novo = new ProdutoRecorrentePersistReq();
+        _modalAberto = false;
+        await CarregarAsync();
+    }
+
+    private async Task Excluir(int id)
+    {
+        erro = await Api.ExcluirRecorrenteAsync(id);
+        _selecionados.Remove(id);
+        await CarregarAsync();
+    }
+
+    private static DateOnly SegundaDe(DateOnly d)
+    {
+        var diff = ((int)d.DayOfWeek - 1 + 7) % 7;
+        return d.AddDays(-diff);
+    }
+}
