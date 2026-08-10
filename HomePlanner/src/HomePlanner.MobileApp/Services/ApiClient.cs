@@ -111,6 +111,12 @@ public class ApiClient
     public Task<string?> DeletarIngredienteAsync(int id, CancellationToken ct = default)
         => EnviarAsync(HttpMethod.Delete, $"/api/ingredientes/{id}", null, ct);
 
+    public Task<(List<IngredienteListaDTO>? dados, string? erro)> AutocompleteIngredientesAsync(string texto, CancellationToken ct = default)
+        => GetAsync<List<IngredienteListaDTO>>($"/api/ingredientes/autocomplete?texto={Uri.EscapeDataString(texto)}&limite=10", ct);
+
+    public Task<(List<UnidadeMedidaDTO>? dados, string? erro)> ListarUnidadesAsync(CancellationToken ct = default)
+        => GetAsync<List<UnidadeMedidaDTO>>("/api/unidades", ct);
+
     // ── Modelos de semana ─────────────────────────────────────────────────
     public Task<(ResultadoListagem<ModeloSemanaListaDTO>? dados, string? erro)> ListarModelosAsync(int pagina = 1, CancellationToken ct = default)
         => GetAsync<ResultadoListagem<ModeloSemanaListaDTO>>($"/api/modelos?pagina={pagina}&tamanhoPagina=50", ct);

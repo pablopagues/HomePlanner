@@ -199,6 +199,14 @@ public class IngredientePersistenciaRequest
     public int? UnidadeMedidaPadraoId { get; set; }
 }
 
+public class UnidadeMedidaDTO
+{
+    public int Id { get; set; }
+    public string Codigo { get; set; } = string.Empty;
+    public string Nome { get; set; } = string.Empty;
+    public string Tipo { get; set; } = string.Empty;
+}
+
 // ── Lojas / Produtos recorrentes ──────────────────────────────────────────
 public class LojaDTO
 {

@@ -24,15 +24,43 @@ else
         </div>
     </div>
 
+    <div class="card-hp" style="margin-top:.8rem">
+        <div class="linha"><h3>Ingredientes</h3>
+            <button class="link" style="width:auto" @onclick="() => _modalIng = true">+ Adicionar</button>
+        </div>
+        @if (_linhas.Count == 0) { <p class="muted">Nenhum ingrediente.</p> }
+        else
+        {
+            @foreach (var l in _linhas)
+            {
+                <div class="item-check" style="gap:.4rem">
+                    <div style="flex:1">
+                        <div><strong>@l.Nome</strong></div>
+                        <div class="linha" style="gap:.4rem;margin-top:.2rem">
+                            <input type="number" step="0.01" min="0" style="width:80px" @bind="l.Quantidade" />
+                            <select @bind="l.UnidadeMedidaId" style="width:auto">
+                                @foreach (var u in _unidades) { <option value="@u.Id">@u.Codigo</option> }
+                            </select>
+                            <label style="display:flex;align-items:center;gap:.2rem;font-size:.8rem;margin:0">
+                                <input type="checkbox" style="width:16px;height:16px" @bind="l.Opcional" /> opc.
+                            </label>
+                        </div>
+                    </div>
+                    <button class="menu-btn" style="color:var(--hp-danger)" @onclick="() => _linhas.Remove(l)">✕</button>
+                </div>
+            }
+        }
+    </div>
+
     <label>Modo de preparo</label>
     <textarea rows="6" @bind="_dto.ModoPreparo"></textarea>
 
     <label>Observações</label>
     <textarea rows="2" @bind="_dto.Observacoes"></textarea>
 
-    @if (Id.HasValue && (_qtdIngredientes > 0 || _qtdComponentes > 0))
+    @if (_qtdComponentes > 0)
     {
-        <p class="muted">Os @_qtdIngredientes ingrediente(s) e @_qtdComponentes componente(s) são preservados. Edite-os na versão web.</p>
+        <p class="muted">@_qtdComponentes componente(s) preservado(s) (edite na versão web).</p>
     }
 
     <button class="btn-acao" @onclick="SalvarAsync" disabled="@ocupado">
@@ -41,42 +69,77 @@ else
     @if (erro is not null) { <p class="erro">@erro</p> }
 }
 
+@if (_modalIng)
+{
+    <div class="modal-fundo" @onclick="() => _modalIng = false">
+        <div class="modal" @onclick:stopPropagation="true">
+            <h3>Adicionar ingrediente</h3>
+            <input placeholder="Buscar ingrediente..." @bind="_buscaIng" @bind:event="oninput" @onkeyup="BuscarIngAsync" />
+            <div style="max-height:240px;overflow-y:auto;margin-top:.5rem">
+                @foreach (var ing in _resultadosIng)
+                {
+                    <div class="item-check" style="cursor:pointer" @onclick="() => AdicionarLinha(ing)">
+                        <span>@ing.Nome</span>
+                    </div>
+                }
+            </div>
+            <button class="link" @onclick="() => _modalIng = false">Fechar</button>
+        </div>
+    </div>
+}
+
 @code {
     [Parameter] public int? Id { get; set; }
 
+    private class LinhaIng
+    {
+        public int IngredienteId { get; set; }
+        public string Nome { get; set; } = "";
+        public decimal Quantidade { get; set; } = 1;
+        public int UnidadeMedidaId { get; set; }
+        public bool Opcional { get; set; }
+    }
+
     private ReceitaPersistenciaRequest _dto = new();
-    private int _qtdIngredientes, _qtdComponentes;
+    private List<LinhaIng> _linhas = new();
+    private List<UnidadeMedidaDTO> _unidades = new();
+    private int _qtdComponentes;
     private bool carregando = true, ocupado;
     private string? erro;
+
+    private bool _modalIng;
+    private string _buscaIng = "";
+    private List<IngredienteListaDTO> _resultadosIng = new();
 
     protected override async Task OnParametersSetAsync()
     {
         carregando = true;
+        var (unidades, _) = await Api.ListarUnidadesAsync();
+        _unidades = unidades ?? new();
+
         if (Id.HasValue)
         {
             var (r, err) = await Api.ObterReceitaAsync(Id.Value);
             erro = err;
             if (r is not null)
             {
-                _qtdIngredientes = r.Ingredientes.Count;
                 _qtdComponentes = r.Componentes.Count;
                 _dto = new ReceitaPersistenciaRequest
                 {
                     Id = r.Id, Nome = r.Nome, ModoPreparo = r.ModoPreparo,
                     NumeroPorcoesBase = r.NumeroPorcoesBase, TempoPreparoMinutos = r.TempoPreparoMinutos,
                     Observacoes = r.Observacoes,
-                    // Preserva os itens existentes (a edição fina fica na web).
-                    Ingredientes = r.Ingredientes.Select(i => new ReceitaIngredientePersistReq
-                    {
-                        Id = i.Id, IngredienteId = i.IngredienteId, Quantidade = i.Quantidade,
-                        UnidadeMedidaId = i.UnidadeMedidaId, Observacao = i.Observacao, Opcional = i.Opcional, Ordem = i.Ordem,
-                    }).ToList(),
                     Componentes = r.Componentes.Select(c => new ReceitaComponentePersistReq
                     {
                         Id = c.Id, ReceitaComponenteId = c.ComponenteId, NomeComponente = c.Nome,
                         PorcoesDesejadas = c.PorcoesDesejadas, Ordem = c.Ordem,
                     }).ToList(),
                 };
+                _linhas = r.Ingredientes.Select(i => new LinhaIng
+                {
+                    IngredienteId = i.IngredienteId, Nome = i.NomeIngrediente, Quantidade = i.Quantidade,
+                    UnidadeMedidaId = i.UnidadeMedidaId, Opcional = i.Opcional,
+                }).ToList();
             }
         }
         else
@@ -86,10 +149,34 @@ else
         carregando = false;
     }
 
+    private async Task BuscarIngAsync(KeyboardEventArgs e)
+    {
+        if (_buscaIng.Trim().Length < 2) { _resultadosIng = new(); return; }
+        var (dados, _) = await Api.AutocompleteIngredientesAsync(_buscaIng.Trim());
+        _resultadosIng = dados ?? new();
+    }
+
+    private void AdicionarLinha(IngredienteListaDTO ing)
+    {
+        _linhas.Add(new LinhaIng
+        {
+            IngredienteId = ing.Id, Nome = ing.Nome, Quantidade = 1,
+            UnidadeMedidaId = _unidades.FirstOrDefault()?.Id ?? 0,
+        });
+        _modalIng = false;
+        _buscaIng = ""; _resultadosIng = new();
+    }
+
     private async Task SalvarAsync()
     {
         erro = null;
         if (string.IsNullOrWhiteSpace(_dto.Nome)) { erro = "Informe o nome."; return; }
+
+        _dto.Ingredientes = _linhas.Select((l, idx) => new ReceitaIngredientePersistReq
+        {
+            IngredienteId = l.IngredienteId, Quantidade = l.Quantidade,
+            UnidadeMedidaId = l.UnidadeMedidaId, Opcional = l.Opcional, Ordem = idx,
+        }).ToList();
 
         ocupado = true;
         var (id, err) = await Api.SalvarReceitaAsync(_dto);
