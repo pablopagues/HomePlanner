@@ -1,0 +1,109 @@
+@page "/compras"
+@using HomePlanner.MobileApp.Services
+@inject ApiClient Api
+
+<div class="barra-topo">
+    <button class="menu-btn" style="color:var(--hp-primary)" @onclick="() => MudarSemana(-7)">‹</button>
+    <h2>Compras · @_segunda.ToString("dd/MM")</h2>
+    <button class="menu-btn" style="color:var(--hp-primary)" @onclick="() => MudarSemana(7)">›</button>
+</div>
+
+@if (carregando) { <p class="muted">Carregando...</p> }
+else if (erro is not null) { <p class="erro">@erro</p> }
+else
+{
+    <div class="card-hp">
+        <h3>Do cardápio (@(_lista?.TotalReceitas ?? 0) receitas)</h3>
+        @if (_lista is null || _lista.Itens.Count == 0)
+        {
+            <p class="muted">Nenhum item calculado para esta semana.</p>
+        }
+        else
+        {
+            @foreach (var i in _lista.Itens)
+            {
+                var comprado = _marcacoes.TryGetValue(i.IngredienteId, out var c) && c;
+                <div class="item-check">
+                    <input type="checkbox" checked="@comprado"
+                           @onchange="e => MarcarItem(i.IngredienteId, (bool)e.Value!)" />
+                    <div style="flex:1" class="@(comprado ? "riscado" : "")">
+                        <div>@i.NomeIngrediente</div>
+                        <div class="muted">@i.QuantidadeFormatada</div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    @if (_pedidos.Count > 0)
+    {
+        @foreach (var grupo in _pedidos)
+        {
+            <div class="card-hp">
+                <h3>@grupo.SolicitanteNome</h3>
+                @foreach (var p in grupo.Itens)
+                {
+                    <div class="item-check">
+                        <input type="checkbox" checked="@p.Comprado" disabled="@(!p.PodeEditar)"
+                               @onchange="e => MarcarPedido(p.Id, (bool)e.Value!)" />
+                        <div style="flex:1" class="@(p.Comprado ? "riscado" : "")">
+                            <div>@p.Descricao</div>
+                            @if (!string.IsNullOrWhiteSpace(p.Quantidade)) { <div class="muted">@p.Quantidade</div> }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+}
+
+@code {
+    private DateOnly _segunda;
+    private ListaComprasDTO? _lista;
+    private Dictionary<int, bool> _marcacoes = new();
+    private List<PedidoMembroGrupoDTO> _pedidos = new();
+    private bool carregando = true;
+    private string? erro;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _segunda = SegundaDe(DateOnly.FromDateTime(DateTime.Today));
+        await CarregarAsync();
+    }
+
+    private async Task CarregarAsync()
+    {
+        carregando = true; erro = null;
+        var (lista, e1) = await Api.ComprasDaSemanaAsync(_segunda);
+        var (marc, _) = await Api.MarcacoesSemanaAsync(_segunda);
+        var (peds, _) = await Api.PedidosDaSemanaAsync(_segunda);
+        carregando = false;
+
+        if (e1 is not null) { erro = e1; return; }
+        _lista = lista;
+        _marcacoes = marc ?? new();
+        _pedidos = peds ?? new();
+    }
+
+    private async Task MarcarItem(int ingredienteId, bool comprado)
+    {
+        _marcacoes[ingredienteId] = comprado; // otimista
+        var err = await Api.MarcarItemAsync(_segunda, ingredienteId, comprado);
+        if (err is not null) { erro = err; await CarregarAsync(); }
+    }
+
+    private async Task MarcarPedido(int id, bool comprado)
+    {
+        var err = await Api.MarcarPedidoAsync(id, comprado);
+        if (err is not null) { erro = err; }
+        await CarregarAsync();
+    }
+
+    private async Task MudarSemana(int dias) { _segunda = _segunda.AddDays(dias); await CarregarAsync(); }
+
+    private static DateOnly SegundaDe(DateOnly d)
+    {
+        var diff = ((int)d.DayOfWeek - 1 + 7) % 7;
+        return d.AddDays(-diff);
+    }
+}

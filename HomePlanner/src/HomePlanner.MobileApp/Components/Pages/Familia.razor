@@ -1,0 +1,48 @@
+@page "/familia"
+@using HomePlanner.MobileApp.Services
+@inject ApiClient Api
+
+<div class="barra-topo"><h2>Família</h2></div>
+
+@if (carregando) { <p class="muted">Carregando...</p> }
+else if (erro is not null) { <p class="erro">@erro</p> }
+else
+{
+    @if (_resumo is not null)
+    {
+        <p class="muted">@_resumo.MembrosAtivos de @_resumo.LimiteMembros assentos usados</p>
+    }
+
+    @foreach (var m in _membros)
+    {
+        <div class="card-hp">
+            <div class="linha">
+                <h3>@m.Nome</h3>
+                <span class="pill">@m.Papel</span>
+            </div>
+            <div class="muted">@m.Email</div>
+            <div class="muted">
+                @(m.Ativo ? "Ativo" : "Inativo")
+                @(m.SenhaDefinida ? "" : " · convite pendente")
+            </div>
+        </div>
+    }
+}
+
+@code {
+    private List<MembroFamiliaDetalheDTO> _membros = new();
+    private ResumoFamiliaDTO? _resumo;
+    private bool carregando = true;
+    private string? erro;
+
+    protected override async Task OnInitializedAsync()
+    {
+        carregando = true; erro = null;
+        var (membros, err) = await Api.MembrosAsync();
+        var (resumo, _) = await Api.ResumoFamiliaAsync();
+        carregando = false;
+        if (err is not null) { erro = err; return; }
+        _membros = membros ?? new();
+        _resumo = resumo;
+    }
+}

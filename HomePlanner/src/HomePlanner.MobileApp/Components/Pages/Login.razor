@@ -1,0 +1,92 @@
+@page "/"
+@layout SemMenuLayout
+@using HomePlanner.MobileApp.Services
+@inject AuthApi Auth
+@inject SessaoAtual Sessao
+@inject NavigationManager Nav
+
+<div class="auth">
+    <h1>HomePlanner</h1>
+
+    @if (verificando)
+    {
+        <p>Carregando...</p>
+    }
+    else
+    {
+        <p class="sub">Entrar na sua conta</p>
+
+        <label>Servidor (API)</label>
+        <input @bind="baseUrl" placeholder="https://..." />
+
+        <label>E-mail</label>
+        <input @bind="email" type="email" inputmode="email" placeholder="voce@exemplo.com" />
+
+        <label>Senha</label>
+        <input @bind="senha" type="password" @onkeyup="AoTeclar" />
+
+        <button class="primario" @onclick="EntrarAsync" disabled="@ocupado">
+            @(ocupado ? "Entrando..." : "Entrar")
+        </button>
+
+        <button class="link" @onclick='() => Nav.NavigateTo("/registro")'>Criar uma conta</button>
+
+        @if (!string.IsNullOrEmpty(mensagem))
+        {
+            <p class="erro">@mensagem</p>
+        }
+    }
+</div>
+
+@code {
+    private string baseUrl = SessaoAtual.BaseUrlPadrao;
+    private string email = string.Empty;
+    private string senha = string.Empty;
+    private bool ocupado;
+    private bool verificando = true;
+    private string? mensagem;
+
+    protected override async Task OnInitializedAsync()
+    {
+        baseUrl = Sessao.BaseUrl;
+
+        // Auto-login: se houver refresh token salvo, tenta renovar a sessão.
+        if (await Auth.RenovarAsync())
+        {
+            Nav.NavigateTo("/cardapio");
+            return;
+        }
+        verificando = false;
+    }
+
+    private async Task AoTeclar(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await EntrarAsync();
+    }
+
+    private async Task EntrarAsync()
+    {
+        mensagem = null;
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(senha))
+        {
+            mensagem = "Informe e-mail e senha.";
+            return;
+        }
+
+        ocupado = true;
+        Sessao.SalvarBaseUrl(baseUrl);
+        var (resposta, erro) = await Auth.LoginAsync(email.Trim(), senha);
+        ocupado = false;
+
+        if (erro is not null) { mensagem = erro; return; }
+
+        if (resposta!.Requer2FA)
+        {
+            Sessao.MfaTokenPendente = resposta.MfaToken;
+            Nav.NavigateTo("/2fa");
+            return;
+        }
+
+        Nav.NavigateTo("/cardapio");
+    }
+}

@@ -1,0 +1,88 @@
+@page "/cardapio"
+@using HomePlanner.MobileApp.Services
+@inject ApiClient Api
+
+<div class="barra-topo">
+    <button class="menu-btn" style="color:var(--hp-primary)" @onclick="() => MudarSemana(-7)">‹</button>
+    <h2>@_segunda.ToString("dd/MM") – @_segunda.AddDays(6).ToString("dd/MM")</h2>
+    <button class="menu-btn" style="color:var(--hp-primary)" @onclick="() => MudarSemana(7)">›</button>
+</div>
+<button class="link" @onclick="IrParaHoje">Ir para esta semana</button>
+
+@if (carregando)
+{
+    <p class="muted">Carregando...</p>
+}
+else if (erro is not null)
+{
+    <p class="erro">@erro</p>
+}
+else
+{
+    <div class="cardapio-grade">
+        <div class="cel cab"></div>
+        @foreach (var d in _dias)
+        {
+            <div class="cel cab">@d.curto</div>
+        }
+
+        @foreach (var t in _tipos)
+        {
+            <div class="cel rot">@t.rotulo</div>
+            @foreach (var d in _dias)
+            {
+                var r = Refeicao(d.chave, t.chave);
+                <div class="cel @(r is not null ? "cheia" : "")">
+                    @if (r is not null)
+                    {
+                        <span>@r.ReceitaNome</span>
+                    }
+                </div>
+            }
+        }
+    </div>
+}
+
+@code {
+    private DateOnly _segunda;
+    private CardapioSemanaDTO? _cardapio;
+    private bool carregando = true;
+    private string? erro;
+
+    private static readonly (string chave, string curto)[] _dias =
+    [
+        ("Segunda","Seg"),("Terca","Ter"),("Quarta","Qua"),("Quinta","Qui"),
+        ("Sexta","Sex"),("Sabado","Sáb"),("Domingo","Dom"),
+    ];
+    private static readonly (string chave, string rotulo)[] _tipos =
+    [
+        ("CafeManha","Café"),("Almoco","Almoço"),("Lanche","Lanche"),("Jantar","Jantar"),("Ceia","Ceia"),
+    ];
+
+    protected override async Task OnInitializedAsync()
+    {
+        _segunda = SegundaDe(DateOnly.FromDateTime(DateTime.Today));
+        await CarregarAsync();
+    }
+
+    private async Task CarregarAsync()
+    {
+        carregando = true; erro = null;
+        var (dados, err) = await Api.ObterCardapioSemanaAsync(_segunda);
+        carregando = false;
+        if (err is not null) { erro = err; return; }
+        _cardapio = dados;
+    }
+
+    private RefeicaoDiaDTO? Refeicao(string dia, string tipo)
+        => _cardapio?.Refeicoes.FirstOrDefault(r => r.DiaSemana == dia && r.TipoRefeicao == tipo && r.ReceitaId.HasValue);
+
+    private async Task MudarSemana(int dias) { _segunda = _segunda.AddDays(dias); await CarregarAsync(); }
+    private async Task IrParaHoje() { _segunda = SegundaDe(DateOnly.FromDateTime(DateTime.Today)); await CarregarAsync(); }
+
+    private static DateOnly SegundaDe(DateOnly d)
+    {
+        var diff = ((int)d.DayOfWeek - 1 + 7) % 7;
+        return d.AddDays(-diff);
+    }
+}

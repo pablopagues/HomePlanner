@@ -1,0 +1,60 @@
+@page "/planner"
+@using HomePlanner.MobileApp.Services
+@inject ApiClient Api
+
+<div class="barra-topo"><h2>Tarefas</h2></div>
+
+<div class="linha" style="margin-bottom:.6rem">
+    <label style="display:flex;align-items:center;gap:.4rem;color:var(--hp-text-2)">
+        <input type="checkbox" style="width:18px;height:18px" @bind="ocultarConcluidas" @bind:after="CarregarAsync" />
+        Ocultar concluídas
+    </label>
+</div>
+
+@if (carregando) { <p class="muted">Carregando...</p> }
+else if (erro is not null) { <p class="erro">@erro</p> }
+else if (lista is null || lista.Itens.Count == 0) { <p class="muted">Nenhuma tarefa.</p> }
+else
+{
+    @foreach (var t in lista.Itens)
+    {
+        <div class="card-hp">
+            <div class="item-check">
+                <input type="checkbox" checked="@t.Concluida" @onchange="e => Concluir(t, (bool)e.Value!)" />
+                <div style="flex:1">
+                    <div class="@(t.Concluida ? "riscado" : "")"><strong>@t.Titulo</strong></div>
+                    <div class="muted">
+                        @(t.DataPrevista?.ToString("dd/MM") ?? "sem data")
+                        @(t.HoraInicio is not null ? $" · {t.HoraInicio:HH\\:mm}" : "")
+                        @(t.ResponsavelNome is not null ? $" · {t.ResponsavelNome}" : "")
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    private ResultadoListagem<TarefaListaDTO>? lista;
+    private bool ocultarConcluidas;
+    private bool carregando = true;
+    private string? erro;
+
+    protected override async Task OnInitializedAsync() => await CarregarAsync();
+
+    private async Task CarregarAsync()
+    {
+        carregando = true; erro = null;
+        var (dados, err) = await Api.ListarTarefasAsync(ocultarConcluidas ? false : null);
+        carregando = false;
+        if (err is not null) { erro = err; return; }
+        lista = dados;
+    }
+
+    private async Task Concluir(TarefaListaDTO t, bool concluida)
+    {
+        var err = await Api.ConcluirTarefaAsync(t.Id, concluida);
+        if (err is not null) { erro = err; return; }
+        await CarregarAsync();
+    }
+}

@@ -1,0 +1,53 @@
+@inherits LayoutComponentBase
+@using HomePlanner.MobileApp.Services
+@inject SessaoAtual Sessao
+@inject NavigationManager Nav
+
+<div class="app-shell">
+    <header class="app-bar">
+        <button class="menu-btn" @onclick="() => menuAberto = !menuAberto">☰</button>
+        <span class="app-titulo">HomePlanner</span>
+        <button class="menu-btn" @onclick="Sair" title="Sair">⏻</button>
+    </header>
+
+    @if (menuAberto)
+    {
+        <nav class="menu" @onclick="() => menuAberto = false">
+            @foreach (var (rota, rotulo) in _itens)
+            {
+                <NavLink class="menu-item" href="@rota" Match="NavLinkMatch.All">@rotulo</NavLink>
+            }
+        </nav>
+    }
+
+    <article class="conteudo">
+        @Body
+    </article>
+</div>
+
+@code {
+    private bool menuAberto;
+
+    private static readonly (string rota, string rotulo)[] _itens =
+    [
+        ("/cardapio", "🍽️ Cardápio"),
+        ("/receitas", "📖 Receitas"),
+        ("/ingredientes", "🥕 Ingredientes"),
+        ("/planner", "✅ Tarefas"),
+        ("/compras", "🛒 Compras"),
+        ("/familia", "👪 Família"),
+        ("/perfil", "👤 Perfil"),
+    ];
+
+    protected override void OnInitialized()
+    {
+        if (!Sessao.EstaLogado)
+            Nav.NavigateTo("/");
+    }
+
+    private void Sair()
+    {
+        Sessao.Sair();
+        Nav.NavigateTo("/");
+    }
+}

@@ -1,0 +1,63 @@
+@page "/receitas"
+@using HomePlanner.MobileApp.Services
+@inject ApiClient Api
+@inject NavigationManager Nav
+
+<div class="barra-topo"><h2>Receitas</h2></div>
+
+<input placeholder="Buscar..." @bind="busca" @bind:event="oninput" @onkeyup="AoTeclar" />
+
+@if (carregando)
+{
+    <p class="muted">Carregando...</p>
+}
+else if (erro is not null)
+{
+    <p class="erro">@erro</p>
+}
+else if (lista is null || lista.Itens.Count == 0)
+{
+    <p class="muted">Nenhuma receita encontrada.</p>
+}
+else
+{
+    @foreach (var r in lista.Itens)
+    {
+        <div class="card-hp" @onclick="() => Abrir(r.Id)" style="cursor:pointer">
+            <div class="linha">
+                <h3>@r.Nome</h3>
+                <span class="pill">@r.NumeroPorcoesBase porç.</span>
+            </div>
+            <div class="muted">
+                @(r.TempoPreparoMinutos.HasValue ? $"{r.TempoPreparoMinutos} min · " : "")
+                @r.TotalIngredientes ingrediente(s)
+            </div>
+        </div>
+    }
+}
+
+@code {
+    private ResultadoListagem<ReceitaListaDTO>? lista;
+    private string busca = string.Empty;
+    private bool carregando = true;
+    private string? erro;
+    private CancellationTokenSource? _cts;
+
+    protected override async Task OnInitializedAsync() => await CarregarAsync();
+
+    private async Task AoTeclar(KeyboardEventArgs e) => await CarregarAsync();
+
+    private async Task CarregarAsync()
+    {
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        carregando = true; erro = null;
+        var (dados, err) = await Api.ListarReceitasAsync(busca, 1, _cts.Token);
+        if (_cts.IsCancellationRequested) return;
+        carregando = false;
+        if (err is not null) { erro = err; return; }
+        lista = dados;
+    }
+
+    private void Abrir(int id) => Nav.NavigateTo($"/receitas/{id}");
+}

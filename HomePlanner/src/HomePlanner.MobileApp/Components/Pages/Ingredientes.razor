@@ -1,0 +1,46 @@
+@page "/ingredientes"
+@using HomePlanner.MobileApp.Services
+@inject ApiClient Api
+
+<div class="barra-topo"><h2>Ingredientes</h2></div>
+
+<input placeholder="Buscar..." @bind="busca" @bind:event="oninput" @onkeyup="AoTeclar" />
+
+@if (carregando) { <p class="muted">Carregando...</p> }
+else if (erro is not null) { <p class="erro">@erro</p> }
+else if (lista is null || lista.Itens.Count == 0) { <p class="muted">Nenhum ingrediente.</p> }
+else
+{
+    @foreach (var i in lista.Itens)
+    {
+        <div class="card-hp">
+            <div class="linha">
+                <h3>@i.Nome</h3>
+                @if (!string.IsNullOrWhiteSpace(i.Categoria)) { <span class="pill">@i.Categoria</span> }
+            </div>
+        </div>
+    }
+}
+
+@code {
+    private ResultadoListagem<IngredienteListaDTO>? lista;
+    private string busca = string.Empty;
+    private bool carregando = true;
+    private string? erro;
+    private CancellationTokenSource? _cts;
+
+    protected override async Task OnInitializedAsync() => await CarregarAsync();
+    private async Task AoTeclar(KeyboardEventArgs e) => await CarregarAsync();
+
+    private async Task CarregarAsync()
+    {
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        carregando = true; erro = null;
+        var (dados, err) = await Api.ListarIngredientesAsync(busca, 1, _cts.Token);
+        if (_cts.IsCancellationRequested) return;
+        carregando = false;
+        if (err is not null) { erro = err; return; }
+        lista = dados;
+    }
+}

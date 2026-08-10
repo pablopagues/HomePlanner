@@ -187,7 +187,11 @@ try
 
     // ── Razor Pages + Controllers + Blazor + MudBlazor ───────────────────────
     builder.Services.AddRazorPages();
-    builder.Services.AddControllers(); // webhook do Stripe
+    // Controllers: webhook do Stripe + API mobile. Enums como string (JSON amigável para o app).
+    builder.Services.AddControllers()
+        .AddJsonOptions(opts =>
+            opts.JsonSerializerOptions.Converters.Add(
+                new System.Text.Json.Serialization.JsonStringEnumConverter()));
     builder.Services.AddRazorComponents()
         .AddInteractiveServerComponents();
     builder.Services.AddMudServices();

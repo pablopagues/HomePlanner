@@ -1,0 +1,80 @@
+@page "/receitas/{Id:int}"
+@using HomePlanner.MobileApp.Services
+@inject ApiClient Api
+@inject NavigationManager Nav
+
+<button class="link" style="text-align:left;width:auto" @onclick='() => Nav.NavigateTo("/receitas")'>‹ Voltar</button>
+
+@if (carregando)
+{
+    <p class="muted">Carregando...</p>
+}
+else if (erro is not null)
+{
+    <p class="erro">@erro</p>
+}
+else if (r is not null)
+{
+    <div class="barra-topo"><h2>@r.Nome</h2></div>
+    <p class="muted">
+        @r.NumeroPorcoesBase porções
+        @(r.TempoPreparoMinutos.HasValue ? $" · {r.TempoPreparoMinutos} min" : "")
+    </p>
+
+    @if (r.Componentes.Count > 0)
+    {
+        <div class="card-hp">
+            <h3>Componentes</h3>
+            @foreach (var c in r.Componentes)
+            {
+                <div class="linha"><span>@c.Nome</span><span class="muted">@c.PorcoesDesejadas porç.</span></div>
+            }
+        </div>
+    }
+
+    <div class="card-hp">
+        <h3>Ingredientes</h3>
+        @if (r.Ingredientes.Count == 0)
+        {
+            <p class="muted">Sem ingredientes cadastrados.</p>
+        }
+        else
+        {
+            @foreach (var i in r.Ingredientes)
+            {
+                <div class="linha">
+                    <span>@i.NomeIngrediente @(i.Opcional ? "(opcional)" : "")</span>
+                    <span class="muted">@FormatarQtd(i.Quantidade) @i.CodigoUnidade</span>
+                </div>
+            }
+        }
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(r.ModoPreparo))
+    {
+        <div class="card-hp">
+            <h3>Modo de preparo</h3>
+            <div style="white-space:pre-wrap">@r.ModoPreparo</div>
+        </div>
+    }
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private ReceitaDetalheDTO? r;
+    private bool carregando = true;
+    private string? erro;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        carregando = true; erro = null;
+        var (dados, err) = await Api.ObterReceitaAsync(Id);
+        carregando = false;
+        if (err is not null) { erro = err; return; }
+        r = dados;
+    }
+
+    private static string FormatarQtd(decimal q)
+        => q == Math.Floor(q) ? ((int)q).ToString() : q.ToString("0.##");
+}

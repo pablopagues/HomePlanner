@@ -1,0 +1,73 @@
+@page "/registro"
+@layout SemMenuLayout
+@using HomePlanner.MobileApp.Services
+@inject AuthApi Auth
+@inject SessaoAtual Sessao
+@inject NavigationManager Nav
+
+<div class="auth">
+    <h1>Criar conta</h1>
+
+    @if (sucesso)
+    {
+        <p class="sub">Conta criada! Agora é só entrar.</p>
+        <button class="primario" @onclick='() => Nav.NavigateTo("/")'>Ir para o login</button>
+    }
+    else
+    {
+        <label>Servidor (API)</label>
+        <input @bind="baseUrl" />
+
+        <label>Seu nome</label>
+        <input @bind="nome" />
+
+        <label>E-mail</label>
+        <input @bind="email" type="email" inputmode="email" />
+
+        <label>Senha</label>
+        <input @bind="senha" type="password" />
+
+        <label>País</label>
+        <select @bind="pais">
+            <option value="BR">Brasil</option>
+            <option value="CA">Canadá</option>
+        </select>
+
+        <button class="primario" @onclick="RegistrarAsync" disabled="@ocupado">
+            @(ocupado ? "Criando..." : "Criar conta")
+        </button>
+        <button class="link" @onclick='() => Nav.NavigateTo("/")'>Já tenho conta</button>
+
+        @if (!string.IsNullOrEmpty(mensagem)) { <p class="erro">@mensagem</p> }
+    }
+</div>
+
+@code {
+    private string baseUrl = SessaoAtual.BaseUrlPadrao;
+    private string nome = string.Empty, email = string.Empty, senha = string.Empty, pais = "BR";
+    private bool ocupado, sucesso;
+    private string? mensagem;
+
+    protected override void OnInitialized() => baseUrl = Sessao.BaseUrl;
+
+    private async Task RegistrarAsync()
+    {
+        mensagem = null;
+        if (string.IsNullOrWhiteSpace(nome) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(senha))
+        {
+            mensagem = "Preencha todos os campos.";
+            return;
+        }
+
+        ocupado = true;
+        Sessao.SalvarBaseUrl(baseUrl);
+        var erro = await Auth.RegistrarAsync(new RegistroRequest
+        {
+            NomeResponsavel = nome.Trim(), Email = email.Trim(), Senha = senha, PaisId = pais,
+        });
+        ocupado = false;
+
+        if (erro is not null) { mensagem = erro; return; }
+        sucesso = true;
+    }
+}

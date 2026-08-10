@@ -1,0 +1,75 @@
+@page "/perfil"
+@using HomePlanner.MobileApp.Services
+@inject ApiClient Api
+@inject SessaoAtual Sessao
+@inject NavigationManager Nav
+
+<div class="barra-topo"><h2>Perfil</h2></div>
+
+@if (carregando) { <p class="muted">Carregando...</p> }
+else
+{
+    @if (_conta is not null)
+    {
+        <div class="card-hp">
+            <h3>@_conta.NomeResponsavel</h3>
+            <div class="muted">@_conta.Email</div>
+            <div class="muted">@(_conta.EmailConfirmado ? "E-mail confirmado" : "E-mail não confirmado")</div>
+        </div>
+    }
+
+    @if (_assinatura is not null)
+    {
+        <div class="card-hp">
+            <div class="linha">
+                <h3>Plano @_assinatura.Plano</h3>
+                <span class="pill">@_assinatura.Status</span>
+            </div>
+            @if (_assinatura.DiasRestantesTrial is int dias)
+            {
+                <div class="muted">@dias dia(s) restante(s) no teste</div>
+            }
+            <div class="muted">Até @_assinatura.LimiteMembros membros</div>
+            <p class="muted" style="margin-top:.6rem">Para mudar de plano, acesse a versão web.</p>
+        </div>
+    }
+
+    @if (_config is not null)
+    {
+        <div class="card-hp">
+            <h3>Configuração</h3>
+            <div class="muted">Fuso: @_config.FusoHorario</div>
+            <div class="muted">Refeições: @string.Join(", ", _config.TiposRefeicaoAtivos)</div>
+            <div class="muted">Lembrete: @_config.MinutosAntecedenciaLembrete min antes</div>
+        </div>
+    }
+
+    @if (erro is not null) { <p class="erro">@erro</p> }
+
+    <button class="btn-acao" style="background:var(--hp-danger)" @onclick="Sair">Sair da conta</button>
+}
+
+@code {
+    private EmpresaDetalheDTO? _conta;
+    private AssinaturaAtualDTO? _assinatura;
+    private ConfiguracaoFamiliaDTO? _config;
+    private bool carregando = true;
+    private string? erro;
+
+    protected override async Task OnInitializedAsync()
+    {
+        carregando = true;
+        var (conta, e1) = await Api.ObterContaAsync();
+        var (ass, _) = await Api.MinhaAssinaturaAsync();
+        var (cfg, _) = await Api.ObterConfiguracaoAsync();
+        carregando = false;
+        erro = e1;
+        _conta = conta; _assinatura = ass; _config = cfg;
+    }
+
+    private void Sair()
+    {
+        Sessao.Sair();
+        Nav.NavigateTo("/");
+    }
+}

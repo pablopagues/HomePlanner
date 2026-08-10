@@ -1,0 +1,60 @@
+@page "/2fa"
+@layout SemMenuLayout
+@using HomePlanner.MobileApp.Services
+@inject AuthApi Auth
+@inject SessaoAtual Sessao
+@inject NavigationManager Nav
+
+<div class="auth">
+    <h1>Verificação em duas etapas</h1>
+    <p class="sub">@(usarRecuperacao ? "Digite um código de recuperação" : "Digite o código do seu app autenticador")</p>
+
+    <label>Código</label>
+    <input @bind="codigo" inputmode="@(usarRecuperacao ? "text" : "numeric")" @onkeyup="AoTeclar" />
+
+    <button class="primario" @onclick="ConfirmarAsync" disabled="@ocupado">
+        @(ocupado ? "Verificando..." : "Confirmar")
+    </button>
+
+    <button class="link" @onclick="() => usarRecuperacao = !usarRecuperacao">
+        @(usarRecuperacao ? "Usar código do app" : "Usar código de recuperação")
+    </button>
+
+    @if (!string.IsNullOrEmpty(mensagem))
+    {
+        <p class="erro">@mensagem</p>
+    }
+</div>
+
+@code {
+    private string codigo = string.Empty;
+    private bool usarRecuperacao;
+    private bool ocupado;
+    private string? mensagem;
+
+    protected override void OnInitialized()
+    {
+        if (string.IsNullOrEmpty(Sessao.MfaTokenPendente))
+            Nav.NavigateTo("/");
+    }
+
+    private async Task AoTeclar(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await ConfirmarAsync();
+    }
+
+    private async Task ConfirmarAsync()
+    {
+        mensagem = null;
+        if (string.IsNullOrWhiteSpace(codigo)) { mensagem = "Informe o código."; return; }
+
+        ocupado = true;
+        var erro = await Auth.Confirmar2FAAsync(Sessao.MfaTokenPendente!, codigo.Trim(), usarRecuperacao);
+        ocupado = false;
+
+        if (erro is not null) { mensagem = erro; return; }
+
+        Sessao.MfaTokenPendente = null;
+        Nav.NavigateTo("/cardapio");
+    }
+}
