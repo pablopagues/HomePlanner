@@ -3,7 +3,10 @@
 @inject ApiClient Api
 @inject NavigationManager Nav
 
-<div class="barra-topo"><h2>Receitas</h2></div>
+<div class="barra-topo">
+    <h2>Receitas</h2>
+    <button class="link" style="width:auto" @onclick='() => Nav.NavigateTo("/importar")'>⬇️ Importar</button>
+</div>
 
 <input placeholder="Buscar..." @bind="busca" @bind:event="oninput" @onkeyup="AoTeclar" />
 

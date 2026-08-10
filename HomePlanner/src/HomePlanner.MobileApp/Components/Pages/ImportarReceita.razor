@@ -1,0 +1,74 @@
+@page "/importar"
+@using HomePlanner.MobileApp.Services
+@inject ApiClient Api
+@inject NavigationManager Nav
+
+<button class="link" style="text-align:left;width:auto" @onclick='() => Nav.NavigateTo("/receitas")'>‹ Voltar</button>
+<div class="barra-topo"><h2>Importar receita</h2></div>
+
+<label>Cole o link de uma receita</label>
+<input @bind="_url" placeholder="https://..." inputmode="url" />
+<button class="btn-acao" @onclick="ImportarAsync" disabled="@_importando">
+    @(_importando ? "Importando..." : "Importar")
+</button>
+
+@if (erro is not null) { <p class="erro">@erro</p> }
+
+@if (_preview is not null)
+{
+    <div class="card-hp">
+        <h3>@_preview.Nome</h3>
+        <div class="muted">@_preview.NumeroPorcoesBase porções @(_preview.TempoPreparoMinutos.HasValue ? $"· {_preview.TempoPreparoMinutos} min" : "")</div>
+        @if (_preview.IngredientesTexto.Count > 0)
+        {
+            <p class="muted" style="margin-top:.5rem"><strong>Ingredientes:</strong></p>
+            <ul>@foreach (var i in _preview.IngredientesTexto) { <li>@i</li> }</ul>
+        }
+    </div>
+
+    <p class="muted">Ao salvar, a lista de ingredientes fica nas observações. Você pode formalizá-los na versão web depois.</p>
+    <button class="btn-acao" @onclick="SalvarAsync" disabled="@_salvando">
+        @(_salvando ? "Salvando..." : "Salvar como receita")
+    </button>
+}
+
+@code {
+    private string _url = "";
+    private ReceitaImportadaPreviewDTO? _preview;
+    private bool _importando, _salvando;
+    private string? erro;
+
+    private async Task ImportarAsync()
+    {
+        erro = null; _preview = null;
+        if (string.IsNullOrWhiteSpace(_url)) { erro = "Cole um link."; return; }
+        _importando = true;
+        var (dados, err) = await Api.ImportarReceitaUrlAsync(_url.Trim());
+        _importando = false;
+        if (err is not null) { erro = err; return; }
+        if (dados is null || !dados.Sucesso) { erro = dados?.MensagemErro ?? "Não foi possível importar."; return; }
+        _preview = dados;
+    }
+
+    private async Task SalvarAsync()
+    {
+        _salvando = true;
+        var obs = _preview!.IngredientesTexto.Count > 0
+            ? "Ingredientes (importados):\n" + string.Join("\n", _preview.IngredientesTexto)
+            : null;
+
+        var (id, err) = await Api.SalvarReceitaAsync(new ReceitaPersistenciaRequest
+        {
+            Nome = _preview.Nome,
+            ModoPreparo = _preview.ModoPreparo,
+            NumeroPorcoesBase = _preview.NumeroPorcoesBase,
+            TempoPreparoMinutos = _preview.TempoPreparoMinutos,
+            UrlOrigem = _preview.UrlOrigem,
+            UrlImagem = _preview.UrlImagem,
+            Observacoes = obs,
+        });
+        _salvando = false;
+        if (err is not null) { erro = err; return; }
+        Nav.NavigateTo($"/receitas/{id}");
+    }
+}

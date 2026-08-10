@@ -143,9 +143,24 @@ public class ReceitaPersistenciaRequest
     public string? ModoPreparo { get; set; }
     public int NumeroPorcoesBase { get; set; } = 4;
     public int? TempoPreparoMinutos { get; set; }
+    public string? UrlOrigem { get; set; }
+    public string? UrlImagem { get; set; }
     public string? Observacoes { get; set; }
     public List<ReceitaIngredientePersistReq> Ingredientes { get; set; } = new();
     public List<ReceitaComponentePersistReq> Componentes { get; set; } = new();
+}
+
+public class ReceitaImportadaPreviewDTO
+{
+    public bool Sucesso { get; set; }
+    public string? MensagemErro { get; set; }
+    public string Nome { get; set; } = string.Empty;
+    public string? ModoPreparo { get; set; }
+    public int NumeroPorcoesBase { get; set; } = 4;
+    public int? TempoPreparoMinutos { get; set; }
+    public string? UrlOrigem { get; set; }
+    public string? UrlImagem { get; set; }
+    public List<string> IngredientesTexto { get; set; } = new();
 }
 
 public class ReceitaIngredientePersistReq

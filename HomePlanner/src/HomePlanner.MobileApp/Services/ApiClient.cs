@@ -98,6 +98,9 @@ public class ApiClient
     public Task<(int dados, string? erro)> SalvarReceitaAsync(ReceitaPersistenciaRequest dto, CancellationToken ct = default)
         => EnviarAsync<int>(HttpMethod.Post, "/api/receitas", dto, ct);
 
+    public Task<(ReceitaImportadaPreviewDTO? dados, string? erro)> ImportarReceitaUrlAsync(string url, CancellationToken ct = default)
+        => EnviarAsync<ReceitaImportadaPreviewDTO>(HttpMethod.Post, "/api/importacao/url", new { url }, ct);
+
     // ── Ingredientes ──────────────────────────────────────────────────────
     public Task<(ResultadoListagem<IngredienteListaDTO>? dados, string? erro)> ListarIngredientesAsync(string? busca, int pagina = 1, CancellationToken ct = default)
         => GetAsync<ResultadoListagem<IngredienteListaDTO>>($"/api/ingredientes?pagina={pagina}&tamanhoPagina=20&textoBusca={Uri.EscapeDataString(busca ?? "")}", ct);
