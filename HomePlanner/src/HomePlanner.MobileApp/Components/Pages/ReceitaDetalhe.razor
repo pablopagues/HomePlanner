@@ -21,6 +21,13 @@ else if (r is not null)
         @(r.TempoPreparoMinutos.HasValue ? $" · {r.TempoPreparoMinutos} min" : "")
     </p>
 
+    <div class="linha" style="gap:.4rem;margin-bottom:.4rem">
+        <button class="link" style="width:auto" @onclick='() => Nav.NavigateTo($"/receitas/{r.Id}/editar")'>✏️ Editar</button>
+        <button class="link" style="width:auto" @onclick="DuplicarAsync">📄 Duplicar</button>
+        <button class="link" style="width:auto;color:var(--hp-danger)" @onclick="ExcluirAsync">🗑️ Excluir</button>
+    </div>
+    @if (acaoErro is not null) { <p class="erro">@acaoErro</p> }
+
     @if (r.Componentes.Count > 0)
     {
         <div class="card-hp">
@@ -65,6 +72,7 @@ else if (r is not null)
     private ReceitaDetalheDTO? r;
     private bool carregando = true;
     private string? erro;
+    private string? acaoErro;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -73,6 +81,20 @@ else if (r is not null)
         carregando = false;
         if (err is not null) { erro = err; return; }
         r = dados;
+    }
+
+    private async Task DuplicarAsync()
+    {
+        acaoErro = null;
+        var (novoId, err) = await Api.DuplicarReceitaAsync(Id);
+        if (err is not null) { acaoErro = err; return; }
+        Nav.NavigateTo($"/receitas/{novoId}");
+    }
+
+    private async Task ExcluirAsync()
+    {
+        acaoErro = await Api.DeletarReceitaAsync(Id);
+        if (acaoErro is null) Nav.NavigateTo("/receitas");
     }
 
     private static string FormatarQtd(decimal q)

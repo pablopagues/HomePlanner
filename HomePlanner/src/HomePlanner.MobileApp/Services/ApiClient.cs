@@ -81,6 +81,9 @@ public class ApiClient
     public Task<(int dados, string? erro)> DuplicarReceitaAsync(int id, CancellationToken ct = default)
         => EnviarAsync<int>(HttpMethod.Post, $"/api/receitas/{id}/duplicar", null, ct);
 
+    public Task<(int dados, string? erro)> SalvarReceitaAsync(ReceitaPersistenciaRequest dto, CancellationToken ct = default)
+        => EnviarAsync<int>(HttpMethod.Post, "/api/receitas", dto, ct);
+
     // ── Ingredientes ──────────────────────────────────────────────────────
     public Task<(ResultadoListagem<IngredienteListaDTO>? dados, string? erro)> ListarIngredientesAsync(string? busca, int pagina = 1, CancellationToken ct = default)
         => GetAsync<ResultadoListagem<IngredienteListaDTO>>($"/api/ingredientes?pagina={pagina}&tamanhoPagina=20&textoBusca={Uri.EscapeDataString(busca ?? "")}", ct);
@@ -129,6 +132,18 @@ public class ApiClient
 
     public Task<(ResumoFamiliaDTO? dados, string? erro)> ResumoFamiliaAsync(CancellationToken ct = default)
         => GetAsync<ResumoFamiliaDTO>("/api/familia/resumo", ct);
+
+    public Task<string?> AdicionarMembroAsync(NovoMembroRequest dto, CancellationToken ct = default)
+        => EnviarAsync(HttpMethod.Post, "/api/familia/membros", dto, ct);
+
+    public Task<string?> AlterarPapelAsync(string usuarioId, string novoPapel, CancellationToken ct = default)
+        => EnviarAsync(HttpMethod.Post, $"/api/familia/membros/{usuarioId}/papel", new { novoPapel }, ct);
+
+    public Task<string?> DefinirAtivoMembroAsync(string usuarioId, bool ativo, CancellationToken ct = default)
+        => EnviarAsync(HttpMethod.Post, $"/api/familia/membros/{usuarioId}/ativo?ativo={ativo}", null, ct);
+
+    public Task<string?> RemoverMembroAsync(string usuarioId, CancellationToken ct = default)
+        => EnviarAsync(HttpMethod.Delete, $"/api/familia/membros/{usuarioId}", null, ct);
 
     // ── Conta / Configuração / Assinatura ─────────────────────────────────
     public Task<(EmpresaDetalheDTO? dados, string? erro)> ObterContaAsync(CancellationToken ct = default)

@@ -1,0 +1,102 @@
+@page "/receitas/nova"
+@page "/receitas/{Id:int}/editar"
+@using HomePlanner.MobileApp.Services
+@inject ApiClient Api
+@inject NavigationManager Nav
+
+<button class="link" style="text-align:left;width:auto" @onclick="Voltar">‹ Voltar</button>
+<div class="barra-topo"><h2>@(Id.HasValue ? "Editar receita" : "Nova receita")</h2></div>
+
+@if (carregando) { <p class="muted">Carregando...</p> }
+else
+{
+    <label>Nome</label>
+    <input @bind="_dto.Nome" />
+
+    <div class="campo-linha">
+        <div>
+            <label>Porções</label>
+            <input type="number" min="1" @bind="_dto.NumeroPorcoesBase" />
+        </div>
+        <div>
+            <label>Tempo (min)</label>
+            <input type="number" min="0" @bind="_dto.TempoPreparoMinutos" />
+        </div>
+    </div>
+
+    <label>Modo de preparo</label>
+    <textarea rows="6" @bind="_dto.ModoPreparo"></textarea>
+
+    <label>Observações</label>
+    <textarea rows="2" @bind="_dto.Observacoes"></textarea>
+
+    @if (Id.HasValue && (_qtdIngredientes > 0 || _qtdComponentes > 0))
+    {
+        <p class="muted">Os @_qtdIngredientes ingrediente(s) e @_qtdComponentes componente(s) são preservados. Edite-os na versão web.</p>
+    }
+
+    <button class="btn-acao" @onclick="SalvarAsync" disabled="@ocupado">
+        @(ocupado ? "Salvando..." : "Salvar")
+    </button>
+    @if (erro is not null) { <p class="erro">@erro</p> }
+}
+
+@code {
+    [Parameter] public int? Id { get; set; }
+
+    private ReceitaPersistenciaRequest _dto = new();
+    private int _qtdIngredientes, _qtdComponentes;
+    private bool carregando = true, ocupado;
+    private string? erro;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        carregando = true;
+        if (Id.HasValue)
+        {
+            var (r, err) = await Api.ObterReceitaAsync(Id.Value);
+            erro = err;
+            if (r is not null)
+            {
+                _qtdIngredientes = r.Ingredientes.Count;
+                _qtdComponentes = r.Componentes.Count;
+                _dto = new ReceitaPersistenciaRequest
+                {
+                    Id = r.Id, Nome = r.Nome, ModoPreparo = r.ModoPreparo,
+                    NumeroPorcoesBase = r.NumeroPorcoesBase, TempoPreparoMinutos = r.TempoPreparoMinutos,
+                    Observacoes = r.Observacoes,
+                    // Preserva os itens existentes (a edição fina fica na web).
+                    Ingredientes = r.Ingredientes.Select(i => new ReceitaIngredientePersistReq
+                    {
+                        Id = i.Id, IngredienteId = i.IngredienteId, Quantidade = i.Quantidade,
+                        UnidadeMedidaId = i.UnidadeMedidaId, Observacao = i.Observacao, Opcional = i.Opcional, Ordem = i.Ordem,
+                    }).ToList(),
+                    Componentes = r.Componentes.Select(c => new ReceitaComponentePersistReq
+                    {
+                        Id = c.Id, ReceitaComponenteId = c.ComponenteId, NomeComponente = c.Nome,
+                        PorcoesDesejadas = c.PorcoesDesejadas, Ordem = c.Ordem,
+                    }).ToList(),
+                };
+            }
+        }
+        else
+        {
+            _dto = new ReceitaPersistenciaRequest();
+        }
+        carregando = false;
+    }
+
+    private async Task SalvarAsync()
+    {
+        erro = null;
+        if (string.IsNullOrWhiteSpace(_dto.Nome)) { erro = "Informe o nome."; return; }
+
+        ocupado = true;
+        var (id, err) = await Api.SalvarReceitaAsync(_dto);
+        ocupado = false;
+        if (err is not null) { erro = err; return; }
+        Nav.NavigateTo($"/receitas/{(Id ?? id)}");
+    }
+
+    private void Voltar() => Nav.NavigateTo(Id.HasValue ? $"/receitas/{Id}" : "/receitas");
+}

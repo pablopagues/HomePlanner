@@ -115,17 +115,55 @@ public class ReceitaDetalheDTO
 public class ReceitaIngredienteDTO
 {
     public int Id { get; set; }
+    public int IngredienteId { get; set; }
     public string NomeIngrediente { get; set; } = string.Empty;
     public decimal Quantidade { get; set; }
+    public int UnidadeMedidaId { get; set; }
     public string CodigoUnidade { get; set; } = string.Empty;
+    public string? Observacao { get; set; }
     public bool Opcional { get; set; }
+    public int Ordem { get; set; }
 }
 
 public class ReceitaComponenteDetalheDTO
 {
+    public int Id { get; set; }
     public int ComponenteId { get; set; }
     public string Nome { get; set; } = string.Empty;
     public int PorcoesDesejadas { get; set; }
+    public int Ordem { get; set; }
+}
+
+public class ReceitaPersistenciaRequest
+{
+    public int Id { get; set; }
+    public string Nome { get; set; } = string.Empty;
+    public string? ModoPreparo { get; set; }
+    public int NumeroPorcoesBase { get; set; } = 4;
+    public int? TempoPreparoMinutos { get; set; }
+    public string? Observacoes { get; set; }
+    public List<ReceitaIngredientePersistReq> Ingredientes { get; set; } = new();
+    public List<ReceitaComponentePersistReq> Componentes { get; set; } = new();
+}
+
+public class ReceitaIngredientePersistReq
+{
+    public int Id { get; set; }
+    public int IngredienteId { get; set; }
+    public decimal Quantidade { get; set; }
+    public int UnidadeMedidaId { get; set; }
+    public string? Observacao { get; set; }
+    public bool Opcional { get; set; }
+    public int Ordem { get; set; }
+}
+
+public class ReceitaComponentePersistReq
+{
+    public int Id { get; set; }
+    public int ReceitaComponenteId { get; set; }
+    public string NomeComponente { get; set; } = string.Empty;
+    public int PorcoesDesejadas { get; set; }
+    public int Ordem { get; set; }
 }
 
 // ── Ingredientes ──────────────────────────────────────────────────────────
@@ -235,6 +273,13 @@ public class ResumoFamiliaDTO
 {
     public int MembrosAtivos { get; set; }
     public int LimiteMembros { get; set; }
+}
+
+public class NovoMembroRequest
+{
+    public string Nome { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Papel { get; set; } = "Membro";
 }
 
 // ── Conta / Configuração / Assinatura ─────────────────────────────────────

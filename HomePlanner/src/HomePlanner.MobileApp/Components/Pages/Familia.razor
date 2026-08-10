@@ -25,8 +25,46 @@ else
                 @(m.Ativo ? "Ativo" : "Inativo")
                 @(m.SenhaDefinida ? "" : " · convite pendente")
             </div>
+
+            @if (m.Papel != "Owner")
+            {
+                <div class="linha" style="gap:.4rem;margin-top:.5rem;flex-wrap:wrap">
+                    <button class="link" style="width:auto" @onclick="() => AlterarPapel(m)">
+                        Tornar @(m.Papel == "Filho" ? "Membro" : "Filho")
+                    </button>
+                    <button class="link" style="width:auto" @onclick="() => DefinirAtivo(m, !m.Ativo)">
+                        @(m.Ativo ? "Desativar" : "Ativar")
+                    </button>
+                    <button class="link" style="width:auto;color:var(--hp-danger)" @onclick="() => Remover(m)">Remover</button>
+                </div>
+            }
         </div>
     }
+}
+
+<button class="fab" @onclick="() => _modalAberto = true">+</button>
+
+@if (_modalAberto)
+{
+    <div class="modal-fundo" @onclick="() => _modalAberto = false">
+        <div class="modal" @onclick:stopPropagation="true">
+            <h3>Adicionar membro</h3>
+            <label>Nome</label>
+            <input @bind="_novo.Nome" />
+            <label>E-mail</label>
+            <input type="email" @bind="_novo.Email" />
+            <label>Papel</label>
+            <select @bind="_novo.Papel">
+                <option value="Membro">Pai/mãe (Membro)</option>
+                <option value="Filho">Filho</option>
+            </select>
+            <button class="btn-acao" @onclick="AdicionarAsync" disabled="@_salvando">
+                @(_salvando ? "Enviando convite..." : "Adicionar e convidar")
+            </button>
+            <button class="link" @onclick="() => _modalAberto = false">Cancelar</button>
+            @if (_erroModal is not null) { <p class="erro">@_erroModal</p> }
+        </div>
+    </div>
 }
 
 @code {
@@ -35,7 +73,13 @@ else
     private bool carregando = true;
     private string? erro;
 
-    protected override async Task OnInitializedAsync()
+    private bool _modalAberto, _salvando;
+    private NovoMembroRequest _novo = new();
+    private string? _erroModal;
+
+    protected override async Task OnInitializedAsync() => await CarregarAsync();
+
+    private async Task CarregarAsync()
     {
         carregando = true; erro = null;
         var (membros, err) = await Api.MembrosAsync();
@@ -44,5 +88,41 @@ else
         if (err is not null) { erro = err; return; }
         _membros = membros ?? new();
         _resumo = resumo;
+    }
+
+    private async Task AdicionarAsync()
+    {
+        _erroModal = null;
+        if (string.IsNullOrWhiteSpace(_novo.Nome) || string.IsNullOrWhiteSpace(_novo.Email))
+        {
+            _erroModal = "Informe nome e e-mail.";
+            return;
+        }
+        _salvando = true;
+        _erroModal = await Api.AdicionarMembroAsync(_novo);
+        _salvando = false;
+        if (_erroModal is not null) return;
+        _novo = new NovoMembroRequest();
+        _modalAberto = false;
+        await CarregarAsync();
+    }
+
+    private async Task AlterarPapel(MembroFamiliaDetalheDTO m)
+    {
+        var novo = m.Papel == "Filho" ? "Membro" : "Filho";
+        erro = await Api.AlterarPapelAsync(m.UsuarioId, novo);
+        await CarregarAsync();
+    }
+
+    private async Task DefinirAtivo(MembroFamiliaDetalheDTO m, bool ativo)
+    {
+        erro = await Api.DefinirAtivoMembroAsync(m.UsuarioId, ativo);
+        await CarregarAsync();
+    }
+
+    private async Task Remover(MembroFamiliaDetalheDTO m)
+    {
+        erro = await Api.RemoverMembroAsync(m.UsuarioId);
+        await CarregarAsync();
     }
 }
