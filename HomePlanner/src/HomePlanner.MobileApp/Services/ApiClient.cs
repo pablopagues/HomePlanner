@@ -95,6 +95,12 @@ public class ApiClient
     public Task<string?> DeletarTarefaAsync(int id, CancellationToken ct = default)
         => EnviarAsync(HttpMethod.Delete, $"/api/planner/{id}", null, ct);
 
+    public Task<(int dados, string? erro)> SalvarTarefaAsync(TarefaPersistenciaRequest dto, CancellationToken ct = default)
+        => EnviarAsync<int>(HttpMethod.Post, "/api/planner", dto, ct);
+
+    public Task<(List<MembroSimplesDTO>? dados, string? erro)> MembrosPlannerAsync(CancellationToken ct = default)
+        => GetAsync<List<MembroSimplesDTO>>("/api/planner/membros", ct);
+
     // ── Compras ───────────────────────────────────────────────────────────
     public Task<(ListaComprasDTO? dados, string? erro)> ComprasDaSemanaAsync(DateOnly segunda, CancellationToken ct = default)
         => GetAsync<ListaComprasDTO>($"/api/compras/semana/{segunda:yyyy-MM-dd}", ct);
@@ -110,6 +116,12 @@ public class ApiClient
 
     public Task<string?> MarcarPedidoAsync(int id, bool comprado, CancellationToken ct = default)
         => EnviarAsync(HttpMethod.Post, $"/api/compras/pedidos/{id}/comprado?comprado={comprado}", null, ct);
+
+    public Task<(int dados, string? erro)> AdicionarPedidoAsync(PedidoCompraPersistenciaRequest dto, CancellationToken ct = default)
+        => EnviarAsync<int>(HttpMethod.Post, "/api/compras/pedidos", dto, ct);
+
+    public Task<string?> DeletarPedidoAsync(int id, CancellationToken ct = default)
+        => EnviarAsync(HttpMethod.Delete, $"/api/compras/pedidos/{id}", null, ct);
 
     // ── Família ───────────────────────────────────────────────────────────
     public Task<(List<MembroFamiliaDetalheDTO>? dados, string? erro)> MembrosAsync(CancellationToken ct = default)

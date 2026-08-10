@@ -9,22 +9,13 @@
 </div>
 <button class="link" @onclick="IrParaHoje">Ir para esta semana</button>
 
-@if (carregando)
-{
-    <p class="muted">Carregando...</p>
-}
-else if (erro is not null)
-{
-    <p class="erro">@erro</p>
-}
+@if (carregando) { <p class="muted">Carregando...</p> }
+else if (erro is not null) { <p class="erro">@erro</p> }
 else
 {
     <div class="cardapio-grade">
         <div class="cel cab"></div>
-        @foreach (var d in _dias)
-        {
-            <div class="cel cab">@d.curto</div>
-        }
+        @foreach (var d in _dias) { <div class="cel cab">@d.curto</div> }
 
         @foreach (var t in _tipos)
         {
@@ -32,14 +23,49 @@ else
             @foreach (var d in _dias)
             {
                 var r = Refeicao(d.chave, t.chave);
-                <div class="cel @(r is not null ? "cheia" : "")">
-                    @if (r is not null)
-                    {
-                        <span>@r.ReceitaNome</span>
-                    }
+                <div class="cel @(r is not null ? "cheia" : "")" style="cursor:pointer"
+                     @onclick="() => AbrirSeletor(d.chave, t.chave, r)">
+                    @if (r is not null) { <span>@r.ReceitaNome</span> }
+                    else { <span class="muted">+</span> }
                 </div>
             }
         }
+    </div>
+}
+
+@if (_seletorAberto)
+{
+    <div class="modal-fundo" @onclick="Fechar">
+        <div class="modal" @onclick:stopPropagation="true">
+            <h3>@RotuloDia(_selDia) · @RotuloTipo(_selTipo)</h3>
+
+            <input placeholder="Buscar receita..." @bind="_busca" @bind:event="oninput" @onkeyup="BuscarAsync" />
+
+            @if (_buscando) { <p class="muted">Buscando...</p> }
+            else
+            {
+                <div style="max-height:220px;overflow-y:auto">
+                    @foreach (var rec in _resultados)
+                    {
+                        <div class="item-check" style="cursor:pointer" @onclick="() => DefinirAsync(rec.Id)">
+                            <span>@rec.Nome</span>
+                        </div>
+                    }
+                </div>
+            }
+
+            <label>Porções</label>
+            <input type="number" min="1" @bind="_porcoes" />
+
+            <div class="linha" style="margin-top:.8rem">
+                @if (_selReceitaAtual.HasValue)
+                {
+                    <button class="link" style="color:var(--hp-danger)" @onclick="RemoverAsync">Remover receita</button>
+                }
+                <button class="link" @onclick="Fechar">Cancelar</button>
+            </div>
+            @if (_erroModal is not null) { <p class="erro">@_erroModal</p> }
+        </div>
     </div>
 }
 
@@ -48,6 +74,16 @@ else
     private CardapioSemanaDTO? _cardapio;
     private bool carregando = true;
     private string? erro;
+
+    private bool _seletorAberto;
+    private string _selDia = "", _selTipo = "";
+    private int? _selReceitaAtual;
+    private int _porcoes = 4;
+    private string _busca = "";
+    private List<ReceitaListaDTO> _resultados = new();
+    private bool _buscando;
+    private string? _erroModal;
+    private CancellationTokenSource? _cts;
 
     private static readonly (string chave, string curto)[] _dias =
     [
@@ -77,8 +113,54 @@ else
     private RefeicaoDiaDTO? Refeicao(string dia, string tipo)
         => _cardapio?.Refeicoes.FirstOrDefault(r => r.DiaSemana == dia && r.TipoRefeicao == tipo && r.ReceitaId.HasValue);
 
+    private async Task AbrirSeletor(string dia, string tipo, RefeicaoDiaDTO? atual)
+    {
+        _selDia = dia; _selTipo = tipo;
+        _selReceitaAtual = atual?.ReceitaId;
+        _porcoes = atual?.PorcoesDesejadas ?? 4;
+        _busca = ""; _erroModal = null;
+        _seletorAberto = true;
+        await BuscarAsync();
+    }
+
+    private async Task BuscarAsync()
+    {
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        _buscando = true;
+        var (dados, _) = await Api.ListarReceitasAsync(_busca, 1, _cts.Token);
+        if (_cts.IsCancellationRequested) return;
+        _buscando = false;
+        _resultados = dados?.Itens ?? new();
+        StateHasChanged();
+    }
+
+    private async Task DefinirAsync(int receitaId)
+    {
+        _erroModal = await Api.DefinirRefeicaoAsync(new DefinirRefeicaoRequest
+        {
+            DataInicio = _segunda, DiaSemana = _selDia, TipoRefeicao = _selTipo,
+            ReceitaId = receitaId, PorcoesDesejadas = _porcoes,
+        });
+        if (_erroModal is null) { Fechar(); await CarregarAsync(); }
+    }
+
+    private async Task RemoverAsync()
+    {
+        _erroModal = await Api.DefinirRefeicaoAsync(new DefinirRefeicaoRequest
+        {
+            DataInicio = _segunda, DiaSemana = _selDia, TipoRefeicao = _selTipo, ReceitaId = null,
+        });
+        if (_erroModal is null) { Fechar(); await CarregarAsync(); }
+    }
+
+    private void Fechar() => _seletorAberto = false;
+
     private async Task MudarSemana(int dias) { _segunda = _segunda.AddDays(dias); await CarregarAsync(); }
     private async Task IrParaHoje() { _segunda = SegundaDe(DateOnly.FromDateTime(DateTime.Today)); await CarregarAsync(); }
+
+    private static string RotuloDia(string c) => _dias.FirstOrDefault(x => x.chave == c).curto;
+    private static string RotuloTipo(string c) => _tipos.FirstOrDefault(x => x.chave == c).rotulo;
 
     private static DateOnly SegundaDe(DateOnly d)
     {

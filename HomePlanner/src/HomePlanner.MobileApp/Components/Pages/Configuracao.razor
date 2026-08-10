@@ -1,0 +1,68 @@
+@page "/config"
+@using HomePlanner.MobileApp.Services
+@inject ApiClient Api
+@inject NavigationManager Nav
+
+<button class="link" style="text-align:left;width:auto" @onclick='() => Nav.NavigateTo("/perfil")'>‹ Voltar</button>
+<div class="barra-topo"><h2>Configuração</h2></div>
+
+@if (carregando) { <p class="muted">Carregando...</p> }
+else if (_cfg is not null)
+{
+    <div class="card-hp">
+        <h3>Refeições ativas</h3>
+        @foreach (var (chave, rotulo) in _tipos)
+        {
+            <label class="item-check" style="border:none;cursor:pointer">
+                <input type="checkbox" checked="@_cfg.TiposRefeicaoAtivos.Contains(chave)"
+                       @onchange="e => Alternar(chave, (bool)e.Value!)" />
+                <span>@rotulo</span>
+            </label>
+        }
+    </div>
+
+    <div class="card-hp">
+        <label>Antecedência do lembrete (min)</label>
+        <input type="number" min="0" @bind="_cfg.MinutosAntecedenciaLembrete" />
+        <label>Tamanho padrão da família</label>
+        <input type="number" min="1" @bind="_cfg.TamanhoFamiliaPadrao" />
+    </div>
+
+    <button class="btn-acao" @onclick="SalvarAsync" disabled="@ocupado">
+        @(ocupado ? "Salvando..." : "Salvar")
+    </button>
+    @if (mensagem is not null) { <p class="@(sucesso ? "muted" : "erro")">@mensagem</p> }
+}
+
+@code {
+    private ConfiguracaoFamiliaDTO? _cfg;
+    private bool carregando = true, ocupado, sucesso;
+    private string? mensagem;
+
+    private static readonly (string chave, string rotulo)[] _tipos =
+    [
+        ("CafeManha","Café da manhã"),("Almoco","Almoço"),("Lanche","Lanche"),("Jantar","Jantar"),("Ceia","Ceia"),
+    ];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var (cfg, _) = await Api.ObterConfiguracaoAsync();
+        _cfg = cfg ?? new ConfiguracaoFamiliaDTO();
+        carregando = false;
+    }
+
+    private void Alternar(string chave, bool ativo)
+    {
+        if (ativo) { if (!_cfg!.TiposRefeicaoAtivos.Contains(chave)) _cfg.TiposRefeicaoAtivos.Add(chave); }
+        else _cfg!.TiposRefeicaoAtivos.Remove(chave);
+    }
+
+    private async Task SalvarAsync()
+    {
+        mensagem = null; ocupado = true;
+        var err = await Api.SalvarConfiguracaoAsync(_cfg!);
+        ocupado = false;
+        sucesso = err is null;
+        mensagem = err ?? "Configuração salva!";
+    }
+}

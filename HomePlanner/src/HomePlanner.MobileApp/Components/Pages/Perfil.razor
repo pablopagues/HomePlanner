@@ -46,6 +46,8 @@ else
 
     @if (erro is not null) { <p class="erro">@erro</p> }
 
+    <button class="btn-acao" @onclick='() => Nav.NavigateTo("/config")'>⚙️ Configuração</button>
+    <button class="btn-acao" style="background:#555" @onclick='() => Nav.NavigateTo("/feedback")'>💬 Enviar feedback</button>
     <button class="btn-acao" style="background:var(--hp-danger)" @onclick="Sair">Sair da conta</button>
 }
 

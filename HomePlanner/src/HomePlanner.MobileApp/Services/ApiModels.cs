@@ -144,8 +144,33 @@ public class TarefaListaDTO
     public string? Descricao { get; set; }
     public DateOnly? DataPrevista { get; set; }
     public TimeOnly? HoraInicio { get; set; }
+    public TimeOnly? HoraFim { get; set; }
     public bool Concluida { get; set; }
+    public string Recorrencia { get; set; } = "Nenhuma";
+    public string Visibilidade { get; set; } = "Familia";
+    public string? ResponsavelUsuarioId { get; set; }
     public string? ResponsavelNome { get; set; }
+    public bool NotificarResponsaveis { get; set; }
+}
+
+public class TarefaPersistenciaRequest
+{
+    public int Id { get; set; }
+    public string Titulo { get; set; } = string.Empty;
+    public string? Descricao { get; set; }
+    public DateOnly? DataPrevista { get; set; }
+    public TimeOnly? HoraInicio { get; set; }
+    public TimeOnly? HoraFim { get; set; }
+    public string Recorrencia { get; set; } = "Nenhuma";
+    public string Visibilidade { get; set; } = "Familia";
+    public string? ResponsavelUsuarioId { get; set; }
+    public bool NotificarResponsaveis { get; set; }
+}
+
+public class MembroSimplesDTO
+{
+    public string UsuarioId { get; set; } = string.Empty;
+    public string Nome { get; set; } = string.Empty;
 }
 
 // ── Compras ───────────────────────────────────────────────────────────────
@@ -178,6 +203,21 @@ public class PedidoCompraDTO
     public string? Quantidade { get; set; }
     public bool Comprado { get; set; }
     public bool PodeEditar { get; set; }
+}
+
+public class PedidoCompraPersistenciaRequest
+{
+    public DateOnly DataInicioSemana { get; set; }
+    public string Descricao { get; set; } = string.Empty;
+    public string? Quantidade { get; set; }
+    public string? SolicitanteUsuarioId { get; set; }
+}
+
+public class FeedbackRequest
+{
+    public string Tipo { get; set; } = "Sugestao";
+    public string Mensagem { get; set; } = string.Empty;
+    public string? PaginaAtual { get; set; }
 }
 
 // ── Família ───────────────────────────────────────────────────────────────

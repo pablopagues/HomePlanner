@@ -1,0 +1,115 @@
+@page "/tarefa"
+@page "/tarefa/{Id:int}"
+@using HomePlanner.MobileApp.Services
+@inject ApiClient Api
+@inject NavigationManager Nav
+
+<button class="link" style="text-align:left;width:auto" @onclick='() => Nav.NavigateTo("/planner")'>‹ Voltar</button>
+<div class="barra-topo"><h2>@(Id.HasValue ? "Editar tarefa" : "Nova tarefa")</h2></div>
+
+@if (carregando) { <p class="muted">Carregando...</p> }
+else
+{
+    <label>Título</label>
+    <input @bind="_dto.Titulo" />
+
+    <label>Descrição</label>
+    <textarea rows="3" @bind="_dto.Descricao"></textarea>
+
+    <div class="campo-linha">
+        <div>
+            <label>Data</label>
+            <input type="date" @bind="_dto.DataPrevista" />
+        </div>
+        <div>
+            <label>Hora</label>
+            <input type="time" @bind="_dto.HoraInicio" />
+        </div>
+    </div>
+
+    <label>Responsável</label>
+    <select @bind="_dto.ResponsavelUsuarioId">
+        <option value="">— Ninguém —</option>
+        @foreach (var m in _membros)
+        {
+            <option value="@m.UsuarioId">@m.Nome</option>
+        }
+    </select>
+
+    <label style="display:flex;align-items:center;gap:.5rem;margin-top:.8rem">
+        <input type="checkbox" style="width:18px;height:18px" @bind="_dto.NotificarResponsaveis" />
+        Notificar o responsável
+    </label>
+
+    <button class="btn-acao" @onclick="SalvarAsync" disabled="@ocupado">
+        @(ocupado ? "Salvando..." : "Salvar")
+    </button>
+
+    @if (Id.HasValue)
+    {
+        <button class="link" style="color:var(--hp-danger)" @onclick="ExcluirAsync">Excluir tarefa</button>
+    }
+
+    @if (erro is not null) { <p class="erro">@erro</p> }
+}
+
+@code {
+    [Parameter] public int? Id { get; set; }
+
+    private TarefaPersistenciaRequest _dto = new();
+    private List<MembroSimplesDTO> _membros = new();
+    private bool carregando = true;
+    private bool ocupado;
+    private string? erro;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        carregando = true;
+        var (membros, _) = await Api.MembrosPlannerAsync();
+        _membros = membros ?? new();
+
+        if (Id.HasValue)
+        {
+            // Não há GET por id na API — carrega da listagem e localiza.
+            var (lista, err) = await Api.ListarTarefasAsync(null);
+            erro = err;
+            var t = lista?.Itens.FirstOrDefault(x => x.Id == Id.Value);
+            if (t is not null)
+            {
+                _dto = new TarefaPersistenciaRequest
+                {
+                    Id = t.Id, Titulo = t.Titulo, Descricao = t.Descricao,
+                    DataPrevista = t.DataPrevista, HoraInicio = t.HoraInicio, HoraFim = t.HoraFim,
+                    Recorrencia = t.Recorrencia, Visibilidade = t.Visibilidade,
+                    ResponsavelUsuarioId = t.ResponsavelUsuarioId, NotificarResponsaveis = t.NotificarResponsaveis,
+                };
+            }
+        }
+        else
+        {
+            _dto = new TarefaPersistenciaRequest { DataPrevista = DateOnly.FromDateTime(DateTime.Today) };
+        }
+        carregando = false;
+    }
+
+    private async Task SalvarAsync()
+    {
+        erro = null;
+        if (string.IsNullOrWhiteSpace(_dto.Titulo)) { erro = "Informe o título."; return; }
+
+        // "" no dropdown vira null (ninguém)
+        if (string.IsNullOrEmpty(_dto.ResponsavelUsuarioId)) _dto.ResponsavelUsuarioId = null;
+
+        ocupado = true;
+        var (_, err) = await Api.SalvarTarefaAsync(_dto);
+        ocupado = false;
+        if (err is not null) { erro = err; return; }
+        Nav.NavigateTo("/planner");
+    }
+
+    private async Task ExcluirAsync()
+    {
+        erro = await Api.DeletarTarefaAsync(Id!.Value);
+        if (erro is null) Nav.NavigateTo("/planner");
+    }
+}

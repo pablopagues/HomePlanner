@@ -1,6 +1,7 @@
 @page "/planner"
 @using HomePlanner.MobileApp.Services
 @inject ApiClient Api
+@inject NavigationManager Nav
 
 <div class="barra-topo"><h2>Tarefas</h2></div>
 
@@ -19,9 +20,9 @@ else
     @foreach (var t in lista.Itens)
     {
         <div class="card-hp">
-            <div class="item-check">
+            <div class="item-check" style="border:none">
                 <input type="checkbox" checked="@t.Concluida" @onchange="e => Concluir(t, (bool)e.Value!)" />
-                <div style="flex:1">
+                <div style="flex:1;cursor:pointer" @onclick='() => Nav.NavigateTo($"/tarefa/{t.Id}")'>
                     <div class="@(t.Concluida ? "riscado" : "")"><strong>@t.Titulo</strong></div>
                     <div class="muted">
                         @(t.DataPrevista?.ToString("dd/MM") ?? "sem data")
@@ -33,6 +34,8 @@ else
         </div>
     }
 }
+
+<button class="fab" @onclick='() => Nav.NavigateTo("/tarefa")'>+</button>
 
 @code {
     private ResultadoListagem<TarefaListaDTO>? lista;

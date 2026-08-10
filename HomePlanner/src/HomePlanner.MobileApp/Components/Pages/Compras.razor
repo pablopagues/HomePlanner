@@ -35,6 +35,25 @@ else
         }
     </div>
 
+    <button class="fab" @onclick="() => _modalAberto = true">+</button>
+
+    @if (_modalAberto)
+    {
+        <div class="modal-fundo" @onclick="() => _modalAberto = false">
+            <div class="modal" @onclick:stopPropagation="true">
+                <h3>Adicionar pedido</h3>
+                <label>O quê</label>
+                <input @bind="_novoDescricao" placeholder="Ex.: papel toalha" />
+                <label>Quantidade (opcional)</label>
+                <input @bind="_novoQuantidade" placeholder="Ex.: 2 pacotes" />
+                <button class="btn-acao" @onclick="AdicionarPedido" disabled="@_salvando">
+                    @(_salvando ? "Adicionando..." : "Adicionar")
+                </button>
+                <button class="link" @onclick="() => _modalAberto = false">Cancelar</button>
+            </div>
+        </div>
+    }
+
     @if (_pedidos.Count > 0)
     {
         @foreach (var grupo in _pedidos)
@@ -50,6 +69,10 @@ else
                             <div>@p.Descricao</div>
                             @if (!string.IsNullOrWhiteSpace(p.Quantidade)) { <div class="muted">@p.Quantidade</div> }
                         </div>
+                        @if (p.PodeEditar)
+                        {
+                            <button class="menu-btn" style="color:var(--hp-danger)" @onclick="() => RemoverPedido(p.Id)">✕</button>
+                        }
                     </div>
                 }
             </div>
@@ -65,9 +88,35 @@ else
     private bool carregando = true;
     private string? erro;
 
+    private bool _modalAberto, _salvando;
+    private string _novoDescricao = "", _novoQuantidade = "";
+
     protected override async Task OnInitializedAsync()
     {
         _segunda = SegundaDe(DateOnly.FromDateTime(DateTime.Today));
+        await CarregarAsync();
+    }
+
+    private async Task AdicionarPedido()
+    {
+        if (string.IsNullOrWhiteSpace(_novoDescricao)) return;
+        _salvando = true;
+        var (_, err) = await Api.AdicionarPedidoAsync(new PedidoCompraPersistenciaRequest
+        {
+            DataInicioSemana = _segunda,
+            Descricao = _novoDescricao.Trim(),
+            Quantidade = string.IsNullOrWhiteSpace(_novoQuantidade) ? null : _novoQuantidade.Trim(),
+        });
+        _salvando = false;
+        if (err is not null) { erro = err; return; }
+        _novoDescricao = ""; _novoQuantidade = ""; _modalAberto = false;
+        await CarregarAsync();
+    }
+
+    private async Task RemoverPedido(int id)
+    {
+        var err = await Api.DeletarPedidoAsync(id);
+        if (err is not null) { erro = err; return; }
         await CarregarAsync();
     }
 

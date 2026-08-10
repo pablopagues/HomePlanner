@@ -1,0 +1,49 @@
+@page "/feedback"
+@using HomePlanner.MobileApp.Services
+@inject ApiClient Api
+@inject NavigationManager Nav
+
+<button class="link" style="text-align:left;width:auto" @onclick='() => Nav.NavigateTo("/perfil")'>‹ Voltar</button>
+<div class="barra-topo"><h2>Enviar feedback</h2></div>
+
+@if (enviado)
+{
+    <p class="muted">Obrigado! Sua mensagem foi enviada.</p>
+    <button class="link" @onclick='() => Nav.NavigateTo("/cardapio")'>Voltar ao início</button>
+}
+else
+{
+    <label>Tipo</label>
+    <select @bind="_tipo">
+        <option value="Sugestao">Sugestão</option>
+        <option value="Bug">Problema (bug)</option>
+        <option value="Elogio">Elogio</option>
+        <option value="Outro">Outro</option>
+    </select>
+
+    <label>Mensagem</label>
+    <textarea rows="5" @bind="_mensagem" placeholder="Conte pra gente..."></textarea>
+
+    <button class="btn-acao" @onclick="EnviarAsync" disabled="@ocupado">
+        @(ocupado ? "Enviando..." : "Enviar")
+    </button>
+    @if (erro is not null) { <p class="erro">@erro</p> }
+}
+
+@code {
+    private string _tipo = "Sugestao";
+    private string _mensagem = "";
+    private bool ocupado, enviado;
+    private string? erro;
+
+    private async Task EnviarAsync()
+    {
+        erro = null;
+        if (_mensagem.Trim().Length < 10) { erro = "A mensagem deve ter ao menos 10 caracteres."; return; }
+
+        ocupado = true;
+        erro = await Api.EnviarFeedbackAsync(new FeedbackRequest { Tipo = _tipo, Mensagem = _mensagem.Trim() });
+        ocupado = false;
+        if (erro is null) enviado = true;
+    }
+}
