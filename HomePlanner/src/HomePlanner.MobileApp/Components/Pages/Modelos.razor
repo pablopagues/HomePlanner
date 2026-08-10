@@ -1,0 +1,104 @@
+@page "/modelos"
+@using HomePlanner.MobileApp.Services
+@inject ApiClient Api
+@inject NavigationManager Nav
+
+<div class="barra-topo"><h2>Modelos de semana</h2></div>
+<p class="muted">Aplique um modelo à semana atual (@_segunda.ToString("dd/MM")).</p>
+
+@if (carregando) { <p class="muted">Carregando...</p> }
+else if (erro is not null) { <p class="erro">@erro</p> }
+else if (_lista is null || _lista.Itens.Count == 0) { <p class="muted">Nenhum modelo salvo ainda.</p> }
+else
+{
+    @foreach (var m in _lista.Itens)
+    {
+        <div class="card-hp">
+            <div class="linha">
+                <h3>@m.Nome</h3>
+                <span class="pill">@m.TotalRefeicoes refeições</span>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(m.Descricao)) { <div class="muted">@m.Descricao</div> }
+            <div class="linha" style="gap:.4rem;margin-top:.5rem">
+                <button class="link" style="width:auto" @onclick="() => Aplicar(m.Id)">Aplicar a esta semana</button>
+                <button class="link" style="width:auto;color:var(--hp-danger)" @onclick="() => Excluir(m.Id)">Excluir</button>
+            </div>
+        </div>
+    }
+}
+
+@if (mensagem is not null) { <p class="@(sucesso ? "muted" : "erro")">@mensagem</p> }
+
+<button class="fab" @onclick="() => _modalAberto = true">+</button>
+
+@if (_modalAberto)
+{
+    <div class="modal-fundo" @onclick="() => _modalAberto = false">
+        <div class="modal" @onclick:stopPropagation="true">
+            <h3>Salvar semana atual como modelo</h3>
+            <label>Nome do modelo</label>
+            <input @bind="_novoNome" placeholder="Ex.: Semana favorita" />
+            <button class="btn-acao" @onclick="SalvarModelo" disabled="@_salvando">
+                @(_salvando ? "Salvando..." : "Salvar")
+            </button>
+            <button class="link" @onclick="() => _modalAberto = false">Cancelar</button>
+        </div>
+    </div>
+}
+
+@code {
+    private ResultadoListagem<ModeloSemanaListaDTO>? _lista;
+    private DateOnly _segunda;
+    private bool carregando = true, sucesso;
+    private string? erro, mensagem;
+
+    private bool _modalAberto, _salvando;
+    private string _novoNome = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _segunda = SegundaDe(DateOnly.FromDateTime(DateTime.Today));
+        await CarregarAsync();
+    }
+
+    private async Task CarregarAsync()
+    {
+        carregando = true; erro = null;
+        var (dados, err) = await Api.ListarModelosAsync();
+        carregando = false;
+        if (err is not null) { erro = err; return; }
+        _lista = dados;
+    }
+
+    private async Task Aplicar(int id)
+    {
+        mensagem = null;
+        var (_, err) = await Api.AplicarModeloAsync(id, _segunda);
+        sucesso = err is null;
+        mensagem = err ?? "Modelo aplicado à semana!";
+    }
+
+    private async Task Excluir(int id)
+    {
+        var err = await Api.DeletarModeloAsync(id);
+        if (err is not null) { erro = err; return; }
+        await CarregarAsync();
+    }
+
+    private async Task SalvarModelo()
+    {
+        if (string.IsNullOrWhiteSpace(_novoNome)) return;
+        _salvando = true;
+        var (_, err) = await Api.SalvarSemanaComoModeloAsync(_segunda, _novoNome.Trim());
+        _salvando = false;
+        if (err is not null) { erro = err; return; }
+        _novoNome = ""; _modalAberto = false;
+        await CarregarAsync();
+    }
+
+    private static DateOnly SegundaDe(DateOnly d)
+    {
+        var diff = ((int)d.DayOfWeek - 1 + 7) % 7;
+        return d.AddDays(-diff);
+    }
+}

@@ -1,0 +1,60 @@
+@page "/ingredientes/nova"
+@page "/ingredientes/{Id:int}/editar"
+@using HomePlanner.MobileApp.Services
+@inject ApiClient Api
+@inject NavigationManager Nav
+
+<button class="link" style="text-align:left;width:auto" @onclick='() => Nav.NavigateTo("/ingredientes")'>‹ Voltar</button>
+<div class="barra-topo"><h2>@(Id.HasValue ? "Editar ingrediente" : "Novo ingrediente")</h2></div>
+
+<label>Nome</label>
+<input @bind="_dto.Nome" />
+
+<label>Categoria (opcional)</label>
+<input @bind="_dto.Categoria" placeholder="Ex.: Laticínios" />
+
+<button class="btn-acao" @onclick="SalvarAsync" disabled="@ocupado">
+    @(ocupado ? "Salvando..." : "Salvar")
+</button>
+@if (Id.HasValue)
+{
+    <button class="link" style="color:var(--hp-danger)" @onclick="ExcluirAsync">Excluir</button>
+}
+@if (erro is not null) { <p class="erro">@erro</p> }
+
+@code {
+    [Parameter] public int? Id { get; set; }
+
+    private IngredientePersistenciaRequest _dto = new();
+    private bool ocupado;
+    private string? erro;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id.HasValue && _dto.Id != Id.Value)
+        {
+            // Não há GET por id — busca na listagem para pré-preencher.
+            var (lista, _) = await Api.ListarIngredientesAsync(null, 1);
+            var i = lista?.Itens.FirstOrDefault(x => x.Id == Id.Value);
+            if (i is not null)
+                _dto = new IngredientePersistenciaRequest { Id = i.Id, Nome = i.Nome, Categoria = i.Categoria };
+        }
+    }
+
+    private async Task SalvarAsync()
+    {
+        erro = null;
+        if (string.IsNullOrWhiteSpace(_dto.Nome)) { erro = "Informe o nome."; return; }
+        ocupado = true;
+        var (_, err) = await Api.SalvarIngredienteAsync(_dto);
+        ocupado = false;
+        if (err is not null) { erro = err; return; }
+        Nav.NavigateTo("/ingredientes");
+    }
+
+    private async Task ExcluirAsync()
+    {
+        erro = await Api.DeletarIngredienteAsync(Id!.Value);
+        if (erro is null) Nav.NavigateTo("/ingredientes");
+    }
+}

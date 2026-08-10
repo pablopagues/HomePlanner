@@ -88,6 +88,45 @@ public class ApiClient
     public Task<(ResultadoListagem<IngredienteListaDTO>? dados, string? erro)> ListarIngredientesAsync(string? busca, int pagina = 1, CancellationToken ct = default)
         => GetAsync<ResultadoListagem<IngredienteListaDTO>>($"/api/ingredientes?pagina={pagina}&tamanhoPagina=20&textoBusca={Uri.EscapeDataString(busca ?? "")}", ct);
 
+    public Task<(int dados, string? erro)> SalvarIngredienteAsync(IngredientePersistenciaRequest dto, CancellationToken ct = default)
+        => EnviarAsync<int>(HttpMethod.Post, "/api/ingredientes", dto, ct);
+
+    public Task<string?> DeletarIngredienteAsync(int id, CancellationToken ct = default)
+        => EnviarAsync(HttpMethod.Delete, $"/api/ingredientes/{id}", null, ct);
+
+    // ── Modelos de semana ─────────────────────────────────────────────────
+    public Task<(ResultadoListagem<ModeloSemanaListaDTO>? dados, string? erro)> ListarModelosAsync(int pagina = 1, CancellationToken ct = default)
+        => GetAsync<ResultadoListagem<ModeloSemanaListaDTO>>($"/api/modelos?pagina={pagina}&tamanhoPagina=50", ct);
+
+    public Task<(CardapioSemanaDTO? dados, string? erro)> AplicarModeloAsync(int id, DateOnly segunda, CancellationToken ct = default)
+        => EnviarAsync<CardapioSemanaDTO>(HttpMethod.Post, $"/api/modelos/{id}/aplicar?dataInicio={segunda:yyyy-MM-dd}", null, ct);
+
+    public Task<(int dados, string? erro)> SalvarSemanaComoModeloAsync(DateOnly segunda, string nome, CancellationToken ct = default)
+        => EnviarAsync<int>(HttpMethod.Post, $"/api/modelos/salvar-da-semana?dataInicio={segunda:yyyy-MM-dd}&nome={Uri.EscapeDataString(nome)}", null, ct);
+
+    public Task<string?> DeletarModeloAsync(int id, CancellationToken ct = default)
+        => EnviarAsync(HttpMethod.Delete, $"/api/modelos/{id}", null, ct);
+
+    // ── 2FA ────────────────────────────────────────────────────────────────
+    public Task<(StatusDoisFatores? dados, string? erro)> StatusDoisFatoresAsync(CancellationToken ct = default)
+        => GetAsync<StatusDoisFatores>("/api/2fa/status", ct);
+
+    public Task<(ChaveAutenticadorDTO? dados, string? erro)> GerarChave2FAAsync(CancellationToken ct = default)
+        => EnviarAsync<ChaveAutenticadorDTO>(HttpMethod.Post, "/api/2fa/chave", null, ct);
+
+    public Task<(List<string>? dados, string? erro)> Ativar2FAAsync(string codigo, CancellationToken ct = default)
+        => EnviarAsync<List<string>>(HttpMethod.Post, "/api/2fa/ativar", new { codigo }, ct);
+
+    public Task<string?> Desativar2FAAsync(CancellationToken ct = default)
+        => EnviarAsync(HttpMethod.Post, "/api/2fa/desativar", null, ct);
+
+    // ── Conta ──────────────────────────────────────────────────────────────
+    public Task<string?> SalvarContaAsync(AtualizarEmpresaRequest dto, CancellationToken ct = default)
+        => EnviarAsync(HttpMethod.Put, "/api/empresa", dto, ct);
+
+    public Task<string?> ReenviarConfirmacaoAsync(CancellationToken ct = default)
+        => EnviarAsync(HttpMethod.Post, "/api/empresa/reenviar-confirmacao", null, ct);
+
     // ── Planner ───────────────────────────────────────────────────────────
     public Task<(ResultadoListagem<TarefaListaDTO>? dados, string? erro)> ListarTarefasAsync(bool? concluida, int pagina = 1, CancellationToken ct = default)
         => GetAsync<ResultadoListagem<TarefaListaDTO>>($"/api/planner?pagina={pagina}&tamanhoPagina=50{(concluida.HasValue ? $"&concluida={concluida}" : "")}", ct);

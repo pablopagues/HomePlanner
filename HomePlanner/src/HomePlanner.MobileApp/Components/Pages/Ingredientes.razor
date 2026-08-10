@@ -1,6 +1,7 @@
 @page "/ingredientes"
 @using HomePlanner.MobileApp.Services
 @inject ApiClient Api
+@inject NavigationManager Nav
 
 <div class="barra-topo"><h2>Ingredientes</h2></div>
 
@@ -13,7 +14,7 @@ else
 {
     @foreach (var i in lista.Itens)
     {
-        <div class="card-hp">
+        <div class="card-hp" style="cursor:pointer" @onclick='() => Nav.NavigateTo($"/ingredientes/{i.Id}/editar")'>
             <div class="linha">
                 <h3>@i.Nome</h3>
                 @if (!string.IsNullOrWhiteSpace(i.Categoria)) { <span class="pill">@i.Categoria</span> }
@@ -21,6 +22,8 @@ else
         </div>
     }
 }
+
+<button class="fab" @onclick='() => Nav.NavigateTo("/ingredientes/nova")'>+</button>
 
 @code {
     private ResultadoListagem<IngredienteListaDTO>? lista;

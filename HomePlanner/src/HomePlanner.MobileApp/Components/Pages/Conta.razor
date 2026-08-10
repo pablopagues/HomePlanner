@@ -1,0 +1,131 @@
+@page "/conta"
+@using HomePlanner.MobileApp.Services
+@inject ApiClient Api
+@inject NavigationManager Nav
+
+<button class="link" style="text-align:left;width:auto" @onclick='() => Nav.NavigateTo("/perfil")'>‹ Voltar</button>
+<div class="barra-topo"><h2>Minha conta</h2></div>
+
+@if (carregando) { <p class="muted">Carregando...</p> }
+else
+{
+    <div class="card-hp">
+        <h3>Dados</h3>
+        <label>Nome</label>
+        <input @bind="_nome" />
+        <button class="btn-acao" @onclick="SalvarNome" disabled="@_salvandoNome">
+            @(_salvandoNome ? "Salvando..." : "Salvar nome")
+        </button>
+
+        @if (_conta is not null)
+        {
+            <p class="muted" style="margin-top:.6rem">@_conta.Email — @(_conta.EmailConfirmado ? "confirmado" : "não confirmado")</p>
+            @if (!_conta.EmailConfirmado)
+            {
+                <button class="link" @onclick="ReenviarConfirmacao">Reenviar e-mail de confirmação</button>
+            }
+        }
+        @if (_msgConta is not null) { <p class="@(_okConta ? "muted" : "erro")">@_msgConta</p> }
+    </div>
+
+    <div class="card-hp">
+        <h3>Verificação em duas etapas</h3>
+        <p class="muted">@(_ativo ? "Ativa" : "Inativa")</p>
+
+        @if (_ativo)
+        {
+            <button class="btn-acao" style="background:var(--hp-danger)" @onclick="Desativar2FA">Desativar 2FA</button>
+        }
+        else if (_chave is null)
+        {
+            <button class="btn-acao" @onclick="Iniciar2FA">Ativar 2FA</button>
+        }
+        else
+        {
+            <p class="muted">1. No app autenticador, adicione a conta com esta chave:</p>
+            <p style="font-family:monospace;font-size:1.1rem">@_chave.ChaveFormatada</p>
+            <p class="muted">Conta: @_chave.Email</p>
+            <label>2. Digite o código gerado</label>
+            <input @bind="_codigo" inputmode="numeric" />
+            <button class="btn-acao" @onclick="Confirmar2FA" disabled="@_confirmando">
+                @(_confirmando ? "Verificando..." : "Confirmar e ativar")
+            </button>
+        }
+
+        @if (_codigosRecuperacao is not null)
+        {
+            <p class="muted" style="margin-top:.6rem"><strong>Guarde seus códigos de recuperação:</strong></p>
+            <p style="font-family:monospace">@string.Join("  ", _codigosRecuperacao)</p>
+        }
+        @if (_msg2fa is not null) { <p class="erro">@_msg2fa</p> }
+    </div>
+}
+
+@code {
+    private EmpresaDetalheDTO? _conta;
+    private string _nome = "";
+    private bool carregando = true, _salvandoNome, _okConta;
+    private string? _msgConta;
+
+    private bool _ativo;
+    private ChaveAutenticadorDTO? _chave;
+    private string _codigo = "";
+    private bool _confirmando;
+    private List<string>? _codigosRecuperacao;
+    private string? _msg2fa;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var (conta, _) = await Api.ObterContaAsync();
+        _conta = conta;
+        _nome = conta?.NomeResponsavel ?? "";
+        var (status, _) = await Api.StatusDoisFatoresAsync();
+        _ativo = status?.Ativo ?? false;
+        carregando = false;
+    }
+
+    private async Task SalvarNome()
+    {
+        _msgConta = null; _salvandoNome = true;
+        var err = await Api.SalvarContaAsync(new AtualizarEmpresaRequest { NomeResponsavel = _nome.Trim() });
+        _salvandoNome = false;
+        _okConta = err is null;
+        _msgConta = err ?? "Nome atualizado!";
+    }
+
+    private async Task ReenviarConfirmacao()
+    {
+        var err = await Api.ReenviarConfirmacaoAsync();
+        _okConta = err is null;
+        _msgConta = err ?? "E-mail de confirmação reenviado.";
+    }
+
+    private async Task Iniciar2FA()
+    {
+        _msg2fa = null;
+        var (chave, err) = await Api.GerarChave2FAAsync();
+        if (err is not null) { _msg2fa = err; return; }
+        _chave = chave;
+    }
+
+    private async Task Confirmar2FA()
+    {
+        _msg2fa = null;
+        if (string.IsNullOrWhiteSpace(_codigo)) { _msg2fa = "Informe o código."; return; }
+        _confirmando = true;
+        var (codigos, err) = await Api.Ativar2FAAsync(_codigo.Trim());
+        _confirmando = false;
+        if (err is not null) { _msg2fa = err; return; }
+        _codigosRecuperacao = codigos;
+        _ativo = true;
+        _chave = null;
+    }
+
+    private async Task Desativar2FA()
+    {
+        var err = await Api.Desativar2FAAsync();
+        if (err is not null) { _msg2fa = err; return; }
+        _ativo = false;
+        _codigosRecuperacao = null;
+    }
+}

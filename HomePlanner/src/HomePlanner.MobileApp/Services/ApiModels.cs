@@ -174,6 +174,44 @@ public class IngredienteListaDTO
     public string? Categoria { get; set; }
 }
 
+public class IngredientePersistenciaRequest
+{
+    public int Id { get; set; }
+    public string Nome { get; set; } = string.Empty;
+    public string? Categoria { get; set; }
+    public int? UnidadeMedidaPadraoId { get; set; }
+}
+
+// ── Modelos de semana ─────────────────────────────────────────────────────
+public class ModeloSemanaListaDTO
+{
+    public int Id { get; set; }
+    public string Nome { get; set; } = string.Empty;
+    public string? Descricao { get; set; }
+    public int TotalRefeicoes { get; set; }
+}
+
+// ── Segurança (2FA) ───────────────────────────────────────────────────────
+public class ChaveAutenticadorDTO
+{
+    public string ChaveRaw { get; set; } = string.Empty;
+    public string ChaveFormatada { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+}
+
+public class StatusDoisFatores
+{
+    public bool Ativo { get; set; }
+}
+
+// ── Conta ─────────────────────────────────────────────────────────────────
+public class AtualizarEmpresaRequest
+{
+    public string NomeResponsavel { get; set; } = string.Empty;
+    public string? Cpf { get; set; }
+    public string? Province { get; set; }
+}
+
 // ── Planner ───────────────────────────────────────────────────────────────
 public class TarefaListaDTO
 {
