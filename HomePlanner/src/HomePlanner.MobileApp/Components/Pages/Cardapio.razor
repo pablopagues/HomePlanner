@@ -25,7 +25,14 @@ else
                 var r = Refeicao(d.chave, t.chave);
                 <div class="cel @(r is not null ? "cheia" : "")" style="cursor:pointer"
                      @onclick="() => AbrirSeletor(d.chave, t.chave, r)">
-                    @if (r is not null) { <span>@r.ReceitaNome</span> }
+                    @if (r is not null)
+                    {
+                        @if (r.ReceitaId is int rid && _imgs.TryGetValue(rid, out var img))
+                        {
+                            <img src="@img" alt="" onerror="this.style.display='none'" style="width:100%;height:34px;object-fit:cover;border-radius:5px;margin-bottom:2px" />
+                        }
+                        <span>@r.ReceitaNome</span>
+                    }
                     else { <span class="muted">+</span> }
                 </div>
             }
@@ -74,6 +81,7 @@ else
     private CardapioSemanaDTO? _cardapio;
     private bool carregando = true;
     private string? erro;
+    private readonly Dictionary<int, string> _imgs = new();
 
     private bool _seletorAberto;
     private string _selDia = "", _selTipo = "";
@@ -103,11 +111,35 @@ else
 
     private async Task CarregarAsync()
     {
-        carregando = true; erro = null;
+        carregando = true; erro = null; _imgs.Clear();
         var (dados, err) = await Api.ObterCardapioSemanaAsync(_segunda);
         carregando = false;
         if (err is not null) { erro = err; return; }
         _cardapio = dados;
+        _ = CarregarImagensAsync(); // popula as miniaturas sem travar a grade
+    }
+
+    private async Task CarregarImagensAsync()
+    {
+        if (_cardapio is null) return;
+        var receitas = _cardapio.Refeicoes
+            .Where(r => r.ReceitaId.HasValue)
+            .GroupBy(r => r.ReceitaId!.Value)
+            .Select(g => g.First());
+
+        foreach (var r in receitas)
+        {
+            var rid = r.ReceitaId!.Value;
+            if (_imgs.ContainsKey(rid)) continue;
+
+            string? src = null;
+            if (r.ReceitaTemFoto)
+                src = await Api.ObterImagemDataUrlAsync($"/api/receitas/{rid}/foto");
+            else if (r.ReceitaImagemSrc is not null && r.ReceitaImagemSrc.StartsWith("http"))
+                src = r.ReceitaImagemSrc;
+
+            if (src is not null) { _imgs[rid] = src; StateHasChanged(); }
+        }
     }
 
     private RefeicaoDiaDTO? Refeicao(string dia, string tipo)

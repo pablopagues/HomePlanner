@@ -17,7 +17,7 @@ else if (r is not null)
 {
     @if (_imgSrc is not null)
     {
-        <img src="@_imgSrc" alt="@r.Nome" style="width:100%;max-height:220px;object-fit:cover;border-radius:10px;margin-bottom:.6rem" />
+        <img src="@_imgSrc" alt="@r.Nome" onerror="this.style.display='none'" style="width:100%;max-height:220px;object-fit:cover;border-radius:10px;margin-bottom:.6rem" />
     }
     <div class="barra-topo"><h2>@r.Nome</h2></div>
     <p class="muted">

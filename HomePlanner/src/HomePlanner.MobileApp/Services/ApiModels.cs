@@ -77,6 +77,8 @@ public class RefeicaoDiaDTO
     public string TipoRefeicao { get; set; } = string.Empty;
     public int? ReceitaId { get; set; }
     public string? ReceitaNome { get; set; }
+    public bool ReceitaTemFoto { get; set; }
+    public string? ReceitaImagemSrc { get; set; }
     public int? PorcoesDesejadas { get; set; }
 }
 

@@ -53,7 +53,7 @@
         // Auto-login: se houver refresh token salvo, tenta renovar a sessão.
         if (await Auth.RenovarAsync())
         {
-            Nav.NavigateTo("/cardapio");
+            Nav.NavigateTo("/dashboard");
             return;
         }
         verificando = false;

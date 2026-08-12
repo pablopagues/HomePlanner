@@ -1,0 +1,97 @@
+@page "/dashboard"
+@using HomePlanner.MobileApp.Services
+@inject ApiClient Api
+@inject SessaoAtual Sessao
+@inject NavigationManager Nav
+
+<div class="barra-topo"><h2>Olá, @PrimeiroNome 👋</h2></div>
+
+@if (carregando) { <p class="muted">Carregando...</p> }
+else
+{
+    <div class="card-hp">
+        <h3>Refeições de hoje</h3>
+        @if (_refeicoesHoje.Count == 0)
+        {
+            <p class="muted">Nada planejado para hoje.
+                <a href="#" @onclick:preventDefault @onclick='() => Nav.NavigateTo("/cardapio")'>Abrir cardápio</a>
+            </p>
+        }
+        else
+        {
+            @foreach (var r in _refeicoesHoje)
+            {
+                <div class="linha"><span>@RotuloTipo(r.TipoRefeicao)</span><strong>@r.ReceitaNome</strong></div>
+            }
+        }
+    </div>
+
+    <div class="card-hp" style="cursor:pointer" @onclick='() => Nav.NavigateTo("/planner")'>
+        <div class="linha">
+            <h3>Tarefas pendentes</h3>
+            <span class="pill">@_tarefasPendentes</span>
+        </div>
+        @foreach (var t in _proximasTarefas)
+        {
+            <div class="muted">• @t.Titulo @(t.DataPrevista.HasValue ? $"({t.DataPrevista:dd/MM})" : "")</div>
+        }
+    </div>
+
+    <div class="atalhos">
+        @foreach (var (rota, rotulo) in _atalhos)
+        {
+            <button class="atalho" @onclick='() => Nav.NavigateTo(rota)'>@rotulo</button>
+        }
+    </div>
+}
+
+@code {
+    private List<RefeicaoDiaDTO> _refeicoesHoje = new();
+    private int _tarefasPendentes;
+    private List<TarefaListaDTO> _proximasTarefas = new();
+    private bool carregando = true;
+
+    private string PrimeiroNome => (Sessao.NomeCompleto ?? "").Split(' ').FirstOrDefault() ?? "";
+
+    private static readonly (string rota, string rotulo)[] _atalhos =
+    [
+        ("/cardapio", "🍽️ Cardápio"), ("/receitas", "📖 Receitas"),
+        ("/compras", "🛒 Compras"), ("/planner", "✅ Tarefas"),
+    ];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var hojeChave = DiaChave(DateTime.Today.DayOfWeek);
+        var segunda = SegundaDe(DateOnly.FromDateTime(DateTime.Today));
+
+        var (cardapio, _) = await Api.ObterCardapioSemanaAsync(segunda);
+        _refeicoesHoje = cardapio?.Refeicoes
+            .Where(r => r.DiaSemana == hojeChave && r.ReceitaId.HasValue)
+            .ToList() ?? new();
+
+        var (tarefas, _) = await Api.ListarTarefasAsync(false);
+        _tarefasPendentes = tarefas?.Total ?? tarefas?.Itens.Count ?? 0;
+        _proximasTarefas = tarefas?.Itens.Take(3).ToList() ?? new();
+
+        carregando = false;
+    }
+
+    private static string DiaChave(DayOfWeek d) => d switch
+    {
+        DayOfWeek.Monday => "Segunda", DayOfWeek.Tuesday => "Terca", DayOfWeek.Wednesday => "Quarta",
+        DayOfWeek.Thursday => "Quinta", DayOfWeek.Friday => "Sexta", DayOfWeek.Saturday => "Sabado",
+        _ => "Domingo",
+    };
+
+    private static string RotuloTipo(string t) => t switch
+    {
+        "CafeManha" => "Café", "Almoco" => "Almoço", "Lanche" => "Lanche",
+        "Jantar" => "Jantar", "Ceia" => "Ceia", _ => t,
+    };
+
+    private static DateOnly SegundaDe(DateOnly d)
+    {
+        var diff = ((int)d.DayOfWeek - 1 + 7) % 7;
+        return d.AddDays(-diff);
+    }
+}
