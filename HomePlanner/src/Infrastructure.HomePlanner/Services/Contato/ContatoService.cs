@@ -1,3 +1,4 @@
+using Application.HomePlanner.Common;
 using System.Net;
 using Application.HomePlanner.DTOs.Contato;
 using Application.HomePlanner.Services.Contato;
@@ -38,7 +39,7 @@ public class ContatoService : IContatoService
         if (string.IsNullOrWhiteSpace(destino))
         {
             _logger.LogWarning("Contato:EmailDestino não configurado — mensagem de {Email} não entregue.", m.Email);
-            return ContatoEnvioResultado.Falha("Não foi possível enviar sua mensagem agora. Tente novamente em instantes.");
+            return ContatoEnvioResultado.Falha(ErrosApp.EnvioIndisponivel);
         }
 
         try
@@ -55,7 +56,7 @@ public class ContatoService : IContatoService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Falha ao enviar e-mail de contato. Remetente={Email}", m.Email);
-            return ContatoEnvioResultado.Falha("Não conseguimos enviar sua mensagem agora. Tente novamente em instantes.");
+            return ContatoEnvioResultado.Falha(ErrosApp.EnvioIndisponivel);
         }
     }
 

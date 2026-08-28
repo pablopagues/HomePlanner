@@ -3,40 +3,51 @@
 @using HomePlanner.MobileApp.Services
 @inject AuthApi Auth
 @inject SessaoAtual Sessao
+@inject LinksLegais Legais
+@inject IStringLocalizer<SharedResource> L
 @inject NavigationManager Nav
 
 <div class="auth">
-    <h1>Criar conta</h1>
+    <h1>@L["Auth_RegistroTitulo"]</h1>
 
     @if (sucesso)
     {
-        <p class="sub">Conta criada! Agora é só entrar.</p>
-        <button class="primario" @onclick='() => Nav.NavigateTo("/")'>Ir para o login</button>
+        <p class="sub">@L["Auth_ContaCriada"]</p>
+        <button class="primario" @onclick='() => Nav.NavigateTo("/")'>@L["Auth_IrLogin"]</button>
     }
     else
     {
-        <label>Servidor (API)</label>
+        <label>@L["Auth_Servidor"]</label>
         <input @bind="baseUrl" />
 
-        <label>Seu nome</label>
+        <label>@L["Auth_SeuNome"]</label>
         <input @bind="nome" />
 
-        <label>E-mail</label>
+        <label>@L["Auth_Email"]</label>
         <input @bind="email" type="email" inputmode="email" />
 
-        <label>Senha</label>
+        <label>@L["Auth_Senha"]</label>
         <input @bind="senha" type="password" />
 
-        <label>País</label>
+        <label>@L["Auth_Pais"]</label>
         <select @bind="pais">
             <option value="BR">Brasil</option>
             <option value="CA">Canadá</option>
         </select>
 
+        <label class="aceite">
+            <input type="checkbox" @bind="aceitaTermos" />
+            <span>@L["Auth_AceiteLabel"]</span>
+        </label>
+        <div class="aceite-links">
+            <button class="link" @onclick="AbrirTermos">@L["Auth_VerTermos"]</button>
+            <button class="link" @onclick="AbrirPrivacidade">@L["Auth_VerPrivacidade"]</button>
+        </div>
+
         <button class="primario" @onclick="RegistrarAsync" disabled="@ocupado">
-            @(ocupado ? "Criando..." : "Criar conta")
+            @(ocupado ? L["Auth_Criando"] : L["Auth_RegistroTitulo"])
         </button>
-        <button class="link" @onclick='() => Nav.NavigateTo("/")'>Já tenho conta</button>
+        <button class="link" @onclick='() => Nav.NavigateTo("/")'>@L["Auth_JaTenhoConta"]</button>
 
         @if (!string.IsNullOrEmpty(mensagem)) { <p class="erro">@mensagem</p> }
     }
@@ -45,17 +56,38 @@
 @code {
     private string baseUrl = SessaoAtual.BaseUrlPadrao;
     private string nome = string.Empty, email = string.Empty, senha = string.Empty, pais = "BR";
+    private bool aceitaTermos;
     private bool ocupado, sucesso;
     private string? mensagem;
 
     protected override void OnInitialized() => baseUrl = Sessao.BaseUrl;
+
+    // Os documentos ficam no servidor informado no campo "Servidor" — salvamos antes
+    // de abrir para o link não apontar para a URL anterior.
+    private Task AbrirTermos()
+    {
+        Sessao.SalvarBaseUrl(baseUrl);
+        return Legais.AbrirTermosAsync();
+    }
+
+    private Task AbrirPrivacidade()
+    {
+        Sessao.SalvarBaseUrl(baseUrl);
+        return Legais.AbrirPrivacidadeAsync();
+    }
 
     private async Task RegistrarAsync()
     {
         mensagem = null;
         if (string.IsNullOrWhiteSpace(nome) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(senha))
         {
-            mensagem = "Preencha todos os campos.";
+            mensagem = L["Auth_PreenchaTudo"];
+            return;
+        }
+
+        if (!aceitaTermos)
+        {
+            mensagem = L["Auth_AceiteObrigatorio"];
             return;
         }
 
@@ -64,6 +96,7 @@
         var erro = await Auth.RegistrarAsync(new RegistroRequest
         {
             NomeResponsavel = nome.Trim(), Email = email.Trim(), Senha = senha, PaisId = pais,
+            AceitaTermos = aceitaTermos,
         });
         ocupado = false;
 

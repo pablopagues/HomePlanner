@@ -202,7 +202,7 @@ else
         var r = await CardapioService.ObterOuCriarSemanaAsync(_dataInicio);
         _cardapio = r.Sucesso ? r.Valor : null;
         if (!r.Sucesso)
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
         _carregando = false;
     }
 
@@ -242,7 +242,7 @@ else
         if (r.Sucesso)
             await CarregarSemanaAsync();
         else
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
     }
 
     private void SemanaAnterior() =>
@@ -264,7 +264,7 @@ else
             Nav.NavigateTo($"/cardapio/{destino:yyyy-MM-dd}");
         }
         else
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
     }
 
     private async Task SalvarComoModelo()
@@ -278,7 +278,7 @@ else
         if (r.Sucesso)
             Snackbar.Add("Modelo salvo!", Severity.Success);
         else
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
     }
 
     private static DateOnly SegundaDeHoje()

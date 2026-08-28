@@ -277,7 +277,7 @@ else
             await CarregarAsync();
         }
         else
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
     }
 
     // ── Cores / textos ──────────────────────────────────────────────────────

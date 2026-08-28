@@ -3,21 +3,22 @@
 @using HomePlanner.MobileApp.Services
 @inject AuthApi Auth
 @inject SessaoAtual Sessao
+@inject IStringLocalizer<SharedResource> L
 @inject NavigationManager Nav
 
 <div class="auth">
-    <h1>Verificação em duas etapas</h1>
-    <p class="sub">@(usarRecuperacao ? "Digite um código de recuperação" : "Digite o código do seu app autenticador")</p>
+    <h1>@L["Auth_2FATitulo"]</h1>
+    <p class="sub">@(usarRecuperacao ? L["Auth_2FASubRec"] : L["Auth_2FASubApp"])</p>
 
-    <label>Código</label>
+    <label>@L["Auth_2FACodigo"]</label>
     <input @bind="codigo" inputmode="@(usarRecuperacao ? "text" : "numeric")" @onkeyup="AoTeclar" />
 
     <button class="primario" @onclick="ConfirmarAsync" disabled="@ocupado">
-        @(ocupado ? "Verificando..." : "Confirmar")
+        @(ocupado ? L["Auth_2FAVerificando"] : L["Btn_Confirmar"])
     </button>
 
     <button class="link" @onclick="() => usarRecuperacao = !usarRecuperacao">
-        @(usarRecuperacao ? "Usar código do app" : "Usar código de recuperação")
+        @(usarRecuperacao ? L["Auth_2FAUsarApp"] : L["Auth_2FAUsarRec"])
     </button>
 
     @if (!string.IsNullOrEmpty(mensagem))
@@ -55,6 +56,7 @@
         if (erro is not null) { mensagem = erro; return; }
 
         Sessao.MfaTokenPendente = null;
-        Nav.NavigateTo("/dashboard");
+        // Mesmo desvio do login sem 2FA: família não configurada vai para o onboarding.
+        Nav.NavigateTo(Sessao.OnboardingCompleto ? "/dashboard" : "/onboarding");
     }
 }

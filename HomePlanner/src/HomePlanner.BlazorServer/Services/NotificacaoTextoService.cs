@@ -3,6 +3,7 @@ using System.Resources;
 using Application.HomePlanner.Services.Notificacoes;
 using Domain.HomePlanner.Models.SaaS.Options;
 using Microsoft.Extensions.Options;
+using Resources.HomePlanner;
 
 namespace HomePlanner.BlazorServer.Services;
 
@@ -12,8 +13,11 @@ namespace HomePlanner.BlazorServer.Services;
 /// </summary>
 public class NotificacaoTextoService : INotificacaoTextoService
 {
+    // Nome-base derivado do próprio tipo: se as .resx mudarem de projeto outra vez,
+    // isto acompanha em vez de falhar em silêncio no runtime.
     private static readonly ResourceManager Rm =
-        new("HomePlanner.BlazorServer.Resources.SharedResource", typeof(SharedResource).Assembly);
+        new($"{typeof(SharedResource).Assembly.GetName().Name}.Resources.SharedResource",
+            typeof(SharedResource).Assembly);
 
     private readonly string _idiomaPadrao;
 

@@ -47,11 +47,11 @@ public class ProdutoRecorrenteService : IProdutoRecorrenteService
     {
         await _tenantAccessor.GarantirHidratadoAsync();
         if (!PodeGerenciar)
-            return ResultadoOperacao<int>.Falha("Você não tem permissão para gerenciar produtos recorrentes.");
+            return ResultadoOperacao<int>.Falha(ErrosApp.SemPermissaoRecorrentes);
 
         var descricao = dto.Descricao?.Trim() ?? string.Empty;
         if (descricao.Length < 2)
-            return ResultadoOperacao<int>.Falha("A descrição do produto deve ter pelo menos 2 caracteres.");
+            return ResultadoOperacao<int>.Falha(ErrosApp.DescricaoProdutoCurta);
 
         var entidade = new ProdutoRecorrente
         {
@@ -72,15 +72,15 @@ public class ProdutoRecorrenteService : IProdutoRecorrenteService
     {
         await _tenantAccessor.GarantirHidratadoAsync();
         if (!PodeGerenciar)
-            return ResultadoOperacao.Falha("Você não tem permissão para gerenciar produtos recorrentes.");
+            return ResultadoOperacao.Falha(ErrosApp.SemPermissaoRecorrentes);
 
         var entidade = await _repo.ObterEntidadeAsync(id, ct);
         if (entidade is null)
-            return ResultadoOperacao.Falha("Produto não encontrado.");
+            return ResultadoOperacao.Falha(ErrosApp.ProdutoNaoEncontrado);
 
         var descricao = dto.Descricao?.Trim() ?? string.Empty;
         if (descricao.Length < 2)
-            return ResultadoOperacao.Falha("A descrição do produto deve ter pelo menos 2 caracteres.");
+            return ResultadoOperacao.Falha(ErrosApp.DescricaoProdutoCurta);
 
         entidade.Descricao  = descricao;
         entidade.Quantidade = string.IsNullOrWhiteSpace(dto.Quantidade) ? null : dto.Quantidade.Trim();
@@ -95,11 +95,11 @@ public class ProdutoRecorrenteService : IProdutoRecorrenteService
     {
         await _tenantAccessor.GarantirHidratadoAsync();
         if (!PodeGerenciar)
-            return ResultadoOperacao.Falha("Você não tem permissão para gerenciar produtos recorrentes.");
+            return ResultadoOperacao.Falha(ErrosApp.SemPermissaoRecorrentes);
 
         var entidade = await _repo.ObterEntidadeAsync(id, ct);
         if (entidade is null)
-            return ResultadoOperacao.Falha("Produto não encontrado.");
+            return ResultadoOperacao.Falha(ErrosApp.ProdutoNaoEncontrado);
 
         entidade.IsDeleted = true;
         await _repo.SalvarAsync(ct);
@@ -117,7 +117,7 @@ public class ProdutoRecorrenteService : IProdutoRecorrenteService
     {
         await _tenantAccessor.GarantirHidratadoAsync();
         if (!PodeGerenciar)
-            return ResultadoOperacao<int>.Falha("Você não tem permissão para gerenciar produtos recorrentes.");
+            return ResultadoOperacao<int>.Falha(ErrosApp.SemPermissaoRecorrentes);
 
         // Descrições já no catálogo (para não duplicar), comparadas sem diferenciar caixa.
         var existentes = (await _repo.ListarAsync(ct))
@@ -154,8 +154,7 @@ public class ProdutoRecorrenteService : IProdutoRecorrenteService
     {
         await _tenantAccessor.GarantirHidratadoAsync();
         if (!PodeGerenciar)
-            return ResultadoOperacao<AdicaoRecorrentesResultadoDTO>.Falha(
-                "Você não tem permissão para gerenciar produtos recorrentes.");
+            return ResultadoOperacao<AdicaoRecorrentesResultadoDTO>.Falha(ErrosApp.SemPermissaoRecorrentes);
 
         if (produtoIds.Count == 0)
             return ResultadoOperacao<AdicaoRecorrentesResultadoDTO>.Ok(new AdicaoRecorrentesResultadoDTO());

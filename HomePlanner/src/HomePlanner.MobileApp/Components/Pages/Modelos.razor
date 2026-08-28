@@ -1,14 +1,15 @@
 @page "/modelos"
 @using HomePlanner.MobileApp.Services
 @inject ApiClient Api
+@inject IStringLocalizer<SharedResource> L
 @inject NavigationManager Nav
 
-<div class="barra-topo"><h2>Modelos de semana</h2></div>
-<p class="muted">Aplique um modelo à semana atual (@_segunda.ToString("dd/MM")).</p>
+<div class="barra-topo"><h2>@L["Modelo_Titulo"]</h2></div>
+<p class="muted">@string.Format(L["App_ModelosDesc"], _segunda.ToString("dd/MM"))</p>
 
-@if (carregando) { <p class="muted">Carregando...</p> }
+@if (carregando) { <p class="muted">@L["Btn_Carregando"]</p> }
 else if (erro is not null) { <p class="erro">@erro</p> }
-else if (_lista is null || _lista.Itens.Count == 0) { <p class="muted">Nenhum modelo salvo ainda.</p> }
+else if (_lista is null || _lista.Itens.Count == 0) { <p class="muted">@L["App_SemModelos"]</p> }
 else
 {
     @foreach (var m in _lista.Itens)
@@ -16,12 +17,12 @@ else
         <div class="card-hp">
             <div class="linha">
                 <h3>@m.Nome</h3>
-                <span class="pill">@m.TotalRefeicoes refeições</span>
+                <span class="pill">@m.TotalRefeicoes @L["Modelo_Refeicoes"]</span>
             </div>
             @if (!string.IsNullOrWhiteSpace(m.Descricao)) { <div class="muted">@m.Descricao</div> }
             <div class="linha" style="gap:.4rem;margin-top:.5rem">
-                <button class="link" style="width:auto" @onclick="() => Aplicar(m.Id)">Aplicar a esta semana</button>
-                <button class="link" style="width:auto;color:var(--hp-danger)" @onclick="() => Excluir(m.Id)">Excluir</button>
+                <button class="link" style="width:auto" @onclick="() => Aplicar(m.Id)">@L["App_AplicarSemana"]</button>
+                <button class="link" style="width:auto;color:var(--hp-danger)" @onclick="() => Excluir(m.Id)">@L["Btn_Excluir"]</button>
             </div>
         </div>
     }
@@ -35,13 +36,13 @@ else
 {
     <div class="modal-fundo" @onclick="() => _modalAberto = false">
         <div class="modal" @onclick:stopPropagation="true">
-            <h3>Salvar semana atual como modelo</h3>
-            <label>Nome do modelo</label>
-            <input @bind="_novoNome" placeholder="Ex.: Semana favorita" />
+            <h3>@L["App_SalvarModeloTitulo"]</h3>
+            <label>@L["App_NomeModelo"]</label>
+            <input @bind="_novoNome" placeholder="@L["App_ModeloPlaceholder"]" />
             <button class="btn-acao" @onclick="SalvarModelo" disabled="@_salvando">
-                @(_salvando ? "Salvando..." : "Salvar")
+                @(_salvando ? L["Btn_Salvando"] : L["Btn_Salvar"])
             </button>
-            <button class="link" @onclick="() => _modalAberto = false">Cancelar</button>
+            <button class="link" @onclick="() => _modalAberto = false">@L["Btn_Cancelar"]</button>
         </div>
     </div>
 }
@@ -75,7 +76,7 @@ else
         mensagem = null;
         var (_, err) = await Api.AplicarModeloAsync(id, _segunda);
         sucesso = err is null;
-        mensagem = err ?? "Modelo aplicado à semana!";
+        mensagem = err ?? L["App_ModeloAplicado"];
     }
 
     private async Task Excluir(int id)

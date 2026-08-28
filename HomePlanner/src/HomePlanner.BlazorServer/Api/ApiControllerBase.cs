@@ -17,9 +17,28 @@ public abstract class ApiControllerBase : ControllerBase
 {
     /// <summary>Resultado sem payload → 204 no sucesso, 400 com a lista de erros na falha.</summary>
     protected IActionResult Responder(ResultadoOperacao r)
-        => r.Sucesso ? NoContent() : BadRequest(new { erros = r.Erros });
+        => r.Sucesso ? NoContent() : BadRequest(CorpoErro(r.Erros));
 
     /// <summary>Resultado com payload → 200 no sucesso, 400 com a lista de erros na falha.</summary>
     protected IActionResult Responder<T>(ResultadoOperacao<T> r)
-        => r.Sucesso ? Ok(r.Valor) : BadRequest(new { erros = r.Erros });
+        => r.Sucesso ? Ok(r.Valor) : BadRequest(CorpoErro(r.Erros));
+
+    /// <summary>
+    /// Corpo padrão de erro da API.
+    ///
+    /// <c>erros</c> leva o código e os argumentos — é o contrato: o cliente traduz.
+    /// <c>mensagens</c> repete o texto padrão em português, para clientes antigos e
+    /// para códigos que o cliente ainda não conheça. Sem ele, um app desatualizado
+    /// mostraria o código cru.
+    /// </summary>
+    private static object CorpoErro(IReadOnlyList<ErroOperacao> erros) => new
+    {
+        erros = erros.Select(e => new
+        {
+            codigo = e.Externo ? null : e.Codigo,
+            args = e.Args,
+            texto = e.TextoPadrao,
+        }),
+        mensagens = erros.Select(e => e.TextoPadrao),
+    };
 }

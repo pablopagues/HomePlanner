@@ -50,36 +50,36 @@
 }
 
 @* ── Adicionar pedido ───────────────────────────────────────────────────── *@
-@if (!Mural.Ativo)
-{
-    <MudPaper Class="pa-3 mb-4" Elevation="0" Style="border:1px solid var(--mud-palette-lines-default); border-radius:10px;">
-        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center" Wrap="Wrap.Wrap">
-            <MudTextField @bind-Value="_novoDescricao" Label="@L["Compras_NovoPedido"]"
-                          Variant="Variant.Outlined" Margin="Margin.Dense"
-                          Immediate="true" Style="flex:1; min-width:160px;"
-                          OnKeyDown="@(async (e) => { if (e.Key == "Enter") await AdicionarPedido(); })" />
-            <MudTextField @bind-Value="_novoQuantidade" Label="@L["Compras_Quantidade"]"
-                          Variant="Variant.Outlined" Margin="Margin.Dense"
-                          Style="width:140px;"
-                          OnKeyDown="@(async (e) => { if (e.Key == "Enter") await AdicionarPedido(); })" />
-            @if (!_restrito && _membros.Count > 0)
-            {
-                <MudSelect T="string" @bind-Value="_novoSolicitante" Dense="true"
-                           Label="@L["Compras_Solicitante"]" Variant="Variant.Outlined"
-                           Margin="Margin.Dense" Style="min-width:160px; max-width:200px;">
-                    @foreach (var m in _membros)
-                    {
-                        <MudSelectItem T="string" Value="@m.UsuarioId">@m.Nome</MudSelectItem>
-                    }
-                </MudSelect>
-            }
-            <MudButton Variant="Variant.Filled" Color="Color.Primary"
-                       StartIcon="@Icons.Material.Filled.Add" OnClick="AdicionarPedido">
-                @L["Compras_AdicionarPedido"]
-            </MudButton>
-        </MudStack>
-    </MudPaper>
-}
+@* Única ação de escrita liberada no Mural: qualquer um da família anota um    *@
+@* item no tablet da cozinha (o resto da tela continua somente-leitura).       *@
+<MudPaper Class="pa-3 mb-4" Elevation="0" Style="border:1px solid var(--mud-palette-lines-default); border-radius:10px;">
+    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center" Wrap="Wrap.Wrap">
+        <MudTextField @bind-Value="_novoDescricao" Label="@L["Compras_NovoPedido"]"
+                      Variant="Variant.Outlined" Margin="@CampoMargem"
+                      Immediate="true" Style="flex:1; min-width:160px;"
+                      OnKeyDown="@(async (e) => { if (e.Key == "Enter") await AdicionarPedido(); })" />
+        <MudTextField @bind-Value="_novoQuantidade" Label="@L["Compras_Quantidade"]"
+                      Variant="Variant.Outlined" Margin="@CampoMargem"
+                      Style="width:140px;"
+                      OnKeyDown="@(async (e) => { if (e.Key == "Enter") await AdicionarPedido(); })" />
+        @if (!_restrito && _membros.Count > 0)
+        {
+            <MudSelect T="string" @bind-Value="_novoSolicitante" Dense="@(!Mural.Ativo)"
+                       Label="@L["Compras_Solicitante"]" Variant="Variant.Outlined"
+                       Margin="@CampoMargem" Style="min-width:160px; max-width:200px;">
+                @foreach (var m in _membros)
+                {
+                    <MudSelectItem T="string" Value="@m.UsuarioId">@m.Nome</MudSelectItem>
+                }
+            </MudSelect>
+        }
+        <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                   Size="@(Mural.Ativo ? Size.Large : Size.Medium)"
+                   StartIcon="@Icons.Material.Filled.Add" OnClick="AdicionarPedido">
+            @L["Compras_AdicionarPedido"]
+        </MudButton>
+    </MudStack>
+</MudPaper>
 
 @* ── Barra: agrupar por membro/loja + gerenciar lojas ───────────────────── *@
 @if (!Mural.Ativo)
@@ -306,6 +306,9 @@ else if (_lista is not null)
     private string? _novoQuantidade;
     private string? _novoSolicitante;
 
+    // No Mural os campos ficam maiores — dedo em tablet, não mouse.
+    private Margin CampoMargem => Mural.Ativo ? Margin.Normal : Margin.Dense;
+
     // Estado "já tenho" compartilhado — carregado/persistido no banco (por semana, tenant)
     private Dictionary<int, bool> _jaTenho = new();
 
@@ -435,10 +438,13 @@ else if (_lista is not null)
         {
             _novoDescricao = null;
             _novoQuantidade = null;
+            // No Mural o item cai lá embaixo, no grupo do membro: confirma na tela.
+            if (Mural.Ativo)
+                Snackbar.Add(L["Msg_SalvoOk"], Severity.Success);
             await RecarregarPedidos();
         }
         else
-            Snackbar.Add(string.Join(", ", res.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(res.Erros), Severity.Error);
     }
 
     private async Task TrocarComprado(PedidoCompraDTO pedido, bool valor)
@@ -447,7 +453,7 @@ else if (_lista is not null)
         if (res.Sucesso)
             await RecarregarPedidos();
         else
-            Snackbar.Add(string.Join(", ", res.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(res.Erros), Severity.Error);
     }
 
     private async Task ConfirmarExclusao(PedidoCompraDTO pedido)
@@ -466,7 +472,7 @@ else if (_lista is not null)
             await RecarregarPedidos();
         }
         else
-            Snackbar.Add(string.Join(", ", res.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(res.Erros), Severity.Error);
     }
 
     private async Task AbrirAgrupar(ItemComprasDTO item)

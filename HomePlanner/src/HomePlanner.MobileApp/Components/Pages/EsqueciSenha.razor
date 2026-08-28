@@ -1,0 +1,65 @@
+@page "/esqueci-senha"
+@layout SemMenuLayout
+@using HomePlanner.MobileApp.Services
+@inject AuthApi Auth
+@inject SessaoAtual Sessao
+@inject IStringLocalizer<SharedResource> L
+@inject NavigationManager Nav
+
+<div class="auth">
+    <h1>@L["Auth_EsqueciSenha"]</h1>
+
+    @if (enviado)
+    {
+        @* Mensagem propositalmente igual exista ou não a conta — a API responde igual
+           nos dois casos, e a tela não pode entregar o que a API esconde. *@
+        <p class="sub">@L["Auth_EsqueciEnviado"]</p>
+        <button class="primario" @onclick='() => Nav.NavigateTo("/")'>@L["Auth_VoltarLogin"]</button>
+    }
+    else
+    {
+        <p class="sub">@L["Auth_EsqueciSub"]</p>
+
+        <label>@L["Auth_Servidor"]</label>
+        <input @bind="baseUrl" />
+
+        <label>@L["Auth_Email"]</label>
+        <input @bind="email" type="email" inputmode="email" placeholder="voce@exemplo.com" />
+
+        <button class="primario" @onclick="EnviarAsync" disabled="@ocupado">
+            @(ocupado ? L["Auth_Enviando"] : L["Auth_EnviarLink"])
+        </button>
+        <button class="link" @onclick='() => Nav.NavigateTo("/")'>@L["Auth_VoltarLogin"]</button>
+
+        @if (mensagem is not null) { <p class="erro">@mensagem</p> }
+    }
+</div>
+
+@code {
+    private string baseUrl = SessaoAtual.BaseUrlPadrao;
+    private string email = string.Empty;
+    private bool ocupado, enviado;
+    private string? mensagem;
+
+    protected override void OnInitialized() => baseUrl = Sessao.BaseUrl;
+
+    private async Task EnviarAsync()
+    {
+        mensagem = null;
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            mensagem = L["Auth_InformeEmail"];
+            return;
+        }
+
+        ocupado = true;
+        Sessao.SalvarBaseUrl(baseUrl);
+        var erro = await Auth.EsqueciSenhaAsync(email.Trim());
+        ocupado = false;
+
+        // Só erro de transporte aparece; a API nunca diferencia e-mail existente de inexistente.
+        if (erro is not null) { mensagem = erro; return; }
+        enviado = true;
+    }
+}

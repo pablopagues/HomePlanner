@@ -53,14 +53,14 @@ public class ConfiguracaoFamiliaService : IConfiguracaoFamiliaService
         await _tenantAccessor.GarantirHidratadoAsync();
         var tenantId = _tenantContext.TenantId;
         if (tenantId is null)
-            return ResultadoOperacao.Falha("Sessão inválida. Faça login novamente.");
+            return ResultadoOperacao.Falha(ErrosApp.SessaoInvalida);
 
         if (dto.TamanhoFamiliaPadrao < 1)
-            return ResultadoOperacao.Falha("O tamanho da família deve ser ao menos 1.");
+            return ResultadoOperacao.Falha(ErrosApp.TamanhoFamiliaMinimo);
         if (dto.TiposRefeicaoAtivos.Count == 0)
-            return ResultadoOperacao.Falha("Selecione ao menos um tipo de refeição.");
+            return ResultadoOperacao.Falha(ErrosApp.SelecioneTipoRefeicao);
         if (dto.MinutosAntecedenciaLembrete is < 0 or > 1440)
-            return ResultadoOperacao.Falha("A antecedência do lembrete deve estar entre 0 e 1440 minutos.");
+            return ResultadoOperacao.Falha(ErrosApp.AntecedenciaInvalida);
 
         var config = await _db.ConfiguracoesFamilia
             .FirstOrDefaultAsync(c => c.TenantId == tenantId.Value, ct);

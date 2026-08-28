@@ -1,31 +1,32 @@
 @page "/feedback"
 @using HomePlanner.MobileApp.Services
 @inject ApiClient Api
+@inject IStringLocalizer<SharedResource> L
 @inject NavigationManager Nav
 
-<button class="link" style="text-align:left;width:auto" @onclick='() => Nav.NavigateTo("/perfil")'>‹ Voltar</button>
-<div class="barra-topo"><h2>Enviar feedback</h2></div>
+<button class="link" style="text-align:left;width:auto" @onclick='() => Nav.NavigateTo("/perfil")'>‹ @L["Btn_Voltar"]</button>
+<div class="barra-topo"><h2>@L["Fb_Titulo"]</h2></div>
 
 @if (enviado)
 {
-    <p class="muted">Obrigado! Sua mensagem foi enviada.</p>
-    <button class="link" @onclick='() => Nav.NavigateTo("/cardapio")'>Voltar ao início</button>
+    <p class="muted">@L["App_ObrigadoFeedback"]</p>
+    <button class="link" @onclick='() => Nav.NavigateTo("/cardapio")'>@L["App_VoltarInicio"]</button>
 }
 else
 {
-    <label>Tipo</label>
+    <label>@L["Fb_Tipo"]</label>
     <select @bind="_tipo">
-        <option value="Sugestao">Sugestão</option>
-        <option value="Bug">Problema (bug)</option>
-        <option value="Elogio">Elogio</option>
-        <option value="Outro">Outro</option>
+        <option value="Sugestao">@L["App_TipoSugestao"]</option>
+        <option value="Bug">@L["App_TipoBug"]</option>
+        <option value="Elogio">@L["App_TipoElogio"]</option>
+        <option value="Outro">@L["App_TipoOutro"]</option>
     </select>
 
-    <label>Mensagem</label>
-    <textarea rows="5" @bind="_mensagem" placeholder="Conte pra gente..."></textarea>
+    <label>@L["Fb_Mensagem"]</label>
+    <textarea rows="5" @bind="_mensagem" placeholder="@L["App_FeedbackPlaceholder"]"></textarea>
 
     <button class="btn-acao" @onclick="EnviarAsync" disabled="@ocupado">
-        @(ocupado ? "Enviando..." : "Enviar")
+        @(ocupado ? L["Fb_Enviando"] : L["Fb_Enviar"])
     </button>
     @if (erro is not null) { <p class="erro">@erro</p> }
 }
@@ -39,7 +40,7 @@ else
     private async Task EnviarAsync()
     {
         erro = null;
-        if (_mensagem.Trim().Length < 10) { erro = "A mensagem deve ter ao menos 10 caracteres."; return; }
+        if (_mensagem.Trim().Length < 10) { erro = L["Fb_ErroMin"]; return; }
 
         ocupado = true;
         erro = await Api.EnviarFeedbackAsync(new FeedbackRequest { Tipo = _tipo, Mensagem = _mensagem.Trim() });

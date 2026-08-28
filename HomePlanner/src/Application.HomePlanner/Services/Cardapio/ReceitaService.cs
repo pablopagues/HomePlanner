@@ -48,7 +48,7 @@ public class ReceitaService : IReceitaService
 
         var dto = await _repo.ObterDetalheAsync(id, ct);
         if (dto is null)
-            return ResultadoOperacao<ReceitaDetalheDTO>.Falha("Receita não encontrada.");
+            return ResultadoOperacao<ReceitaDetalheDTO>.Falha(ErrosApp.ReceitaNaoEncontrada);
 
         // Prato composto: monta a lista de ingredientes do prato inteiro (própria + componentes).
         if (dto.Componentes.Count > 0)
@@ -112,10 +112,10 @@ public class ReceitaService : IReceitaService
 
         dto.Nome = dto.Nome?.Trim() ?? string.Empty;
         if (dto.Nome.Length < 2)
-            return ResultadoOperacao<int>.Falha("Nome da receita deve ter pelo menos 2 caracteres.");
+            return ResultadoOperacao<int>.Falha(ErrosApp.NomeReceitaCurto);
 
         if (dto.NumeroPorcoesBase < 1)
-            return ResultadoOperacao<int>.Falha("Número de porções deve ser ao menos 1.");
+            return ResultadoOperacao<int>.Falha(ErrosApp.PorcoesMinimo);
 
         Receita entidade;
         if (dto.Id == 0)
@@ -136,9 +136,9 @@ public class ReceitaService : IReceitaService
             foreach (var compId in dto.Componentes.Select(c => c.ReceitaComponenteId).Distinct())
             {
                 if (compId == entidade.Id && entidade.Id != 0)
-                    return ResultadoOperacao<int>.Falha("Uma receita não pode ser componente de si mesma.");
+                    return ResultadoOperacao<int>.Falha(ErrosApp.ReceitaComponenteDeSi);
                 if (entidade.Id != 0 && ExpansorReceita.CriariaCiclo(grafo, entidade.Id, compId))
-                    return ResultadoOperacao<int>.Falha("Esse componente criaria um ciclo (ele já usa este prato).");
+                    return ResultadoOperacao<int>.Falha(ErrosApp.CicloComponente);
             }
         }
 
@@ -158,14 +158,12 @@ public class ReceitaService : IReceitaService
 
         var entidade = await _repo.ObterEntidadeComIngredientesAsync(id, ct);
         if (entidade is null)
-            return ResultadoOperacao.Falha("Receita não encontrada.");
+            return ResultadoOperacao.Falha(ErrosApp.ReceitaNaoEncontrada);
 
         // Bloqueia se a receita ainda é usada como componente de outro prato.
         var pais = await _repo.ObterPaisQueUsamAsync(id, ct);
         if (pais.Count > 0)
-            return ResultadoOperacao.Falha(
-                $"Esta receita é usada como componente em: {string.Join(", ", pais)}. " +
-                "Remova-a desses pratos antes de excluir.");
+            return ResultadoOperacao.Falha(ErrosApp.ReceitaUsadaComoComponente(string.Join(", ", pais)));
 
         entidade.IsDeleted = true;
         await _repo.SalvarAsync(ct);
@@ -178,7 +176,7 @@ public class ReceitaService : IReceitaService
 
         var original = await _repo.ObterEntidadeComIngredientesAsync(id, ct);
         if (original is null)
-            return ResultadoOperacao<int>.Falha("Receita não encontrada.");
+            return ResultadoOperacao<int>.Falha(ErrosApp.ReceitaNaoEncontrada);
 
         var copia = new Receita
         {

@@ -121,7 +121,7 @@ public class AssinaturaService : IAssinaturaService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Falha ao criar Checkout Session.");
-            return ResultadoOperacao<StripeRedirectDTO>.Falha("Não foi possível iniciar o checkout. Tente novamente.");
+            return ResultadoOperacao<StripeRedirectDTO>.Falha(ErrosApp.CheckoutFalhou);
         }
     }
 
@@ -132,8 +132,7 @@ public class AssinaturaService : IAssinaturaService
 
         var assinatura = await _repo.ObterMinhaAssinaturaAsync(ct);
         if (assinatura is null || string.IsNullOrWhiteSpace(assinatura.StripeCustomerId))
-            return ResultadoOperacao<StripeRedirectDTO>.Falha(
-                "Você ainda não tem uma assinatura ativa. Contrate um plano primeiro.");
+            return ResultadoOperacao<StripeRedirectDTO>.Falha(ErrosApp.SemAssinaturaAtiva);
 
         try
         {
@@ -146,7 +145,7 @@ public class AssinaturaService : IAssinaturaService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Falha ao abrir Customer Portal.");
-            return ResultadoOperacao<StripeRedirectDTO>.Falha("Não foi possível abrir o gerenciamento. Tente novamente.");
+            return ResultadoOperacao<StripeRedirectDTO>.Falha(ErrosApp.PortalFalhou);
         }
     }
 

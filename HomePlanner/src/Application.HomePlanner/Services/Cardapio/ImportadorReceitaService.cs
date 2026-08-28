@@ -84,11 +84,11 @@ public class ImportadorReceitaService : IImportadorReceitaService
         string url, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(url))
-            return ResultadoOperacao<ReceitaImportadaPreviewDTO>.Falha("URL não informada.");
+            return ResultadoOperacao<ReceitaImportadaPreviewDTO>.Falha(ErrosApp.UrlNaoInformada);
 
         if (!Uri.TryCreate(url.Trim(), UriKind.Absolute, out var uri)
             || (uri.Scheme != "http" && uri.Scheme != "https"))
-            return ResultadoOperacao<ReceitaImportadaPreviewDTO>.Falha("URL inválida.");
+            return ResultadoOperacao<ReceitaImportadaPreviewDTO>.Falha(ErrosApp.UrlInvalida);
 
         string html;
         try
@@ -100,17 +100,14 @@ public class ImportadorReceitaService : IImportadorReceitaService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Falha ao buscar URL {Url}", url);
-            return ResultadoOperacao<ReceitaImportadaPreviewDTO>.Falha(
-                $"Não foi possível acessar a URL: {ex.Message}");
+            return ResultadoOperacao<ReceitaImportadaPreviewDTO>.Falha(ErrosApp.UrlInacessivel(ex.Message));
         }
 
         var preview = ExtrairDeJsonLd(html, url.Trim())
                    ?? ExtrairHeuristico(html, url.Trim());
 
         if (preview is null)
-            return ResultadoOperacao<ReceitaImportadaPreviewDTO>.Falha(
-                "Não foi possível identificar uma receita nesta página. " +
-                "Verifique se o site usa o formato schema.org/Recipe.");
+            return ResultadoOperacao<ReceitaImportadaPreviewDTO>.Falha(ErrosApp.ReceitaNaoIdentificada);
 
         return ResultadoOperacao<ReceitaImportadaPreviewDTO>.Ok(preview);
     }

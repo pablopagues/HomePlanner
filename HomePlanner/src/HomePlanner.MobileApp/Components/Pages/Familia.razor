@@ -1,16 +1,17 @@
 @page "/familia"
 @using HomePlanner.MobileApp.Services
 @inject ApiClient Api
+@inject IStringLocalizer<SharedResource> L
 
-<div class="barra-topo"><h2>Família</h2></div>
+<div class="barra-topo"><h2>@L["Fam_Titulo"]</h2></div>
 
-@if (carregando) { <p class="muted">Carregando...</p> }
+@if (carregando) { <p class="muted">@L["Btn_Carregando"]</p> }
 else if (erro is not null) { <p class="erro">@erro</p> }
 else
 {
     @if (_resumo is not null)
     {
-        <p class="muted">@_resumo.MembrosAtivos de @_resumo.LimiteMembros assentos usados</p>
+        <p class="muted">@string.Format(L["Fam_Uso"], _resumo.MembrosAtivos, _resumo.LimiteMembros)</p>
     }
 
     @foreach (var m in _membros)
@@ -22,20 +23,45 @@ else
             </div>
             <div class="muted">@m.Email</div>
             <div class="muted">
-                @(m.Ativo ? "Ativo" : "Inativo")
-                @(m.SenhaDefinida ? "" : " · convite pendente")
+                @(m.Ativo ? L["Fam_Ativo"] : L["App_Inativo"])
+                @(m.SenhaDefinida ? "" : $" · {L["Fam_Pendente"]}")
+                @if (!m.SenhaDefinida && m.UltimoConviteEnviadoEm is not null)
+                {
+                    @($" · enviado {TempoDesde(m.UltimoConviteEnviadoEm.Value)}")
+                }
             </div>
 
             @if (m.Papel != "Owner")
             {
                 <div class="linha" style="gap:.4rem;margin-top:.5rem;flex-wrap:wrap">
+                    @* Convite pendente: reenviar e corrigir os dados são as ações úteis aqui. *@
+                    @if (!m.SenhaDefinida && m.Ativo)
+                    {
+                        <button class="link" style="width:auto" disabled="@(_reenviandoId == m.UsuarioId)"
+                                @onclick="() => ReenviarConvite(m)">
+                            @(_reenviandoId == m.UsuarioId ? L["App_Reenviando"] : L["Fam_ReenviarConvite"])
+                        </button>
+                    }
+                    @if (!m.SenhaDefinida)
+                    {
+                        <button class="link" style="width:auto" @onclick="() => AbrirEdicao(m)">@L["Btn_Editar"]</button>
+                    }
                     <button class="link" style="width:auto" @onclick="() => AlterarPapel(m)">
-                        Tornar @(m.Papel == "Filho" ? "Membro" : "Filho")
+                        @(m.Papel == "Filho" ? L["Fam_TornarPai"] : L["Fam_TornarFilho"])
                     </button>
                     <button class="link" style="width:auto" @onclick="() => DefinirAtivo(m, !m.Ativo)">
-                        @(m.Ativo ? "Desativar" : "Ativar")
+                        @(m.Ativo ? L["Fam_Desativar"] : L["Fam_Reativar"])
                     </button>
-                    <button class="link" style="width:auto;color:var(--hp-danger)" @onclick="() => Remover(m)">Remover</button>
+                    <button class="link" style="width:auto;color:var(--hp-danger)" @onclick="() => Remover(m)">@L["Fam_Remover"]</button>
+                </div>
+            }
+
+            @* Servidor sem SMTP: o link precisa ser repassado à mão. *@
+            @if (_linkConvite?.UsuarioId == m.UsuarioId && _linkConvite.LinkConvite is not null)
+            {
+                <div class="muted" style="margin-top:.5rem;word-break:break-all">
+                    @string.Format(L["App_LinkConviteManual"], m.Nome)
+                    <div>@_linkConvite.LinkConvite</div>
                 </div>
             }
         </div>
@@ -48,21 +74,40 @@ else
 {
     <div class="modal-fundo" @onclick="() => _modalAberto = false">
         <div class="modal" @onclick:stopPropagation="true">
-            <h3>Adicionar membro</h3>
-            <label>Nome</label>
+            <h3>@L["Fam_Adicionar"]</h3>
+            <label>@L["Fam_Nome"]</label>
             <input @bind="_novo.Nome" />
-            <label>E-mail</label>
+            <label>@L["Fam_Email"]</label>
             <input type="email" @bind="_novo.Email" />
-            <label>Papel</label>
+            <label>@L["Fam_Papel"]</label>
             <select @bind="_novo.Papel">
-                <option value="Membro">Pai/mãe (Membro)</option>
-                <option value="Filho">Filho</option>
+                <option value="Membro">@L["Fam_PapelPai"]</option>
+                <option value="Filho">@L["Fam_PapelFilho"]</option>
             </select>
             <button class="btn-acao" @onclick="AdicionarAsync" disabled="@_salvando">
-                @(_salvando ? "Enviando convite..." : "Adicionar e convidar")
+                @(_salvando ? L["App_EnviandoConvite"] : L["Fam_EnviarConvite"])
             </button>
-            <button class="link" @onclick="() => _modalAberto = false">Cancelar</button>
+            <button class="link" @onclick="() => _modalAberto = false">@L["Btn_Cancelar"]</button>
             @if (_erroModal is not null) { <p class="erro">@_erroModal</p> }
+        </div>
+    </div>
+}
+
+@if (_editando is not null)
+{
+    <div class="modal-fundo" @onclick="FecharEdicao">
+        <div class="modal" @onclick:stopPropagation="true">
+            <h3>@L["Fam_EditarMembro"]</h3>
+            <label>@L["Fam_Nome"]</label>
+            <input @bind="_edit.Nome" />
+            <label>@L["Fam_Email"]</label>
+            <input type="email" @bind="_edit.Email" />
+            <p class="muted">@L["App_TrocarEmailAviso"]</p>
+            <button class="btn-acao" @onclick="SalvarEdicaoAsync" disabled="@_salvando">
+                @(_salvando ? L["Btn_Salvando"] : L["Btn_Salvar"])
+            </button>
+            <button class="link" @onclick="FecharEdicao">@L["Btn_Cancelar"]</button>
+            @if (_erroEdicao is not null) { <p class="erro">@_erroEdicao</p> }
         </div>
     </div>
 }
@@ -76,6 +121,13 @@ else
     private bool _modalAberto, _salvando;
     private NovoMembroRequest _novo = new();
     private string? _erroModal;
+
+    private MembroFamiliaDetalheDTO? _editando;
+    private EditarMembroRequest _edit = new();
+    private string? _erroEdicao;
+
+    private string? _reenviandoId;
+    private ConviteMembroResultadoDTO? _linkConvite;
 
     protected override async Task OnInitializedAsync() => await CarregarAsync();
 
@@ -95,7 +147,7 @@ else
         _erroModal = null;
         if (string.IsNullOrWhiteSpace(_novo.Nome) || string.IsNullOrWhiteSpace(_novo.Email))
         {
-            _erroModal = "Informe nome e e-mail.";
+            _erroModal = L["App_InformeNomeEmail"];
             return;
         }
         _salvando = true;
@@ -105,6 +157,60 @@ else
         _novo = new NovoMembroRequest();
         _modalAberto = false;
         await CarregarAsync();
+    }
+
+    private async Task ReenviarConvite(MembroFamiliaDetalheDTO m)
+    {
+        _reenviandoId = m.UsuarioId;
+        _linkConvite = null;
+        erro = null;
+        var (convite, err) = await Api.ReenviarConviteAsync(m.UsuarioId);
+        _reenviandoId = null;
+
+        if (err is not null) { erro = err; return; }
+        // Sem SMTP o servidor devolve o link em vez de enviar o e-mail.
+        if (convite is not null && !convite.EmailEnviado) _linkConvite = convite;
+
+        await CarregarAsync();
+    }
+
+    private void AbrirEdicao(MembroFamiliaDetalheDTO m)
+    {
+        _editando = m;
+        _edit = new EditarMembroRequest { Nome = m.Nome, Email = m.Email };
+        _erroEdicao = null;
+    }
+
+    private void FecharEdicao() => _editando = null;
+
+    private async Task SalvarEdicaoAsync()
+    {
+        if (_editando is null) return;
+
+        _erroEdicao = null;
+        if (string.IsNullOrWhiteSpace(_edit.Nome) || string.IsNullOrWhiteSpace(_edit.Email))
+        {
+            _erroEdicao = L["App_InformeNomeEmail"];
+            return;
+        }
+
+        _salvando = true;
+        _erroEdicao = await Api.EditarMembroAsync(_editando.UsuarioId, _edit);
+        _salvando = false;
+        if (_erroEdicao is not null) return;
+
+        _editando = null;
+        await CarregarAsync();
+    }
+
+    /// <summary>Tempo decorrido em texto, calculado em UTC (independe do fuso do aparelho).</summary>
+    private string TempoDesde(DateTime utc)
+    {
+        var decorrido = DateTime.UtcNow - utc;
+        if (decorrido < TimeSpan.FromMinutes(1)) return L["Fam_ConviteAgora"];
+        if (decorrido < TimeSpan.FromHours(1)) return string.Format(L["Fam_ConviteHaMinutos"], (int)decorrido.TotalMinutes);
+        if (decorrido < TimeSpan.FromDays(1)) return string.Format(L["Fam_ConviteHaHoras"], (int)decorrido.TotalHours);
+        return string.Format(L["Fam_ConviteHaDias"], (int)decorrido.TotalDays);
     }
 
     private async Task AlterarPapel(MembroFamiliaDetalheDTO m)

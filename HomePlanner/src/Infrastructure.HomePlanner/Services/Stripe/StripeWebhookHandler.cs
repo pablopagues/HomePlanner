@@ -1,3 +1,4 @@
+using Application.HomePlanner.Middleware;
 using Application.HomePlanner.Repositories.Assinatura;
 using Domain.HomePlanner.Models.Enums;
 using Domain.HomePlanner.Models.SaaS.Options;
@@ -14,15 +15,18 @@ namespace Infrastructure.HomePlanner.Services.Stripe;
 public class StripeWebhookHandler : IStripeWebhookHandler
 {
     private readonly IAssinaturaRepository _repo;
+    private readonly IAssinaturaStatusReader _statusReader;
     private readonly StripeOptions _options;
     private readonly ILogger<StripeWebhookHandler> _logger;
 
     public StripeWebhookHandler(
         IAssinaturaRepository repo,
+        IAssinaturaStatusReader statusReader,
         IOptions<StripeOptions> options,
         ILogger<StripeWebhookHandler> logger)
     {
         _repo = repo;
+        _statusReader = statusReader;
         _options = options.Value;
         _logger = logger;
     }
@@ -87,6 +91,7 @@ public class StripeWebhookHandler : IStripeWebhookHandler
 
         assinatura.DataModificacao = DateTime.UtcNow;
         await _repo.SalvarAsync(ct);
+        _statusReader.Invalidar(assinatura.TenantId);
 
         _logger.LogInformation("Assinatura atualizada via webhook: tenant {TenantId}, plano {Plano}, status {Status}.",
             assinatura.TenantId, assinatura.Plano, assinatura.Status);
@@ -106,6 +111,7 @@ public class StripeWebhookHandler : IStripeWebhookHandler
         assinatura.DataProximaCobranca = null;
         assinatura.DataModificacao     = DateTime.UtcNow;
         await _repo.SalvarAsync(ct);
+        _statusReader.Invalidar(assinatura.TenantId);
 
         _logger.LogInformation("Assinatura cancelada (subscription.deleted): tenant {TenantId}.", assinatura.TenantId);
     }
@@ -122,6 +128,7 @@ public class StripeWebhookHandler : IStripeWebhookHandler
 
         assinatura.DataModificacao = DateTime.UtcNow;
         await _repo.SalvarAsync(ct);
+        _statusReader.Invalidar(assinatura.TenantId);
 
         _logger.LogInformation("Invoice paga: tenant {TenantId}, valor {Total}.",
             assinatura.TenantId, invoice.AmountPaid / 100m);
@@ -137,6 +144,7 @@ public class StripeWebhookHandler : IStripeWebhookHandler
         assinatura.Status          = StatusAssinatura.Suspenso;
         assinatura.DataModificacao = DateTime.UtcNow;
         await _repo.SalvarAsync(ct);
+        _statusReader.Invalidar(assinatura.TenantId);
 
         _logger.LogWarning("Invoice falhou: tenant {TenantId} marcado como suspenso.", assinatura.TenantId);
     }

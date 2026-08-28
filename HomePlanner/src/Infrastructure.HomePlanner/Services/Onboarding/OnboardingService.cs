@@ -52,12 +52,12 @@ public class OnboardingService : IOnboardingService
         await _tenantAccessor.GarantirHidratadoAsync();
         var tenantId = _tenantContext.TenantId;
         if (tenantId is null)
-            return ResultadoOperacao.Falha("Sessão inválida. Faça login novamente.");
+            return ResultadoOperacao.Falha(ErrosApp.SessaoInvalida);
 
         if (dto.TamanhoFamiliaPadrao < 1)
-            return ResultadoOperacao.Falha("O tamanho da família deve ser ao menos 1.");
+            return ResultadoOperacao.Falha(ErrosApp.TamanhoFamiliaMinimo);
         if (dto.TiposRefeicaoAtivos.Count == 0)
-            return ResultadoOperacao.Falha("Selecione ao menos um tipo de refeição.");
+            return ResultadoOperacao.Falha(ErrosApp.SelecioneTipoRefeicao);
 
         // 1. Cria/atualiza ConfiguracaoFamilia
         var config = await _db.ConfiguracoesFamilia

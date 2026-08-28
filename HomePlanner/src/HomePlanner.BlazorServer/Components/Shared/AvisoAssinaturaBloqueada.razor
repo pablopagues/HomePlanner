@@ -1,0 +1,40 @@
+@inject IStringLocalizer<SharedResource> L
+@inject PublicLanguageService Lang
+
+@* Aviso de assinatura bloqueada. Usado no topo de todas as telas (MainLayout) e na
+   página dedicada de bloqueio — por isso a ação é opcional. *@
+<MudAlert Severity="Severity.Warning" Dense="@Compacto" Class="mb-4">
+    <MudText Typo="Typo.subtitle2">@Titulo</MudText>
+    <MudText Typo="Typo.body2" Class="mt-1">@Texto</MudText>
+    @if (PodeContratar && MostrarAcao)
+    {
+        <MudButton Href="@Lang.U("/assinatura")" Variant="Variant.Filled" Color="Color.Primary"
+                   Size="Size.Small" Class="mt-3" StartIcon="@Icons.Material.Filled.CreditCard">
+            @L["Assin_BloqAcao"]
+        </MudButton>
+    }
+</MudAlert>
+
+@code {
+    [Parameter, EditorRequired] public MotivoBloqueio Motivo { get; set; }
+
+    /// <summary>Owner: pode escolher um plano. Membro/Filho: só pode avisar o responsável.</summary>
+    [Parameter] public bool PodeContratar { get; set; }
+
+    /// <summary>Falso quando o usuário já está na tela de planos — o botão seria redundante.</summary>
+    [Parameter] public bool MostrarAcao { get; set; } = true;
+
+    [Parameter] public bool Compacto { get; set; }
+
+    private string Titulo => Motivo switch
+    {
+        MotivoBloqueio.TrialExpirado     => L["Assin_BloqTrialTitulo"],
+        MotivoBloqueio.PagamentoPendente => L["Assin_BloqPagamentoTitulo"],
+        MotivoBloqueio.Cancelado         => L["Assin_BloqCanceladoTitulo"],
+        _                                => string.Empty,
+    };
+
+    private string Texto => PodeContratar
+        ? L["Assin_BloqTexto"]
+        : L["Assin_BloqSemPermissao"];
+}

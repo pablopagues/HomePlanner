@@ -14,6 +14,10 @@ public class Usuario : IdentityUser<string>, ITenantEntity, IDeletableEntity
     public DateTime DataCriacao { get; set; }
     public DateTime? UltimoLogin { get; set; }
 
+    /// <summary>Quando o convite de definição de senha foi enviado pela última vez (UTC).
+    /// Usado para exibir o histórico ao Owner e para limitar reenvios seguidos.</summary>
+    public DateTime? UltimoConviteEnviadoEm { get; set; }
+
     // Foto de perfil (avatar) — armazenada no próprio banco
     public byte[]? Foto { get; set; }
     public string? FotoContentType { get; set; }

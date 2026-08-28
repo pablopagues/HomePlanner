@@ -25,6 +25,9 @@ public class SessaoAtual
     public string NomeCompleto { get; private set; } = string.Empty;
     public bool EhOwner { get; private set; }
 
+    /// <summary>Falso → o app precisa levar o usuário ao onboarding antes de usar o resto.</summary>
+    public bool OnboardingCompleto { get; private set; }
+
     /// <summary>MfaToken pendente entre o passo de senha e a tela de 2FA.</summary>
     public string? MfaTokenPendente { get; set; }
 
@@ -46,7 +49,19 @@ public class SessaoAtual
         RefreshToken = tokens.RefreshToken;
         NomeCompleto = tokens.NomeCompleto;
         EhOwner = tokens.EhOwner;
+        OnboardingCompleto = tokens.OnboardingCompleto;
         await SecureStorage.Default.SetAsync(ChaveRefresh, tokens.RefreshToken);
+        Alterou?.Invoke();
+    }
+
+    /// <summary>
+    /// Marca o onboarding como concluído sem esperar um novo login — o valor só é
+    /// recarregado quando os tokens são reemitidos.
+    /// </summary>
+    public void MarcarOnboardingConcluido()
+    {
+        if (OnboardingCompleto) return;
+        OnboardingCompleto = true;
         Alterou?.Invoke();
     }
 
@@ -60,6 +75,7 @@ public class SessaoAtual
         RefreshToken = null;
         NomeCompleto = string.Empty;
         EhOwner = false;
+        OnboardingCompleto = false;
         SecureStorage.Default.Remove(ChaveRefresh);
         Alterou?.Invoke();
     }

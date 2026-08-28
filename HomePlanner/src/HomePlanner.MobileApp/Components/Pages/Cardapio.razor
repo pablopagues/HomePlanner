@@ -1,15 +1,16 @@
 @page "/cardapio"
 @using HomePlanner.MobileApp.Services
 @inject ApiClient Api
+@inject IStringLocalizer<SharedResource> L
 
 <div class="barra-topo">
     <button class="menu-btn" style="color:var(--hp-primary)" @onclick="() => MudarSemana(-7)">‹</button>
     <h2>@_segunda.ToString("dd/MM") – @_segunda.AddDays(6).ToString("dd/MM")</h2>
     <button class="menu-btn" style="color:var(--hp-primary)" @onclick="() => MudarSemana(7)">›</button>
 </div>
-<button class="link" @onclick="IrParaHoje">Ir para esta semana</button>
+<button class="link" @onclick="IrParaHoje">@L["App_IrEstaSemana"]</button>
 
-@if (carregando) { <p class="muted">Carregando...</p> }
+@if (carregando) { <p class="muted">@L["Btn_Carregando"]</p> }
 else if (erro is not null) { <p class="erro">@erro</p> }
 else
 {
@@ -48,7 +49,7 @@ else
 
             <input placeholder="Buscar receita..." @bind="_busca" @bind:event="oninput" @onkeyup="BuscarAsync" />
 
-            @if (_buscando) { <p class="muted">Buscando...</p> }
+            @if (_buscando) { <p class="muted">@L["App_Buscando"]</p> }
             else
             {
                 <div style="max-height:220px;overflow-y:auto">
@@ -61,15 +62,15 @@ else
                 </div>
             }
 
-            <label>Porções</label>
+            <label>@L["Receita_Porcoes"]</label>
             <input type="number" min="1" @bind="_porcoes" />
 
             <div class="linha" style="margin-top:.8rem">
                 @if (_selReceitaAtual.HasValue)
                 {
-                    <button class="link" style="color:var(--hp-danger)" @onclick="RemoverAsync">Remover receita</button>
+                    <button class="link" style="color:var(--hp-danger)" @onclick="RemoverAsync">@L["App_RemoverReceita"]</button>
                 }
-                <button class="link" @onclick="Fechar">Cancelar</button>
+                <button class="link" @onclick="Fechar">@L["Btn_Cancelar"]</button>
             </div>
             @if (_erroModal is not null) { <p class="erro">@_erroModal</p> }
         </div>

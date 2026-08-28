@@ -1,5 +1,6 @@
 using Application.HomePlanner.DTOs.Auth;
 using Application.HomePlanner.Services.Auth;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,8 +14,13 @@ namespace HomePlanner.BlazorServer.Api;
 public class AuthController : ControllerBase
 {
     private readonly IAuthTokenService _auth;
+    private readonly ISenhaService _senha;
 
-    public AuthController(IAuthTokenService auth) => _auth = auth;
+    public AuthController(IAuthTokenService auth, ISenhaService senha)
+    {
+        _auth = auth;
+        _senha = senha;
+    }
 
     /// <summary>
     /// Valida credenciais. Sem 2FA: devolve os tokens. Com 2FA: devolve requer2FA + mfaToken
@@ -49,5 +55,34 @@ public class AuthController : ControllerBase
     {
         await _auth.RevogarAsync(dto.RefreshToken, ct);
         return NoContent();
+    }
+
+    /// <summary>
+    /// Envia o e-mail com o link de redefinição de senha. Responde 204 sempre, exista
+    /// o e-mail ou não — distinguir os casos revelaria quem tem conta.
+    /// </summary>
+    [HttpPost("esqueci-senha")]
+    public async Task<IActionResult> EsqueciSenha([FromBody] EsqueciSenhaDTO dto, CancellationToken ct)
+    {
+        var baseUrl = $"{Request.Scheme}://{Request.Host}";
+        await _senha.SolicitarResetAsync(dto.Email, baseUrl, ct);
+        return NoContent();
+    }
+
+    /// <summary>Redefine a senha usando o token recebido por e-mail.</summary>
+    [HttpPost("redefinir-senha")]
+    public async Task<IActionResult> RedefinirSenha([FromBody] RedefinirSenhaDTO dto, CancellationToken ct)
+    {
+        var r = await _senha.RedefinirAsync(dto.UsuarioId, dto.Token, dto.NovaSenha, ct);
+        return r.Sucesso ? NoContent() : BadRequest(new { erros = r.Erros });
+    }
+
+    /// <summary>Troca a senha do usuário autenticado, exigindo a senha atual.</summary>
+    [HttpPost("alterar-senha")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> AlterarSenha([FromBody] AlterarSenhaDTO dto, CancellationToken ct)
+    {
+        var r = await _senha.AlterarAsync(dto.SenhaAtual, dto.NovaSenha, ct);
+        return r.Sucesso ? NoContent() : BadRequest(new { erros = r.Erros });
     }
 }

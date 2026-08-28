@@ -6,6 +6,7 @@
 @inject ICotaImportacaoService Cota
 @inject PublicLanguageService Lang
 @inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResource> L
 
 <MudDialog>
     <TitleContent>
@@ -260,7 +261,7 @@
         var existente = await ResolverIngredienteExistente(nomeNovo);
         if (existente is not null) return (existente.Id, existente.Nome);
 
-        Snackbar.Add($"Não foi possível criar '{nomeNovo}': {string.Join(", ", r.Erros)}", Severity.Warning);
+        Snackbar.Add($"Não foi possível criar '{nomeNovo}': {L.Traduzir(r.Erros)}", Severity.Warning);
         return (0, string.Empty);
     }
 

@@ -41,18 +41,18 @@ public class FotoUsuarioService : IFotoUsuarioService
         byte[] conteudo, string contentType, CancellationToken ct = default)
     {
         if (conteudo is null || conteudo.Length == 0)
-            return ResultadoOperacao<string>.Falha("Arquivo vazio.");
+            return ResultadoOperacao<string>.Falha(ErrosApp.ArquivoVazio);
 
         if (conteudo.Length > TamanhoMaximoBytes)
-            return ResultadoOperacao<string>.Falha("A imagem excede o tamanho máximo permitido (2 MB).");
+            return ResultadoOperacao<string>.Falha(ErrosApp.ImagemMuitoGrande);
 
         var tipo = (contentType ?? string.Empty).Trim().ToLowerInvariant();
         if (!TiposPermitidos.Contains(tipo))
-            return ResultadoOperacao<string>.Falha("Formato inválido. Use JPG, PNG, WEBP ou GIF.");
+            return ResultadoOperacao<string>.Falha(ErrosApp.ImagemFormatoInvalidoUpload);
 
         var usuario = await ObterUsuarioAsync();
         if (usuario is null)
-            return ResultadoOperacao<string>.Falha("Sessão inválida. Faça login novamente.");
+            return ResultadoOperacao<string>.Falha(ErrosApp.SessaoInvalida);
 
         usuario.Foto = conteudo;
         usuario.FotoContentType = tipo;
@@ -70,7 +70,7 @@ public class FotoUsuarioService : IFotoUsuarioService
     {
         var usuario = await ObterUsuarioAsync();
         if (usuario is null)
-            return ResultadoOperacao.Falha("Sessão inválida. Faça login novamente.");
+            return ResultadoOperacao.Falha(ErrosApp.SessaoInvalida);
 
         usuario.Foto = null;
         usuario.FotoContentType = null;

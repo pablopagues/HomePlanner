@@ -51,7 +51,7 @@ public class ModeloSemanaService : IModeloSemanaService
 
         var dto = await _repo.ObterDetalheAsync(id, ct);
         return dto is null
-            ? ResultadoOperacao<ModeloSemanaDetalheDTO>.Falha("Modelo de semana não encontrado.")
+            ? ResultadoOperacao<ModeloSemanaDetalheDTO>.Falha(ErrosApp.ModeloNaoEncontrado)
             : ResultadoOperacao<ModeloSemanaDetalheDTO>.Ok(dto);
     }
 
@@ -62,7 +62,7 @@ public class ModeloSemanaService : IModeloSemanaService
 
         dto.Nome = dto.Nome?.Trim() ?? string.Empty;
         if (dto.Nome.Length < 2)
-            return ResultadoOperacao<int>.Falha("Nome do modelo deve ter pelo menos 2 caracteres.");
+            return ResultadoOperacao<int>.Falha(ErrosApp.NomeModeloCurto);
 
         ModeloSemana entidade;
         if (dto.Id == 0)
@@ -89,7 +89,7 @@ public class ModeloSemanaService : IModeloSemanaService
 
         var entidade = await _repo.ObterEntidadeComRefeicoesAsync(id, ct);
         if (entidade is null)
-            return ResultadoOperacao.Falha("Modelo de semana não encontrado.");
+            return ResultadoOperacao.Falha(ErrosApp.ModeloNaoEncontrado);
 
         entidade.IsDeleted = true;
         await _repo.SalvarAsync(ct);
@@ -102,11 +102,11 @@ public class ModeloSemanaService : IModeloSemanaService
         await _tenantAccessor.GarantirHidratadoAsync();
 
         if (dataInicio.DayOfWeek != DayOfWeek.Monday)
-            return ResultadoOperacao<CardapioSemanaDTO>.Falha("A data de início deve ser uma segunda-feira.");
+            return ResultadoOperacao<CardapioSemanaDTO>.Falha(ErrosApp.DataDeveSerSegunda);
 
         var modelo = await _repo.ObterEntidadeComRefeicoesAsync(modeloId, ct);
         if (modelo is null)
-            return ResultadoOperacao<CardapioSemanaDTO>.Falha("Modelo não encontrado.");
+            return ResultadoOperacao<CardapioSemanaDTO>.Falha(ErrosApp.ModeloNaoEncontrado);
 
         var planejamento = await _planejamentoRepo.ObterPorDataInicioAsync(dataInicio, ct);
         if (planejamento is null)
@@ -154,11 +154,11 @@ public class ModeloSemanaService : IModeloSemanaService
 
         nomeModelo = nomeModelo?.Trim() ?? string.Empty;
         if (nomeModelo.Length < 2)
-            return ResultadoOperacao<int>.Falha("Nome do modelo deve ter pelo menos 2 caracteres.");
+            return ResultadoOperacao<int>.Falha(ErrosApp.NomeModeloCurto);
 
         var cardapio = await _planejamentoRepo.ObterCardapioSemanaAsync(dataInicio, ct);
         if (cardapio is null)
-            return ResultadoOperacao<int>.Falha("Cardápio da semana não encontrado.");
+            return ResultadoOperacao<int>.Falha(ErrosApp.CardapioNaoEncontrado);
 
         var modelo = new ModeloSemana { Nome = nomeModelo };
         foreach (var rf in cardapio.Refeicoes)

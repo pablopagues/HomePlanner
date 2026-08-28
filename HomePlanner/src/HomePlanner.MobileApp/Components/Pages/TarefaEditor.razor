@@ -2,34 +2,35 @@
 @page "/tarefa/{Id:int}"
 @using HomePlanner.MobileApp.Services
 @inject ApiClient Api
+@inject IStringLocalizer<SharedResource> L
 @inject NavigationManager Nav
 
-<button class="link" style="text-align:left;width:auto" @onclick='() => Nav.NavigateTo("/planner")'>‹ Voltar</button>
-<div class="barra-topo"><h2>@(Id.HasValue ? "Editar tarefa" : "Nova tarefa")</h2></div>
+<button class="link" style="text-align:left;width:auto" @onclick='() => Nav.NavigateTo("/planner")'>‹ @L["Btn_Voltar"]</button>
+<div class="barra-topo"><h2>@(Id.HasValue ? L["Planner_Editar"] : L["Planner_Nova"])</h2></div>
 
-@if (carregando) { <p class="muted">Carregando...</p> }
+@if (carregando) { <p class="muted">@L["Btn_Carregando"]</p> }
 else
 {
-    <label>Título</label>
+    <label>@L["Planner_TituloLabel"]</label>
     <input @bind="_dto.Titulo" />
 
-    <label>Descrição</label>
+    <label>@L["Planner_DescricaoLabel"]</label>
     <textarea rows="3" @bind="_dto.Descricao"></textarea>
 
     <div class="campo-linha">
         <div>
-            <label>Data</label>
+            <label>@L["App_Data"]</label>
             <input type="date" @bind="_dto.DataPrevista" />
         </div>
         <div>
-            <label>Hora</label>
+            <label>@L["App_Hora"]</label>
             <input type="time" @bind="_dto.HoraInicio" />
         </div>
     </div>
 
-    <label>Responsável</label>
+    <label>@L["Planner_ResponsavelLabel"]</label>
     <select @bind="_dto.ResponsavelUsuarioId">
-        <option value="">— Ninguém —</option>
+        <option value="">@L["App_Ninguem"]</option>
         @foreach (var m in _membros)
         {
             <option value="@m.UsuarioId">@m.Nome</option>
@@ -38,16 +39,16 @@ else
 
     <label style="display:flex;align-items:center;gap:.5rem;margin-top:.8rem">
         <input type="checkbox" style="width:18px;height:18px" @bind="_dto.NotificarResponsaveis" />
-        Notificar o responsável
+        @L["App_NotificarResponsavel"]
     </label>
 
     <button class="btn-acao" @onclick="SalvarAsync" disabled="@ocupado">
-        @(ocupado ? "Salvando..." : "Salvar")
+        @(ocupado ? L["Btn_Salvando"] : L["Btn_Salvar"])
     </button>
 
     @if (Id.HasValue)
     {
-        <button class="link" style="color:var(--hp-danger)" @onclick="ExcluirAsync">Excluir tarefa</button>
+        <button class="link" style="color:var(--hp-danger)" @onclick="ExcluirAsync">@L["App_ExcluirTarefa"]</button>
     }
 
     @if (erro is not null) { <p class="erro">@erro</p> }
@@ -95,7 +96,7 @@ else
     private async Task SalvarAsync()
     {
         erro = null;
-        if (string.IsNullOrWhiteSpace(_dto.Titulo)) { erro = "Informe o título."; return; }
+        if (string.IsNullOrWhiteSpace(_dto.Titulo)) { erro = L["App_InformeTitulo"]; return; }
 
         // "" no dropdown vira null (ninguém)
         if (string.IsNullOrEmpty(_dto.ResponsavelUsuarioId)) _dto.ResponsavelUsuarioId = null;

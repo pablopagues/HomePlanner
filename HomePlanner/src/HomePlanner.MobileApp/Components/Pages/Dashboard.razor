@@ -2,19 +2,20 @@
 @using HomePlanner.MobileApp.Services
 @inject ApiClient Api
 @inject SessaoAtual Sessao
+@inject IStringLocalizer<SharedResource> L
 @inject NavigationManager Nav
 
-<div class="barra-topo"><h2>Olá, @PrimeiroNome 👋</h2></div>
+<div class="barra-topo"><h2>@string.Format(L["App_Ola"], PrimeiroNome) 👋</h2></div>
 
-@if (carregando) { <p class="muted">Carregando...</p> }
+@if (carregando) { <p class="muted">@L["Btn_Carregando"]</p> }
 else
 {
     <div class="card-hp">
-        <h3>Refeições de hoje</h3>
+        <h3>@L["App_RefeicoesHoje"]</h3>
         @if (_refeicoesHoje.Count == 0)
         {
-            <p class="muted">Nada planejado para hoje.
-                <a href="#" @onclick:preventDefault @onclick='() => Nav.NavigateTo("/cardapio")'>Abrir cardápio</a>
+            <p class="muted">@L["App_NadaHoje"]
+                <a href="#" @onclick:preventDefault @onclick='() => Nav.NavigateTo("/cardapio")'>@L["App_AbrirCardapio"]</a>
             </p>
         }
         else
@@ -28,7 +29,7 @@ else
 
     <div class="card-hp" style="cursor:pointer" @onclick='() => Nav.NavigateTo("/planner")'>
         <div class="linha">
-            <h3>Tarefas pendentes</h3>
+            <h3>@L["App_TarefasPendentes"]</h3>
             <span class="pill">@_tarefasPendentes</span>
         </div>
         @foreach (var t in _proximasTarefas)
@@ -38,7 +39,7 @@ else
     </div>
 
     <div class="atalhos">
-        @foreach (var (rota, rotulo) in _atalhos)
+        @foreach (var (rota, rotulo) in Atalhos)
         {
             <button class="atalho" @onclick='() => Nav.NavigateTo(rota)'>@rotulo</button>
         }
@@ -53,10 +54,10 @@ else
 
     private string PrimeiroNome => (Sessao.NomeCompleto ?? "").Split(' ').FirstOrDefault() ?? "";
 
-    private static readonly (string rota, string rotulo)[] _atalhos =
+    private (string rota, string rotulo)[] Atalhos =>
     [
-        ("/cardapio", "🍽️ Cardápio"), ("/receitas", "📖 Receitas"),
-        ("/compras", "🛒 Compras"), ("/planner", "✅ Tarefas"),
+        ("/cardapio", $"🍽️ {L["Nav_Cardapio"]}"), ("/receitas", $"📖 {L["Nav_Receitas"]}"),
+        ("/compras", $"🛒 {L["Nav_ListaCompras"]}"), ("/planner", $"✅ {L["Nav_Planner"]}"),
     ];
 
     protected override async Task OnInitializedAsync()
@@ -83,10 +84,11 @@ else
         _ => "Domingo",
     };
 
-    private static string RotuloTipo(string t) => t switch
+    private string RotuloTipo(string t) => t switch
     {
-        "CafeManha" => "Café", "Almoco" => "Almoço", "Lanche" => "Lanche",
-        "Jantar" => "Jantar", "Ceia" => "Ceia", _ => t,
+        "CafeManha" => L["Refeicao_CafeManha"], "Almoco" => L["Refeicao_Almoco"],
+        "Lanche" => L["Refeicao_Lanche"], "Jantar" => L["Refeicao_Jantar"],
+        "Ceia" => L["Refeicao_Ceia"], _ => t,
     };
 
     private static DateOnly SegundaDe(DateOnly d)

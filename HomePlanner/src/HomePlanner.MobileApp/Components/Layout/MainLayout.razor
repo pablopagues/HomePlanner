@@ -1,19 +1,20 @@
 @inherits LayoutComponentBase
 @using HomePlanner.MobileApp.Services
 @inject SessaoAtual Sessao
+@inject IStringLocalizer<SharedResource> L
 @inject NavigationManager Nav
 
 <div class="app-shell">
     <header class="app-bar">
         <button class="menu-btn" @onclick="() => menuAberto = !menuAberto">☰</button>
         <span class="app-titulo">HomePlanner</span>
-        <button class="menu-btn" @onclick="Sair" title="Sair">⏻</button>
+        <button class="menu-btn" @onclick="Sair" title="@L["Nav_Sair"]">⏻</button>
     </header>
 
     @if (menuAberto)
     {
         <nav class="menu" @onclick="() => menuAberto = false">
-            @foreach (var (rota, rotulo) in _itens)
+            @foreach (var (rota, rotulo) in Itens)
             {
                 <NavLink class="menu-item" href="@rota" Match="NavLinkMatch.All">@rotulo</NavLink>
             }
@@ -28,19 +29,20 @@
 @code {
     private bool menuAberto;
 
-    private static readonly (string rota, string rotulo)[] _itens =
+    private (string rota, string rotulo)[] Itens =>
     [
-        ("/dashboard", "🏠 Início"),
-        ("/cardapio", "🍽️ Cardápio"),
-        ("/modelos", "🗓️ Modelos"),
-        ("/receitas", "📖 Receitas"),
-        ("/ingredientes", "🥕 Ingredientes"),
-        ("/planner", "✅ Tarefas"),
-        ("/compras", "🛒 Compras"),
-        ("/lojas", "🏬 Lojas"),
-        ("/recorrentes", "🔁 Recorrentes"),
-        ("/familia", "👪 Família"),
-        ("/perfil", "👤 Perfil"),
+        ("/dashboard", $"🏠 {L["Nav_Dashboard"]}"),
+        ("/cardapio", $"🍽️ {L["Nav_Cardapio"]}"),
+        ("/modelos", $"🗓️ {L["Nav_Modelos"]}"),
+        ("/receitas", $"📖 {L["Nav_Receitas"]}"),
+        ("/ingredientes", $"🥕 {L["App_Ingredientes"]}"),
+        ("/planner", $"✅ {L["Nav_Planner"]}"),
+        ("/calendario", $"📆 {L["Nav_Calendario"]}"),
+        ("/compras", $"🛒 {L["App_Compras"]}"),
+        ("/lojas", $"🏬 {L["App_Lojas"]}"),
+        ("/recorrentes", $"🔁 {L["App_Recorrentes"]}"),
+        ("/familia", $"👪 {L["Nav_Familia"]}"),
+        ("/perfil", $"👤 {L["App_Perfil"]}"),
     ];
 
     protected override void OnInitialized()

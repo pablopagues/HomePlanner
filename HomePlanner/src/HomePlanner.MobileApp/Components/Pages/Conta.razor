@@ -1,60 +1,75 @@
 @page "/conta"
 @using HomePlanner.MobileApp.Services
 @inject ApiClient Api
+@inject IStringLocalizer<SharedResource> L
 @inject NavigationManager Nav
 
-<button class="link" style="text-align:left;width:auto" @onclick='() => Nav.NavigateTo("/perfil")'>‹ Voltar</button>
-<div class="barra-topo"><h2>Minha conta</h2></div>
+<button class="link" style="text-align:left;width:auto" @onclick='() => Nav.NavigateTo("/perfil")'>‹ @L["Btn_Voltar"]</button>
+<div class="barra-topo"><h2>@L["App_MinhaConta"]</h2></div>
 
-@if (carregando) { <p class="muted">Carregando...</p> }
+@if (carregando) { <p class="muted">@L["Btn_Carregando"]</p> }
 else
 {
     <div class="card-hp">
-        <h3>Dados</h3>
-        <label>Nome</label>
+        <h3>@L["App_Dados"]</h3>
+        <label>@L["Fam_Nome"]</label>
         <input @bind="_nome" />
         <button class="btn-acao" @onclick="SalvarNome" disabled="@_salvandoNome">
-            @(_salvandoNome ? "Salvando..." : "Salvar nome")
+            @(_salvandoNome ? L["Btn_Salvando"] : L["App_SalvarNome"])
         </button>
 
         @if (_conta is not null)
         {
-            <p class="muted" style="margin-top:.6rem">@_conta.Email — @(_conta.EmailConfirmado ? "confirmado" : "não confirmado")</p>
+            <p class="muted" style="margin-top:.6rem">@_conta.Email — @(_conta.EmailConfirmado ? L["App_Confirmado"] : L["App_NaoConfirmado"])</p>
             @if (!_conta.EmailConfirmado)
             {
-                <button class="link" @onclick="ReenviarConfirmacao">Reenviar e-mail de confirmação</button>
+                <button class="link" @onclick="ReenviarConfirmacao">@L["Emp_ReenviarConfirmacao"]</button>
             }
         }
         @if (_msgConta is not null) { <p class="@(_okConta ? "muted" : "erro")">@_msgConta</p> }
     </div>
 
     <div class="card-hp">
-        <h3>Verificação em duas etapas</h3>
-        <p class="muted">@(_ativo ? "Ativa" : "Inativa")</p>
+        <h3>@L["Perfil_Senha_Titulo"]</h3>
+        <label>@L["Perfil_Senha_Atual"]</label>
+        <input type="password" @bind="_senhaAtual" />
+        <label>@L["Perfil_Senha_Nova"]</label>
+        <input type="password" @bind="_senhaNova" />
+        <label>@L["Perfil_Senha_Confirma"]</label>
+        <input type="password" @bind="_senhaConfirma" />
+        <button class="btn-acao" @onclick="AlterarSenha" disabled="@_alterandoSenha">
+            @(_alterandoSenha ? L["App_Alterando"] : L["Perfil_Senha_Botao"])
+        </button>
+        @if (_msgSenha is not null) { <p class="@(_okSenha ? "muted" : "erro")">@_msgSenha</p> }
+    </div>
+
+    <div class="card-hp">
+        <h3>@L["Auth_2FATitulo"]</h3>
+        <p class="muted">@(_ativo ? L["App_Ativa"] : L["App_Inativa"])</p>
 
         @if (_ativo)
         {
-            <button class="btn-acao" style="background:var(--hp-danger)" @onclick="Desativar2FA">Desativar 2FA</button>
+            <button class="btn-acao" style="background:var(--hp-danger)" @onclick="Desativar2FA">@L["App_Desativar2FA"]</button>
         }
         else if (_chave is null)
         {
-            <button class="btn-acao" @onclick="Iniciar2FA">Ativar 2FA</button>
+            <button class="btn-acao" @onclick="Iniciar2FA">@L["App_Ativar2FA"]</button>
         }
         else
         {
-            <p class="muted">1. No app autenticador, adicione a conta com esta chave:</p>
+            <p class="muted">@L["App_2FAPasso1"]</p>
             <p style="font-family:monospace;font-size:1.1rem">@_chave.ChaveFormatada</p>
-            <p class="muted">Conta: @_chave.Email</p>
-            <label>2. Digite o código gerado</label>
+            <p class="muted">@L["App_2FAConta"]: @_chave.Email</p>
+            <label>@L["App_2FAPasso2"]</label>
             <input @bind="_codigo" inputmode="numeric" />
             <button class="btn-acao" @onclick="Confirmar2FA" disabled="@_confirmando">
-                @(_confirmando ? "Verificando..." : "Confirmar e ativar")
+                @(_confirmando ? L["Auth_2FAVerificando"] : L["App_ConfirmarAtivar"])
             </button>
         }
 
         @if (_codigosRecuperacao is not null)
         {
-            <p class="muted" style="margin-top:.6rem"><strong>Guarde seus códigos de recuperação:</strong></p>
+            <p class="muted" style="margin-top:.6rem"><strong>@L["App_GuardeCodigos"]</strong></p>
             <p style="font-family:monospace">@string.Join("  ", _codigosRecuperacao)</p>
         }
         @if (_msg2fa is not null) { <p class="erro">@_msg2fa</p> }
@@ -66,6 +81,10 @@ else
     private string _nome = "";
     private bool carregando = true, _salvandoNome, _okConta;
     private string? _msgConta;
+
+    private string _senhaAtual = "", _senhaNova = "", _senhaConfirma = "";
+    private bool _alterandoSenha, _okSenha;
+    private string? _msgSenha;
 
     private bool _ativo;
     private ChaveAutenticadorDTO? _chave;
@@ -90,14 +109,42 @@ else
         var err = await Api.SalvarContaAsync(new AtualizarEmpresaRequest { NomeResponsavel = _nome.Trim() });
         _salvandoNome = false;
         _okConta = err is null;
-        _msgConta = err ?? "Nome atualizado!";
+        _msgConta = err ?? L["Emp_SalvoOk"];
     }
 
     private async Task ReenviarConfirmacao()
     {
         var err = await Api.ReenviarConfirmacaoAsync();
         _okConta = err is null;
-        _msgConta = err ?? "E-mail de confirmação reenviado.";
+        _msgConta = err ?? L["Emp_ReenviarConfirmacao"];
+    }
+
+    private async Task AlterarSenha()
+    {
+        _msgSenha = null;
+        _okSenha = false;
+
+        if (string.IsNullOrWhiteSpace(_senhaAtual) || string.IsNullOrWhiteSpace(_senhaNova))
+        {
+            _msgSenha = L["Perfil_Senha_Preencha"];
+            return;
+        }
+
+        if (_senhaNova != _senhaConfirma)
+        {
+            _msgSenha = L["Perfil_Senha_NaoCoincide"];
+            return;
+        }
+
+        _alterandoSenha = true;
+        var err = await Api.AlterarSenhaAsync(_senhaAtual, _senhaNova);
+        _alterandoSenha = false;
+
+        if (err is not null) { _msgSenha = err; return; }
+
+        _senhaAtual = _senhaNova = _senhaConfirma = "";
+        _okSenha = true;
+        _msgSenha = L["Perfil_Senha_Ok"];
     }
 
     private async Task Iniciar2FA()
@@ -111,7 +158,7 @@ else
     private async Task Confirmar2FA()
     {
         _msg2fa = null;
-        if (string.IsNullOrWhiteSpace(_codigo)) { _msg2fa = "Informe o código."; return; }
+        if (string.IsNullOrWhiteSpace(_codigo)) { _msg2fa = L["Perfil_2FA_InformeCodigo"]; return; }
         _confirmando = true;
         var (codigos, err) = await Api.Ativar2FAAsync(_codigo.Trim());
         _confirmando = false;

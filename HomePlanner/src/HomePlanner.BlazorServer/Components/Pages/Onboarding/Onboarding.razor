@@ -96,7 +96,7 @@
         if (r.Sucesso)
             Nav.NavigateTo("/dashboard", forceLoad: true);
         else
-            _erro = string.Join(", ", r.Erros);
+            _erro = L.Traduzir(r.Erros);
     }
 
     private string NomeTipo(string tipo) => tipo switch

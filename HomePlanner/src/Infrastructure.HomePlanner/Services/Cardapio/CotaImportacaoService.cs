@@ -40,9 +40,7 @@ public class CotaImportacaoService : ICotaImportacaoService
     {
         var uso = await ObterUsoAsync(ct);
         if (uso.AtingiuLimite)
-            return ResultadoOperacao.Falha(
-                $"Você atingiu o limite de {uso.Limite} importações de receita este mês no seu plano. " +
-                "Faça upgrade para importar mais.");
+            return ResultadoOperacao.Falha(ErrosApp.LimiteImportacoes(uso.Limite));
         return ResultadoOperacao.Ok();
     }
 
@@ -56,8 +54,7 @@ public class CotaImportacaoService : ICotaImportacaoService
         var atual = _cache.TryGetValue(key, out int c) ? c : 0;
 
         if (atual >= LimiteChamadasIAHora)
-            return ResultadoOperacao.Falha(
-                "Muitas análises de ingredientes em pouco tempo. Aguarde alguns minutos e tente novamente.");
+            return ResultadoOperacao.Falha(ErrosApp.MuitasAnalisesIA);
 
         _cache.Set(key, atual + 1, TimeSpan.FromHours(1));
         return ResultadoOperacao.Ok();

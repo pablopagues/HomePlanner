@@ -16,6 +16,7 @@ public static class UrlMap
             ["/contato"]       = ("/contact",     "/contacto",    "/nous-contacter"),
             ["/quem-somos"]    = ("/about",       "/acerca",      "/a-propos"),
             ["/assinatura"]    = ("/subscription", "/suscripcion", "/abonnement"),
+            ["/assinatura-expirada"] = ("/subscription-expired", "/suscripcion-expirada", "/abonnement-expire"),
             ["/perfil"]        = ("/profile",     "/perfil",      "/profil"),
             // ── Páginas autenticadas (URL única, idioma via cookie) ──────────
             ["/dashboard"]     = ("/dashboard",   "/dashboard",   "/dashboard"),

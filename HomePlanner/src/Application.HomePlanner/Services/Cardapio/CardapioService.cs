@@ -30,7 +30,7 @@ public class CardapioService : ICardapioService
 
         var dto = await _repo.ObterCardapioSemanaAsync(dataInicio, ct);
         return dto is null
-            ? ResultadoOperacao<CardapioSemanaDTO>.Falha("Semana não encontrada.")
+            ? ResultadoOperacao<CardapioSemanaDTO>.Falha(ErrosApp.SemanaNaoEncontrada)
             : ResultadoOperacao<CardapioSemanaDTO>.Ok(dto);
     }
 
@@ -41,7 +41,7 @@ public class CardapioService : ICardapioService
 
         // DataInicio DEVE ser segunda-feira (regra de negócio crítica)
         if (dataInicio.DayOfWeek != DayOfWeek.Monday)
-            return ResultadoOperacao<CardapioSemanaDTO>.Falha("A data de início do cardápio deve ser uma segunda-feira.");
+            return ResultadoOperacao<CardapioSemanaDTO>.Falha(ErrosApp.DataDeveSerSegunda);
 
         var planejamento = await _repo.ObterPorDataInicioAsync(dataInicio, ct);
         if (planejamento is null)
@@ -63,7 +63,7 @@ public class CardapioService : ICardapioService
 
         var planejamento = await _repo.ObterPorDataInicioAsync(cmd.DataInicio, ct);
         if (planejamento is null)
-            return ResultadoOperacao.Falha("Semana não encontrada. Crie o cardápio primeiro.");
+            return ResultadoOperacao.Falha(ErrosApp.SemanaSemCardapio);
 
         // Upsert idempotente do slot
         var refeicao = await _repo.ObterRefeicaoDiaAsync(
@@ -96,7 +96,7 @@ public class CardapioService : ICardapioService
         // Verifica que o planejamento pertence ao tenant atual (filtro global garante)
         var planejamento = await _repo.ObterEntidadeAsync(planejamentoId, ct);
         if (planejamento is null)
-            return ResultadoOperacao.Falha("Cardápio não encontrado.");
+            return ResultadoOperacao.Falha(ErrosApp.CardapioNaoEncontrado);
 
         var refeicao = await _repo.ObterRefeicaoDiaPorIdAsync(refeicaoDiaId, ct);
         if (refeicao is null || refeicao.PlanejamentoSemanalId != planejamentoId)
@@ -116,11 +116,11 @@ public class CardapioService : ICardapioService
         await _tenantAccessor.GarantirHidratadoAsync();
 
         if (dataInicioDestino.DayOfWeek != DayOfWeek.Monday)
-            return ResultadoOperacao<CardapioSemanaDTO>.Falha("O destino deve ser uma segunda-feira.");
+            return ResultadoOperacao<CardapioSemanaDTO>.Falha(ErrosApp.DestinoDeveSerSegunda);
 
         var origem = await _repo.ObterCardapioSemanaAsync(dataInicioOrigem, ct);
         if (origem is null)
-            return ResultadoOperacao<CardapioSemanaDTO>.Falha("Semana de origem não encontrada.");
+            return ResultadoOperacao<CardapioSemanaDTO>.Falha(ErrosApp.SemanaOrigemNaoEncontrada);
 
         // Cria ou obtém a semana de destino
         var planejamentoDestino = await _repo.ObterPorDataInicioAsync(dataInicioDestino, ct);

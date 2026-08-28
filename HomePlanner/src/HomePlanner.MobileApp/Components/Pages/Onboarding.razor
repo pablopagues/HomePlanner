@@ -1,0 +1,117 @@
+@page "/onboarding"
+@layout SemMenuLayout
+@using HomePlanner.MobileApp.Services
+@inject ApiClient Api
+@inject SessaoAtual Sessao
+@inject IStringLocalizer<SharedResource> L
+@inject NavigationManager Nav
+
+@* Primeira configuração da família. Espelha a tela /onboarding da web — mesmos campos,
+   mesmos endpoints. Sem ela, quem cria conta pelo app fica com o tenant marcado como
+   não-configurado para sempre, porque o middleware do servidor ignora /api. *@
+
+<div class="auth">
+    <h1>@L["Onb_Titulo"]</h1>
+    <p class="sub">@L["Onb_Subtitulo"]</p>
+
+    @if (carregando)
+    {
+        <p class="muted">@L["Btn_Carregando"]</p>
+    }
+    else
+    {
+        <label>@L["Onb_TamanhoFamilia"]</label>
+        <input type="number" min="1" max="20" @bind="_dto.TamanhoFamiliaPadrao" />
+
+        <label>@L["Onb_FusoHorario"]</label>
+        <select @bind="_dto.FusoHorario">
+            @foreach (var (id, rotulo) in _fusos)
+            {
+                <option value="@id">@rotulo</option>
+            }
+        </select>
+
+        <label>@L["Cfg_Antecedencia"]</label>
+        <input type="number" min="0" @bind="_dto.MinutosAntecedenciaLembrete" />
+
+        <label>@L["Onb_TiposRefeicao"]</label>
+        <div class="chips">
+            @foreach (var chave in _tipos)
+            {
+                <button type="button"
+                        class="@(_dto.TiposRefeicaoAtivos.Contains(chave) ? "chip-sel" : "chip-off")"
+                        @onclick="() => Alternar(chave)">
+                    @NomeRefeicao(chave)
+                </button>
+            }
+        </div>
+
+        @if (mensagem is not null) { <p class="erro">@mensagem</p> }
+
+        <button class="primario" @onclick="FinalizarAsync" disabled="@ocupado">
+            @(ocupado ? L["Btn_Salvando"] : L["Onb_Finalizar"])
+        </button>
+    }
+</div>
+
+@code {
+    private ConfiguracaoFamiliaDTO _dto = new();
+    private bool carregando = true, ocupado;
+    private string? mensagem;
+
+    private static readonly (string Id, string Rotulo)[] _fusos =
+    [
+        ("America/Toronto",   "America/Toronto (Canadá)"),
+        ("America/Sao_Paulo", "America/Sao_Paulo (Brasil)"),
+        ("America/Vancouver", "America/Vancouver"),
+        ("Europe/Madrid",     "Europe/Madrid (Espanha)"),
+    ];
+
+    private static readonly string[] _tipos =
+        ["CafeManha", "Almoco", "Lanche", "Jantar", "Ceia"];
+
+    private string NomeRefeicao(string chave) => chave switch
+    {
+        "CafeManha" => L["Refeicao_CafeManha"],
+        "Almoco"    => L["Refeicao_Almoco"],
+        "Lanche"    => L["Refeicao_Lanche"],
+        "Jantar"    => L["Refeicao_Jantar"],
+        "Ceia"      => L["Refeicao_Ceia"],
+        _           => chave,
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var (cfg, _) = await Api.ObterOnboardingAsync();
+        _dto = cfg ?? new ConfiguracaoFamiliaDTO();
+        if (_dto.TiposRefeicaoAtivos.Count == 0)
+            _dto.TiposRefeicaoAtivos.Add("Almoco");
+        carregando = false;
+    }
+
+    private void Alternar(string chave)
+    {
+        if (!_dto.TiposRefeicaoAtivos.Remove(chave))
+            _dto.TiposRefeicaoAtivos.Add(chave);
+    }
+
+    private async Task FinalizarAsync()
+    {
+        mensagem = null;
+
+        if (_dto.TiposRefeicaoAtivos.Count == 0)
+        {
+            mensagem = L["Onb_EscolhaRefeicao"];
+            return;
+        }
+
+        ocupado = true;
+        var erro = await Api.FinalizarOnboardingAsync(_dto);
+        ocupado = false;
+
+        if (erro is not null) { mensagem = erro; return; }
+
+        Sessao.MarcarOnboardingConcluido();
+        Nav.NavigateTo("/dashboard");
+    }
+}

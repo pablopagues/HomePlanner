@@ -139,6 +139,36 @@ body { background: var(--hp-bg); margin: 0; color: #1f2937; }
 .auth label { display: block; font-size: .85rem; color: var(--hp-text-2); margin: .8rem 0 .2rem; }
 .auth input { width: 100%; box-sizing: border-box; }
 
+/* Aceite de termos (LGPD): o checkbox não pode herdar o layout de campo do .auth. */
+.auth label.aceite {
+    display: flex; align-items: flex-start; gap: .5rem;
+    margin: 1rem 0 .2rem; color: #1f2937; line-height: 1.35;
+}
+.auth label.aceite input[type=checkbox] { width: auto; flex: none; margin: .12rem 0 0; }
+.aceite-links { display: flex; flex-direction: column; }
+.aceite-links button.link { margin-top: .15rem; font-size: .85rem; text-align: left; }
+
+/* Foto de perfil */
+.perfil-topo { display: flex; align-items: center; gap: .8rem; }
+.avatar {
+    width: 60px; height: 60px; border-radius: 50%; flex: none;
+    object-fit: cover; border: 1px solid var(--hp-line);
+}
+.avatar-vazio {
+    display: flex; align-items: center; justify-content: center;
+    background: var(--hp-primary-2); color: var(--hp-primary);
+    font-weight: 600; font-size: 1.15rem;
+}
+
+/* Chips de seleção múltipla (refeições do onboarding). */
+.chips { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .3rem; }
+.chips button {
+    border-radius: 999px; padding: .35rem .8rem; font-size: .9rem;
+    cursor: pointer; width: auto; margin: 0;
+}
+.chips .chip-sel { background: var(--hp-primary); color: #fff; border: 1px solid var(--hp-primary); }
+.chips .chip-off { background: #fff; color: var(--hp-text-2); border: 1px solid var(--hp-line); }
+
 /* Form controls */
 input, select, textarea {
     padding: .6rem .7rem; border: 1px solid var(--hp-line); border-radius: 8px;

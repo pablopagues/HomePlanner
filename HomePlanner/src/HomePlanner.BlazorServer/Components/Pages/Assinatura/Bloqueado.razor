@@ -1,0 +1,81 @@
+@page "/assinatura-expirada"
+@page "/subscription-expired"
+@page "/suscripcion-expirada"
+@page "/abonnement-expire"
+@attribute [Authorize]
+@inject IAssinaturaStatusReader StatusReader
+@inject IStringLocalizer<SharedResource> L
+@inject PublicLanguageService Lang
+
+@* Tela para quem não é Owner: explica o bloqueio sem oferecer a contratação, que é
+   privilégio do responsável pela família. O Owner cai direto em /assinatura. *@
+
+<PageTitle>@L["Assin_Titulo"] — HomePlanner</PageTitle>
+
+@if (_carregando)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else if (_motivo == MotivoBloqueio.Nenhum)
+{
+    <MudAlert Severity="Severity.Success" Class="mb-4">@L["Assin_BloqLiberado"]</MudAlert>
+    <MudButton Href="/dashboard" Variant="Variant.Filled" Color="Color.Primary">
+        @L["Nav_Dashboard"]
+    </MudButton>
+}
+else
+{
+    <MudPaper Class="pa-6" Elevation="1" Style="border-radius:14px; max-width:640px;">
+        <AvisoAssinaturaBloqueada Motivo="_motivo" PodeContratar="_ehOwner" />
+
+        <MudText Typo="Typo.body2" Color="Color.Secondary">
+            @L["Assin_BloqContaLivre"]
+        </MudText>
+
+        @* Direitos do titular (LGPD art. 18): a Política de Privacidade promete o
+           atendimento pelo canal de contato — então o caminho tem que estar visível
+           justamente aqui, para quem está de saída. *@
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-2">
+            @L["Assin_BloqDados"]
+        </MudText>
+
+        <MudStack Row="true" Spacing="2" Class="mt-4" Wrap="Wrap.Wrap">
+            <MudButton Href="@Lang.U("/perfil")" Variant="Variant.Outlined"
+                       StartIcon="@Icons.Material.Filled.ManageAccounts">
+                @L["Nav_Perfil"]
+            </MudButton>
+            <MudButton Href="@Lang.U("/contato")" Variant="Variant.Outlined"
+                       StartIcon="@Icons.Material.Filled.MailOutline">
+                @L["Footer_Contato"]
+            </MudButton>
+            <MudButton Href="/Identity/Account/Logout" ForceLoad="true" Variant="Variant.Text"
+                       StartIcon="@Icons.Material.Filled.Logout">
+                @L["Nav_Sair"]
+            </MudButton>
+        </MudStack>
+    </MudPaper>
+}
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthState { get; set; }
+
+    private MotivoBloqueio _motivo = MotivoBloqueio.Nenhum;
+    private bool _ehOwner;
+    private bool _carregando = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Lang.SetLang(Lang.Lang);
+
+        if (AuthState is not null)
+        {
+            var usuario = (await AuthState).User;
+            _ehOwner = usuario.IsInRole("Owner");
+
+            if (Guid.TryParse(usuario.FindFirst("tenant_id")?.Value, out var tenantId))
+                _motivo = (await StatusReader.ObterAsync(tenantId)).Motivo;
+        }
+
+        _carregando = false;
+    }
+}

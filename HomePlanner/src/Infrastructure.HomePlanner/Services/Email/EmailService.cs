@@ -66,12 +66,34 @@ public class EmailService : IEmailService
         return EnviarAsync(para, "Redefinição de senha — HomePlanner", corpo, ct);
     }
 
-    private static string Template(string titulo, string texto, string textoBotao, string link) => $$"""
-        <div style="font-family:'Segoe UI',Arial,sans-serif; max-width:480px; margin:0 auto; background:#FAF7F2; padding:32px; border-radius:12px; color:#2A3A33;">
-            <h1 style="font-weight:300; color:#4A6B5C; font-size:24px;">{{titulo}}</h1>
-            <p style="font-size:15px; line-height:1.6; color:#2A3A33;">{{texto}}</p>
-            <a href="{{link}}" style="display:inline-block; margin-top:16px; background:#C97B5A; color:#FFFFFF; padding:12px 28px; border-radius:8px; text-decoration:none; font-weight:500;">{{textoBotao}}</a>
-            <p style="font-size:12px; color:#7A8278; margin-top:32px;">HomePlanner — by SiderisX</p>
-        </div>
-        """;
+    public Task EnviarConviteMembroAsync(string para, string nome, string nomeConvidante,
+        string linkConvite, int diasValidade, CancellationToken ct = default)
+    {
+        var convidante = string.IsNullOrWhiteSpace(nomeConvidante) ? "Sua família" : nomeConvidante;
+        var corpo = Template(
+            $"Olá, {nome}!",
+            $"{convidante} convidou você para o HomePlanner — onde a família organiza junto o cardápio da " +
+            "semana, as tarefas de casa e a lista de compras. Crie sua senha para entrar.",
+            "Criar minha senha", linkConvite,
+            $"Este convite vale por {diasValidade} dias. Se expirar, peça um novo a {convidante}.");
+        return EnviarAsync(para, $"{convidante} convidou você para o HomePlanner", corpo, ct);
+    }
+
+    private static string Template(string titulo, string texto, string textoBotao, string link,
+        string? observacao = null)
+    {
+        var blocoObservacao = observacao is null
+            ? string.Empty
+            : $"""<p style="font-size:13px; line-height:1.5; color:#7A8278; margin-top:20px;">{observacao}</p>""";
+
+        return $$"""
+            <div style="font-family:'Segoe UI',Arial,sans-serif; max-width:480px; margin:0 auto; background:#FAF7F2; padding:32px; border-radius:12px; color:#2A3A33;">
+                <h1 style="font-weight:300; color:#4A6B5C; font-size:24px;">{{titulo}}</h1>
+                <p style="font-size:15px; line-height:1.6; color:#2A3A33;">{{texto}}</p>
+                <a href="{{link}}" style="display:inline-block; margin-top:16px; background:#C97B5A; color:#FFFFFF; padding:12px 28px; border-radius:8px; text-decoration:none; font-weight:500;">{{textoBotao}}</a>
+                {{blocoObservacao}}
+                <p style="font-size:12px; color:#7A8278; margin-top:32px;">HomePlanner — by SiderisX</p>
+            </div>
+            """;
+    }
 }

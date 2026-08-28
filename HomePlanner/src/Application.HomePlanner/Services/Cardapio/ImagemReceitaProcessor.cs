@@ -40,16 +40,14 @@ public class ImagemReceitaProcessor : IImagemReceitaProcessor
         byte[] bytesOriginais, string contentType, CancellationToken ct = default)
     {
         if (bytesOriginais is null || bytesOriginais.Length == 0)
-            return ResultadoOperacao<ImagemProcessadaDTO>.Falha("Arquivo de imagem vazio.");
+            return ResultadoOperacao<ImagemProcessadaDTO>.Falha(ErrosApp.ArquivoVazio);
 
         if (bytesOriginais.Length > TamanhoMaxEntradaBytes)
-            return ResultadoOperacao<ImagemProcessadaDTO>.Falha(
-                $"Imagem muito grande. Máximo {TamanhoMaxEntradaBytes / (1024 * 1024)} MB.");
+            return ResultadoOperacao<ImagemProcessadaDTO>.Falha(ErrosApp.ImagemEntradaMuitoGrande(TamanhoMaxEntradaBytes / (1024 * 1024)));
 
         var mime = (contentType ?? string.Empty).Trim().ToLowerInvariant();
         if (!MimeTypesAceitos.Contains(mime))
-            return ResultadoOperacao<ImagemProcessadaDTO>.Falha(
-                "Formato de imagem não suportado. Use JPEG, PNG ou WebP.");
+            return ResultadoOperacao<ImagemProcessadaDTO>.Falha(ErrosApp.ImagemFormatoInvalido);
 
         try
         {
@@ -88,9 +86,7 @@ public class ImagemReceitaProcessor : IImagemReceitaProcessor
                 _logger.LogWarning(
                     "Foto de receita processada ainda excede o limite: {Bytes} bytes (max {Max}).",
                     bytesFinais.Length, TamanhoMaxSaidaBytes);
-                return ResultadoOperacao<ImagemProcessadaDTO>.Falha(
-                    $"A foto final ainda está acima do limite ({bytesFinais.Length / 1024} KB). " +
-                    "Tente uma imagem mais simples.");
+                return ResultadoOperacao<ImagemProcessadaDTO>.Falha(ErrosApp.ImagemFinalAcimaDoLimite(bytesFinais.Length / 1024));
             }
 
             return ResultadoOperacao<ImagemProcessadaDTO>.Ok(new ImagemProcessadaDTO
@@ -101,18 +97,17 @@ public class ImagemReceitaProcessor : IImagemReceitaProcessor
         }
         catch (UnknownImageFormatException)
         {
-            return ResultadoOperacao<ImagemProcessadaDTO>.Falha(
-                "Não foi possível ler a imagem. Verifique se o arquivo está correto.");
+            return ResultadoOperacao<ImagemProcessadaDTO>.Falha(ErrosApp.ImagemNaoLegivel);
         }
         catch (InvalidImageContentException ex)
         {
             _logger.LogWarning(ex, "Imagem de receita com conteúdo inválido.");
-            return ResultadoOperacao<ImagemProcessadaDTO>.Falha("Imagem inválida ou corrompida.");
+            return ResultadoOperacao<ImagemProcessadaDTO>.Falha(ErrosApp.ImagemCorrompida);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erro inesperado ao processar foto de receita.");
-            return ResultadoOperacao<ImagemProcessadaDTO>.Falha("Erro ao processar a imagem. Tente outra.");
+            return ResultadoOperacao<ImagemProcessadaDTO>.Falha(ErrosApp.ImagemErroProcessar);
         }
     }
 }

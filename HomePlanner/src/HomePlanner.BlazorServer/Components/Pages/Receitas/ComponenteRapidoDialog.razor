@@ -4,6 +4,7 @@
 @inject IIngredienteService IngService
 @inject IReceitaService ReceitaService
 @inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResource> L
 
 <MudDialog>
     <TitleContent>
@@ -81,7 +82,7 @@
 
         if (!r.Sucesso)
         {
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
             return;
         }
 

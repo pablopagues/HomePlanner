@@ -29,15 +29,14 @@ public class ConversorUnidadeService : IConversorUnidadeService
     {
         var origem = await _repo.ObterPorIdAsync(unidadeOrigemId, ct);
         if (origem is null)
-            return ResultadoOperacao<decimal>.Falha($"Unidade de medida {unidadeOrigemId} não encontrada.");
+            return ResultadoOperacao<decimal>.Falha(ErrosApp.UnidadeNaoEncontrada(unidadeOrigemId));
 
         var destino = await _repo.ObterPorIdAsync(unidadeDestinoId, ct);
         if (destino is null)
-            return ResultadoOperacao<decimal>.Falha($"Unidade de medida {unidadeDestinoId} não encontrada.");
+            return ResultadoOperacao<decimal>.Falha(ErrosApp.UnidadeNaoEncontrada(unidadeDestinoId));
 
         if (!SaoCompativeis(origem, destino))
-            return ResultadoOperacao<decimal>.Falha(
-                $"Unidades incompatíveis: {origem.Codigo} e {destino.Codigo} são de tipos diferentes.");
+            return ResultadoOperacao<decimal>.Falha(ErrosApp.UnidadesIncompativeis(origem.Codigo, destino.Codigo));
 
         return ResultadoOperacao<decimal>.Ok(Converter(quantidade, origem, destino));
     }

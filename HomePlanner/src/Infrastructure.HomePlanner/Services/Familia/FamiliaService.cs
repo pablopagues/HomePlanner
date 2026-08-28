@@ -9,6 +9,7 @@ using Domain.HomePlanner.Models.Enums;
 using Domain.HomePlanner.Models.SaaS.Identity;
 using Domain.HomePlanner.Models.SaaS.Options;
 using Infrastructure.HomePlanner.Contexts;
+using Infrastructure.HomePlanner.Services.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
@@ -64,6 +65,7 @@ public class FamiliaService : IFamiliaService
                 Ativo         = u.Ativo,
                 SenhaDefinida = u.PasswordHash != null,
                 UltimoLogin   = u.UltimoLogin,
+                UltimoConviteEnviadoEm = u.UltimoConviteEnviadoEm,
             })
             .ToListAsync(ct);
 
@@ -80,17 +82,17 @@ public class FamiliaService : IFamiliaService
         await _tenantAccessor.GarantirHidratadoAsync();
         var tenantId = _tenantContext.TenantId;
         if (tenantId is null)
-            return ResultadoOperacao<ConviteMembroResultadoDTO>.Falha("Sessão inválida. Faça login novamente.");
+            return ResultadoOperacao<ConviteMembroResultadoDTO>.Falha(ErrosApp.SessaoInvalida);
 
         var nome = dto.Nome?.Trim() ?? string.Empty;
         var email = dto.Email?.Trim().ToLowerInvariant() ?? string.Empty;
 
         if (nome.Length < 2)
-            return ResultadoOperacao<ConviteMembroResultadoDTO>.Falha("Informe o nome do membro.");
+            return ResultadoOperacao<ConviteMembroResultadoDTO>.Falha(ErrosApp.InformeNomeMembro);
         if (string.IsNullOrWhiteSpace(email) || !email.Contains('@'))
-            return ResultadoOperacao<ConviteMembroResultadoDTO>.Falha("Informe um e-mail válido.");
+            return ResultadoOperacao<ConviteMembroResultadoDTO>.Falha(ErrosApp.InformeEmail);
         if (dto.Papel != PapelUsuario.Membro && dto.Papel != PapelUsuario.Filho)
-            return ResultadoOperacao<ConviteMembroResultadoDTO>.Falha("Papel inválido para um membro.");
+            return ResultadoOperacao<ConviteMembroResultadoDTO>.Falha(ErrosApp.PapelInvalido);
 
         // Owner adiciona qualquer papel; Membro (pai/mãe) só pode adicionar filhos.
         var erroPermissao = ValidarGestao(dto.Papel);
@@ -101,14 +103,12 @@ public class FamiliaService : IFamiliaService
             .IgnoreQueryFilters()
             .AnyAsync(u => !u.IsDeleted && u.NormalizedEmail == email.ToUpperInvariant(), ct);
         if (emailExiste)
-            return ResultadoOperacao<ConviteMembroResultadoDTO>.Falha("Já existe uma conta com este e-mail.");
+            return ResultadoOperacao<ConviteMembroResultadoDTO>.Falha(ErrosApp.EmailJaCadastrado);
 
         // Limite de membros do plano (conta apenas membros ativos como assentos ocupados).
         var (totalAtual, limite) = await ObterUsoMembrosAsync(ct);
         if (totalAtual >= limite)
-            return ResultadoOperacao<ConviteMembroResultadoDTO>.Falha(
-                $"Seu plano atual permite até {limite} membro(s) ativo(s). " +
-                "Faça upgrade do plano para adicionar mais.");
+            return ResultadoOperacao<ConviteMembroResultadoDTO>.Falha(ErrosApp.LimiteMembrosPlano(limite));
 
         var papel = await _db.Roles.FirstOrDefaultAsync(r => r.Tipo == dto.Papel, ct);
         if (papel is null)
@@ -149,12 +149,24 @@ public class FamiliaService : IFamiliaService
 
         var usuario = await _db.Users.FirstOrDefaultAsync(u => u.Id == usuarioId, ct);
         if (usuario is null)
-            return ResultadoOperacao<ConviteMembroResultadoDTO>.Falha("Membro não encontrado.");
+            return ResultadoOperacao<ConviteMembroResultadoDTO>.Falha(ErrosApp.MembroNaoEncontrado);
 
         var papelAlvo = await ObterPapelDoUsuarioAsync(usuarioId, ct);
         var erroPermissao = ValidarGestao(papelAlvo?.Tipo);
         if (erroPermissao is not null)
             return ResultadoOperacao<ConviteMembroResultadoDTO>.Falha(erroPermissao);
+
+        // Quem já definiu a senha não tem convite pendente — o caminho dele é "esqueci minha senha".
+        if (usuario.PasswordHash != null)
+            return ResultadoOperacao<ConviteMembroResultadoDTO>.Falha(ErrosApp.MembroJaAtivouSenha);
+
+        // Convidar quem está desativado geraria um link que não permite entrar (lockout).
+        if (!usuario.Ativo)
+            return ResultadoOperacao<ConviteMembroResultadoDTO>.Falha(ErrosApp.ReativeAntesDeReenviar);
+
+        var espera = TempoRestanteParaReenvio(usuario);
+        if (espera is not null)
+            return ResultadoOperacao<ConviteMembroResultadoDTO>.Falha(ErrosApp.ConviteAguardeReenvio((int)espera.Value.TotalSeconds));
 
         var convite = await GerarEnviarConviteAsync(usuario, baseUrl, ct);
         return ResultadoOperacao<ConviteMembroResultadoDTO>.Ok(convite);
@@ -169,33 +181,32 @@ public class FamiliaService : IFamiliaService
         var emailLimpo = email?.Trim().ToLowerInvariant() ?? string.Empty;
 
         if (nomeLimpo.Length < 2)
-            return ResultadoOperacao.Falha("Informe o nome do membro.");
+            return ResultadoOperacao.Falha(ErrosApp.InformeNomeMembro);
         if (string.IsNullOrWhiteSpace(emailLimpo) || !emailLimpo.Contains('@'))
-            return ResultadoOperacao.Falha("Informe um e-mail válido.");
+            return ResultadoOperacao.Falha(ErrosApp.InformeEmail);
 
         var usuario = await _db.Users.FirstOrDefaultAsync(u => u.Id == usuarioId, ct);
         if (usuario is null)
-            return ResultadoOperacao.Falha("Membro não encontrado.");
+            return ResultadoOperacao.Falha(ErrosApp.MembroNaoEncontrado);
 
         var papel = await ObterPapelDoUsuarioAsync(usuarioId, ct);
         var erroPermissao = ValidarGestao(papel?.Tipo);
         if (erroPermissao is not null)
             return ResultadoOperacao.Falha(erroPermissao);
         if (papel?.Tipo == PapelUsuario.Owner)
-            return ResultadoOperacao.Falha("Os dados do administrador (Owner) devem ser alterados no perfil.");
+            return ResultadoOperacao.Falha(ErrosApp.OwnerDadosNoPerfil);
 
         // Só é editável enquanto o convite está pendente (senha ainda não definida).
         // Depois que o membro define a senha, ele já pode ter dados — o e-mail vira imutável.
         if (usuario.PasswordHash != null)
-            return ResultadoOperacao.Falha(
-                "Este membro já ativou a conta. O e-mail não pode mais ser alterado; use Desativar se necessário.");
+            return ResultadoOperacao.Falha(ErrosApp.MembroJaAtivouEmail);
 
         var emailNormalizado = emailLimpo.ToUpperInvariant();
         var emailEmUso = await _db.Users
             .IgnoreQueryFilters()
             .AnyAsync(u => !u.IsDeleted && u.Id != usuarioId && u.NormalizedEmail == emailNormalizado, ct);
         if (emailEmUso)
-            return ResultadoOperacao.Falha("Já existe uma conta com este e-mail.");
+            return ResultadoOperacao.Falha(ErrosApp.EmailJaCadastrado);
 
         var emailMudou = usuario.NormalizedEmail != emailNormalizado;
 
@@ -206,8 +217,15 @@ public class FamiliaService : IFamiliaService
         usuario.UserName = emailLimpo;
         usuario.NormalizedUserName = emailNormalizado;
         // Trocou o e-mail: o anterior nunca foi confirmado de fato — exige novo convite/confirmação.
+        // O novo carimbo invalida o convite já enviado, que foi parar no endereço errado.
         if (emailMudou)
+        {
             usuario.EmailConfirmed = false;
+            usuario.SecurityStamp = Guid.NewGuid().ToString();
+            // O envio anterior foi para o endereço errado: não deve segurar o reenvio
+            // para o e-mail corrigido, que é justamente o próximo passo esperado.
+            usuario.UltimoConviteEnviadoEm = null;
+        }
 
         await _db.SaveChangesAsync(ct);
 
@@ -222,18 +240,18 @@ public class FamiliaService : IFamiliaService
 
         // Trocar papel é escalonamento de privilégio — só o Owner pode.
         if (!_tenantContext.EhOwner)
-            return ResultadoOperacao.Falha("Somente o administrador pode alterar o papel de um membro.");
+            return ResultadoOperacao.Falha(ErrosApp.SomenteAdminAlteraPapel);
 
         if (novoPapel != PapelUsuario.Membro && novoPapel != PapelUsuario.Filho)
-            return ResultadoOperacao.Falha("Só é possível alternar entre Pai e Filho.");
+            return ResultadoOperacao.Falha(ErrosApp.SoAlternaPaiFilho);
 
         var usuario = await _db.Users.FirstOrDefaultAsync(u => u.Id == usuarioId, ct);
         if (usuario is null)
-            return ResultadoOperacao.Falha("Membro não encontrado.");
+            return ResultadoOperacao.Falha(ErrosApp.MembroNaoEncontrado);
 
         var papelAtual = await ObterPapelDoUsuarioAsync(usuarioId, ct);
         if (papelAtual?.Tipo == PapelUsuario.Owner)
-            return ResultadoOperacao.Falha("O papel do administrador (Owner) não pode ser alterado.");
+            return ResultadoOperacao.Falha(ErrosApp.OwnerPapelImutavel);
 
         var novoPapelEntidade = await _db.Roles.FirstOrDefaultAsync(r => r.Tipo == novoPapel, ct);
         if (novoPapelEntidade is null)
@@ -256,23 +274,21 @@ public class FamiliaService : IFamiliaService
 
         var usuario = await _db.Users.FirstOrDefaultAsync(u => u.Id == usuarioId, ct);
         if (usuario is null)
-            return ResultadoOperacao.Falha("Membro não encontrado.");
+            return ResultadoOperacao.Falha(ErrosApp.MembroNaoEncontrado);
 
         var papel = await ObterPapelDoUsuarioAsync(usuarioId, ct);
         var erroPermissao = ValidarGestao(papel?.Tipo);
         if (erroPermissao is not null)
             return ResultadoOperacao.Falha(erroPermissao);
         if (papel?.Tipo == PapelUsuario.Owner)
-            return ResultadoOperacao.Falha("O administrador (Owner) não pode ser desativado.");
+            return ResultadoOperacao.Falha(ErrosApp.OwnerNaoPodeSerDesativado);
 
         // Reativar consome um assento — respeita o limite do plano.
         if (ativo && !usuario.Ativo)
         {
             var (totalAtual, limite) = await ObterUsoMembrosAsync(ct);
             if (totalAtual >= limite)
-                return ResultadoOperacao.Falha(
-                    $"Seu plano atual permite até {limite} membro(s) ativo(s). " +
-                    "Faça upgrade do plano para reativar este membro.");
+                return ResultadoOperacao.Falha(ErrosApp.LimiteMembrosPlano(limite));
         }
 
         usuario.Ativo = ativo;
@@ -291,27 +307,26 @@ public class FamiliaService : IFamiliaService
 
         var usuario = await _db.Users.FirstOrDefaultAsync(u => u.Id == usuarioId, ct);
         if (usuario is null)
-            return ResultadoOperacao.Falha("Membro não encontrado.");
+            return ResultadoOperacao.Falha(ErrosApp.MembroNaoEncontrado);
 
         var papel = await ObterPapelDoUsuarioAsync(usuarioId, ct);
         var erroPermissao = ValidarGestao(papel?.Tipo);
         if (erroPermissao is not null)
             return ResultadoOperacao.Falha(erroPermissao);
         if (papel?.Tipo == PapelUsuario.Owner)
-            return ResultadoOperacao.Falha("O administrador (Owner) não pode ser removido.");
+            return ResultadoOperacao.Falha(ErrosApp.OwnerNaoPodeSerRemovido);
 
         // Exclusão FÍSICA só é permitida na fase de criação (convite pendente, senha não definida):
         // sem senha o membro nunca logou, logo não tem dados no sistema. Depois disso, só Desativar.
         if (usuario.PasswordHash != null)
-            return ResultadoOperacao.Falha(
-                "Este membro já ativou a conta e pode ter dados no sistema. Use Desativar em vez de remover.");
+            return ResultadoOperacao.Falha(ErrosApp.MembroJaAtivouRemocao);
 
         // DELETE físico (libera totalmente o e-mail no Identity). ExecuteDelete ignora o soft-delete
         // do SaveChanges; respeita os filtros globais (tenant + não-removido), então é escopado ao tenant.
         await _db.UserRoles.Where(ur => ur.UserId == usuarioId).ExecuteDeleteAsync(ct);
         var removidos = await _db.Users.Where(u => u.Id == usuarioId).ExecuteDeleteAsync(ct);
         if (removidos == 0)
-            return ResultadoOperacao.Falha("Membro não encontrado.");
+            return ResultadoOperacao.Falha(ErrosApp.MembroNaoEncontrado);
 
         _logger.LogInformation("Membro {UsuarioId} removido fisicamente (convite pendente).", usuarioId);
         return ResultadoOperacao.Ok();
@@ -349,6 +364,20 @@ public class FamiliaService : IFamiliaService
         return null;
     }
 
+    /// <summary>
+    /// Intervalo mínimo entre reenvios do mesmo convite. Evita disparar vários e-mails com
+    /// cliques repetidos (e transformar o botão em vetor de spam para o endereço convidado).
+    /// </summary>
+    private static readonly TimeSpan IntervaloMinimoReenvio = TimeSpan.FromMinutes(2);
+
+    /// <summary>Quanto ainda falta para poder reenviar o convite, ou null se já é permitido.</summary>
+    private static TimeSpan? TempoRestanteParaReenvio(Usuario usuario)
+    {
+        if (usuario.UltimoConviteEnviadoEm is null) return null;
+        var restante = usuario.UltimoConviteEnviadoEm.Value + IntervaloMinimoReenvio - DateTime.UtcNow;
+        return restante > TimeSpan.Zero ? restante : null;
+    }
+
     private async Task<Papel?> ObterPapelDoUsuarioAsync(string usuarioId, CancellationToken ct)
     {
         return await (
@@ -361,20 +390,39 @@ public class FamiliaService : IFamiliaService
     private async Task<ConviteMembroResultadoDTO> GerarEnviarConviteAsync(
         Usuario usuario, string baseUrl, CancellationToken ct)
     {
-        var token = await _userManager.GeneratePasswordResetTokenAsync(usuario);
+        // Token do provider de convite (validade longa), não o de reset de senha.
+        var token = await _userManager.GenerateUserTokenAsync(
+            usuario, ConviteToken.Provider, ConviteToken.Proposito);
         var tokenCodificado = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+        // convite=1 diz à página qual provider deve validar o token.
         var link = $"{baseUrl.TrimEnd('/')}/Identity/Account/RedefinirSenha" +
-                   $"?userId={Uri.EscapeDataString(usuario.Id)}&token={tokenCodificado}";
+                   $"?userId={Uri.EscapeDataString(usuario.Id)}&token={tokenCodificado}&convite=1";
+
+        usuario.UltimoConviteEnviadoEm = DateTime.UtcNow;
+        await _db.SaveChangesAsync(ct);
 
         if (_emailService.Habilitado)
         {
-            await _emailService.EnviarResetSenhaAsync(usuario.Email!, usuario.NomeCompleto, link, ct);
-            return new ConviteMembroResultadoDTO { UsuarioId = usuario.Id, EmailEnviado = true };
+            await _emailService.EnviarConviteMembroAsync(
+                usuario.Email!, usuario.NomeCompleto, _tenantContext.UsuarioNome,
+                link, ConviteToken.DiasValidade, ct);
+            return new ConviteMembroResultadoDTO
+            {
+                UsuarioId  = usuario.Id,
+                NomeMembro = usuario.NomeCompleto,
+                EmailEnviado = true,
+            };
         }
 
         // Sem SMTP (dev): devolve o link para o Owner compartilhar manualmente.
         _logger.LogWarning("SMTP desabilitado — link de convite de {Email} retornado para compartilhamento manual.",
             usuario.Email);
-        return new ConviteMembroResultadoDTO { UsuarioId = usuario.Id, EmailEnviado = false, LinkConvite = link };
+        return new ConviteMembroResultadoDTO
+        {
+            UsuarioId    = usuario.Id,
+            NomeMembro   = usuario.NomeCompleto,
+            EmailEnviado = false,
+            LinkConvite  = link,
+        };
     }
 }

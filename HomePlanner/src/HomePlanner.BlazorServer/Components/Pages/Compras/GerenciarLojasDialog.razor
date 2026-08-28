@@ -112,7 +112,7 @@
             await CarregarAsync();
         }
         else
-            Snackbar.Add(string.Join(", ", res.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(res.Erros), Severity.Error);
     }
 
     private async Task SalvarLoja(LojaEdit loja)
@@ -123,7 +123,7 @@
             Nome = loja.Nome, Icone = loja.Icone, Cor = loja.Cor,
         });
         if (res.Sucesso) _mudou = true;
-        else Snackbar.Add(string.Join(", ", res.Erros), Severity.Error);
+        else Snackbar.Add(L.Traduzir(res.Erros), Severity.Error);
     }
 
     private async Task DefinirIcone(LojaEdit loja, string chave)
@@ -153,7 +153,7 @@
             await CarregarAsync();
         }
         else
-            Snackbar.Add(string.Join(", ", res.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(res.Erros), Severity.Error);
     }
 
     private void Fechar() => MudDialog.Close(DialogResult.Ok(_mudou));

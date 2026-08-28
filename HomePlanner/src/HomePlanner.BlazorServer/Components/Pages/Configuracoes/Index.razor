@@ -99,7 +99,7 @@ else
         if (r.Sucesso)
             Snackbar.Add(L["Msg_SalvoOk"], Severity.Success);
         else
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
     }
 
     private string NomeTipo(string tipo) => tipo switch

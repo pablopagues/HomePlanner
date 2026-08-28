@@ -178,7 +178,7 @@ else if (_atual is not null)
         if (r.Sucesso && r.Valor is not null)
             Nav.NavigateTo(r.Valor.Url, forceLoad: true);
         else
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
     }
 
     private async Task GerenciarAsync()
@@ -190,7 +190,7 @@ else if (_atual is not null)
         if (r.Sucesso && r.Valor is not null)
             Nav.NavigateTo(r.Valor.Url, forceLoad: true);
         else
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
     }
 
     private void LimparStatus() => _statusRetorno = null;

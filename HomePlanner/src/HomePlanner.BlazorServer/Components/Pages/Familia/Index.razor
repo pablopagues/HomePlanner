@@ -12,6 +12,7 @@
 @inject ISnackbar Snackbar
 @inject NavigationManager Nav
 @inject PublicLanguageService Lang
+@inject IJSRuntime JS
 
 <PageTitle>@L["Fam_Titulo"] — HomePlanner</PageTitle>
 
@@ -51,6 +52,26 @@
     }
 </AuthorizeView>
 
+@* Sem SMTP (dev): o link fica aqui, identificado pelo membro, em vez de dentro do form de cadastro. *@
+<AuthorizeView Roles="Owner,Membro">
+    @if (_convite is not null)
+    {
+        <MudAlert Severity="Severity.Info" Class="mb-4" ShowCloseIcon="true"
+                  CloseIconClicked="@((MudAlert _) => _convite = null)">
+            <MudText Typo="Typo.body2">
+                @string.Format(L["Fam_LinkConviteDe"], _convite.NomeMembro)
+            </MudText>
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="mt-1">
+                <MudLink Href="@_convite.LinkConvite" Target="_blank" Style="word-break:break-all;">
+                    @_convite.LinkConvite
+                </MudLink>
+                <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Size="Size.Small"
+                               Title="@L["Btn_Copiar"]" OnClick="CopiarLinkConviteAsync" />
+            </MudStack>
+        </MudAlert>
+    }
+</AuthorizeView>
+
 <AuthorizeView Roles="Owner,Membro">
     @if (_mostrarForm)
     {
@@ -84,14 +105,6 @@
                         @L["Btn_Cancelar"]
                     </MudButton>
                 </MudStack>
-
-                @if (_linkConvite is not null)
-                {
-                    <MudAlert Severity="Severity.Info" Dense="true">
-                        @L["Fam_LinkConviteManual"]
-                        <MudLink Href="@_linkConvite" Target="_blank" Class="ml-1">@_linkConvite</MudLink>
-                    </MudAlert>
-                }
             </MudStack>
         </MudPaper>
     }
@@ -153,6 +166,12 @@ else
                 else if (!context.SenhaDefinida)
                 {
                     <MudChip T="string" Size="Size.Small" Color="Color.Warning">@L["Fam_Pendente"]</MudChip>
+                    @if (context.UltimoConviteEnviadoEm is not null)
+                    {
+                        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="d-block">
+                            @string.Format(L["Fam_ConviteEnviadoEm"], TempoDesde(context.UltimoConviteEnviadoEm.Value))
+                        </MudText>
+                    }
                 }
                 else
                 {
@@ -163,53 +182,63 @@ else
                 <MudTd Style="text-align:right;">
                     @if (PodeGerenciar(context))
                     {
-                        <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true"
-                                 AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
-                            @if (!context.SenhaDefinida)
+                        <MudStack Row="true" Spacing="1" Justify="Justify.FlexEnd" AlignItems="AlignItems.Center">
+                            @* Reenviar é a ação mais buscada num convite pendente — fica visível, não escondida no menu.
+                               Membro desativado não recebe convite: o link levaria a um login bloqueado. *@
+                            @if (!context.SenhaDefinida && context.Ativo)
                             {
-                                <MudMenuItem OnClick="@(() => AbrirEdicao(context))">
-                                    @L["Fam_Editar"]
-                                </MudMenuItem>
-                                <MudMenuItem OnClick="@(() => ReenviarConviteAsync(context))">
+                                <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary"
+                                           StartIcon="@Icons.Material.Filled.Send"
+                                           Disabled="@(_reenviandoId == context.UsuarioId)"
+                                           OnClick="@(() => ReenviarConviteAsync(context))">
                                     @L["Fam_ReenviarConvite"]
-                                </MudMenuItem>
+                                </MudButton>
                             }
-                            @* Trocar papel é exclusivo do Owner (escalonamento de privilégio). *@
-                            @if (_ehOwner)
-                            {
-                                @if (context.Papel == PapelUsuario.Filho)
+                            <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true"
+                                     AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+                                @if (!context.SenhaDefinida)
                                 {
-                                    <MudMenuItem OnClick="@(() => AlterarPapelAsync(context, PapelUsuario.Membro))">
-                                        @L["Fam_TornarPai"]
+                                    <MudMenuItem OnClick="@(() => AbrirEdicao(context))">
+                                        @L["Fam_Editar"]
+                                    </MudMenuItem>
+                                }
+                                @* Trocar papel é exclusivo do Owner (escalonamento de privilégio). *@
+                                @if (_ehOwner)
+                                {
+                                    @if (context.Papel == PapelUsuario.Filho)
+                                    {
+                                        <MudMenuItem OnClick="@(() => AlterarPapelAsync(context, PapelUsuario.Membro))">
+                                            @L["Fam_TornarPai"]
+                                        </MudMenuItem>
+                                    }
+                                    else
+                                    {
+                                        <MudMenuItem OnClick="@(() => AlterarPapelAsync(context, PapelUsuario.Filho))">
+                                            @L["Fam_TornarFilho"]
+                                        </MudMenuItem>
+                                    }
+                                }
+                                @if (context.Ativo)
+                                {
+                                    <MudMenuItem OnClick="@(() => DefinirAtivoAsync(context, false))">
+                                        @L["Fam_Desativar"]
                                     </MudMenuItem>
                                 }
                                 else
                                 {
-                                    <MudMenuItem OnClick="@(() => AlterarPapelAsync(context, PapelUsuario.Filho))">
-                                        @L["Fam_TornarFilho"]
+                                    <MudMenuItem OnClick="@(() => DefinirAtivoAsync(context, true))">
+                                        @L["Fam_Reativar"]
                                     </MudMenuItem>
                                 }
-                            }
-                            @if (context.Ativo)
-                            {
-                                <MudMenuItem OnClick="@(() => DefinirAtivoAsync(context, false))">
-                                    @L["Fam_Desativar"]
-                                </MudMenuItem>
-                            }
-                            else
-                            {
-                                <MudMenuItem OnClick="@(() => DefinirAtivoAsync(context, true))">
-                                    @L["Fam_Reativar"]
-                                </MudMenuItem>
-                            }
-                            @if (!context.SenhaDefinida)
-                            {
-                                <MudMenuItem OnClick="@(() => RemoverAsync(context))"
-                                             IconColor="Color.Error" Style="color:var(--mud-palette-error);">
-                                    @L["Fam_Remover"]
-                                </MudMenuItem>
-                            }
-                        </MudMenu>
+                                @if (!context.SenhaDefinida)
+                                {
+                                    <MudMenuItem OnClick="@(() => RemoverAsync(context))"
+                                                 IconColor="Color.Error" Style="color:var(--mud-palette-error);">
+                                        @L["Fam_Remover"]
+                                    </MudMenuItem>
+                                }
+                            </MudMenu>
+                        </MudStack>
                     }
                 </MudTd>
             </AuthorizeView>
@@ -224,10 +253,15 @@ else
     private bool _mostrarForm;
     private bool _salvando;
     private NovoMembroDTO _novo = new();
-    private string? _linkConvite;
     private MembroFamiliaDetalheDTO? _editando;
     private NovoMembroDTO _edit = new();
     private bool _ehOwner;
+
+    /// <summary>Convite cujo link precisa ser compartilhado à mão (SMTP desligado).</summary>
+    private ConviteMembroResultadoDTO? _convite;
+
+    /// <summary>Membro com reenvio em andamento — evita cliques repetidos na mesma linha.</summary>
+    private string? _reenviandoId;
 
     [CascadingParameter] private Task<AuthenticationState>? AuthState { get; set; }
 
@@ -261,24 +295,23 @@ else
     private async Task AdicionarAsync()
     {
         _salvando = true;
-        _linkConvite = null;
+        _convite = null;
         var r = await Service.AdicionarMembroAsync(_novo, Nav.BaseUri);
         _salvando = false;
 
         if (!r.Sucesso)
         {
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
             return;
         }
 
+        // O formulário sempre fecha; sem SMTP, o link aparece no alerta acima da tabela.
+        _mostrarForm = false;
         if (r.Valor!.EmailEnviado)
-        {
             Snackbar.Add(L["Fam_ConviteEnviado"], Severity.Success);
-            _mostrarForm = false;
-        }
         else
         {
-            _linkConvite = r.Valor.LinkConvite;
+            _convite = r.Valor;
             Snackbar.Add(L["Fam_MembroCriado"], Severity.Success);
         }
 
@@ -288,10 +321,14 @@ else
 
     private async Task ReenviarConviteAsync(MembroFamiliaDetalheDTO m)
     {
+        _reenviandoId = m.UsuarioId;
+        _convite = null;
         var r = await Service.ReenviarConviteAsync(m.UsuarioId, Nav.BaseUri);
+        _reenviandoId = null;
+
         if (!r.Sucesso)
         {
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
             return;
         }
 
@@ -299,10 +336,31 @@ else
             Snackbar.Add(L["Fam_ConviteEnviado"], Severity.Success);
         else
         {
-            _linkConvite = r.Valor.LinkConvite;
-            _mostrarForm = true;
+            _convite = r.Valor;
             Snackbar.Add(L["Fam_LinkGerado"], Severity.Success);
         }
+
+        // Recarrega para atualizar o "convite enviado há ..." da linha.
+        await CarregarAsync();
+    }
+
+    private async Task CopiarLinkConviteAsync()
+    {
+        if (_convite?.LinkConvite is null) return;
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", _convite.LinkConvite);
+        Snackbar.Add(L["Msg_LinkCopiado"], Severity.Success);
+    }
+
+    /// <summary>Tempo decorrido em texto ("há 5 minutos"). Calculado em UTC — independe do fuso do servidor.</summary>
+    private string TempoDesde(DateTime utc)
+    {
+        var decorrido = DateTime.UtcNow - utc;
+        if (decorrido < TimeSpan.FromMinutes(1)) return L["Fam_ConviteAgora"];
+        if (decorrido < TimeSpan.FromHours(1))
+            return string.Format(L["Fam_ConviteHaMinutos"], (int)decorrido.TotalMinutes);
+        if (decorrido < TimeSpan.FromDays(1))
+            return string.Format(L["Fam_ConviteHaHoras"], (int)decorrido.TotalHours);
+        return string.Format(L["Fam_ConviteHaDias"], (int)decorrido.TotalDays);
     }
 
     private void AbrirEdicao(MembroFamiliaDetalheDTO m)
@@ -321,7 +379,7 @@ else
 
         if (!r.Sucesso)
         {
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
             return;
         }
 
@@ -346,7 +404,7 @@ else
             await CarregarAsync();
         }
         else
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
     }
 
     private async Task AlterarPapelAsync(MembroFamiliaDetalheDTO m, PapelUsuario novoPapel)
@@ -358,7 +416,7 @@ else
             await CarregarAsync();
         }
         else
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
     }
 
     private async Task DefinirAtivoAsync(MembroFamiliaDetalheDTO m, bool ativo)
@@ -379,7 +437,7 @@ else
             await CarregarAsync();
         }
         else
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
     }
 
     private string NomePapel(PapelUsuario p) => p switch

@@ -80,6 +80,7 @@ public class RegistroModel : PageModel
             Email           = Input.Email,
             Senha           = Input.Senha,
             PaisId          = Input.PaisId,
+            AceitaTermos    = Input.AceitaTermos,
         });
 
         if (!resultado.Sucesso)

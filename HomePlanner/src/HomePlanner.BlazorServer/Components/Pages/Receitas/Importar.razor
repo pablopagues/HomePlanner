@@ -1,5 +1,6 @@
 @page "/receitas/importar"
 @attribute [Authorize]
+@inject IStringLocalizer<SharedResource> L
 
 <PageTitle>Importar Receita</PageTitle>
 
@@ -202,7 +203,7 @@
         else
         {
             _salvando = false;
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
         }
     }
 

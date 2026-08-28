@@ -1,6 +1,7 @@
 @page "/compras"
 @using HomePlanner.MobileApp.Services
 @inject ApiClient Api
+@inject IStringLocalizer<SharedResource> L
 
 <div class="barra-topo">
     <button class="menu-btn" style="color:var(--hp-primary)" @onclick="() => MudarSemana(-7)">‹</button>
@@ -8,7 +9,7 @@
     <button class="menu-btn" style="color:var(--hp-primary)" @onclick="() => MudarSemana(7)">›</button>
 </div>
 
-@if (carregando) { <p class="muted">Carregando...</p> }
+@if (carregando) { <p class="muted">@L["Btn_Carregando"]</p> }
 else if (erro is not null) { <p class="erro">@erro</p> }
 else
 {
@@ -16,7 +17,7 @@ else
         <h3>Do cardápio (@(_lista?.TotalReceitas ?? 0) receitas)</h3>
         @if (_lista is null || _lista.Itens.Count == 0)
         {
-            <p class="muted">Nenhum item calculado para esta semana.</p>
+            <p class="muted">@L["App_SemItensSemana"]</p>
         }
         else
         {
@@ -41,15 +42,15 @@ else
     {
         <div class="modal-fundo" @onclick="() => _modalAberto = false">
             <div class="modal" @onclick:stopPropagation="true">
-                <h3>Adicionar pedido</h3>
-                <label>O quê</label>
+                <h3>@L["App_AdicionarPedido"]</h3>
+                <label>@L["App_OQue"]</label>
                 <input @bind="_novoDescricao" placeholder="Ex.: papel toalha" />
-                <label>Quantidade (opcional)</label>
+                <label>@L["App_QuantidadeOpcional"]</label>
                 <input @bind="_novoQuantidade" placeholder="Ex.: 2 pacotes" />
                 <button class="btn-acao" @onclick="AdicionarPedido" disabled="@_salvando">
                     @(_salvando ? "Adicionando..." : "Adicionar")
                 </button>
-                <button class="link" @onclick="() => _modalAberto = false">Cancelar</button>
+                <button class="link" @onclick="() => _modalAberto = false">@L["Btn_Cancelar"]</button>
             </div>
         </div>
     }

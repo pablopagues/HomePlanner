@@ -2,6 +2,7 @@
 @page "/templates"
 @page "/plantillas"
 @attribute [Authorize]
+@inject IStringLocalizer<SharedResource> L
 
 <PageTitle>Modelos de Semana</PageTitle>
 
@@ -101,7 +102,7 @@ else
             Nav.NavigateTo($"/cardapio/{segunda:yyyy-MM-dd}");
         }
         else
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
     }
 
     private async Task ConfirmarExclusao(ModeloSemanaListaDTO modelo)
@@ -120,7 +121,7 @@ else
                 await CarregarAsync();
             }
             else
-                Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+                Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
         }
     }
 }

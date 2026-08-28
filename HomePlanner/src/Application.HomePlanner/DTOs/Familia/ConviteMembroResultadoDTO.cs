@@ -4,6 +4,9 @@ public class ConviteMembroResultadoDTO
 {
     public string UsuarioId { get; init; } = string.Empty;
 
+    /// <summary>Nome do membro convidado, para a tela dizer de quem é o link exibido.</summary>
+    public string NomeMembro { get; init; } = string.Empty;
+
     /// <summary>True quando o convite foi enviado por e-mail.</summary>
     public bool EmailEnviado { get; init; }
 

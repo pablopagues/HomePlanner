@@ -9,6 +9,7 @@
 @inject IFotoUsuarioService Foto
 @inject EstadoFotoUsuario EstadoFoto
 @inject EstadoMural Mural
+@inject IAssinaturaStatusReader StatusAssinatura
 @inject IDialogService Dialog
 @inject NavigationManager Nav
 @inject IJSRuntime JS
@@ -139,6 +140,18 @@ else
         <MudDrawer @bind-Open="_drawerAberto" ClipMode="DrawerClipMode.Always"
                    Elevation="2" Variant="DrawerVariant.Responsive">
             <MudNavMenu>
+                @* Assinatura bloqueada: os módulos saem do menu — o guarda de navegação
+                   barraria o clique de qualquer jeito, e link morto só frustra. *@
+                @if (_bloqueio.Bloqueada)
+                {
+                    <MudNavLink Href="@Lang.U(_ehOwner ? "/assinatura" : "/assinatura-expirada")"
+                                Icon="@Icons.Material.Filled.Lock">
+                        @L["Assin_BloqAcao"]
+                    </MudNavLink>
+                    <MudDivider Class="my-2" />
+                }
+                else
+                {
                 <MudNavLink Href="/dashboard" Match="NavLinkMatch.All"
                             Icon="@Icons.Material.Filled.Dashboard">
                     @L["Nav_Dashboard"]
@@ -172,6 +185,7 @@ else
                     @L["Nav_Familia"]
                 </MudNavLink>
                 <MudDivider Class="my-2" />
+                }
                 <AuthorizeView Roles="Owner">
                     <MudNavLink Href="@Lang.U("/empresa")"
                                 Icon="@Icons.Material.Filled.Home">
@@ -191,6 +205,11 @@ else
 
         <MudMainContent>
             <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-4">
+                @if (_bloqueio.Bloqueada && !NaTelaDeBloqueio)
+                {
+                    <AvisoAssinaturaBloqueada Motivo="_bloqueio.Motivo" PodeContratar="_ehOwner"
+                                              MostrarAcao="!NaTelaDePlanos" />
+                }
                 @Body
             </MudContainer>
         </MudMainContent>
@@ -209,6 +228,49 @@ else
     private const string MuralKey = "hp_mural";
     private PersistingComponentStateSubscription _langSub;
     private bool _drawerAberto = true;
+
+    [CascadingParameter] private Task<AuthenticationState>? AuthState { get; set; }
+
+    // ── Assinatura ────────────────────────────────────────────────────────────
+    // O middleware barra as cargas de página; aqui cuidamos da navegação dentro do
+    // circuito, que roda por SignalR e nunca passa pelo pipeline HTTP.
+    private EstadoAssinatura _bloqueio = EstadoAssinatura.Liberada;
+    private bool _ehOwner;
+
+    private static readonly string[] _rotasDeBloqueio =
+        ["assinatura-expirada", "subscription-expired", "suscripcion-expirada", "abonnement-expire"];
+
+    private static readonly string[] _rotasDePlanos =
+        ["assinatura", "subscription", "suscripcion", "abonnement"];
+
+    private string SegmentoAtual
+    {
+        get
+        {
+            var p = Nav.ToBaseRelativePath(Nav.Uri).Split('?')[0].Split('#')[0].Trim('/');
+            var idx = p.IndexOf('/');
+            return idx < 0 ? p : p[..idx];
+        }
+    }
+
+    private bool NaTelaDeBloqueio => _rotasDeBloqueio.Contains(SegmentoAtual, StringComparer.OrdinalIgnoreCase);
+    private bool NaTelaDePlanos   => _rotasDePlanos.Contains(SegmentoAtual, StringComparer.OrdinalIgnoreCase);
+
+    private string DestinoBloqueio =>
+        Lang.U(_ehOwner ? AssinaturaRotas.DestinoOwner : AssinaturaRotas.DestinoMembro);
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthState is null) return;
+
+        var usuario = (await AuthState).User;
+        if (usuario.Identity?.IsAuthenticated != true) return;
+
+        _ehOwner = usuario.IsInRole("Owner");
+
+        if (Guid.TryParse(usuario.FindFirst("tenant_id")?.Value, out var tenantId))
+            _bloqueio = await StatusAssinatura.ObterAsync(tenantId);
+    }
 
     private bool _isDark;
     private string _temaNome = "sage";
@@ -296,13 +358,27 @@ else
     // ── Modo Mural ────────────────────────────────────────────────────────────
     private void AoMudarMural() => InvokeAsync(StateHasChanged);
 
-    /// <summary>Guarda de navegação: no Mural, qualquer rota fora da allow-list volta para Tarefas.</summary>
+    /// <summary>
+    /// Guarda de navegação. No Mural, qualquer rota fora da allow-list volta para Tarefas.
+    /// Com a assinatura bloqueada, sobram a tela de planos, o perfil e as configurações.
+    /// </summary>
     private void AoNavegar(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
     {
-        if (!Mural.Ativo) return;
         var path = Nav.ToBaseRelativePath(e.Location);
-        if (!MuralRotas.Permitida(path))
-            Nav.NavigateTo(Lang.U("/planner"));
+
+        if (Mural.Ativo)
+        {
+            if (!MuralRotas.Permitida(path))
+                Nav.NavigateTo(Lang.U("/planner"));
+            return;
+        }
+
+        if (!_bloqueio.Bloqueada) return;
+
+        if (!AssinaturaRotas.Liberada(path))
+            Nav.NavigateTo(DestinoBloqueio);
+        else
+            InvokeAsync(StateHasChanged); // banner/menu dependem da rota atual
     }
 
     private async Task EntrarMural()

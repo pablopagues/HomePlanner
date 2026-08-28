@@ -11,4 +11,8 @@ public class MembroFamiliaDetalheDTO
     public bool Ativo { get; init; }
     public bool SenhaDefinida { get; init; }
     public DateTime? UltimoLogin { get; init; }
+
+    /// <summary>Quando o convite foi enviado pela última vez (UTC). Null enquanto nunca foi enviado
+    /// ou para membros criados antes do rastreio existir.</summary>
+    public DateTime? UltimoConviteEnviadoEm { get; init; }
 }

@@ -247,7 +247,7 @@
 
         if (!res.Sucesso)
         {
-            Snackbar.Add(string.Join(", ", res.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(res.Erros), Severity.Error);
             return;
         }
 
@@ -274,7 +274,7 @@
             if (_mostrarImport) await CarregarSugestoesAsync();
         }
         else
-            Snackbar.Add(string.Join(", ", res.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(res.Erros), Severity.Error);
     }
 
     private async Task SalvarProduto(ProdutoRow p)
@@ -286,7 +286,7 @@
         });
         if (!res.Sucesso)
         {
-            Snackbar.Add(string.Join(", ", res.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(res.Erros), Severity.Error);
             await CarregarAsync();
         }
     }
@@ -306,7 +306,7 @@
             await CarregarAsync();
         }
         else
-            Snackbar.Add(string.Join(", ", res.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(res.Erros), Severity.Error);
     }
 
     // ── Importar do histórico ────────────────────────────────────────────
@@ -336,7 +336,7 @@
 
         if (!res.Sucesso)
         {
-            Snackbar.Add(string.Join(", ", res.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(res.Erros), Severity.Error);
             return;
         }
 

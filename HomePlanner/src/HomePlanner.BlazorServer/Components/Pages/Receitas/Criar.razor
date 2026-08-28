@@ -1,5 +1,6 @@
 @page "/receitas/criar"
 @attribute [Authorize]
+@inject IStringLocalizer<SharedResource> L
 
 <PageTitle>Nova Receita</PageTitle>
 
@@ -51,7 +52,7 @@
                 Nav.NavigateTo("/receitas");
             }
             else
-                Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+                Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
         }
         catch (Exception ex)
         {

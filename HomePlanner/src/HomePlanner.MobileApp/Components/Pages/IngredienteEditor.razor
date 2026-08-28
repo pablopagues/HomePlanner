@@ -2,23 +2,24 @@
 @page "/ingredientes/{Id:int}/editar"
 @using HomePlanner.MobileApp.Services
 @inject ApiClient Api
+@inject IStringLocalizer<SharedResource> L
 @inject NavigationManager Nav
 
-<button class="link" style="text-align:left;width:auto" @onclick='() => Nav.NavigateTo("/ingredientes")'>‹ Voltar</button>
-<div class="barra-topo"><h2>@(Id.HasValue ? "Editar ingrediente" : "Novo ingrediente")</h2></div>
+<button class="link" style="text-align:left;width:auto" @onclick='() => Nav.NavigateTo("/ingredientes")'>‹ @L["Btn_Voltar"]</button>
+<div class="barra-topo"><h2>@(Id.HasValue ? L["App_EditarIngrediente"] : L["App_NovoIngrediente"])</h2></div>
 
-<label>Nome</label>
+<label>@L["Fam_Nome"]</label>
 <input @bind="_dto.Nome" />
 
-<label>Categoria (opcional)</label>
-<input @bind="_dto.Categoria" placeholder="Ex.: Laticínios" />
+<label>@L["App_Categoria"]</label>
+<input @bind="_dto.Categoria" placeholder="@L["App_CategoriaPlaceholder"]" />
 
 <button class="btn-acao" @onclick="SalvarAsync" disabled="@ocupado">
-    @(ocupado ? "Salvando..." : "Salvar")
+    @(ocupado ? L["Btn_Salvando"] : L["Btn_Salvar"])
 </button>
 @if (Id.HasValue)
 {
-    <button class="link" style="color:var(--hp-danger)" @onclick="ExcluirAsync">Excluir</button>
+    <button class="link" style="color:var(--hp-danger)" @onclick="ExcluirAsync">@L["Btn_Excluir"]</button>
 }
 @if (erro is not null) { <p class="erro">@erro</p> }
 
@@ -44,7 +45,7 @@
     private async Task SalvarAsync()
     {
         erro = null;
-        if (string.IsNullOrWhiteSpace(_dto.Nome)) { erro = "Informe o nome."; return; }
+        if (string.IsNullOrWhiteSpace(_dto.Nome)) { erro = L["App_InformeNome"]; return; }
         ocupado = true;
         var (_, err) = await Api.SalvarIngredienteAsync(_dto);
         ocupado = false;

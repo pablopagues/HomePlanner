@@ -110,10 +110,10 @@ public class EmpresaService : IEmpresaService
 
         var usuario = usuarioId is null ? null : await _userManager.FindByIdAsync(usuarioId);
         if (usuario is null)
-            return ResultadoOperacao.Falha("Usuário não encontrado.");
+            return ResultadoOperacao.Falha(ErrosApp.UsuarioNaoEncontrado);
 
         if (usuario.EmailConfirmed)
-            return ResultadoOperacao.Falha("Seu e-mail já está confirmado.");
+            return ResultadoOperacao.Falha(ErrosApp.EmailJaConfirmado);
 
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(usuario);
         var tokenCodificado = Base64UrlEncode(token);

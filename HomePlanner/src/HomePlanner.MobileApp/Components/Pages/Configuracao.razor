@@ -1,35 +1,58 @@
 @page "/config"
 @using HomePlanner.MobileApp.Services
 @inject ApiClient Api
+@inject IdiomaService Idioma
+@inject IStringLocalizer<SharedResource> L
 @inject NavigationManager Nav
 
-<button class="link" style="text-align:left;width:auto" @onclick='() => Nav.NavigateTo("/perfil")'>‹ Voltar</button>
-<div class="barra-topo"><h2>Configuração</h2></div>
+<button class="link" style="text-align:left;width:auto" @onclick='() => Nav.NavigateTo("/perfil")'>‹ @L["Btn_Voltar"]</button>
+<div class="barra-topo"><h2>@L["Cfg_Titulo"]</h2></div>
 
-@if (carregando) { <p class="muted">Carregando...</p> }
+@* Idioma é preferência do usuário, não da família — fica fora do DTO de configuração
+   e é salvo na hora, sem esperar o botão Salvar. *@
+<div class="card-hp">
+    <h3>@L["Cfg_Idioma"]</h3>
+    <select value="@Idioma.Atual" @onchange="TrocarIdiomaAsync">
+        @foreach (var lang in IdiomaService.Suportados)
+        {
+            <option value="@lang">@Idioma.NomeDoIdioma(lang)</option>
+        }
+    </select>
+</div>
+
+@if (carregando) { <p class="muted">@L["Btn_Carregando"]</p> }
 else if (_cfg is not null)
 {
     <div class="card-hp">
-        <h3>Refeições ativas</h3>
-        @foreach (var (chave, rotulo) in _tipos)
+        <h3>@L["Onb_TiposRefeicao"]</h3>
+        @foreach (var chave in _tipos)
         {
             <label class="item-check" style="border:none;cursor:pointer">
                 <input type="checkbox" checked="@_cfg.TiposRefeicaoAtivos.Contains(chave)"
                        @onchange="e => Alternar(chave, (bool)e.Value!)" />
-                <span>@rotulo</span>
+                <span>@NomeRefeicao(chave)</span>
             </label>
         }
     </div>
 
     <div class="card-hp">
-        <label>Antecedência do lembrete (min)</label>
+        @* O fuso decide a hora em que o lembrete dispara — precisa ser editável aqui,
+           não só na web, senão o lembrete sai na hora errada para quem só usa o app. *@
+        <label>@L["Onb_FusoHorario"]</label>
+        <select @bind="_cfg.FusoHorario">
+            @foreach (var (id, rotulo) in _fusos)
+            {
+                <option value="@id">@rotulo</option>
+            }
+        </select>
+        <label>@L["Cfg_Antecedencia"]</label>
         <input type="number" min="0" @bind="_cfg.MinutosAntecedenciaLembrete" />
-        <label>Tamanho padrão da família</label>
+        <label>@L["Onb_TamanhoFamilia"]</label>
         <input type="number" min="1" @bind="_cfg.TamanhoFamiliaPadrao" />
     </div>
 
     <button class="btn-acao" @onclick="SalvarAsync" disabled="@ocupado">
-        @(ocupado ? "Salvando..." : "Salvar")
+        @(ocupado ? L["Btn_Salvando"] : L["Btn_Salvar"])
     </button>
     @if (mensagem is not null) { <p class="@(sucesso ? "muted" : "erro")">@mensagem</p> }
 }
@@ -39,10 +62,43 @@ else if (_cfg is not null)
     private bool carregando = true, ocupado, sucesso;
     private string? mensagem;
 
-    private static readonly (string chave, string rotulo)[] _tipos =
+    // Mesma lista da web (Configuracoes/Index.razor) — manter em sincronia.
+    private static readonly (string Id, string Rotulo)[] _fusos =
     [
-        ("CafeManha","Café da manhã"),("Almoco","Almoço"),("Lanche","Lanche"),("Jantar","Jantar"),("Ceia","Ceia"),
+        ("America/Toronto",   "America/Toronto (Canadá)"),
+        ("America/Sao_Paulo", "America/Sao_Paulo (Brasil)"),
+        ("America/Vancouver", "America/Vancouver"),
+        ("Europe/Madrid",     "Europe/Madrid (Espanha)"),
     ];
+
+    private static readonly string[] _tipos =
+        ["CafeManha", "Almoco", "Lanche", "Jantar", "Ceia"];
+
+    private string NomeRefeicao(string chave) => chave switch
+    {
+        "CafeManha" => L["Refeicao_CafeManha"],
+        "Almoco"    => L["Refeicao_Almoco"],
+        "Lanche"    => L["Refeicao_Lanche"],
+        "Jantar"    => L["Refeicao_Jantar"],
+        "Ceia"      => L["Refeicao_Ceia"],
+        _           => chave,
+    };
+
+    /// <summary>
+    /// Troca o idioma na hora: aplica a cultura, re-renderiza e grava no perfil para as
+    /// notificações. Se a gravação falhar, o app segue no idioma novo — a preferência
+    /// local vale mesmo offline.
+    /// </summary>
+    private async Task TrocarIdiomaAsync(ChangeEventArgs e)
+    {
+        var lang = e.Value?.ToString();
+        if (!IdiomaService.EhSuportado(lang)) return;
+
+        Idioma.Definir(lang!);
+        StateHasChanged();
+
+        await Api.DefinirIdiomaAsync(lang!);
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -63,6 +119,6 @@ else if (_cfg is not null)
         var err = await Api.SalvarConfiguracaoAsync(_cfg!);
         ocupado = false;
         sucesso = err is null;
-        mensagem = err ?? "Configuração salva!";
+        mensagem = err ?? L["Cfg_Salvo"];
     }
 }

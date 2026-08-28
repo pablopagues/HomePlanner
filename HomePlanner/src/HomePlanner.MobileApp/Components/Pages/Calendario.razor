@@ -1,0 +1,127 @@
+@page "/calendario"
+@using HomePlanner.MobileApp.Services
+@inject ApiClient Api
+@inject IStringLocalizer<SharedResource> L
+@inject NavigationManager Nav
+
+@* Visão de calendário das tarefas. Na web é um mês; aqui é a semana — num celular o
+   mês vira sete colunas ilegíveis, e a semana é o horizonte que a família usa. *@
+
+<div class="barra-topo">
+    <h2>@L["Nav_Calendario"]</h2>
+    <button class="link" style="width:auto" @onclick='() => Nav.NavigateTo("/planner")'>@L["Nav_Planner"]</button>
+</div>
+
+<div class="linha" style="margin-bottom:.7rem">
+    <button class="link" style="width:auto" @onclick="() => MudarSemana(-7)">‹ @L["Cal_Anterior"]</button>
+    <span class="muted">@_segunda.ToString("dd/MM") – @_segunda.AddDays(6).ToString("dd/MM")</span>
+    <button class="link" style="width:auto" @onclick="() => MudarSemana(7)">@L["Cal_Proxima"] ›</button>
+</div>
+
+@if (_membros.Count > 1)
+{
+    <select @bind="_responsavelId" @bind:after="CarregarAsync" style="margin-bottom:.7rem">
+        <option value="">@L["Cal_TodosMembros"]</option>
+        @foreach (var m in _membros)
+        {
+            <option value="@m.UsuarioId">@m.Nome</option>
+        }
+    </select>
+}
+
+@if (carregando) { <p class="muted">@L["Btn_Carregando"]</p> }
+else if (erro is not null) { <p class="erro">@erro</p> }
+else
+{
+    @foreach (var dia in Dias)
+    {
+        var doDia = _tarefas.Where(t => t.DataPrevista == dia).OrderBy(t => t.HoraInicio).ToList();
+        <div class="card-hp">
+            <div class="linha">
+                <h3>@NomeDia(dia)</h3>
+                <span class="muted">@dia.ToString("dd/MM")</span>
+            </div>
+
+            @if (doDia.Count == 0)
+            {
+                <p class="muted">@L["Cal_NadaAgendado"]</p>
+            }
+            else
+            {
+                @foreach (var t in doDia)
+                {
+                    <div class="item-check" @onclick="() => Abrir(t.Id)" style="cursor:pointer">
+                        <span class="@(t.Concluida ? "riscado" : "")" style="flex:1">
+                            @(t.HoraInicio.HasValue ? t.HoraInicio.Value.ToString("HH\\:mm") + " · " : "")@t.Titulo
+                        </span>
+                        @if (!string.IsNullOrEmpty(t.ResponsavelNome))
+                        {
+                            <span class="pill">@t.ResponsavelNome</span>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    }
+}
+
+@code {
+    private DateOnly _segunda;
+    private List<TarefaListaDTO> _tarefas = [];
+    private List<MembroSimplesDTO> _membros = [];
+    private string _responsavelId = "";
+    private bool carregando = true;
+    private string? erro;
+
+    private IEnumerable<DateOnly> Dias => Enumerable.Range(0, 7).Select(i => _segunda.AddDays(i));
+
+    protected override async Task OnInitializedAsync()
+    {
+        _segunda = SegundaDe(DateOnly.FromDateTime(DateTime.Now));
+
+        var (membros, _) = await Api.MembrosPlannerAsync();
+        _membros = membros ?? [];
+
+        await CarregarAsync();
+    }
+
+    private static DateOnly SegundaDe(DateOnly d)
+    {
+        // DayOfWeek começa no domingo; recuamos até a segunda.
+        var diff = ((int)d.DayOfWeek + 6) % 7;
+        return d.AddDays(-diff);
+    }
+
+    private async Task CarregarAsync()
+    {
+        carregando = true;
+        erro = null;
+
+        var (dados, err) = await Api.TarefasCalendarioAsync(
+            _segunda, _segunda.AddDays(6),
+            string.IsNullOrEmpty(_responsavelId) ? null : _responsavelId);
+
+        carregando = false;
+        if (err is not null) { erro = err; return; }
+        _tarefas = dados ?? [];
+    }
+
+    private async Task MudarSemana(int dias)
+    {
+        _segunda = _segunda.AddDays(dias);
+        await CarregarAsync();
+    }
+
+    private void Abrir(int id) => Nav.NavigateTo($"/tarefa/{id}");
+
+    private string NomeDia(DateOnly d) => d.DayOfWeek switch
+    {
+        DayOfWeek.Monday    => L["Dia_Segunda"],
+        DayOfWeek.Tuesday   => L["Dia_Terca"],
+        DayOfWeek.Wednesday => L["Dia_Quarta"],
+        DayOfWeek.Thursday  => L["Dia_Quinta"],
+        DayOfWeek.Friday    => L["Dia_Sexta"],
+        DayOfWeek.Saturday  => L["Dia_Sabado"],
+        _                   => L["Dia_Domingo"],
+    };
+}

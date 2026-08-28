@@ -5,6 +5,7 @@
     <Project Path="src/Framework.HomePlanner/Framework.HomePlanner.csproj" />
     <Project Path="src/HomePlanner.BlazorServer/HomePlanner.BlazorServer.csproj" />
     <Project Path="src/Infrastructure.HomePlanner/Infrastructure.HomePlanner.csproj" />
+    <Project Path="src/Resources.HomePlanner/Resources.HomePlanner.csproj" />
     <Project Path="src/HomePlanner.MobileApp/HomePlanner.MobileApp.csproj" />
   </Folder>
   <Folder Name="/tests/">

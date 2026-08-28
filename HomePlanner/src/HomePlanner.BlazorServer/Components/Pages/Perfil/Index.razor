@@ -5,6 +5,8 @@
 @using Application.HomePlanner.Services.Seguranca
 @using Application.HomePlanner.Services.Perfil
 @using Application.HomePlanner.Services.Empresa
+@using Application.HomePlanner.Services.Auth
+@inject ISenhaService Senha
 @using HomePlanner.BlazorServer.Services
 @using Microsoft.AspNetCore.Components.Forms
 @using QRCoder
@@ -84,6 +86,32 @@
 
 @* ─── Notificações push ──────────────────────────────────────────── *@
 <NotificacoesPush />
+
+@* ─── Alterar senha ──────────────────────────────────────────────── *@
+<MudPaper Class="pa-6 mb-4" Elevation="1" Style="border-radius:14px; max-width:620px;">
+    <MudText Typo="Typo.h6" Class="mb-3">@L["Perfil_Senha_Titulo"]</MudText>
+    <MudStack Spacing="3">
+        <MudTextField @bind-Value="_senhaAtual" Label="@L["Perfil_Senha_Atual"]"
+                      InputType="InputType.Password" Variant="Variant.Outlined" />
+        <MudTextField @bind-Value="_senhaNova" Label="@L["Perfil_Senha_Nova"]"
+                      InputType="InputType.Password" Variant="Variant.Outlined"
+                      HelperText="@L["Perfil_Senha_Ajuda"]" />
+        <MudTextField @bind-Value="_senhaConfirma" Label="@L["Perfil_Senha_Confirma"]"
+                      InputType="InputType.Password" Variant="Variant.Outlined" />
+
+        @if (_erroSenha is not null)
+        {
+            <MudAlert Severity="Severity.Error" Dense="true">@_erroSenha</MudAlert>
+        }
+
+        <div>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                       OnClick="AlterarSenhaAsync" Disabled="_alterandoSenha">
+                @(_alterandoSenha ? L["Btn_Salvando"] : L["Perfil_Senha_Botao"])
+            </MudButton>
+        </div>
+    </MudStack>
+</MudPaper>
 
 @if (_carregando)
 {
@@ -212,6 +240,42 @@ else
     private bool _emailConfirmado = true; // assume confirmado até carregar (evita flash do aviso)
     private bool _reenviando;
 
+    private string _senhaAtual = string.Empty;
+    private string _senhaNova = string.Empty;
+    private string _senhaConfirma = string.Empty;
+    private bool _alterandoSenha;
+    private string? _erroSenha;
+
+    private async Task AlterarSenhaAsync()
+    {
+        _erroSenha = null;
+
+        if (string.IsNullOrWhiteSpace(_senhaAtual) || string.IsNullOrWhiteSpace(_senhaNova))
+        {
+            _erroSenha = L["Perfil_Senha_Preencha"];
+            return;
+        }
+
+        if (_senhaNova != _senhaConfirma)
+        {
+            _erroSenha = L["Perfil_Senha_NaoCoincide"];
+            return;
+        }
+
+        _alterandoSenha = true;
+        var r = await Senha.AlterarAsync(_senhaAtual, _senhaNova);
+        _alterandoSenha = false;
+
+        if (!r.Sucesso)
+        {
+            _erroSenha = L.Traduzir(r.Erros);
+            return;
+        }
+
+        _senhaAtual = _senhaNova = _senhaConfirma = string.Empty;
+        Snackbar.Add(L["Perfil_Senha_Ok"], Severity.Success);
+    }
+
     protected override async Task OnInitializedAsync()
     {
         _versaoFoto = await Foto.ObterVersaoFotoAsync();
@@ -266,7 +330,7 @@ else
             }
             else
             {
-                Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+                Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
             }
         }
         catch (IOException)
@@ -293,7 +357,7 @@ else
         }
         else
         {
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
         }
     }
 
@@ -305,7 +369,7 @@ else
 
         if (!r.Sucesso || r.Valor is null)
         {
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
             return;
         }
 
@@ -330,7 +394,7 @@ else
 
         if (!r.Sucesso)
         {
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
             return;
         }
 
@@ -362,7 +426,7 @@ else
             Snackbar.Add(L["Perfil_2FA_NovosCodigosOk"], Severity.Warning);
         }
         else
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
     }
 
     private async Task DesativarAsync()
@@ -384,7 +448,7 @@ else
             Snackbar.Add(L["Perfil_2FA_DesativadoOk"], Severity.Info);
         }
         else
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
     }
 
     private static string GerarQrCode(string chave, string email)

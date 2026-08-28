@@ -1,3 +1,4 @@
+using Application.HomePlanner.DTOs.Perfil;
 using Application.HomePlanner.Services.Perfil;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
@@ -8,8 +9,13 @@ namespace HomePlanner.BlazorServer.Api;
 public class PerfilController : ApiControllerBase
 {
     private readonly IFotoUsuarioService _foto;
+    private readonly IPreferenciasUsuarioService _perfil;
 
-    public PerfilController(IFotoUsuarioService foto) => _foto = foto;
+    public PerfilController(IFotoUsuarioService foto, IPreferenciasUsuarioService perfil)
+    {
+        _foto = foto;
+        _perfil = perfil;
+    }
 
     /// <summary>Token de versão da foto atual (null se não houver) — útil para cache-busting.</summary>
     [HttpGet("foto/versao")]
@@ -54,4 +60,13 @@ public class PerfilController : ApiControllerBase
     [HttpDelete("foto")]
     public async Task<IActionResult> Remover(CancellationToken ct)
         => Responder(await _foto.RemoverFotoAsync(ct));
+
+    /// <summary>
+    /// Grava o idioma preferido do usuário. As telas já se traduzem sozinhas pelo
+    /// Accept-Language; isto é para as notificações, que são montadas fora de uma
+    /// requisição e só têm o que estiver em Usuario.Idioma.
+    /// </summary>
+    [HttpPut("idioma")]
+    public async Task<IActionResult> DefinirIdioma([FromBody] DefinirIdiomaDTO dto, CancellationToken ct)
+        => Responder(await _perfil.DefinirIdiomaAsync(dto.Idioma, ct));
 }

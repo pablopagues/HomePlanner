@@ -28,5 +28,9 @@
     </array>
     <key>XSAppIconAssets</key>
     <string>Assets.xcassets/appicon.appiconset</string>
+    <!-- Foto de perfil (MediaPicker). O iOS exige o texto explicando o uso; sem ele o
+         app é rejeitado na revisão e o seletor nem abre. -->
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>O HomePlanner precisa acessar suas fotos para você escolher uma foto de perfil.</string>
 </dict>
 </plist>

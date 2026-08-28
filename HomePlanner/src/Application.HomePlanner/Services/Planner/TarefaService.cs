@@ -84,10 +84,10 @@ public class TarefaService : ITarefaService
 
         dto.Titulo = dto.Titulo?.Trim() ?? string.Empty;
         if (dto.Titulo.Length < 2)
-            return ResultadoOperacao<int>.Falha("O título da tarefa deve ter pelo menos 2 caracteres.");
+            return ResultadoOperacao<int>.Falha(ErrosApp.TituloTarefaCurto);
 
         if (dto.HoraInicio.HasValue && dto.HoraFim.HasValue && dto.HoraFim < dto.HoraInicio)
-            return ResultadoOperacao<int>.Falha("A hora de fim deve ser igual ou posterior à hora de início.");
+            return ResultadoOperacao<int>.Falha(ErrosApp.HoraFimAntesDoInicio);
 
         var restrito = _tenantContext.RestritoAsProprias;
 
@@ -104,7 +104,7 @@ public class TarefaService : ITarefaService
 
             // Filho (papel restrito) só pode editar as próprias tarefas.
             if (restrito && !EhDono(entidade))
-                return ResultadoOperacao<int>.Falha("Você só pode editar as suas próprias tarefas.");
+                return ResultadoOperacao<int>.Falha(ErrosApp.SomenteTarefasProprias);
         }
 
         var responsavelAnterior = entidade.ResponsavelUsuarioId;
@@ -138,10 +138,10 @@ public class TarefaService : ITarefaService
 
         var entidade = await _repo.ObterEntidadeAsync(id, ct);
         if (entidade is null)
-            return ResultadoOperacao.Falha("Tarefa não encontrada.");
+            return ResultadoOperacao.Falha(ErrosApp.TarefaNaoEncontrada);
 
         if (_tenantContext.RestritoAsProprias && !EhDono(entidade))
-            return ResultadoOperacao.Falha("Você só pode alterar as suas próprias tarefas.");
+            return ResultadoOperacao.Falha(ErrosApp.SomenteTarefasProprias);
 
         entidade.Concluida     = concluida;
         entidade.DataConclusao = concluida ? DateTime.UtcNow : null;
@@ -167,10 +167,10 @@ public class TarefaService : ITarefaService
 
         var entidade = await _repo.ObterEntidadeAsync(id, ct);
         if (entidade is null)
-            return ResultadoOperacao.Falha("Tarefa não encontrada.");
+            return ResultadoOperacao.Falha(ErrosApp.TarefaNaoEncontrada);
 
         if (_tenantContext.RestritoAsProprias && !EhDono(entidade))
-            return ResultadoOperacao.Falha("Você só pode excluir as suas próprias tarefas.");
+            return ResultadoOperacao.Falha(ErrosApp.SomenteTarefasProprias);
 
         entidade.IsDeleted = true;
         await _repo.SalvarAsync(ct);

@@ -10,11 +10,13 @@ public class ApiClient
 {
     private readonly HttpClient _http;
     private readonly SessaoAtual _sessao;
+    private readonly ErroApi _erros;
 
-    public ApiClient(HttpClient http, SessaoAtual sessao)
+    public ApiClient(HttpClient http, SessaoAtual sessao, ErroApi erros)
     {
         _http = http;
         _sessao = sessao;
+        _erros = erros;
     }
 
     private string Url(string caminho) => $"{_sessao.BaseUrl.TrimEnd('/')}{caminho}";
@@ -27,7 +29,7 @@ public class ApiClient
             var resp = await _http.GetAsync(Url(caminho), ct);
             if (resp.IsSuccessStatusCode)
                 return (await resp.Content.ReadFromJsonAsync<T>(cancellationToken: ct), null);
-            return (default, await ErroApi.LerAsync(resp, ct));
+            return (default, await _erros.LerAsync(resp, ct));
         }
         catch (Exception ex) { return (default, $"Falha de conexão: {ex.Message}"); }
     }
@@ -39,7 +41,7 @@ public class ApiClient
             using var req = new HttpRequestMessage(metodo, Url(caminho));
             if (corpo is not null) req.Content = JsonContent.Create(corpo);
             var resp = await _http.SendAsync(req, ct);
-            return resp.IsSuccessStatusCode ? null : await ErroApi.LerAsync(resp, ct);
+            return resp.IsSuccessStatusCode ? null : await _erros.LerAsync(resp, ct);
         }
         catch (Exception ex) { return $"Falha de conexão: {ex.Message}"; }
     }
@@ -53,7 +55,7 @@ public class ApiClient
             var resp = await _http.SendAsync(req, ct);
             if (resp.IsSuccessStatusCode)
                 return (await resp.Content.ReadFromJsonAsync<T>(cancellationToken: ct), null);
-            return (default, await ErroApi.LerAsync(resp, ct));
+            return (default, await _erros.LerAsync(resp, ct));
         }
         catch (Exception ex) { return (default, $"Falha de conexão: {ex.Message}"); }
     }
@@ -71,6 +73,44 @@ public class ApiClient
         }
         catch { return null; }
     }
+
+    // ── Foto de perfil ────────────────────────────────────────────────────
+    /// <summary>Token de versão da foto atual — null quando não há foto.</summary>
+    public async Task<string?> ObterVersaoFotoAsync(CancellationToken ct = default)
+    {
+        var (dados, _) = await GetAsync<VersaoFotoDTO>("/api/perfil/foto/versao", ct);
+        return dados?.Versao;
+    }
+
+    /// <summary>
+    /// Envia a foto de perfil. Vai como multipart/form-data no campo "arquivo" — é o que
+    /// o PerfilController espera. O servidor redimensiona; o app manda o original.
+    /// </summary>
+    public async Task<(string? versao, string? erro)> EnviarFotoAsync(
+        byte[] conteudo, string contentType, string nomeArquivo, CancellationToken ct = default)
+    {
+        try
+        {
+            using var form = new MultipartFormDataContent();
+            var arquivo = new ByteArrayContent(conteudo);
+            arquivo.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentType);
+            form.Add(arquivo, "arquivo", nomeArquivo);
+
+            var resp = await _http.PostAsync(Url("/api/perfil/foto"), form, ct);
+            if (!resp.IsSuccessStatusCode) return (null, await _erros.LerAsync(resp, ct));
+
+            var dto = await resp.Content.ReadFromJsonAsync<VersaoFotoDTO>(cancellationToken: ct);
+            return (dto?.Versao, null);
+        }
+        catch (Exception ex) { return (null, $"Falha de conexão: {ex.Message}"); }
+    }
+
+    public Task<string?> RemoverFotoAsync(CancellationToken ct = default)
+        => EnviarAsync(HttpMethod.Delete, "/api/perfil/foto", null, ct);
+
+    /// <summary>Persiste o idioma no perfil — é o que as notificações leem.</summary>
+    public Task<string?> DefinirIdiomaAsync(string idioma, CancellationToken ct = default)
+        => EnviarAsync(HttpMethod.Put, "/api/perfil/idioma", new { Idioma = idioma }, ct);
 
     // ── Cardápio ──────────────────────────────────────────────────────────
     public Task<(CardapioSemanaDTO? dados, string? erro)> ObterCardapioSemanaAsync(DateOnly segunda, CancellationToken ct = default)
@@ -97,6 +137,10 @@ public class ApiClient
 
     public Task<(int dados, string? erro)> SalvarReceitaAsync(ReceitaPersistenciaRequest dto, CancellationToken ct = default)
         => EnviarAsync<int>(HttpMethod.Post, "/api/receitas", dto, ct);
+
+    /// <summary>Consumo da cota mensal de importação por IA (usado/limite do plano).</summary>
+    public Task<(UsoCotaImportacaoDTO? dados, string? erro)> ObterCotaImportacaoAsync(CancellationToken ct = default)
+        => GetAsync<UsoCotaImportacaoDTO>("/api/importacao/cota", ct);
 
     public Task<(ReceitaImportadaPreviewDTO? dados, string? erro)> ImportarReceitaUrlAsync(string url, CancellationToken ct = default)
         => EnviarAsync<ReceitaImportadaPreviewDTO>(HttpMethod.Post, "/api/importacao/url", new { url }, ct);
@@ -173,6 +217,17 @@ public class ApiClient
     public Task<string?> SalvarContaAsync(AtualizarEmpresaRequest dto, CancellationToken ct = default)
         => EnviarAsync(HttpMethod.Put, "/api/empresa", dto, ct);
 
+    public Task<string?> AlterarSenhaAsync(string senhaAtual, string novaSenha, CancellationToken ct = default)
+        => EnviarAsync(HttpMethod.Post, "/api/auth/alterar-senha",
+            new { SenhaAtual = senhaAtual, NovaSenha = novaSenha }, ct);
+
+    // ── Onboarding ────────────────────────────────────────────────────────
+    public Task<(ConfiguracaoFamiliaDTO? dados, string? erro)> ObterOnboardingAsync(CancellationToken ct = default)
+        => GetAsync<ConfiguracaoFamiliaDTO>("/api/onboarding", ct);
+
+    public Task<string?> FinalizarOnboardingAsync(ConfiguracaoFamiliaDTO dto, CancellationToken ct = default)
+        => EnviarAsync(HttpMethod.Post, "/api/onboarding/finalizar", dto, ct);
+
     public Task<string?> ReenviarConfirmacaoAsync(CancellationToken ct = default)
         => EnviarAsync(HttpMethod.Post, "/api/empresa/reenviar-confirmacao", null, ct);
 
@@ -188,6 +243,17 @@ public class ApiClient
 
     public Task<(int dados, string? erro)> SalvarTarefaAsync(TarefaPersistenciaRequest dto, CancellationToken ct = default)
         => EnviarAsync<int>(HttpMethod.Post, "/api/planner", dto, ct);
+
+    /// <summary>Tarefas agendadas no intervalo, para a visão de calendário.</summary>
+    public Task<(List<TarefaListaDTO>? dados, string? erro)> TarefasCalendarioAsync(
+        DateOnly de, DateOnly ate, string? responsavelUsuarioId = null, CancellationToken ct = default)
+    {
+        var filtro = string.IsNullOrEmpty(responsavelUsuarioId)
+            ? string.Empty
+            : $"&responsavelUsuarioId={Uri.EscapeDataString(responsavelUsuarioId)}";
+        return GetAsync<List<TarefaListaDTO>>(
+            $"/api/planner/calendario?de={de:yyyy-MM-dd}&ate={ate:yyyy-MM-dd}{filtro}", ct);
+    }
 
     public Task<(List<MembroSimplesDTO>? dados, string? erro)> MembrosPlannerAsync(CancellationToken ct = default)
         => GetAsync<List<MembroSimplesDTO>>("/api/planner/membros", ct);
@@ -223,6 +289,12 @@ public class ApiClient
 
     public Task<string?> AdicionarMembroAsync(NovoMembroRequest dto, CancellationToken ct = default)
         => EnviarAsync(HttpMethod.Post, "/api/familia/membros", dto, ct);
+
+    public Task<(ConviteMembroResultadoDTO? dados, string? erro)> ReenviarConviteAsync(string usuarioId, CancellationToken ct = default)
+        => EnviarAsync<ConviteMembroResultadoDTO>(HttpMethod.Post, $"/api/familia/membros/{usuarioId}/reenviar-convite", null, ct);
+
+    public Task<string?> EditarMembroAsync(string usuarioId, EditarMembroRequest dto, CancellationToken ct = default)
+        => EnviarAsync(HttpMethod.Put, $"/api/familia/membros/{usuarioId}", dto, ct);
 
     public Task<string?> AlterarPapelAsync(string usuarioId, string novoPapel, CancellationToken ct = default)
         => EnviarAsync(HttpMethod.Post, $"/api/familia/membros/{usuarioId}/papel", new { novoPapel }, ct);

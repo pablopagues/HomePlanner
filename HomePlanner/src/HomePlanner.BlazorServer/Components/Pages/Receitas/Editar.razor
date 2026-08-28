@@ -1,5 +1,6 @@
 @page "/receitas/editar/{Id:int}"
 @attribute [Authorize]
+@inject IStringLocalizer<SharedResource> L
 
 <PageTitle>Editar Receita</PageTitle>
 
@@ -108,7 +109,7 @@ else
                 Nav.NavigateTo("/receitas");
             }
             else
-                Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+                Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
         }
         catch (Exception ex)
         {

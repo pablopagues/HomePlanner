@@ -1,20 +1,21 @@
 @page "/planner"
 @using HomePlanner.MobileApp.Services
 @inject ApiClient Api
+@inject IStringLocalizer<SharedResource> L
 @inject NavigationManager Nav
 
-<div class="barra-topo"><h2>Tarefas</h2></div>
+<div class="barra-topo"><h2>@L["Nav_Planner"]</h2></div>
 
 <div class="linha" style="margin-bottom:.6rem">
     <label style="display:flex;align-items:center;gap:.4rem;color:var(--hp-text-2)">
         <input type="checkbox" style="width:18px;height:18px" @bind="ocultarConcluidas" @bind:after="CarregarAsync" />
-        Ocultar concluídas
+        @L["App_OcultarConcluidas"]
     </label>
 </div>
 
-@if (carregando) { <p class="muted">Carregando...</p> }
+@if (carregando) { <p class="muted">@L["Btn_Carregando"]</p> }
 else if (erro is not null) { <p class="erro">@erro</p> }
-else if (lista is null || lista.Itens.Count == 0) { <p class="muted">Nenhuma tarefa.</p> }
+else if (lista is null || lista.Itens.Count == 0) { <p class="muted">@L["App_SemTarefas"]</p> }
 else
 {
     @foreach (var t in lista.Itens)
@@ -25,7 +26,7 @@ else
                 <div style="flex:1;cursor:pointer" @onclick='() => Nav.NavigateTo($"/tarefa/{t.Id}")'>
                     <div class="@(t.Concluida ? "riscado" : "")"><strong>@t.Titulo</strong></div>
                     <div class="muted">
-                        @(t.DataPrevista?.ToString("dd/MM") ?? "sem data")
+                        @(t.DataPrevista?.ToString("dd/MM") ?? L["App_SemData"].Value)
                         @(t.HoraInicio is not null ? $" · {t.HoraInicio:HH\\:mm}" : "")
                         @(t.ResponsavelNome is not null ? $" · {t.ResponsavelNome}" : "")
                     </div>

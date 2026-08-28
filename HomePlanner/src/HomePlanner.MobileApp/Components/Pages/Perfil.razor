@@ -2,19 +2,44 @@
 @using HomePlanner.MobileApp.Services
 @inject ApiClient Api
 @inject SessaoAtual Sessao
+@inject LinksLegais Legais
+@inject IStringLocalizer<SharedResource> L
 @inject NavigationManager Nav
 
-<div class="barra-topo"><h2>Perfil</h2></div>
+<div class="barra-topo"><h2>@L["App_Perfil"]</h2></div>
 
-@if (carregando) { <p class="muted">Carregando...</p> }
+@if (carregando) { <p class="muted">@L["Btn_Carregando"]</p> }
 else
 {
     @if (_conta is not null)
     {
         <div class="card-hp">
-            <h3>@_conta.NomeResponsavel</h3>
-            <div class="muted">@_conta.Email</div>
-            <div class="muted">@(_conta.EmailConfirmado ? "E-mail confirmado" : "E-mail não confirmado")</div>
+            <div class="perfil-topo">
+                @if (_fotoSrc is not null)
+                {
+                    <img class="avatar" src="@_fotoSrc" alt="@L["Perfil_Foto_Titulo"]" />
+                }
+                else
+                {
+                    <div class="avatar avatar-vazio">@Iniciais(_conta.NomeResponsavel)</div>
+                }
+                <div>
+                    <h3>@_conta.NomeResponsavel</h3>
+                    <div class="muted">@_conta.Email</div>
+                    <div class="muted">@(_conta.EmailConfirmado ? L["Emp_EmailConfirmado"] : L["App_EmailNaoConfirmado"])</div>
+                </div>
+            </div>
+
+            <div class="aceite-links">
+                <button class="link" @onclick="EscolherFotoAsync" disabled="@_enviandoFoto">
+                    @(_enviandoFoto ? L["Auth_Enviando"] : (_fotoSrc is null ? L["App_AdicionarFoto"] : L["Perfil_Foto_Alterar"]))
+                </button>
+                @if (_fotoSrc is not null)
+                {
+                    <button class="link" @onclick="RemoverFotoAsync" disabled="@_enviandoFoto">@L["Perfil_Foto_Remover"]</button>
+                }
+            </div>
+            @if (_msgFoto is not null) { <p class="erro">@_msgFoto</p> }
         </div>
     }
 
@@ -22,34 +47,45 @@ else
     {
         <div class="card-hp">
             <div class="linha">
-                <h3>Plano @_assinatura.Plano</h3>
+                <h3>@string.Format(L["App_PlanoNome"], _assinatura.Plano)</h3>
                 <span class="pill">@_assinatura.Status</span>
             </div>
             @if (_assinatura.DiasRestantesTrial is int dias)
             {
-                <div class="muted">@dias dia(s) restante(s) no teste</div>
+                <div class="muted">@string.Format(L["App_DiasTeste"], dias)</div>
             }
-            <div class="muted">Até @_assinatura.LimiteMembros membros</div>
-            <p class="muted" style="margin-top:.6rem">Para mudar de plano, acesse a versão web.</p>
+            <div class="muted">@string.Format(L["App_AteMembros"], _assinatura.LimiteMembros)</div>
+            <p class="muted" style="margin-top:.6rem">@L["App_MudarPlanoWeb"]</p>
         </div>
     }
 
     @if (_config is not null)
     {
         <div class="card-hp">
-            <h3>Configuração</h3>
-            <div class="muted">Fuso: @_config.FusoHorario</div>
-            <div class="muted">Refeições: @string.Join(", ", _config.TiposRefeicaoAtivos)</div>
-            <div class="muted">Lembrete: @_config.MinutosAntecedenciaLembrete min antes</div>
+            <h3>@L["Cfg_Titulo"]</h3>
+            <div class="muted">@L["App_FusoLabel"]: @_config.FusoHorario</div>
+            <div class="muted">@L["App_RefeicoesLabel"]: @string.Join(", ", _config.TiposRefeicaoAtivos)</div>
+            <div class="muted">@L["App_LembreteLabel"]: @_config.MinutosAntecedenciaLembrete min</div>
         </div>
     }
 
     @if (erro is not null) { <p class="erro">@erro</p> }
 
-    <button class="btn-acao" @onclick='() => Nav.NavigateTo("/conta")'>🔐 Minha conta e 2FA</button>
-    <button class="btn-acao" @onclick='() => Nav.NavigateTo("/config")'>⚙️ Configuração</button>
-    <button class="btn-acao" style="background:#555" @onclick='() => Nav.NavigateTo("/feedback")'>💬 Enviar feedback</button>
-    <button class="btn-acao" style="background:var(--hp-danger)" @onclick="Sair">Sair da conta</button>
+    <button class="btn-acao" @onclick='() => Nav.NavigateTo("/conta")'>🔐 @L["App_MinhaContaBtn"]</button>
+    <button class="btn-acao" @onclick='() => Nav.NavigateTo("/config")'>⚙️ @L["App_ConfiguracaoBtn"]</button>
+    <button class="btn-acao" style="background:#555" @onclick='() => Nav.NavigateTo("/feedback")'>💬 @L["App_FeedbackBtn"]</button>
+
+    @* Privacidade e dados (LGPD). O canal de contato é o caminho oficial para pedir
+       acesso, correção ou exclusão dos dados — precisa estar visível também no app. *@
+    <div class="card-hp">
+        <h3>@L["App_PrivacidadeDados"]</h3>
+        <p class="muted">@L["App_PrivacidadeTexto"]</p>
+        <button class="btn-acao" @onclick="() => Legais.AbrirContatoAsync()">✉️ @L["App_FaleConosco"]</button>
+        <button class="link" @onclick="() => Legais.AbrirPrivacidadeAsync()">@L["Footer_Privacidade"]</button>
+        <button class="link" @onclick="() => Legais.AbrirTermosAsync()">@L["Footer_Termos"]</button>
+    </div>
+
+    <button class="btn-acao" style="background:var(--hp-danger)" @onclick="Sair">@L["App_SairConta"]</button>
 }
 
 @code {
@@ -58,6 +94,83 @@ else
     private ConfiguracaoFamiliaDTO? _config;
     private bool carregando = true;
     private string? erro;
+
+    private string? _fotoSrc;
+    private bool _enviandoFoto;
+    private string? _msgFoto;
+
+    /// <summary>
+    /// Escolhe uma imagem da galeria e envia. O MediaPicker cuida da permissão em tempo
+    /// de execução; a declaração no manifesto/plist é o outro lado da moeda — sem ela o
+    /// seletor abre vazio no Android, sem erro nenhum.
+    /// </summary>
+    private async Task EscolherFotoAsync()
+    {
+        _msgFoto = null;
+        try
+        {
+            var arquivo = await MediaPicker.Default.PickPhotoAsync();
+            if (arquivo is null) return; // usuário cancelou
+
+            _enviandoFoto = true;
+            StateHasChanged();
+
+            using var stream = await arquivo.OpenReadAsync();
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+
+            var tipo = string.IsNullOrEmpty(arquivo.ContentType) ? "image/jpeg" : arquivo.ContentType;
+            var (versao, err) = await Api.EnviarFotoAsync(ms.ToArray(), tipo, arquivo.FileName);
+
+            _enviandoFoto = false;
+            if (err is not null) { _msgFoto = err; return; }
+
+            await CarregarFotoAsync(versao);
+        }
+        catch (FeatureNotSupportedException)
+        {
+            _enviandoFoto = false;
+            _msgFoto = L["App_FotoNaoSuportada"];
+        }
+        catch (PermissionException)
+        {
+            _enviandoFoto = false;
+            _msgFoto = L["App_FotoSemPermissao"];
+        }
+        catch (Exception ex)
+        {
+            _enviandoFoto = false;
+            _msgFoto = string.Format(L["App_FotoErro"], ex.Message);
+        }
+    }
+
+    private async Task RemoverFotoAsync()
+    {
+        _msgFoto = null;
+        _enviandoFoto = true;
+        var err = await Api.RemoverFotoAsync();
+        _enviandoFoto = false;
+
+        if (err is not null) { _msgFoto = err; return; }
+        _fotoSrc = null;
+    }
+
+    /// <summary>Busca a foto autenticada e converte em data URL — &lt;img&gt; não manda Bearer.</summary>
+    private async Task CarregarFotoAsync(string? versao)
+    {
+        _fotoSrc = versao is null
+            ? null
+            : await Api.ObterImagemDataUrlAsync("/api/perfil/foto");
+    }
+
+    private static string Iniciais(string nome)
+    {
+        var partes = nome.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (partes.Length == 0) return "?";
+        var primeira = partes[0][0];
+        var ultima = partes.Length > 1 ? partes[^1][0] : ' ';
+        return $"{primeira}{ultima}".Trim().ToUpperInvariant();
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -68,6 +181,8 @@ else
         carregando = false;
         erro = e1;
         _conta = conta; _assinatura = ass; _config = cfg;
+
+        await CarregarFotoAsync(await Api.ObterVersaoFotoAsync());
     }
 
     private void Sair()

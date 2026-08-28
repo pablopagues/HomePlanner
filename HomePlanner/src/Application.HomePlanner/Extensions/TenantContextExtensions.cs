@@ -18,4 +18,7 @@ public static class TenantContextExtensions
 
     public static IApplicationBuilder UseOnboardingRequired(this IApplicationBuilder app)
         => app.UseMiddleware<OnboardingRequiredMiddleware>();
+
+    public static IApplicationBuilder UseAssinaturaRequired(this IApplicationBuilder app)
+        => app.UseMiddleware<AssinaturaRequiredMiddleware>();
 }

@@ -10,11 +10,13 @@ public class AuthApi
 {
     private readonly HttpClient _http;
     private readonly SessaoAtual _sessao;
+    private readonly ErroApi _erros;
 
-    public AuthApi(HttpClient http, SessaoAtual sessao)
+    public AuthApi(HttpClient http, SessaoAtual sessao, ErroApi erros)
     {
         _http = http;
         _sessao = sessao;
+        _erros = erros;
     }
 
     private string Url(string caminho) => $"{_sessao.BaseUrl.TrimEnd('/')}{caminho}";
@@ -32,7 +34,7 @@ public class AuthApi
                 if (dto?.Tokens is not null) await _sessao.DefinirTokensAsync(dto.Tokens);
                 return (dto, null);
             }
-            return (null, await ErroApi.LerAsync(resp, ct));
+            return (null, await _erros.LerAsync(resp, ct));
         }
         catch (Exception ex) { return (null, $"Falha de conexão: {ex.Message}"); }
     }
@@ -52,7 +54,7 @@ public class AuthApi
                 if (tokens is not null) { await _sessao.DefinirTokensAsync(tokens); return null; }
                 return "Resposta inválida do servidor.";
             }
-            return await ErroApi.LerAsync(resp, ct);
+            return await _erros.LerAsync(resp, ct);
         }
         catch (Exception ex) { return $"Falha de conexão: {ex.Message}"; }
     }
@@ -77,12 +79,26 @@ public class AuthApi
         catch { return false; }
     }
 
+    /// <summary>
+    /// Pede o e-mail de redefinição. A API responde 204 exista o e-mail ou não, então
+    /// a tela mostra sempre a mesma mensagem — não é falta de tratamento, é de propósito.
+    /// </summary>
+    public async Task<string?> EsqueciSenhaAsync(string email, CancellationToken ct = default)
+    {
+        try
+        {
+            var resp = await _http.PostAsJsonAsync(Url("/api/auth/esqueci-senha"), new { Email = email }, ct);
+            return resp.IsSuccessStatusCode ? null : await _erros.LerAsync(resp, ct);
+        }
+        catch (Exception ex) { return $"Falha de conexão: {ex.Message}"; }
+    }
+
     public async Task<string?> RegistrarAsync(RegistroRequest req, CancellationToken ct = default)
     {
         try
         {
             var resp = await _http.PostAsJsonAsync(Url("/api/registro"), req, ct);
-            return resp.IsSuccessStatusCode ? null : await ErroApi.LerAsync(resp, ct);
+            return resp.IsSuccessStatusCode ? null : await _erros.LerAsync(resp, ct);
         }
         catch (Exception ex) { return $"Falha de conexão: {ex.Message}"; }
     }

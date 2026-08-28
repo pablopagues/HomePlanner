@@ -1,13 +1,14 @@
 @page "/lojas"
 @using HomePlanner.MobileApp.Services
 @inject ApiClient Api
+@inject IStringLocalizer<SharedResource> L
 
-<div class="barra-topo"><h2>Lojas</h2></div>
-<p class="muted">Organize as compras por loja (Walmart, Costco, farmácia...).</p>
+<div class="barra-topo"><h2>@L["App_Lojas"]</h2></div>
+<p class="muted">@L["App_LojasDesc"]</p>
 
-@if (carregando) { <p class="muted">Carregando...</p> }
+@if (carregando) { <p class="muted">@L["Btn_Carregando"]</p> }
 else if (erro is not null) { <p class="erro">@erro</p> }
-else if (_lojas.Count == 0) { <p class="muted">Nenhuma loja cadastrada.</p> }
+else if (_lojas.Count == 0) { <p class="muted">@L["App_SemLojas"]</p> }
 else
 {
     @foreach (var l in _lojas)
@@ -16,8 +17,8 @@ else
             <div class="linha">
                 <h3>@l.Nome</h3>
                 <div class="linha" style="gap:.3rem">
-                    <button class="link" style="width:auto" @onclick="() => Editar(l)">Editar</button>
-                    <button class="link" style="width:auto;color:var(--hp-danger)" @onclick="() => Excluir(l.Id)">Excluir</button>
+                    <button class="link" style="width:auto" @onclick="() => Editar(l)">@L["Btn_Editar"]</button>
+                    <button class="link" style="width:auto;color:var(--hp-danger)" @onclick="() => Excluir(l.Id)">@L["Btn_Excluir"]</button>
                 </div>
             </div>
         </div>
@@ -30,13 +31,13 @@ else
 {
     <div class="modal-fundo" @onclick="() => _modalAberto = false">
         <div class="modal" @onclick:stopPropagation="true">
-            <h3>@(_editId.HasValue ? "Editar loja" : "Nova loja")</h3>
-            <label>Nome</label>
+            <h3>@(_editId.HasValue ? L["App_EditarLoja"] : L["Compras_NovaLoja"])</h3>
+            <label>@L["Fam_Nome"]</label>
             <input @bind="_nome" />
             <button class="btn-acao" @onclick="SalvarAsync" disabled="@_salvando">
-                @(_salvando ? "Salvando..." : "Salvar")
+                @(_salvando ? L["Btn_Salvando"] : L["Btn_Salvar"])
             </button>
-            <button class="link" @onclick="() => _modalAberto = false">Cancelar</button>
+            <button class="link" @onclick="() => _modalAberto = false">@L["Btn_Cancelar"]</button>
             @if (_erroModal is not null) { <p class="erro">@_erroModal</p> }
         </div>
     </div>
@@ -69,7 +70,7 @@ else
     private async Task SalvarAsync()
     {
         _erroModal = null;
-        if (string.IsNullOrWhiteSpace(_nome)) { _erroModal = "Informe o nome."; return; }
+        if (string.IsNullOrWhiteSpace(_nome)) { _erroModal = L["App_InformeNome"]; return; }
         _salvando = true;
         var dto = new LojaPersistenciaRequest { Nome = _nome.Trim() };
         _erroModal = _editId.HasValue

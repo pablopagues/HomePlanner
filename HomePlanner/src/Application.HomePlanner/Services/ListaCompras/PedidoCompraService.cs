@@ -61,7 +61,7 @@ public class PedidoCompraService : IPedidoCompraService
 
         dto.Descricao = dto.Descricao?.Trim() ?? string.Empty;
         if (dto.Descricao.Length < 2)
-            return ResultadoOperacao<int>.Falha("A descrição do pedido deve ter pelo menos 2 caracteres.");
+            return ResultadoOperacao<int>.Falha(ErrosApp.DescricaoPedidoCurta);
 
         // Filho só pode pedir para si; Owner/Membro escolhem (null = si mesmo).
         var solicitanteId = _tenantContext.RestritoAsProprias
@@ -89,10 +89,10 @@ public class PedidoCompraService : IPedidoCompraService
 
         var entidade = await _repo.ObterEntidadeAsync(id, ct);
         if (entidade is null)
-            return ResultadoOperacao.Falha("Pedido não encontrado.");
+            return ResultadoOperacao.Falha(ErrosApp.PedidoNaoEncontrado);
 
         if (_tenantContext.RestritoAsProprias && !EhDono(entidade))
-            return ResultadoOperacao.Falha("Você só pode alterar os seus próprios pedidos.");
+            return ResultadoOperacao.Falha(ErrosApp.SomentePedidosProprios);
 
         entidade.Comprado   = comprado;
         entidade.DataCompra = comprado ? DateTime.UtcNow : null;
@@ -107,10 +107,10 @@ public class PedidoCompraService : IPedidoCompraService
 
         var entidade = await _repo.ObterEntidadeAsync(id, ct);
         if (entidade is null)
-            return ResultadoOperacao.Falha("Pedido não encontrado.");
+            return ResultadoOperacao.Falha(ErrosApp.PedidoNaoEncontrado);
 
         if (_tenantContext.RestritoAsProprias && !EhDono(entidade))
-            return ResultadoOperacao.Falha("Você só pode excluir os seus próprios pedidos.");
+            return ResultadoOperacao.Falha(ErrosApp.SomentePedidosProprios);
 
         entidade.IsDeleted = true;
         await _repo.SalvarAsync(ct);

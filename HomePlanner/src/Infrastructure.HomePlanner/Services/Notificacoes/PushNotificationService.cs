@@ -60,7 +60,7 @@ public class PushNotificationService : IPushNotificationService
         await _tenantAccessor.GarantirHidratadoAsync();
         var tenantId = _tenantContext.TenantId ?? Guid.Empty;
         var usuarioId = _tenantContext.UsuarioId;
-        if (usuarioId is null) return ResultadoOperacao.Falha("Usuário não autenticado.");
+        if (usuarioId is null) return ResultadoOperacao.Falha(ErrosApp.SessaoInvalida);
 
         // Upsert por endpoint — inclui registros soft-deleted para reaproveitar (re-ativar).
         var existente = await _db.InscricoesPush

@@ -46,7 +46,7 @@ public class DispositivoPushService : IDispositivoPushService
         await _tenantAccessor.GarantirHidratadoAsync();
         var tenantId = _tenantContext.TenantId ?? Guid.Empty;
         var usuarioId = _tenantContext.UsuarioId;
-        if (usuarioId is null) return ResultadoOperacao.Falha("Usuário não autenticado.");
+        if (usuarioId is null) return ResultadoOperacao.Falha(ErrosApp.SessaoInvalida);
 
         // Upsert por token — reaproveita registros soft-deleted (reativa).
         var existente = await _db.DispositivosPush

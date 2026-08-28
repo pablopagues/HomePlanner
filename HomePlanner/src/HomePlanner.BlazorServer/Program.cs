@@ -25,6 +25,7 @@ using Infrastructure.HomePlanner.Contexts;
 using Infrastructure.HomePlanner.Repositories.Assinatura;
 using Infrastructure.HomePlanner.Repositories.Cardapio;
 using Infrastructure.HomePlanner.Repositories.Planner;
+using Infrastructure.HomePlanner.Services.Assinatura;
 using Infrastructure.HomePlanner.Services.Auth;
 using Infrastructure.HomePlanner.Services.Cardapio;
 using Infrastructure.HomePlanner.Services.Configuracao;
@@ -32,6 +33,7 @@ using Infrastructure.HomePlanner.Services.Contato;
 using Infrastructure.HomePlanner.Services.Email;
 using Infrastructure.HomePlanner.Services.Empresa;
 using Infrastructure.HomePlanner.Services.Familia;
+using Infrastructure.HomePlanner.Services.Identity;
 using Infrastructure.HomePlanner.Services.Notificacoes;
 using Infrastructure.HomePlanner.Services.Onboarding;
 using Infrastructure.HomePlanner.Services.Perfil;
@@ -39,6 +41,7 @@ using Infrastructure.HomePlanner.Services.Seguranca;
 using Infrastructure.HomePlanner.Services.Stripe;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using Serilog;
@@ -123,7 +126,9 @@ try
             opts.SignIn.RequireConfirmedEmail = false;
         })
         .AddEntityFrameworkStores<HomePlannerDbContext>()
-        .AddDefaultTokenProviders();
+        .AddDefaultTokenProviders()
+        // Convite de membro usa provider próprio (validade de 7 dias, contra 1 dia do padrão).
+        .AddTokenProvider<ConviteTokenProvider<Usuario>>(ConviteToken.Provider);
 
     // Claims factory customizado (adiciona tenant_id + NomeAmigavel)
     builder.Services.AddScoped<IUserClaimsPrincipalFactory<Usuario>, TenantUserClaimsPrincipalFactory>();
@@ -239,11 +244,13 @@ try
 
     // ── Auth / Onboarding / Email ─────────────────────────────────────────────
     builder.Services.AddScoped<IRegistroTenantService, RegistroTenantService>();
+    builder.Services.AddScoped<ISenhaService, SenhaService>();
     builder.Services.AddScoped<IOnboardingService, OnboardingService>();
     builder.Services.AddScoped<IConfiguracaoFamiliaService, ConfiguracaoFamiliaService>();
     builder.Services.AddScoped<IFamiliaService, FamiliaService>();
     builder.Services.AddScoped<IDoisFatoresService, DoisFatoresService>();
     builder.Services.AddScoped<IFotoUsuarioService, FotoUsuarioService>();
+    builder.Services.AddScoped<IPreferenciasUsuarioService, PreferenciasUsuarioService>();
     builder.Services.AddScoped<IOnboardingStatusReader, OnboardingStatusReader>();
     builder.Services.AddScoped<IEmailService, EmailService>();
     builder.Services.AddScoped<IEmpresaService, EmpresaService>();
@@ -282,6 +289,8 @@ try
     builder.Services.AddScoped<IStripeBillingService, StripeBillingService>();
     builder.Services.AddScoped<IStripeWebhookHandler, StripeWebhookHandler>();
     builder.Services.AddScoped<IAssinaturaService, AssinaturaService>();
+    // Guarda de acesso: trial vencido / pagamento em aberto bloqueiam o produto.
+    builder.Services.AddScoped<IAssinaturaStatusReader, AssinaturaStatusReader>();
 
     // ═══════════════════════════════════════════════════════════════════════════
     var app = builder.Build();
@@ -309,7 +318,11 @@ try
             .AddSupportedUICultures(suportados);
 
         opts.RequestCultureProviders.Clear();
+        // Páginas: o cookie manda e encerra a cadeia.
         opts.RequestCultureProviders.Add(new PublicLangCookieProvider());
+        // /api: o cookie se abstém e o idioma vem do Accept-Language do app.
+        // Sem provider nenhum aqui, a API responderia sempre em pt-BR.
+        opts.RequestCultureProviders.Add(new AcceptLanguageHeaderRequestCultureProvider());
     });
 
     // ── Troca de idioma (GET /set-lang?lang=pt|en|es|fr&returnUrl=/) ─────────
@@ -356,6 +369,7 @@ try
     app.UseAuthentication();
     app.UseTenantContext();
     app.UseOnboardingRequired();
+    app.UseAssinaturaRequired();
     app.UseAuthorization();
     app.UseAntiforgery();
 

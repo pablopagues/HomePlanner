@@ -1,6 +1,7 @@
 @* Diálogo: extrai linhas de ingrediente selecionadas numa nova receita-componente *@
 @inject IReceitaService ReceitaService
 @inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResource> L
 
 <MudDialog>
     <TitleContent>
@@ -73,7 +74,7 @@
 
         if (!r.Sucesso)
         {
-            Snackbar.Add(string.Join(", ", r.Erros), Severity.Error);
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
             return;
         }
 

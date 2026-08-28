@@ -3,6 +3,8 @@
 @using HomePlanner.MobileApp.Services
 @inject AuthApi Auth
 @inject SessaoAtual Sessao
+@inject LinksLegais Legais
+@inject IStringLocalizer<SharedResource> L
 @inject NavigationManager Nav
 
 <div class="auth">
@@ -10,31 +12,38 @@
 
     @if (verificando)
     {
-        <p>Carregando...</p>
+        <p>@L["Btn_Carregando"]</p>
     }
     else
     {
-        <p class="sub">Entrar na sua conta</p>
+        <p class="sub">@L["Auth_EntrarSub"]</p>
 
-        <label>Servidor (API)</label>
+        <label>@L["Auth_Servidor"]</label>
         <input @bind="baseUrl" placeholder="https://..." />
 
-        <label>E-mail</label>
+        <label>@L["Auth_Email"]</label>
         <input @bind="email" type="email" inputmode="email" placeholder="voce@exemplo.com" />
 
-        <label>Senha</label>
+        <label>@L["Auth_Senha"]</label>
         <input @bind="senha" type="password" @onkeyup="AoTeclar" />
 
         <button class="primario" @onclick="EntrarAsync" disabled="@ocupado">
-            @(ocupado ? "Entrando..." : "Entrar")
+            @(ocupado ? L["Auth_Entrando"] : L["Auth_Entrar"])
         </button>
 
-        <button class="link" @onclick='() => Nav.NavigateTo("/registro")'>Criar uma conta</button>
+        <button class="link" @onclick="IrParaEsqueciSenha">@L["Auth_EsqueciSenha"]</button>
+        <button class="link" @onclick='() => Nav.NavigateTo("/registro")'>@L["Auth_CriarConta"]</button>
 
         @if (!string.IsNullOrEmpty(mensagem))
         {
             <p class="erro">@mensagem</p>
         }
+
+        @* Apple e Google exigem a política de privacidade acessível sem login. *@
+        <div class="aceite-links" style="margin-top:1.2rem">
+            <button class="link" @onclick="AbrirPrivacidade">@L["Footer_Privacidade"]</button>
+            <button class="link" @onclick="AbrirTermos">@L["Footer_Termos"]</button>
+        </div>
     }
 </div>
 
@@ -46,6 +55,26 @@
     private bool verificando = true;
     private string? mensagem;
 
+    // Os documentos ficam no servidor informado no campo "Servidor".
+    private Task AbrirTermos()
+    {
+        Sessao.SalvarBaseUrl(baseUrl);
+        return Legais.AbrirTermosAsync();
+    }
+
+    private Task AbrirPrivacidade()
+    {
+        Sessao.SalvarBaseUrl(baseUrl);
+        return Legais.AbrirPrivacidadeAsync();
+    }
+
+    // Leva o servidor digitado junto — a tela seguinte fala com essa mesma API.
+    private void IrParaEsqueciSenha()
+    {
+        Sessao.SalvarBaseUrl(baseUrl);
+        Nav.NavigateTo("/esqueci-senha");
+    }
+
     protected override async Task OnInitializedAsync()
     {
         baseUrl = Sessao.BaseUrl;
@@ -53,11 +82,19 @@
         // Auto-login: se houver refresh token salvo, tenta renovar a sessão.
         if (await Auth.RenovarAsync())
         {
-            Nav.NavigateTo("/dashboard");
+            Nav.NavigateTo(DestinoPosLogin());
             return;
         }
         verificando = false;
     }
+
+    /// <summary>
+    /// Família ainda não configurada → onboarding antes de qualquer outra tela. Na web
+    /// quem faz esse desvio é o OnboardingRequiredMiddleware, mas ele ignora /api de
+    /// propósito, então no app o desvio é do cliente.
+    /// </summary>
+    private string DestinoPosLogin()
+        => Sessao.OnboardingCompleto ? "/cardapio" : "/onboarding";
 
     private async Task AoTeclar(KeyboardEventArgs e)
     {
@@ -69,7 +106,7 @@
         mensagem = null;
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(senha))
         {
-            mensagem = "Informe e-mail e senha.";
+            mensagem = L["Auth_InformeEmailSenha"];
             return;
         }
 
@@ -87,6 +124,6 @@
             return;
         }
 
-        Nav.NavigateTo("/cardapio");
+        Nav.NavigateTo(DestinoPosLogin());
     }
 }

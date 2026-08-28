@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Nomeia .resx pelo caminho da pasta (Resources.SharedResource), e não pelo
+         namespace da classe marcadora adjacente. Necessário para o IStringLocalizer
+         encontrar o recurso quando SharedResource.cs vive dentro de Resources/. -->
+    <EmbeddedResourceUseDependentUponConvention>false</EmbeddedResourceUseDependentUponConvention>
+  </PropertyGroup>
+</Project>

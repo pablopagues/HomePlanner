@@ -53,7 +53,7 @@ public class AuthTokenService : IAuthTokenService
             .FirstOrDefaultAsync(u => u.NormalizedEmail == emailNormalizado, ct);
 
         if (usuario is null || !usuario.Ativo || usuario.IsDeleted)
-            return ResultadoOperacao<LoginRespostaDTO>.Falha("E-mail ou senha inválidos.");
+            return ResultadoOperacao<LoginRespostaDTO>.Falha(ErrosApp.CredenciaisInvalidas);
 
         // Define o tenant ANTES de gerar claims, para a fábrica ler os papéis (filtro global por TenantId).
         _tenantContext.Definir(usuario.TenantId, usuario.Id, usuario.NomeCompleto);
@@ -61,10 +61,10 @@ public class AuthTokenService : IAuthTokenService
         var resultado = await _signInManager.CheckPasswordSignInAsync(usuario, dto.Senha, lockoutOnFailure: true);
 
         if (resultado.IsLockedOut)
-            return ResultadoOperacao<LoginRespostaDTO>.Falha("Conta temporariamente bloqueada após várias tentativas. Tente novamente em 15 minutos.");
+            return ResultadoOperacao<LoginRespostaDTO>.Falha(ErrosApp.ContaBloqueadaTentativas);
 
         if (!resultado.Succeeded)
-            return ResultadoOperacao<LoginRespostaDTO>.Falha("E-mail ou senha inválidos.");
+            return ResultadoOperacao<LoginRespostaDTO>.Falha(ErrosApp.CredenciaisInvalidas);
 
         // 2FA ativo → devolve um token curto; os tokens finais saem no passo /2fa.
         if (usuario.TwoFactorEnabled)
@@ -89,13 +89,13 @@ public class AuthTokenService : IAuthTokenService
 
         var usuarioId = ValidarMfaToken(dto.MfaToken);
         if (usuarioId is null)
-            return ResultadoOperacao<TokensDTO>.Falha("Sessão de verificação expirada. Faça login novamente.");
+            return ResultadoOperacao<TokensDTO>.Falha(ErrosApp.SessaoExpirada);
 
         var usuario = await _db.Users.IgnoreQueryFilters()
             .FirstOrDefaultAsync(u => u.Id == usuarioId, ct);
 
         if (usuario is null || !usuario.Ativo || usuario.IsDeleted)
-            return ResultadoOperacao<TokensDTO>.Falha("Sessão de verificação expirada. Faça login novamente.");
+            return ResultadoOperacao<TokensDTO>.Falha(ErrosApp.SessaoExpirada);
 
         _tenantContext.Definir(usuario.TenantId, usuario.Id, usuario.NomeCompleto);
 
@@ -115,7 +115,7 @@ public class AuthTokenService : IAuthTokenService
         }
 
         if (!ok)
-            return ResultadoOperacao<TokensDTO>.Falha("Código inválido. Verifique o app autenticador e tente novamente.");
+            return ResultadoOperacao<TokensDTO>.Falha(ErrosApp.CodigoDoisFatoresInvalido);
 
         var tokens = await EmitirTokensAsync(usuario, dto.DispositivoInfo, ct);
 
@@ -135,13 +135,13 @@ public class AuthTokenService : IAuthTokenService
         var token = await _db.RefreshTokens.FirstOrDefaultAsync(t => t.TokenHash == hash, ct);
 
         if (token is null || !token.EstaAtivo)
-            return ResultadoOperacao<TokensDTO>.Falha("Sessão expirada. Faça login novamente.");
+            return ResultadoOperacao<TokensDTO>.Falha(ErrosApp.SessaoExpirada);
 
         var usuario = await _db.Users.IgnoreQueryFilters()
             .FirstOrDefaultAsync(u => u.Id == token.UsuarioId, ct);
 
         if (usuario is null || !usuario.Ativo || usuario.IsDeleted)
-            return ResultadoOperacao<TokensDTO>.Falha("Sessão expirada. Faça login novamente.");
+            return ResultadoOperacao<TokensDTO>.Falha(ErrosApp.SessaoExpirada);
 
         _tenantContext.Definir(usuario.TenantId, usuario.Id, usuario.NomeCompleto);
 
@@ -187,6 +187,13 @@ public class AuthTokenService : IAuthTokenService
             DispositivoInfo = dispositivoInfo,
         });
 
+        // O app precisa saber se manda o usuário para o onboarding logo após entrar.
+        var onboardingCompleto = await _db.Tenants
+            .IgnoreQueryFilters()
+            .Where(t => t.Id == usuario.TenantId)
+            .Select(t => t.OnboardingCompleto)
+            .FirstOrDefaultAsync(ct);
+
         return new TokensDTO
         {
             AccessToken = accessToken,
@@ -195,6 +202,7 @@ public class AuthTokenService : IAuthTokenService
             UsuarioId = usuario.Id,
             NomeCompleto = usuario.NomeCompleto,
             EhOwner = principal.IsInRole("Owner"),
+            OnboardingCompleto = onboardingCompleto,
         };
     }
 

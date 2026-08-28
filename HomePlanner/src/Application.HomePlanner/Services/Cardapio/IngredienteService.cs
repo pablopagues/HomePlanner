@@ -48,7 +48,7 @@ public class IngredienteService : IIngredienteService
 
         var dto = await _repo.ObterDetalheAsync(id, ct);
         return dto is null
-            ? ResultadoOperacao<IngredienteDetalheDTO>.Falha("Ingrediente não encontrado.")
+            ? ResultadoOperacao<IngredienteDetalheDTO>.Falha(ErrosApp.IngredienteNaoEncontrado)
             : ResultadoOperacao<IngredienteDetalheDTO>.Ok(dto);
     }
 
@@ -59,12 +59,12 @@ public class IngredienteService : IIngredienteService
 
         dto.Nome = dto.Nome?.Trim() ?? string.Empty;
         if (dto.Nome.Length < 2)
-            return ResultadoOperacao<int>.Falha("Nome do ingrediente deve ter pelo menos 2 caracteres.");
+            return ResultadoOperacao<int>.Falha(ErrosApp.NomeIngredienteCurto);
 
         var nomeNormalizado = TextoHelper.NormalizarNome(dto.Nome);
 
         if (await _repo.ExisteNomeDuplicadoAsync(nomeNormalizado, dto.Id == 0 ? null : dto.Id, ct))
-            return ResultadoOperacao<int>.Falha($"Já existe um ingrediente com o nome '{dto.Nome}'.");
+            return ResultadoOperacao<int>.Falha(ErrosApp.IngredienteDuplicado(dto.Nome));
 
         Ingrediente entidade;
         if (dto.Id == 0)
@@ -100,7 +100,7 @@ public class IngredienteService : IIngredienteService
 
         var entidade = await _repo.ObterEntidadeAsync(id, ct);
         if (entidade is null)
-            return ResultadoOperacao.Falha("Ingrediente não encontrado.");
+            return ResultadoOperacao.Falha(ErrosApp.IngredienteNaoEncontrado);
 
         entidade.IsDeleted = true;
         await _repo.SalvarAsync(ct);
@@ -130,7 +130,7 @@ public class IngredienteService : IIngredienteService
 
         var ingrediente = await _repo.ObterEntidadeAsync(ingredienteId, ct);
         if (ingrediente is null)
-            return ResultadoOperacao.Falha("Ingrediente não encontrado.");
+            return ResultadoOperacao.Falha(ErrosApp.IngredienteNaoEncontrado);
 
         // Desagrupar.
         if (baseId is null)
@@ -141,16 +141,16 @@ public class IngredienteService : IIngredienteService
         }
 
         if (baseId == ingredienteId)
-            return ResultadoOperacao.Falha("Um ingrediente não pode ser produto base de si mesmo.");
+            return ResultadoOperacao.Falha(ErrosApp.IngredienteBaseDeSi);
 
         var alvo = await _repo.ObterEntidadeAsync(baseId.Value, ct);
         if (alvo is null)
-            return ResultadoOperacao.Falha("Produto base não encontrado.");
+            return ResultadoOperacao.Falha(ErrosApp.ProdutoBaseNaoEncontrado);
 
         // Mantém a invariante "base sempre aponta para a raiz": achata a cadeia do alvo.
         var raizId = alvo.IngredienteBaseId ?? alvo.Id;
         if (raizId == ingredienteId)
-            return ResultadoOperacao.Falha("Este agrupamento criaria um ciclo.");
+            return ResultadoOperacao.Falha(ErrosApp.CicloAgrupamento);
 
         ingrediente.IngredienteBaseId = raizId;
 

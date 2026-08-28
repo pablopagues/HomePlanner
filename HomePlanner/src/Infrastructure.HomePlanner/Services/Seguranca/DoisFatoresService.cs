@@ -38,7 +38,7 @@ public class DoisFatoresService : IDoisFatoresService
     {
         var usuario = await ObterUsuarioAsync();
         if (usuario is null)
-            return ResultadoOperacao<ChaveAutenticadorDTO>.Falha("Sessão inválida. Faça login novamente.");
+            return ResultadoOperacao<ChaveAutenticadorDTO>.Falha(ErrosApp.SessaoInvalida);
 
         var chave = await _userManager.GetAuthenticatorKeyAsync(usuario);
         if (string.IsNullOrEmpty(chave))
@@ -60,15 +60,14 @@ public class DoisFatoresService : IDoisFatoresService
     {
         var usuario = await ObterUsuarioAsync();
         if (usuario is null)
-            return ResultadoOperacao<IReadOnlyList<string>>.Falha("Sessão inválida. Faça login novamente.");
+            return ResultadoOperacao<IReadOnlyList<string>>.Falha(ErrosApp.SessaoInvalida);
 
         var codigoLimpo = (codigo ?? string.Empty).Replace(" ", string.Empty).Replace("-", string.Empty);
         var valido = await _userManager.VerifyTwoFactorTokenAsync(
             usuario, _userManager.Options.Tokens.AuthenticatorTokenProvider, codigoLimpo);
 
         if (!valido)
-            return ResultadoOperacao<IReadOnlyList<string>>.Falha(
-                "Código inválido. Verifique o app autenticador e tente novamente.");
+            return ResultadoOperacao<IReadOnlyList<string>>.Falha(ErrosApp.CodigoDoisFatoresInvalido);
 
         await _userManager.SetTwoFactorEnabledAsync(usuario, true);
         var codigos = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(usuario, 8);
@@ -82,10 +81,10 @@ public class DoisFatoresService : IDoisFatoresService
     {
         var usuario = await ObterUsuarioAsync();
         if (usuario is null)
-            return ResultadoOperacao<IReadOnlyList<string>>.Falha("Sessão inválida. Faça login novamente.");
+            return ResultadoOperacao<IReadOnlyList<string>>.Falha(ErrosApp.SessaoInvalida);
 
         if (!await _userManager.GetTwoFactorEnabledAsync(usuario))
-            return ResultadoOperacao<IReadOnlyList<string>>.Falha("Ative a verificação em duas etapas primeiro.");
+            return ResultadoOperacao<IReadOnlyList<string>>.Falha(ErrosApp.AtiveDoisFatoresPrimeiro);
 
         var codigos = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(usuario, 8);
         return ResultadoOperacao<IReadOnlyList<string>>.Ok(codigos?.ToList() ?? []);
@@ -95,7 +94,7 @@ public class DoisFatoresService : IDoisFatoresService
     {
         var usuario = await ObterUsuarioAsync();
         if (usuario is null)
-            return ResultadoOperacao.Falha("Sessão inválida. Faça login novamente.");
+            return ResultadoOperacao.Falha(ErrosApp.SessaoInvalida);
 
         await _userManager.SetTwoFactorEnabledAsync(usuario, false);
         await _userManager.ResetAuthenticatorKeyAsync(usuario);

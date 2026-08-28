@@ -1,3 +1,4 @@
+using Application.HomePlanner.Common;
 using Application.HomePlanner.DTOs.Auth;
 using Application.HomePlanner.Services.Auth;
 using Domain.HomePlanner.Models.Enums;
@@ -37,16 +38,20 @@ public class RegistroTenantService : IRegistroTenantService
         dto.Email = dto.Email?.Trim().ToLowerInvariant() ?? string.Empty;
 
         if (dto.NomeResponsavel.Length < 2)
-            return RegistroResultadoDTO.Falha("Informe seu nome.");
+            return RegistroResultadoDTO.Falha(ErrosApp.InformeNome);
         if (string.IsNullOrWhiteSpace(dto.Email))
-            return RegistroResultadoDTO.Falha("Informe um e-mail válido.");
+            return RegistroResultadoDTO.Falha(ErrosApp.InformeEmail);
+
+        // Vale para todo cliente (web e app): sem aceite não se grava consentimento.
+        if (!dto.AceitaTermos)
+            return RegistroResultadoDTO.Falha(ErrosApp.TermosNaoAceitos);
 
         // Email globalmente único (ignora filtro de tenant — ainda não autenticado)
         var emailExiste = await _db.Users
             .IgnoreQueryFilters()
             .AnyAsync(u => u.NormalizedEmail == dto.Email.ToUpperInvariant(), ct);
         if (emailExiste)
-            return RegistroResultadoDTO.Falha("Já existe uma conta com este e-mail.");
+            return RegistroResultadoDTO.Falha(ErrosApp.EmailJaCadastrado);
 
         var paisId = dto.PaisId == Paises.Canada ? Paises.Canada : Paises.Brasil;
 
@@ -135,7 +140,7 @@ public class RegistroTenantService : IRegistroTenantService
         {
             await transaction.RollbackAsync(ct);
             _logger.LogError(ex, "Falha ao registrar tenant para {Email}.", dto.Email);
-            return RegistroResultadoDTO.Falha("Não foi possível concluir o cadastro. Tente novamente.");
+            return RegistroResultadoDTO.Falha(ErrosApp.CadastroFalhou);
         }
     }
 

@@ -35,6 +35,9 @@ public class TokensDTO
     public string UsuarioId { get; set; } = string.Empty;
     public string NomeCompleto { get; set; } = string.Empty;
     public bool EhOwner { get; set; }
+
+    /// <summary>Falso → o app desvia para o onboarding logo após entrar.</summary>
+    public bool OnboardingCompleto { get; set; }
 }
 
 public class RefreshRequest
@@ -49,6 +52,9 @@ public class RegistroRequest
     public string Email { get; set; } = string.Empty;
     public string Senha { get; set; } = string.Empty;
     public string PaisId { get; set; } = "BR";
+
+    /// <summary>Aceite dos termos e da política. A API recusa o registro sem isso.</summary>
+    public bool AceitaTermos { get; set; }
 }
 
 // ── Comum ─────────────────────────────────────────────────────────────────
@@ -367,6 +373,7 @@ public class MembroFamiliaDetalheDTO
     public string Papel { get; set; } = string.Empty;
     public bool Ativo { get; set; }
     public bool SenhaDefinida { get; set; }
+    public DateTime? UltimoConviteEnviadoEm { get; set; }
 }
 
 public class ResumoFamiliaDTO
@@ -380,6 +387,22 @@ public class NovoMembroRequest
     public string Nome { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string Papel { get; set; } = "Membro";
+}
+
+public class EditarMembroRequest
+{
+    public string Nome { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+}
+
+public class ConviteMembroResultadoDTO
+{
+    public string UsuarioId { get; set; } = string.Empty;
+    public string NomeMembro { get; set; } = string.Empty;
+    public bool EmailEnviado { get; set; }
+
+    /// <summary>Preenchido só quando o servidor está sem SMTP: link para compartilhar à mão.</summary>
+    public string? LinkConvite { get; set; }
 }
 
 // ── Conta / Configuração / Assinatura ─────────────────────────────────────
@@ -397,6 +420,21 @@ public class ConfiguracaoFamiliaDTO
     public string FusoHorario { get; set; } = "America/Toronto";
     public int MinutosAntecedenciaLembrete { get; set; } = 15;
     public List<string> TiposRefeicaoAtivos { get; set; } = new() { "Almoco" };
+}
+
+public class VersaoFotoDTO
+{
+    public string? Versao { get; set; }
+}
+
+public class UsoCotaImportacaoDTO
+{
+    public string Plano { get; set; } = string.Empty;
+    public int Usado { get; set; }
+    public int Limite { get; set; }
+
+    public int Restantes => Math.Max(0, Limite - Usado);
+    public bool Esgotada => Usado >= Limite;
 }
 
 public class AssinaturaAtualDTO

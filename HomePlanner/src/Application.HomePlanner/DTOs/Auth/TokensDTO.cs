@@ -15,4 +15,11 @@ public class TokensDTO
     public string UsuarioId { get; set; } = string.Empty;
     public string NomeCompleto { get; set; } = string.Empty;
     public bool EhOwner { get; set; }
+
+    /// <summary>
+    /// Falso quando a família ainda não concluiu o onboarding — o app deve desviar para
+    /// a tela de onboarding. Na web quem faz isso é o OnboardingRequiredMiddleware, mas
+    /// ele ignora /api de propósito, então no app o desvio é responsabilidade do cliente.
+    /// </summary>
+    public bool OnboardingCompleto { get; set; }
 }

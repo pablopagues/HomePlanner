@@ -1,3 +1,4 @@
+using Application.HomePlanner.Common;
 using System.Net;
 using System.Reflection;
 using Application.HomePlanner.DTOs.Feedback;
@@ -44,8 +45,7 @@ public class FeedbackService : IFeedbackService
         if (string.IsNullOrWhiteSpace(destino))
         {
             _logger.LogWarning("Feedback: EmailDestino não configurado — feedback descartado.");
-            return FeedbackEnvioResultado.Falha(
-                "Não foi possível enviar seu feedback agora. Tente novamente em instantes.");
+            return FeedbackEnvioResultado.Falha(ErrosApp.EnvioIndisponivel);
         }
 
         var nomeUsuario = string.IsNullOrWhiteSpace(_tenantContext.UsuarioNome)
@@ -74,8 +74,7 @@ public class FeedbackService : IFeedbackService
         {
             _logger.LogError(ex, "Falha ao enviar e-mail de feedback (tipo {Tipo}, usuário {Usuario})",
                 tipoStr, nomeUsuario);
-            return FeedbackEnvioResultado.Falha(
-                "Não conseguimos enviar seu feedback agora. Tente novamente em instantes.");
+            return FeedbackEnvioResultado.Falha(ErrosApp.EnvioIndisponivel);
         }
     }
 

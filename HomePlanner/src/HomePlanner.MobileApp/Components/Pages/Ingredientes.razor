@@ -1,15 +1,16 @@
 @page "/ingredientes"
 @using HomePlanner.MobileApp.Services
 @inject ApiClient Api
+@inject IStringLocalizer<SharedResource> L
 @inject NavigationManager Nav
 
-<div class="barra-topo"><h2>Ingredientes</h2></div>
+<div class="barra-topo"><h2>@L["App_Ingredientes"]</h2></div>
 
-<input placeholder="Buscar..." @bind="busca" @bind:event="oninput" @onkeyup="AoTeclar" />
+<input placeholder="@L["App_Buscar"]" @bind="busca" @bind:event="oninput" @onkeyup="AoTeclar" />
 
-@if (carregando) { <p class="muted">Carregando...</p> }
+@if (carregando) { <p class="muted">@L["Btn_Carregando"]</p> }
 else if (erro is not null) { <p class="erro">@erro</p> }
-else if (lista is null || lista.Itens.Count == 0) { <p class="muted">Nenhum ingrediente.</p> }
+else if (lista is null || lista.Itens.Count == 0) { <p class="muted">@L["App_SemIngredientesReceita"]</p> }
 else
 {
     @foreach (var i in lista.Itens)

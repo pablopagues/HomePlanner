@@ -2,33 +2,34 @@
 @page "/receitas/{Id:int}/editar"
 @using HomePlanner.MobileApp.Services
 @inject ApiClient Api
+@inject IStringLocalizer<SharedResource> L
 @inject NavigationManager Nav
 
-<button class="link" style="text-align:left;width:auto" @onclick="Voltar">‹ Voltar</button>
-<div class="barra-topo"><h2>@(Id.HasValue ? "Editar receita" : "Nova receita")</h2></div>
+<button class="link" style="text-align:left;width:auto" @onclick="Voltar">‹ @L["Btn_Voltar"]</button>
+<div class="barra-topo"><h2>@(Id.HasValue ? L["App_EditarReceita"] : L["Receita_NovaTitle"])</h2></div>
 
-@if (carregando) { <p class="muted">Carregando...</p> }
+@if (carregando) { <p class="muted">@L["Btn_Carregando"]</p> }
 else
 {
-    <label>Nome</label>
+    <label>@L["Receita_NomeLabel"]</label>
     <input @bind="_dto.Nome" />
 
     <div class="campo-linha">
         <div>
-            <label>Porções</label>
+            <label>@L["Receita_NumPorcoesLabel"]</label>
             <input type="number" min="1" @bind="_dto.NumeroPorcoesBase" />
         </div>
         <div>
-            <label>Tempo (min)</label>
+            <label>@L["Receita_TempoLabel"]</label>
             <input type="number" min="0" @bind="_dto.TempoPreparoMinutos" />
         </div>
     </div>
 
     <div class="card-hp" style="margin-top:.8rem">
-        <div class="linha"><h3>Ingredientes</h3>
-            <button class="link" style="width:auto" @onclick="() => _modalIng = true">+ Adicionar</button>
+        <div class="linha"><h3>@L["Ing_Label"]</h3>
+            <button class="link" style="width:auto" @onclick="() => _modalIng = true">+ @L["Ing_Adicionar"]</button>
         </div>
-        @if (_linhas.Count == 0) { <p class="muted">Nenhum ingrediente.</p> }
+        @if (_linhas.Count == 0) { <p class="muted">@L["App_SemIngredientesReceita"]</p> }
         else
         {
             @foreach (var l in _linhas)
@@ -52,10 +53,10 @@ else
         }
     </div>
 
-    <label>Modo de preparo</label>
+    <label>@L["Receita_ModoPreparoLabel"]</label>
     <textarea rows="6" @bind="_dto.ModoPreparo"></textarea>
 
-    <label>Observações</label>
+    <label>@L["Receita_ObservacoesLabel"]</label>
     <textarea rows="2" @bind="_dto.Observacoes"></textarea>
 
     @if (_qtdComponentes > 0)
@@ -73,7 +74,7 @@ else
 {
     <div class="modal-fundo" @onclick="() => _modalIng = false">
         <div class="modal" @onclick:stopPropagation="true">
-            <h3>Adicionar ingrediente</h3>
+            <h3>@L["App_AdicionarIngrediente"]</h3>
             <input placeholder="Buscar ingrediente..." @bind="_buscaIng" @bind:event="oninput" @onkeyup="BuscarIngAsync" />
             <div style="max-height:240px;overflow-y:auto;margin-top:.5rem">
                 @foreach (var ing in _resultadosIng)
@@ -83,7 +84,7 @@ else
                     </div>
                 }
             </div>
-            <button class="link" @onclick="() => _modalIng = false">Fechar</button>
+            <button class="link" @onclick="() => _modalIng = false">@L["Btn_Fechar"]</button>
         </div>
     </div>
 }

@@ -49,11 +49,11 @@ public class ListaCompraService : IListaCompraService
     {
         await _tenantAccessor.GarantirHidratadoAsync();
         if (!PodeGerenciar)
-            return ResultadoOperacao<int>.Falha("Você não tem permissão para gerenciar listas.");
+            return ResultadoOperacao<int>.Falha(ErrosApp.SemPermissaoListas);
 
         var nome = dto.Nome?.Trim() ?? string.Empty;
         if (nome.Length < 2)
-            return ResultadoOperacao<int>.Falha("O nome da lista deve ter pelo menos 2 caracteres.");
+            return ResultadoOperacao<int>.Falha(ErrosApp.NomeListaCurto);
 
         var entidade = new ListaCompra
         {
@@ -72,15 +72,15 @@ public class ListaCompraService : IListaCompraService
     {
         await _tenantAccessor.GarantirHidratadoAsync();
         if (!PodeGerenciar)
-            return ResultadoOperacao.Falha("Você não tem permissão para gerenciar listas.");
+            return ResultadoOperacao.Falha(ErrosApp.SemPermissaoListas);
 
         var entidade = await _repo.ObterEntidadeAsync(id, ct);
         if (entidade is null)
-            return ResultadoOperacao.Falha("Lista não encontrada.");
+            return ResultadoOperacao.Falha(ErrosApp.ListaNaoEncontrada);
 
         var nome = dto.Nome?.Trim() ?? string.Empty;
         if (nome.Length < 2)
-            return ResultadoOperacao.Falha("O nome da lista deve ter pelo menos 2 caracteres.");
+            return ResultadoOperacao.Falha(ErrosApp.NomeListaCurto);
 
         entidade.Nome  = nome;
         entidade.Icone = string.IsNullOrWhiteSpace(dto.Icone) ? null : dto.Icone.Trim();
@@ -94,11 +94,11 @@ public class ListaCompraService : IListaCompraService
     {
         await _tenantAccessor.GarantirHidratadoAsync();
         if (!PodeGerenciar)
-            return ResultadoOperacao.Falha("Você não tem permissão para gerenciar listas.");
+            return ResultadoOperacao.Falha(ErrosApp.SemPermissaoListas);
 
         var entidade = await _repo.ObterEntidadeAsync(id, ct);
         if (entidade is null)
-            return ResultadoOperacao.Falha("Lista não encontrada.");
+            return ResultadoOperacao.Falha(ErrosApp.ListaNaoEncontrada);
 
         // Remove as preferências que apontam para esta lista (senão os itens ficariam órfãos).
         await _repo.RemoverPreferenciasDaListaAsync(id, ct);
@@ -112,7 +112,7 @@ public class ListaCompraService : IListaCompraService
         await _tenantAccessor.GarantirHidratadoAsync();
 
         if (listaId is not null && await _repo.ObterEntidadeAsync(listaId.Value, ct) is null)
-            return ResultadoOperacao.Falha("Lista não encontrada.");
+            return ResultadoOperacao.Falha(ErrosApp.ListaNaoEncontrada);
 
         var pref = await _repo.ObterPreferenciaAsync(ingredienteId, ct);
 
@@ -144,14 +144,14 @@ public class ListaCompraService : IListaCompraService
 
         var pedido = await _pedidoRepo.ObterEntidadeAsync(pedidoId, ct);
         if (pedido is null)
-            return ResultadoOperacao.Falha("Pedido não encontrado.");
+            return ResultadoOperacao.Falha(ErrosApp.PedidoNaoEncontrado);
 
         // Filho só pode remanejar os próprios pedidos.
         if (_tenantContext.RestritoAsProprias && pedido.SolicitanteUsuarioId != _tenantContext.UsuarioId)
-            return ResultadoOperacao.Falha("Você só pode remanejar os seus próprios pedidos.");
+            return ResultadoOperacao.Falha(ErrosApp.SomentePedidosProprios);
 
         if (listaId is not null && await _repo.ObterEntidadeAsync(listaId.Value, ct) is null)
-            return ResultadoOperacao.Falha("Lista não encontrada.");
+            return ResultadoOperacao.Falha(ErrosApp.ListaNaoEncontrada);
 
         pedido.ListaId = listaId;
         await _pedidoRepo.SalvarAsync(ct);

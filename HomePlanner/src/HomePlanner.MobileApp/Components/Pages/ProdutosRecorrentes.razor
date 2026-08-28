@@ -1,13 +1,14 @@
 @page "/recorrentes"
 @using HomePlanner.MobileApp.Services
 @inject ApiClient Api
+@inject IStringLocalizer<SharedResource> L
 
-<div class="barra-topo"><h2>Produtos recorrentes</h2></div>
-<p class="muted">Itens que você compra sempre — envie os selecionados para a semana atual.</p>
+<div class="barra-topo"><h2>@L["Compras_ProdutosRecorrentes"]</h2></div>
+<p class="muted">@L["App_RecorrentesDesc"]</p>
 
-@if (carregando) { <p class="muted">Carregando...</p> }
+@if (carregando) { <p class="muted">@L["Btn_Carregando"]</p> }
 else if (erro is not null) { <p class="erro">@erro</p> }
-else if (_produtos.Count == 0) { <p class="muted">Nenhum produto recorrente.</p> }
+else if (_produtos.Count == 0) { <p class="muted">@L["App_SemRecorrentes"]</p> }
 else
 {
     @foreach (var p in _produtos)
@@ -38,15 +39,15 @@ else
 {
     <div class="modal-fundo" @onclick="() => _modalAberto = false">
         <div class="modal" @onclick:stopPropagation="true">
-            <h3>Novo produto recorrente</h3>
-            <label>Descrição</label>
+            <h3>@L["App_NovoRecorrente"]</h3>
+            <label>@L["Planner_DescricaoLabel"]</label>
             <input @bind="_novo.Descricao" />
-            <label>Quantidade (opcional)</label>
+            <label>@L["App_QuantidadeOpcional"]</label>
             <input @bind="_novo.Quantidade" />
             <button class="btn-acao" @onclick="CriarAsync" disabled="@_salvando">
                 @(_salvando ? "Salvando..." : "Salvar")
             </button>
-            <button class="link" @onclick="() => _modalAberto = false">Cancelar</button>
+            <button class="link" @onclick="() => _modalAberto = false">@L["Btn_Cancelar"]</button>
             @if (_erroModal is not null) { <p class="erro">@_erroModal</p> }
         </div>
     </div>

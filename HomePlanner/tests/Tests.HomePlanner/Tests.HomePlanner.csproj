@@ -15,6 +15,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Localization" Version="8.*" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Application.HomePlanner\Application.HomePlanner.csproj" />
+    <ProjectReference Include="..\..\src\Resources.HomePlanner\Resources.HomePlanner.csproj" />
   </ItemGroup>
 </Project>

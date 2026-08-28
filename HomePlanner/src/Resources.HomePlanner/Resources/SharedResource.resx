@@ -36,9 +36,11 @@
   <data name="Btn_Aplicar" xml:space="preserve"><value>Aplicar</value></data>
   <data name="Btn_Voltar" xml:space="preserve"><value>Voltar</value></data>
   <data name="Btn_Fechar" xml:space="preserve"><value>Fechar</value></data>
+  <data name="Btn_Copiar" xml:space="preserve"><value>Copiar link</value></data>
 
   <!-- ── Mensagens ── -->
   <data name="Msg_SalvoOk" xml:space="preserve"><value>Salvo com sucesso!</value></data>
+  <data name="Msg_LinkCopiado" xml:space="preserve"><value>Link copiado!</value></data>
   <data name="Msg_ExcluidoOk" xml:space="preserve"><value>Excluído com sucesso.</value></data>
   <data name="Msg_ErroGenerico" xml:space="preserve"><value>Ocorreu um erro. Tente novamente.</value></data>
   <data name="Msg_CampoObrigatorio" xml:space="preserve"><value>Campo obrigatório.</value></data>
@@ -470,6 +472,12 @@
   <data name="Fam_MembroCriado" xml:space="preserve"><value>Membro criado. Compartilhe o link de convite abaixo.</value></data>
   <data name="Fam_LinkGerado" xml:space="preserve"><value>Link de convite gerado.</value></data>
   <data name="Fam_LinkConviteManual" xml:space="preserve"><value>E-mail não configurado — compartilhe este link com o membro para definir a senha:</value></data>
+  <data name="Fam_LinkConviteDe" xml:space="preserve"><value>E-mail não configurado — compartilhe este link com {0} para definir a senha:</value></data>
+  <data name="Fam_ConviteEnviadoEm" xml:space="preserve"><value>Convite enviado {0}</value></data>
+  <data name="Fam_ConviteAgora" xml:space="preserve"><value>agora mesmo</value></data>
+  <data name="Fam_ConviteHaMinutos" xml:space="preserve"><value>há {0} min</value></data>
+  <data name="Fam_ConviteHaHoras" xml:space="preserve"><value>há {0} h</value></data>
+  <data name="Fam_ConviteHaDias" xml:space="preserve"><value>há {0} dia(s)</value></data>
   <data name="Fam_Status" xml:space="preserve"><value>Status</value></data>
   <data name="Fam_Acoes" xml:space="preserve"><value>Ações</value></data>
   <data name="Fam_Ativo" xml:space="preserve"><value>Ativo</value></data>
@@ -558,4 +566,276 @@
 
   <!-- ── Planner / Notificar pais ── -->
   <data name="Planner_NotificarPaisLabel" xml:space="preserve"><value>Notificar pai/mãe no lembrete</value></data>
+
+  <!-- ── Assinatura bloqueada (trial vencido / pagamento em aberto) ── -->
+  <data name="Assin_BloqTrialTitulo" xml:space="preserve"><value>Seu período de teste terminou</value></data>
+  <data name="Assin_BloqPagamentoTitulo" xml:space="preserve"><value>Pagamento pendente</value></data>
+  <data name="Assin_BloqCanceladoTitulo" xml:space="preserve"><value>Assinatura cancelada</value></data>
+  <data name="Assin_BloqTexto" xml:space="preserve"><value>Escolha um plano para voltar a usar o HomePlanner. Seus dados continuam salvos.</value></data>
+  <data name="Assin_BloqSemPermissao" xml:space="preserve"><value>Peça ao responsável pela família para escolher um plano e reativar o acesso.</value></data>
+  <data name="Assin_BloqAcao" xml:space="preserve"><value>Escolher plano</value></data>
+  <data name="Assin_BloqContaLivre" xml:space="preserve"><value>Você continua com acesso ao seu perfil e às configurações da conta.</value></data>
+  <data name="Assin_BloqLiberado" xml:space="preserve"><value>Sua assinatura está em dia.</value></data>
+  <data name="Assin_BloqDados" xml:space="preserve"><value>Para solicitar acesso, correção ou exclusão dos seus dados, fale com a gente pelo canal de contato.</value></data>
+  <!-- ── Perfil / Alterar senha ── -->
+  <data name="Perfil_Senha_Titulo" xml:space="preserve"><value>Alterar senha</value></data>
+  <data name="Perfil_Senha_Atual" xml:space="preserve"><value>Senha atual</value></data>
+  <data name="Perfil_Senha_Nova" xml:space="preserve"><value>Nova senha</value></data>
+  <data name="Perfil_Senha_Confirma" xml:space="preserve"><value>Repita a nova senha</value></data>
+  <data name="Perfil_Senha_Ajuda" xml:space="preserve"><value>Ao menos 8 caracteres.</value></data>
+  <data name="Perfil_Senha_Botao" xml:space="preserve"><value>Alterar senha</value></data>
+  <data name="Perfil_Senha_Preencha" xml:space="preserve"><value>Preencha a senha atual e a nova.</value></data>
+  <data name="Perfil_Senha_NaoCoincide" xml:space="preserve"><value>As senhas novas não coincidem.</value></data>
+  <data name="Perfil_Senha_Ok" xml:space="preserve"><value>Senha alterada.</value></data>  <!-- ── App mobile ── -->
+  <data name="Btn_Carregando" xml:space="preserve"><value>Carregando...</value></data>
+  <data name="Cfg_Idioma" xml:space="preserve"><value>Idioma</value></data>
+  <data name="Cfg_Salvo" xml:space="preserve"><value>Configuração salva!</value></data>  <!-- >> Autenticacao do app << -->
+  <data name="Auth_EntrarSub" xml:space="preserve"><value>Entrar na sua conta</value></data>
+  <data name="Auth_Servidor" xml:space="preserve"><value>Servidor (API)</value></data>
+  <data name="Auth_Email" xml:space="preserve"><value>E-mail</value></data>
+  <data name="Auth_Senha" xml:space="preserve"><value>Senha</value></data>
+  <data name="Auth_Entrar" xml:space="preserve"><value>Entrar</value></data>
+  <data name="Auth_Entrando" xml:space="preserve"><value>Entrando...</value></data>
+  <data name="Auth_EsqueciSenha" xml:space="preserve"><value>Esqueci minha senha</value></data>
+  <data name="Auth_CriarConta" xml:space="preserve"><value>Criar uma conta</value></data>
+  <data name="Auth_InformeEmailSenha" xml:space="preserve"><value>Informe e-mail e senha.</value></data>
+  <data name="Auth_RegistroTitulo" xml:space="preserve"><value>Criar conta</value></data>
+  <data name="Auth_SeuNome" xml:space="preserve"><value>Seu nome</value></data>
+  <data name="Auth_Pais" xml:space="preserve"><value>País</value></data>
+  <data name="Auth_Criando" xml:space="preserve"><value>Criando...</value></data>
+  <data name="Auth_JaTenhoConta" xml:space="preserve"><value>Já tenho conta</value></data>
+  <data name="Auth_ContaCriada" xml:space="preserve"><value>Conta criada! Agora é só entrar.</value></data>
+  <data name="Auth_IrLogin" xml:space="preserve"><value>Ir para o login</value></data>
+  <data name="Auth_PreenchaTudo" xml:space="preserve"><value>Preencha todos os campos.</value></data>
+  <data name="Auth_AceiteLabel" xml:space="preserve"><value>Li e aceito os termos de uso e a política de privacidade.</value></data>
+  <data name="Auth_VerTermos" xml:space="preserve"><value>Ver termos de uso</value></data>
+  <data name="Auth_VerPrivacidade" xml:space="preserve"><value>Ver política de privacidade</value></data>
+  <data name="Auth_AceiteObrigatorio" xml:space="preserve"><value>É preciso aceitar os termos de uso e a política de privacidade.</value></data>
+  <data name="Auth_EsqueciSub" xml:space="preserve"><value>Informe seu e-mail e enviamos um link para você criar uma senha nova.</value></data>
+  <data name="Auth_EsqueciEnviado" xml:space="preserve"><value>Se houver uma conta com esse e-mail, enviamos um link para criar uma senha nova. Confira também a caixa de spam.</value></data>
+  <data name="Auth_EnviarLink" xml:space="preserve"><value>Enviar link</value></data>
+  <data name="Auth_Enviando" xml:space="preserve"><value>Enviando...</value></data>
+  <data name="Auth_VoltarLogin" xml:space="preserve"><value>Voltar para o login</value></data>
+  <data name="Auth_InformeEmail" xml:space="preserve"><value>Informe seu e-mail.</value></data>
+  <data name="Auth_2FATitulo" xml:space="preserve"><value>Verificação em duas etapas</value></data>
+  <data name="Auth_2FASubApp" xml:space="preserve"><value>Digite o código do seu app autenticador</value></data>
+  <data name="Auth_2FASubRec" xml:space="preserve"><value>Digite um código de recuperação</value></data>
+  <data name="Auth_2FACodigo" xml:space="preserve"><value>Código</value></data>
+  <data name="Auth_2FAVerificando" xml:space="preserve"><value>Verificando...</value></data>
+  <data name="Auth_2FAUsarApp" xml:space="preserve"><value>Usar código do app</value></data>
+  <data name="Auth_2FAUsarRec" xml:space="preserve"><value>Usar código de recuperação</value></data>
+  <data name="Onb_EscolhaRefeicao" xml:space="preserve"><value>Escolha ao menos uma refeição.</value></data>
+  <!-- >> Telas do app << -->
+  <data name="App_Inativo" xml:space="preserve"><value>Inativo</value></data>
+  <data name="App_Ativa" xml:space="preserve"><value>Ativa</value></data>
+  <data name="App_Inativa" xml:space="preserve"><value>Inativa</value></data>
+  <data name="App_Reenviando" xml:space="preserve"><value>Reenviando...</value></data>
+  <data name="App_EnviandoConvite" xml:space="preserve"><value>Enviando convite...</value></data>
+  <data name="App_LinkConviteManual" xml:space="preserve"><value>E-mail não configurado no servidor — compartilhe este link com {0}:</value></data>
+  <data name="App_TrocarEmailAviso" xml:space="preserve"><value>Ao trocar o e-mail, reenvie o convite para o endereço correto.</value></data>
+  <data name="App_InformeNomeEmail" xml:space="preserve"><value>Informe nome e e-mail.</value></data>
+  <data name="App_Ola" xml:space="preserve"><value>Olá, {0}</value></data>
+  <data name="App_RefeicoesHoje" xml:space="preserve"><value>Refeições de hoje</value></data>
+  <data name="App_NadaHoje" xml:space="preserve"><value>Nada planejado para hoje.</value></data>
+  <data name="App_AbrirCardapio" xml:space="preserve"><value>Abrir cardápio</value></data>
+  <data name="App_TarefasPendentes" xml:space="preserve"><value>Tarefas pendentes</value></data>
+  <data name="App_SemData" xml:space="preserve"><value>sem data</value></data>
+  <data name="App_OcultarConcluidas" xml:space="preserve"><value>Ocultar concluídas</value></data>
+  <data name="App_SemTarefas" xml:space="preserve"><value>Nenhuma tarefa.</value></data>
+  <data name="App_Buscar" xml:space="preserve"><value>Buscar...</value></data>
+  <data name="App_PorcoesAbrev" xml:space="preserve"><value>porç.</value></data>
+  <data name="App_IngredientesQtd" xml:space="preserve"><value>ingrediente(s)</value></data>
+  <data name="App_EmailNaoConfirmado" xml:space="preserve"><value>E-mail não confirmado</value></data>
+  <data name="App_AdicionarFoto" xml:space="preserve"><value>Adicionar foto</value></data>
+  <data name="App_PlanoNome" xml:space="preserve"><value>Plano {0}</value></data>
+  <data name="App_DiasTeste" xml:space="preserve"><value>{0} dia(s) restante(s) no teste</value></data>
+  <data name="App_AteMembros" xml:space="preserve"><value>Até {0} membros</value></data>
+  <data name="App_MudarPlanoWeb" xml:space="preserve"><value>Para mudar de plano, acesse a versão web.</value></data>
+  <data name="App_FusoLabel" xml:space="preserve"><value>Fuso</value></data>
+  <data name="App_RefeicoesLabel" xml:space="preserve"><value>Refeições</value></data>
+  <data name="App_LembreteLabel" xml:space="preserve"><value>Lembrete</value></data>
+  <data name="App_MinhaContaBtn" xml:space="preserve"><value>Minha conta e 2FA</value></data>
+  <data name="App_ConfiguracaoBtn" xml:space="preserve"><value>Configuração</value></data>
+  <data name="App_FeedbackBtn" xml:space="preserve"><value>Enviar feedback</value></data>
+  <data name="App_PrivacidadeDados" xml:space="preserve"><value>Privacidade e dados</value></data>
+  <data name="App_PrivacidadeTexto" xml:space="preserve"><value>Para solicitar acesso, correção ou exclusão dos seus dados, fale com a gente pelo canal de contato.</value></data>
+  <data name="App_FaleConosco" xml:space="preserve"><value>Fale com a gente</value></data>
+  <data name="App_SairConta" xml:space="preserve"><value>Sair da conta</value></data>
+  <data name="App_MinhaConta" xml:space="preserve"><value>Minha conta</value></data>
+  <data name="App_Dados" xml:space="preserve"><value>Dados</value></data>
+  <data name="App_SalvarNome" xml:space="preserve"><value>Salvar nome</value></data>
+  <data name="App_Confirmado" xml:space="preserve"><value>confirmado</value></data>
+  <data name="App_NaoConfirmado" xml:space="preserve"><value>não confirmado</value></data>
+  <data name="App_Alterando" xml:space="preserve"><value>Alterando...</value></data>
+  <data name="App_Desativar2FA" xml:space="preserve"><value>Desativar 2FA</value></data>
+  <data name="App_Ativar2FA" xml:space="preserve"><value>Ativar 2FA</value></data>
+  <data name="App_2FAPasso1" xml:space="preserve"><value>1. No app autenticador, adicione a conta com esta chave:</value></data>
+  <data name="App_2FAConta" xml:space="preserve"><value>Conta</value></data>
+  <data name="App_2FAPasso2" xml:space="preserve"><value>2. Digite o código gerado</value></data>
+  <data name="App_ConfirmarAtivar" xml:space="preserve"><value>Confirmar e ativar</value></data>
+  <data name="App_GuardeCodigos" xml:space="preserve"><value>Guarde seus códigos de recuperação:</value></data>
+  <data name="App_NaoEncontrado" xml:space="preserve"><value>Página não encontrada</value></data>
+  <data name="App_VoltarInicio" xml:space="preserve"><value>Voltar ao início</value></data>
+  <data name="App_Perfil" xml:space="preserve"><value>Perfil</value></data>
+  <data name="App_FotoNaoSuportada" xml:space="preserve"><value>Este aparelho não permite escolher fotos.</value></data>
+  <data name="App_FotoSemPermissao" xml:space="preserve"><value>Autorize o acesso às fotos nas configurações do aparelho.</value></data>
+  <data name="App_FotoErro" xml:space="preserve"><value>Não foi possível enviar a foto: {0}</value></data>
+  <data name="App_Ingredientes" xml:space="preserve"><value>Ingredientes</value></data>
+  <data name="App_Lojas" xml:space="preserve"><value>Lojas</value></data>
+  <data name="App_Recorrentes" xml:space="preserve"><value>Recorrentes</value></data>
+  <data name="App_Modelos" xml:space="preserve"><value>Modelos</value></data>
+  <data name="App_Compras" xml:space="preserve"><value>Compras</value></data>
+  <data name="App_Cardapio" xml:space="preserve"><value>Cardápio</value></data>
+  <data name="App_Feedback" xml:space="preserve"><value>Feedback</value></data>
+  <data name="App_Nenhum" xml:space="preserve"><value>Nada por aqui ainda.</value></data>
+  <data name="App_Erro" xml:space="preserve"><value>Erro</value></data>
+  <data name="Cal_Anterior" xml:space="preserve"><value>Anterior</value></data>
+  <data name="Cal_Proxima" xml:space="preserve"><value>Próxima</value></data>
+  <data name="Cal_NadaAgendado" xml:space="preserve"><value>Nada agendado.</value></data>
+  <data name="App_CotaMes" xml:space="preserve"><value>Importações este mês</value></data>
+  <data name="App_CotaEsgotada" xml:space="preserve"><value>Você usou toda a cota do plano {0} este mês. Ela renova no dia 1º — ou mude de plano na versão web.</value></data>
+  <data name="App_ObrigadoFeedback" xml:space="preserve"><value>Obrigado! Sua mensagem foi enviada.</value></data>
+  <data name="App_TipoSugestao" xml:space="preserve"><value>Sugestão</value></data>
+  <data name="App_TipoBug" xml:space="preserve"><value>Problema (bug)</value></data>
+  <data name="App_TipoElogio" xml:space="preserve"><value>Elogio</value></data>
+  <data name="App_TipoOutro" xml:space="preserve"><value>Outro</value></data>
+  <data name="App_FeedbackPlaceholder" xml:space="preserve"><value>Conte pra gente...</value></data>
+  <data name="App_LojasDesc" xml:space="preserve"><value>Organize as compras por loja (Walmart, Costco, farmácia...).</value></data>
+  <data name="App_SemLojas" xml:space="preserve"><value>Nenhuma loja cadastrada.</value></data>
+  <data name="App_EditarLoja" xml:space="preserve"><value>Editar loja</value></data>
+  <data name="App_InformeNome" xml:space="preserve"><value>Informe o nome.</value></data>
+  <data name="App_SemIngredientes" xml:space="preserve"><value>Nenhum ingrediente cadastrado.</value></data>
+  <data name="App_SemModelos" xml:space="preserve"><value>Nenhum modelo salvo.</value></data>
+  <data name="App_SemRecorrentes" xml:space="preserve"><value>Nenhum produto recorrente.</value></data>
+  <data name="App_SemCompras" xml:space="preserve"><value>Nada na lista desta semana.</value></data>
+  <data name="App_Excluir" xml:space="preserve"><value>Excluir</value></data>
+  <data name="App_Titulo" xml:space="preserve"><value>Título</value></data>
+  <data name="App_Descricao" xml:space="preserve"><value>Descrição</value></data>
+  <data name="App_Data" xml:space="preserve"><value>Data</value></data>
+  <data name="App_Hora" xml:space="preserve"><value>Hora</value></data>
+  <data name="App_Responsavel" xml:space="preserve"><value>Responsável</value></data>
+  <data name="App_Nenhuma" xml:space="preserve"><value>Nenhum resultado.</value></data>
+  <data name="App_ConfirmaExcluir" xml:space="preserve"><value>Confirma a exclusão?</value></data>
+  <data name="App_ModelosDesc" xml:space="preserve"><value>Aplique um modelo à semana atual ({0}).</value></data>
+  <data name="App_AplicarSemana" xml:space="preserve"><value>Aplicar a esta semana</value></data>
+  <data name="App_SalvarModeloTitulo" xml:space="preserve"><value>Salvar semana atual como modelo</value></data>
+  <data name="App_NomeModelo" xml:space="preserve"><value>Nome do modelo</value></data>
+  <data name="App_ModeloPlaceholder" xml:space="preserve"><value>Ex.: Semana favorita</value></data>
+  <data name="App_ModeloAplicado" xml:space="preserve"><value>Modelo aplicado à semana!</value></data>
+  <data name="App_EditarIngrediente" xml:space="preserve"><value>Editar ingrediente</value></data>
+  <data name="App_NovoIngrediente" xml:space="preserve"><value>Novo ingrediente</value></data>
+  <data name="App_Categoria" xml:space="preserve"><value>Categoria (opcional)</value></data>
+  <data name="App_CategoriaPlaceholder" xml:space="preserve"><value>Ex.: Laticínios</value></data>
+  <data name="App_Ninguem" xml:space="preserve"><value>— Ninguém —</value></data>
+  <data name="App_NotificarResponsavel" xml:space="preserve"><value>Notificar o responsável</value></data>
+  <data name="App_ExcluirTarefa" xml:space="preserve"><value>Excluir tarefa</value></data>
+  <data name="App_InformeTitulo" xml:space="preserve"><value>Informe o título.</value></data>
+  <data name="App_IrEstaSemana" xml:space="preserve"><value>Ir para esta semana</value></data>
+  <data name="App_Buscando" xml:space="preserve"><value>Buscando...</value></data>
+  <data name="App_RemoverReceita" xml:space="preserve"><value>Remover receita</value></data>
+  <data name="App_SemItensSemana" xml:space="preserve"><value>Nenhum item calculado para esta semana.</value></data>
+  <data name="App_AdicionarPedido" xml:space="preserve"><value>Adicionar pedido</value></data>
+  <data name="App_OQue" xml:space="preserve"><value>O quê</value></data>
+  <data name="App_QuantidadeOpcional" xml:space="preserve"><value>Quantidade (opcional)</value></data>
+  <data name="App_RecorrentesDesc" xml:space="preserve"><value>Itens que você compra sempre — envie os selecionados para a semana atual.</value></data>
+  <data name="App_NovoRecorrente" xml:space="preserve"><value>Novo produto recorrente</value></data>
+  <data name="App_SemIngredientesReceita" xml:space="preserve"><value>Nenhum ingrediente.</value></data>
+  <data name="App_Opcional" xml:space="preserve"><value>opc.</value></data>
+  <data name="App_AdicionarIngrediente" xml:space="preserve"><value>Adicionar ingrediente</value></data>
+  <data name="App_EditarReceita" xml:space="preserve"><value>Editar receita</value></data>
+  <data name="App_Componentes" xml:space="preserve"><value>Componentes</value></data>
+  <data name="App_SemIngredientesCad" xml:space="preserve"><value>Sem ingredientes cadastrados.</value></data>
+  <!-- >> Erros de operacao (codigo -> texto) << -->
+  <data name="Erro_sessao_invalida" xml:space="preserve"><value>Sessão inválida. Faça login novamente.</value></data>
+  <data name="Erro_sessao_expirada" xml:space="preserve"><value>Sessão expirada. Entre novamente.</value></data>
+  <data name="Erro_credenciais_invalidas" xml:space="preserve"><value>E-mail ou senha inválidos.</value></data>
+  <data name="Erro_conta_bloqueada_tentativas" xml:space="preserve"><value>Conta temporariamente bloqueada após várias tentativas. Tente novamente em 15 minutos.</value></data>
+  <data name="Erro_codigo_2fa_invalido" xml:space="preserve"><value>Código inválido. Verifique o app autenticador e tente novamente.</value></data>
+  <data name="Erro_link_expirado" xml:space="preserve"><value>Link inválido ou expirado. Peça um novo.</value></data>
+  <data name="Erro_email_ja_cadastrado" xml:space="preserve"><value>Já existe uma conta com este e-mail.</value></data>
+  <data name="Erro_termos_nao_aceitos" xml:space="preserve"><value>É preciso aceitar os termos de uso e a política de privacidade.</value></data>
+  <data name="Erro_email_ja_confirmado" xml:space="preserve"><value>Seu e-mail já está confirmado.</value></data>
+  <data name="Erro_ative_2fa_primeiro" xml:space="preserve"><value>Ative a verificação em duas etapas primeiro.</value></data>
+  <data name="Erro_informe_nome" xml:space="preserve"><value>Informe seu nome.</value></data>
+  <data name="Erro_informe_email" xml:space="preserve"><value>Informe um e-mail válido.</value></data>
+  <data name="Erro_idioma_nao_suportado" xml:space="preserve"><value>Idioma não suportado.</value></data>
+  <data name="Erro_muito_curto" xml:space="preserve"><value>{0} deve ter pelo menos {1} caracteres.</value></data>
+  <data name="Erro_data_deve_ser_segunda" xml:space="preserve"><value>A data de início deve ser uma segunda-feira.</value></data>
+  <data name="Erro_sem_permissao_listas" xml:space="preserve"><value>Você não tem permissão para gerenciar listas.</value></data>
+  <data name="Erro_sem_permissao_recorrentes" xml:space="preserve"><value>Você não tem permissão para gerenciar produtos recorrentes.</value></data>
+  <data name="Erro_somente_proprias_tarefas" xml:space="preserve"><value>Você só pode alterar as suas próprias tarefas.</value></data>
+  <data name="Erro_somente_proprios_pedidos" xml:space="preserve"><value>Você só pode alterar os seus próprios pedidos.</value></data>
+  <data name="Erro_receita_nao_encontrada" xml:space="preserve"><value>Receita não encontrada.</value></data>
+  <data name="Erro_ingrediente_nao_encontrado" xml:space="preserve"><value>Ingrediente não encontrado.</value></data>
+  <data name="Erro_membro_nao_encontrado" xml:space="preserve"><value>Membro não encontrado.</value></data>
+  <data name="Erro_lista_nao_encontrada" xml:space="preserve"><value>Lista não encontrada.</value></data>
+  <data name="Erro_pedido_nao_encontrado" xml:space="preserve"><value>Pedido não encontrado.</value></data>
+  <data name="Erro_tarefa_nao_encontrada" xml:space="preserve"><value>Tarefa não encontrada.</value></data>
+  <data name="Erro_modelo_nao_encontrado" xml:space="preserve"><value>Modelo não encontrado.</value></data>
+  <data name="Erro_cardapio_nao_encontrado" xml:space="preserve"><value>Cardápio não encontrado.</value></data>
+  <data name="Erro_semana_nao_encontrada" xml:space="preserve"><value>Semana não encontrada.</value></data>
+  <data name="Erro_produto_nao_encontrado" xml:space="preserve"><value>Produto não encontrado.</value></data>
+  <data name="Erro_owner_nao_pode_desativar" xml:space="preserve"><value>O administrador (Owner) não pode ser desativado.</value></data>
+  <data name="Erro_owner_nao_pode_remover" xml:space="preserve"><value>O administrador (Owner) não pode ser removido.</value></data>
+  <data name="Erro_owner_papel_imutavel" xml:space="preserve"><value>O papel do administrador (Owner) não pode ser alterado.</value></data>
+  <data name="Erro_membro_ja_ativou_remocao" xml:space="preserve"><value>Este membro já ativou a conta e pode ter dados no sistema. Use Desativar em vez de remover.</value></data>
+  <data name="Erro_membro_ja_ativou_email" xml:space="preserve"><value>Este membro já ativou a conta. O e-mail não pode mais ser alterado; use Desativar se necessário.</value></data>
+  <data name="Erro_limite_membros_plano" xml:space="preserve"><value>Seu plano atual permite até {0} membro(s) ativo(s).</value></data>
+  <data name="Erro_convite_aguarde_reenvio" xml:space="preserve"><value>O convite acabou de ser enviado. Aguarde {0} segundo(s) para reenviar.</value></data>
+  <data name="Erro_sem_assinatura_ativa" xml:space="preserve"><value>Você ainda não tem uma assinatura ativa. Contrate um plano primeiro.</value></data>
+  <data name="Erro_limite_importacoes" xml:space="preserve"><value>Você atingiu o limite de {0} importações de receita este mês no seu plano.</value></data>
+  <data name="Erro_imagem_formato_invalido" xml:space="preserve"><value>Formato de imagem não suportado. Use JPEG, PNG ou WebP.</value></data>
+  <data name="Erro_imagem_corrompida" xml:space="preserve"><value>Imagem inválida ou corrompida.</value></data>
+  <data name="Erro_imagem_muito_grande" xml:space="preserve"><value>A imagem excede o tamanho máximo permitido (2 MB).</value></data>
+  <data name="Erro_arquivo_vazio" xml:space="preserve"><value>Arquivo vazio.</value></data>
+  <data name="Erro_url_invalida" xml:space="preserve"><value>URL inválida.</value></data>
+  <data name="Erro_receita_nao_identificada" xml:space="preserve"><value>Não foi possível identificar uma receita nesta página.</value></data>
+  <data name="Erro_muitas_analises_ia" xml:space="preserve"><value>Muitas análises de ingredientes em pouco tempo. Aguarde alguns minutos e tente novamente.</value></data>
+  <data name="Erro_envio_indisponivel" xml:space="preserve"><value>Não conseguimos enviar sua mensagem agora. Tente novamente em instantes.</value></data>
+  <data name="Erro_sem_permissao" xml:space="preserve"><value>Você não tem permissão para esta ação.</value></data>
+  <data name="Erro_nao_encontrado" xml:space="preserve"><value>Não encontrado.</value></data>
+  <data name="Erro_antecedencia_invalida" xml:space="preserve"><value>A antecedência do lembrete deve estar entre 0 e 1440 minutos.</value></data>
+  <data name="Erro_destino_deve_ser_segunda" xml:space="preserve"><value>O destino deve ser uma segunda-feira.</value></data>
+  <data name="Erro_hora_fim_antes_inicio" xml:space="preserve"><value>A hora de fim deve ser igual ou posterior à hora de início.</value></data>
+  <data name="Erro_porcoes_minimo" xml:space="preserve"><value>Número de porções deve ser ao menos 1.</value></data>
+  <data name="Erro_tamanho_familia_minimo" xml:space="preserve"><value>O tamanho da família deve ser ao menos 1.</value></data>
+  <data name="Erro_selecione_tipo_refeicao" xml:space="preserve"><value>Selecione ao menos um tipo de refeição.</value></data>
+  <data name="Erro_informe_nome_membro" xml:space="preserve"><value>Informe o nome do membro.</value></data>
+  <data name="Erro_nome_receita_curto" xml:space="preserve"><value>Nome da receita deve ter pelo menos 2 caracteres.</value></data>
+  <data name="Erro_nome_ingrediente_curto" xml:space="preserve"><value>Nome do ingrediente deve ter pelo menos 2 caracteres.</value></data>
+  <data name="Erro_nome_modelo_curto" xml:space="preserve"><value>Nome do modelo deve ter pelo menos 2 caracteres.</value></data>
+  <data name="Erro_nome_lista_curto" xml:space="preserve"><value>O nome da lista deve ter pelo menos 2 caracteres.</value></data>
+  <data name="Erro_titulo_tarefa_curto" xml:space="preserve"><value>O título da tarefa deve ter pelo menos 2 caracteres.</value></data>
+  <data name="Erro_descricao_pedido_curta" xml:space="preserve"><value>A descrição do pedido deve ter pelo menos 2 caracteres.</value></data>
+  <data name="Erro_descricao_produto_curta" xml:space="preserve"><value>A descrição do produto deve ter pelo menos 2 caracteres.</value></data>
+  <data name="Erro_membro_ja_ativou_senha" xml:space="preserve"><value>Este membro já ativou a conta. Ele pode redefinir a senha pela tela de login.</value></data>
+  <data name="Erro_owner_dados_no_perfil" xml:space="preserve"><value>Os dados do administrador (Owner) devem ser alterados no perfil.</value></data>
+  <data name="Erro_papel_invalido" xml:space="preserve"><value>Papel inválido para um membro.</value></data>
+  <data name="Erro_somente_admin_altera_papel" xml:space="preserve"><value>Somente o administrador pode alterar o papel de um membro.</value></data>
+  <data name="Erro_so_alterna_pai_filho" xml:space="preserve"><value>Só é possível alternar entre Pai e Filho.</value></data>
+  <data name="Erro_reative_antes_reenviar" xml:space="preserve"><value>Reative o acesso deste membro antes de reenviar o convite.</value></data>
+  <data name="Erro_usuario_nao_encontrado" xml:space="preserve"><value>Usuário não encontrado.</value></data>
+  <data name="Erro_ciclo_componente" xml:space="preserve"><value>Esse componente criaria um ciclo (ele já usa este prato).</value></data>
+  <data name="Erro_ciclo_agrupamento" xml:space="preserve"><value>Este agrupamento criaria um ciclo.</value></data>
+  <data name="Erro_receita_componente_de_si" xml:space="preserve"><value>Uma receita não pode ser componente de si mesma.</value></data>
+  <data name="Erro_ingrediente_base_de_si" xml:space="preserve"><value>Um ingrediente não pode ser produto base de si mesmo.</value></data>
+  <data name="Erro_produto_base_nao_encontrado" xml:space="preserve"><value>Produto base não encontrado.</value></data>
+  <data name="Erro_ingrediente_duplicado" xml:space="preserve"><value>Já existe um ingrediente com o nome '{0}'.</value></data>
+  <data name="Erro_receita_usada_componente" xml:space="preserve"><value>Esta receita é usada como componente em: {0}</value></data>
+  <data name="Erro_unidade_nao_encontrada" xml:space="preserve"><value>Unidade de medida {0} não encontrada.</value></data>
+  <data name="Erro_unidades_incompativeis" xml:space="preserve"><value>Unidades incompatíveis: {0} e {1} são de tipos diferentes.</value></data>
+  <data name="Erro_semana_origem_nao_encontrada" xml:space="preserve"><value>Semana de origem não encontrada.</value></data>
+  <data name="Erro_semana_sem_cardapio" xml:space="preserve"><value>Semana não encontrada. Crie o cardápio primeiro.</value></data>
+  <data name="Erro_falha_limpar_marcacoes" xml:space="preserve"><value>Não foi possível limpar as marcações.</value></data>
+  <data name="Erro_falha_salvar_marcacao" xml:space="preserve"><value>Não foi possível salvar a marcação.</value></data>
+  <data name="Erro_imagem_formato_invalido_upload" xml:space="preserve"><value>Formato inválido. Use JPG, PNG, WEBP ou GIF.</value></data>
+  <data name="Erro_imagem_erro_processar" xml:space="preserve"><value>Erro ao processar a imagem. Tente outra.</value></data>
+  <data name="Erro_imagem_nao_legivel" xml:space="preserve"><value>Não foi possível ler a imagem. Verifique se o arquivo está correto.</value></data>
+  <data name="Erro_imagem_entrada_muito_grande" xml:space="preserve"><value>Imagem muito grande. Máximo {0} MB.</value></data>
+  <data name="Erro_imagem_final_acima_limite" xml:space="preserve"><value>A foto final ainda está acima do limite ({0} KB).</value></data>
+  <data name="Erro_url_nao_informada" xml:space="preserve"><value>URL não informada.</value></data>
+  <data name="Erro_url_inacessivel" xml:space="preserve"><value>Não foi possível acessar a URL: {0}</value></data>
+  <data name="Erro_checkout_falhou" xml:space="preserve"><value>Não foi possível iniciar o checkout. Tente novamente.</value></data>
+  <data name="Erro_portal_falhou" xml:space="preserve"><value>Não foi possível abrir o gerenciamento. Tente novamente.</value></data>
+  <data name="Erro_cadastro_falhou" xml:space="preserve"><value>Não foi possível concluir o cadastro. Tente novamente.</value></data>
 </root>

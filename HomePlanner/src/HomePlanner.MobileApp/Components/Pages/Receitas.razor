@@ -1,18 +1,19 @@
 @page "/receitas"
 @using HomePlanner.MobileApp.Services
 @inject ApiClient Api
+@inject IStringLocalizer<SharedResource> L
 @inject NavigationManager Nav
 
 <div class="barra-topo">
-    <h2>Receitas</h2>
-    <button class="link" style="width:auto" @onclick='() => Nav.NavigateTo("/importar")'>⬇️ Importar</button>
+    <h2>@L["Nav_Receitas"]</h2>
+    <button class="link" style="width:auto" @onclick='() => Nav.NavigateTo("/importar")'>⬇️ @L["Btn_Importar"]</button>
 </div>
 
-<input placeholder="Buscar..." @bind="busca" @bind:event="oninput" @onkeyup="AoTeclar" />
+<input placeholder="@L["App_Buscar"]" @bind="busca" @bind:event="oninput" @onkeyup="AoTeclar" />
 
 @if (carregando)
 {
-    <p class="muted">Carregando...</p>
+    <p class="muted">@L["Btn_Carregando"]</p>
 }
 else if (erro is not null)
 {
@@ -20,7 +21,7 @@ else if (erro is not null)
 }
 else if (lista is null || lista.Itens.Count == 0)
 {
-    <p class="muted">Nenhuma receita encontrada.</p>
+    <p class="muted">@L["Receita_Nenhuma"]</p>
 }
 else
 {
@@ -29,11 +30,11 @@ else
         <div class="card-hp" @onclick="() => Abrir(r.Id)" style="cursor:pointer">
             <div class="linha">
                 <h3>@r.Nome</h3>
-                <span class="pill">@r.NumeroPorcoesBase porç.</span>
+                <span class="pill">@r.NumeroPorcoesBase @L["App_PorcoesAbrev"]</span>
             </div>
             <div class="muted">
                 @(r.TempoPreparoMinutos.HasValue ? $"{r.TempoPreparoMinutos} min · " : "")
-                @r.TotalIngredientes ingrediente(s)
+                @r.TotalIngredientes @L["App_IngredientesQtd"]
             </div>
         </div>
     }

@@ -1,15 +1,33 @@
 @page "/importar"
 @using HomePlanner.MobileApp.Services
 @inject ApiClient Api
+@inject IStringLocalizer<SharedResource> L
 @inject NavigationManager Nav
 
-<button class="link" style="text-align:left;width:auto" @onclick='() => Nav.NavigateTo("/receitas")'>‹ Voltar</button>
-<div class="barra-topo"><h2>Importar receita</h2></div>
+<button class="link" style="text-align:left;width:auto" @onclick='() => Nav.NavigateTo("/receitas")'>‹ @L["Btn_Voltar"]</button>
+<div class="barra-topo"><h2>@L["Importar_Titulo"]</h2></div>
 
-<label>Cole o link de uma receita</label>
-<input @bind="_url" placeholder="https://..." inputmode="url" />
-<button class="btn-acao" @onclick="ImportarAsync" disabled="@_importando">
-    @(_importando ? "Importando..." : "Importar")
+@* Cota do plano, como na web: mostra o consumo e barra antes de gastar chamada de IA. *@
+@if (_cota is not null)
+{
+    <div class="card-hp">
+        <div class="linha">
+            <span class="muted">@L["App_CotaMes"]</span>
+            <span class="pill">@_cota.Usado / @_cota.Limite</span>
+        </div>
+        @if (_cota.Esgotada)
+        {
+            <p class="erro" style="margin-top:.4rem">
+                @string.Format(L["App_CotaEsgotada"], _cota.Plano)
+            </p>
+        }
+    </div>
+}
+
+<label>@L["Importar_UrlLabel"]</label>
+<input @bind="_url" placeholder="https://..." inputmode="url" disabled="@Bloqueado" />
+<button class="btn-acao" @onclick="ImportarAsync" disabled="@(_importando || Bloqueado)">
+    @(_importando ? L["Btn_Importando"] : L["Btn_Importar"])
 </button>
 
 @if (erro is not null) { <p class="erro">@erro</p> }
@@ -18,35 +36,49 @@
 {
     <div class="card-hp">
         <h3>@_preview.Nome</h3>
-        <div class="muted">@_preview.NumeroPorcoesBase porções @(_preview.TempoPreparoMinutos.HasValue ? $"· {_preview.TempoPreparoMinutos} min" : "")</div>
+        <div class="muted">@_preview.NumeroPorcoesBase @L["Receita_Porcoes"] @(_preview.TempoPreparoMinutos.HasValue ? $"· {_preview.TempoPreparoMinutos} min" : "")</div>
         @if (_preview.IngredientesTexto.Count > 0)
         {
-            <p class="muted" style="margin-top:.5rem"><strong>Ingredientes:</strong></p>
+            <p class="muted" style="margin-top:.5rem"><strong>@L["Ing_Label"]</strong></p>
             <ul>@foreach (var i in _preview.IngredientesTexto) { <li>@i</li> }</ul>
         }
     </div>
 
-    <p class="muted">Ao salvar, a lista de ingredientes fica nas observações. Você pode formalizá-los na versão web depois.</p>
+    <p class="muted">@L["Importar_IngAviso"]</p>
     <button class="btn-acao" @onclick="SalvarAsync" disabled="@_salvando">
-        @(_salvando ? "Salvando..." : "Salvar como receita")
+        @(_salvando ? L["Btn_Salvando"] : L["Receita_SalvarBtn"])
     </button>
 }
 
 @code {
     private string _url = "";
     private ReceitaImportadaPreviewDTO? _preview;
+    private UsoCotaImportacaoDTO? _cota;
     private bool _importando, _salvando;
     private string? erro;
+
+    private bool Bloqueado => _cota?.Esgotada == true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var (cota, _) = await Api.ObterCotaImportacaoAsync();
+        _cota = cota;
+    }
 
     private async Task ImportarAsync()
     {
         erro = null; _preview = null;
-        if (string.IsNullOrWhiteSpace(_url)) { erro = "Cole um link."; return; }
+        if (string.IsNullOrWhiteSpace(_url)) { erro = L["Importar_UrlInvalida"]; return; }
         _importando = true;
         var (dados, err) = await Api.ImportarReceitaUrlAsync(_url.Trim());
         _importando = false;
+
+        // Importou de verdade → o contador andou. Relê para o número não ficar velho na tela.
+        var (cota, _) = await Api.ObterCotaImportacaoAsync();
+        _cota = cota;
+
         if (err is not null) { erro = err; return; }
-        if (dados is null || !dados.Sucesso) { erro = dados?.MensagemErro ?? "Não foi possível importar."; return; }
+        if (dados is null || !dados.Sucesso) { erro = dados?.MensagemErro ?? L["App_Erro"]; return; }
         _preview = dados;
     }
 

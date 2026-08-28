@@ -1,13 +1,14 @@
 @page "/receitas/{Id:int}"
 @using HomePlanner.MobileApp.Services
 @inject ApiClient Api
+@inject IStringLocalizer<SharedResource> L
 @inject NavigationManager Nav
 
-<button class="link" style="text-align:left;width:auto" @onclick='() => Nav.NavigateTo("/receitas")'>‹ Voltar</button>
+<button class="link" style="text-align:left;width:auto" @onclick='() => Nav.NavigateTo("/receitas")'>‹ @L["Btn_Voltar"]</button>
 
 @if (carregando)
 {
-    <p class="muted">Carregando...</p>
+    <p class="muted">@L["Btn_Carregando"]</p>
 }
 else if (erro is not null)
 {
@@ -26,16 +27,16 @@ else if (r is not null)
     </p>
 
     <div class="linha" style="gap:.4rem;margin-bottom:.4rem">
-        <button class="link" style="width:auto" @onclick='() => Nav.NavigateTo($"/receitas/{r.Id}/editar")'>✏️ Editar</button>
-        <button class="link" style="width:auto" @onclick="DuplicarAsync">📄 Duplicar</button>
-        <button class="link" style="width:auto;color:var(--hp-danger)" @onclick="ExcluirAsync">🗑️ Excluir</button>
+        <button class="link" style="width:auto" @onclick='() => Nav.NavigateTo($"/receitas/{r.Id}/editar")'>✏️ @L["Btn_Editar"]</button>
+        <button class="link" style="width:auto" @onclick="DuplicarAsync">📄 @L["Btn_Duplicar"]</button>
+        <button class="link" style="width:auto;color:var(--hp-danger)" @onclick="ExcluirAsync">🗑️ @L["Btn_Excluir"]</button>
     </div>
     @if (acaoErro is not null) { <p class="erro">@acaoErro</p> }
 
     @if (r.Componentes.Count > 0)
     {
         <div class="card-hp">
-            <h3>Componentes</h3>
+            <h3>@L["App_Componentes"]</h3>
             @foreach (var c in r.Componentes)
             {
                 <div class="linha"><span>@c.Nome</span><span class="muted">@c.PorcoesDesejadas porç.</span></div>
@@ -44,10 +45,10 @@ else if (r is not null)
     }
 
     <div class="card-hp">
-        <h3>Ingredientes</h3>
+        <h3>@L["Ing_Label"]</h3>
         @if (r.Ingredientes.Count == 0)
         {
-            <p class="muted">Sem ingredientes cadastrados.</p>
+            <p class="muted">@L["App_SemIngredientesCad"]</p>
         }
         else
         {
@@ -64,7 +65,7 @@ else if (r is not null)
     @if (!string.IsNullOrWhiteSpace(r.ModoPreparo))
     {
         <div class="card-hp">
-            <h3>Modo de preparo</h3>
+            <h3>@L["Receita_ModoPreparoLabel"]</h3>
             <div style="white-space:pre-wrap">@r.ModoPreparo</div>
         </div>
     }

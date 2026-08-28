@@ -204,7 +204,7 @@ public class ListaComprasService : IListaComprasService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Falha ao marcar ingrediente {Id} na semana {Semana}.", ingredienteId, dataInicio);
-            return ResultadoOperacao.Falha("Não foi possível salvar a marcação.");
+            return ResultadoOperacao.Falha(ErrosApp.FalhaSalvarMarcacao);
         }
     }
 
@@ -226,7 +226,7 @@ public class ListaComprasService : IListaComprasService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Falha ao limpar marcações da semana {Semana}.", dataInicio);
-            return ResultadoOperacao.Falha("Não foi possível limpar as marcações.");
+            return ResultadoOperacao.Falha(ErrosApp.FalhaLimparMarcacoes);
         }
     }
 
