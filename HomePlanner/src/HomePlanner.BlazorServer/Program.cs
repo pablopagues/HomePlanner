@@ -261,15 +261,35 @@ try
     builder.Services.AddScoped<IDispositivoPushService, DispositivoPushService>();
 
     // FirebaseApp default (uma vez) — só quando o FCM está configurado.
+    //
+    // Roda antes de builder.Build(), quando o Serilog de arquivo ainda não existe: uma
+    // exceção aqui só apareceria no console e derrubaria o app inteiro por causa de um
+    // recurso opcional. Por isso o try/catch — push é acessório, login não é.
     var fcmOptions = builder.Configuration.GetSection(FcmOptions.SectionName).Get<FcmOptions>() ?? new FcmOptions();
     if (fcmOptions.EstaConfigurado && FirebaseAdmin.FirebaseApp.DefaultInstance is null)
     {
-        var credencial = !string.IsNullOrWhiteSpace(fcmOptions.CredentialsJson)
-            ? GoogleCredential.FromJson(fcmOptions.CredentialsJson)
-            : GoogleCredential.FromFile(fcmOptions.CredentialsPath!);
+        try
+        {
+            var credencial = !string.IsNullOrWhiteSpace(fcmOptions.CredentialsJson)
+                ? GoogleCredential.FromJson(fcmOptions.CredentialsJson)
+                : GoogleCredential.FromFile(fcmOptions.CredentialsPath!);
 
-        FirebaseAdmin.FirebaseApp.Create(new FirebaseAdmin.AppOptions { Credential = credencial });
-        Log.Information("Firebase (FCM) inicializado — push nativo habilitado.");
+            FirebaseAdmin.FirebaseApp.Create(new FirebaseAdmin.AppOptions { Credential = credencial });
+            Log.Information("Firebase (FCM) inicializado — push nativo habilitado.");
+        }
+        catch (Exception ex)
+        {
+            // Diz qual das duas fontes falhou e o tamanho lido: credencial truncada pelo
+            // editor de variáveis de ambiente do Windows é a causa mais comum, e o
+            // tamanho denuncia isso na hora (o JSON da conta de serviço passa de 2 KB).
+            var origem = !string.IsNullOrWhiteSpace(fcmOptions.CredentialsJson)
+                ? $"Fcm:CredentialsJson ({fcmOptions.CredentialsJson!.Length} caracteres)"
+                : $"Fcm:CredentialsPath ({fcmOptions.CredentialsPath})";
+
+            Log.Error(ex,
+                "FCM não pôde ser inicializado a partir de {Origem}. O push nativo fica " +
+                "desligado; o resto da aplicação segue normalmente.", origem);
+        }
     }
     // Textos das notificações no idioma do destinatário (lê as SharedResource.resx).
     builder.Services.AddSingleton<INotificacaoTextoService, HomePlanner.BlazorServer.Services.NotificacaoTextoService>();
