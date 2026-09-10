@@ -60,6 +60,11 @@ secrets.json
 *firebase-adminsdk*.json
 firebase-credentials.json
 
+# Chaves do Data Protection (cookies de autenticação e antiforgery). São geradas em
+# runtime e valem por ambiente — versionar seria vazar a chave de todos os cookies.
+App_Data/keys/
+**/App_Data/keys/
+
 ## Logs do app (Serilog)
 logs/
 *.log

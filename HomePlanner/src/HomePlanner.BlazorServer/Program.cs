@@ -40,6 +40,7 @@ using Infrastructure.HomePlanner.Services.Perfil;
 using Infrastructure.HomePlanner.Services.Seguranca;
 using Infrastructure.HomePlanner.Services.Stripe;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
@@ -74,6 +75,28 @@ try
 
     // ── HttpContextAccessor ──────────────────────────────────────────────────
     builder.Services.AddHttpContextAccessor();
+
+    // ── Data Protection ──────────────────────────────────────────────────────
+    // Sem isto, o ASP.NET Core guarda as chaves só em memória quando o app pool não
+    // tem perfil de usuário carregado — o caso da hospedagem compartilhada. A cada
+    // reciclo do pool as chaves mudam, e todo cookie de autenticação e token
+    // antiforgery emitidos antes param de descriptografar: o usuário cai da sessão e
+    // o POST de login falha com "The antiforgery token could not be decrypted".
+    var pastaChaves = builder.Configuration["DataProtection:KeysPath"];
+    if (string.IsNullOrWhiteSpace(pastaChaves))
+        pastaChaves = Path.Combine("App_Data", "keys");
+    if (!Path.IsPathRooted(pastaChaves))
+        pastaChaves = Path.Combine(builder.Environment.ContentRootPath, pastaChaves);
+
+    Directory.CreateDirectory(pastaChaves);
+
+    builder.Services.AddDataProtection()
+        .PersistKeysToFileSystem(new DirectoryInfo(pastaChaves))
+        // Nome fixo de propósito: o padrão deriva do caminho físico da aplicação, que
+        // muda entre deploys na hospedagem e invalidaria as chaves sem necessidade.
+        .SetApplicationName("HomePlanner");
+
+    Log.Information("Data Protection: chaves em {Pasta}", pastaChaves);
 
     // ── Options ──────────────────────────────────────────────────────────────
     builder.Services.Configure<AppOptions>(builder.Configuration.GetSection(AppOptions.SectionName));
@@ -266,7 +289,21 @@ try
     // exceção aqui só apareceria no console e derrubaria o app inteiro por causa de um
     // recurso opcional. Por isso o try/catch — push é acessório, login não é.
     var fcmOptions = builder.Configuration.GetSection(FcmOptions.SectionName).Get<FcmOptions>() ?? new FcmOptions();
-    if (fcmOptions.EstaConfigurado && FirebaseAdmin.FirebaseApp.DefaultInstance is null)
+
+    // Sempre registra o estado: sem isto, "não configurado" e "configurado mas falhou"
+    // produzem o mesmo silêncio no log, e não dá para saber se a variável de ambiente
+    // sequer chegou na aplicação.
+    if (!fcmOptions.IsEnabled)
+    {
+        Log.Information("Push nativo (FCM) desligado — Fcm:IsEnabled está false ou não chegou à aplicação.");
+    }
+    else if (string.IsNullOrWhiteSpace(fcmOptions.CredentialsJson)
+             && string.IsNullOrWhiteSpace(fcmOptions.CredentialsPath))
+    {
+        Log.Warning("Push nativo (FCM) ligado, mas sem credencial: " +
+                    "Fcm:CredentialsJson e Fcm:CredentialsPath estão vazios.");
+    }
+    else if (FirebaseAdmin.FirebaseApp.DefaultInstance is null)
     {
         // Caminho relativo resolve a partir da raiz da aplicação (onde fica o
         // appsettings.json). Em hospedagem compartilhada isso evita ter que descobrir o
