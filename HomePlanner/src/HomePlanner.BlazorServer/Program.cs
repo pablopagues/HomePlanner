@@ -268,23 +268,30 @@ try
     var fcmOptions = builder.Configuration.GetSection(FcmOptions.SectionName).Get<FcmOptions>() ?? new FcmOptions();
     if (fcmOptions.EstaConfigurado && FirebaseAdmin.FirebaseApp.DefaultInstance is null)
     {
+        // Caminho relativo resolve a partir da raiz da aplicação (onde fica o
+        // appsettings.json). Em hospedagem compartilhada isso evita ter que descobrir o
+        // caminho físico absoluto para preencher a variável de ambiente.
+        var caminhoCredencial = fcmOptions.CredentialsPath;
+        if (!string.IsNullOrWhiteSpace(caminhoCredencial) && !Path.IsPathRooted(caminhoCredencial))
+            caminhoCredencial = Path.Combine(builder.Environment.ContentRootPath, caminhoCredencial);
+
         try
         {
             var credencial = !string.IsNullOrWhiteSpace(fcmOptions.CredentialsJson)
                 ? GoogleCredential.FromJson(fcmOptions.CredentialsJson)
-                : GoogleCredential.FromFile(fcmOptions.CredentialsPath!);
+                : GoogleCredential.FromFile(caminhoCredencial!);
 
             FirebaseAdmin.FirebaseApp.Create(new FirebaseAdmin.AppOptions { Credential = credencial });
             Log.Information("Firebase (FCM) inicializado — push nativo habilitado.");
         }
         catch (Exception ex)
         {
-            // Diz qual das duas fontes falhou e o tamanho lido: credencial truncada pelo
-            // editor de variáveis de ambiente do Windows é a causa mais comum, e o
-            // tamanho denuncia isso na hora (o JSON da conta de serviço passa de 2 KB).
+            // Diz qual fonte falhou e o suficiente para identificar a causa sem acesso ao
+            // servidor: tamanho lido (denuncia JSON truncado ou mal escapado) ou caminho
+            // resolvido e se o arquivo existe.
             var origem = !string.IsNullOrWhiteSpace(fcmOptions.CredentialsJson)
                 ? $"Fcm:CredentialsJson ({fcmOptions.CredentialsJson!.Length} caracteres)"
-                : $"Fcm:CredentialsPath ({fcmOptions.CredentialsPath})";
+                : $"Fcm:CredentialsPath ({caminhoCredencial}; existe: {File.Exists(caminhoCredencial)})";
 
             Log.Error(ex,
                 "FCM não pôde ser inicializado a partir de {Origem}. O push nativo fica " +

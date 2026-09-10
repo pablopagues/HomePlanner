@@ -55,6 +55,10 @@ secrets.json
 *.key
 .env
 .env.*
+# Conta de serviço do Firebase (Fcm:CredentialsPath). O nome que o console gera é
+# <projeto>-firebase-adminsdk-xxxxx-xxxxxxxxxx.json; cobrimos os dois formatos.
+*firebase-adminsdk*.json
+firebase-credentials.json
 
 ## Logs do app (Serilog)
 logs/
