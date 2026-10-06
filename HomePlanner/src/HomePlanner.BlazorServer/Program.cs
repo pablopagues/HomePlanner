@@ -73,6 +73,11 @@ try
         .ReadFrom.Services(services)
         .Enrich.FromLogContext());
 
+    // Até builder.Build() só existe o bootstrap logger (console): o que for logado antes
+    // disso nunca chega ao arquivo em logs/. Os diagnósticos de inicialização ficam
+    // guardados aqui e são emitidos logo após o Build, já com o sink de arquivo ativo.
+    var logsInicio = new List<Action>();
+
     // ── HttpContextAccessor ──────────────────────────────────────────────────
     builder.Services.AddHttpContextAccessor();
 
@@ -96,7 +101,7 @@ try
         // muda entre deploys na hospedagem e invalidaria as chaves sem necessidade.
         .SetApplicationName("HomePlanner");
 
-    Log.Information("Data Protection: chaves em {Pasta}", pastaChaves);
+    logsInicio.Add(() => Log.Information("Data Protection: chaves em {Pasta}", pastaChaves));
 
     // ── Options ──────────────────────────────────────────────────────────────
     builder.Services.Configure<AppOptions>(builder.Configuration.GetSection(AppOptions.SectionName));
@@ -306,13 +311,14 @@ try
     // sequer chegou na aplicação.
     if (!fcmOptions.IsEnabled)
     {
-        Log.Information("Push nativo (FCM) desligado — Fcm:IsEnabled está false ou não chegou à aplicação.");
+        logsInicio.Add(() => Log.Information(
+            "Push nativo (FCM) desligado — Fcm:IsEnabled está false ou não chegou à aplicação."));
     }
     else if (string.IsNullOrWhiteSpace(fcmOptions.CredentialsJson)
              && string.IsNullOrWhiteSpace(fcmOptions.CredentialsPath))
     {
-        Log.Warning("Push nativo (FCM) ligado, mas sem credencial: " +
-                    "Fcm:CredentialsJson e Fcm:CredentialsPath estão vazios.");
+        logsInicio.Add(() => Log.Warning("Push nativo (FCM) ligado, mas sem credencial: " +
+                                         "Fcm:CredentialsJson e Fcm:CredentialsPath estão vazios."));
     }
     else if (FirebaseAdmin.FirebaseApp.DefaultInstance is null)
     {
@@ -330,7 +336,7 @@ try
                 : GoogleCredential.FromFile(caminhoCredencial!);
 
             FirebaseAdmin.FirebaseApp.Create(new FirebaseAdmin.AppOptions { Credential = credencial });
-            Log.Information("Firebase (FCM) inicializado — push nativo habilitado.");
+            logsInicio.Add(() => Log.Information("Firebase (FCM) inicializado — push nativo habilitado."));
         }
         catch (Exception ex)
         {
@@ -341,9 +347,9 @@ try
                 ? $"Fcm:CredentialsJson ({fcmOptions.CredentialsJson!.Length} caracteres)"
                 : $"Fcm:CredentialsPath ({caminhoCredencial}; existe: {File.Exists(caminhoCredencial)})";
 
-            Log.Error(ex,
+            logsInicio.Add(() => Log.Error(ex,
                 "FCM não pôde ser inicializado a partir de {Origem}. O push nativo fica " +
-                "desligado; o resto da aplicação segue normalmente.", origem);
+                "desligado; o resto da aplicação segue normalmente.", origem));
         }
     }
     // Textos das notificações no idioma do destinatário (lê as SharedResource.resx).
@@ -370,6 +376,8 @@ try
     // ═══════════════════════════════════════════════════════════════════════════
     var app = builder.Build();
     // ═══════════════════════════════════════════════════════════════════════════
+
+    foreach (var emitir in logsInicio) emitir();
 
     if (!app.Environment.IsDevelopment())
     {
