@@ -169,6 +169,17 @@ try
         opts.AccessDeniedPath = "/Identity/Account/AccessDenied";
         opts.ExpireTimeSpan = TimeSpan.FromDays(7);
         opts.SlidingExpiration = true;
+
+        // A cada 30 min o Identity revalida o cookie buscando o usuário no banco. Isso
+        // roda na autenticação, antes do TenantContextMiddleware: sem hidratar o tenant
+        // aqui, o filtro global (Usuario é ITenantEntity) esconde o usuário, a validação
+        // falha e ele é deslogado — ao voltar de uma aba inativa, por exemplo.
+        opts.Events.OnValidatePrincipal = contexto =>
+        {
+            contexto.HttpContext.RequestServices.GetRequiredService<TenantContext>()
+                .DefinirAPartirDe(contexto.Principal);
+            return SecurityStampValidator.ValidatePrincipalAsync(contexto);
+        };
     });
 
     // 2FA: "lembrar este dispositivo por 30 dias" — duração do cookie TwoFactorRememberMe.

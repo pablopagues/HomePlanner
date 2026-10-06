@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Http;
-using System.Security.Claims;
 
 namespace Application.HomePlanner.Middleware;
 
@@ -20,20 +19,8 @@ public class TenantContextAccessor
 
     public Task GarantirHidratadoAsync()
     {
-        if (_tenantContext.EstaHidratado) return Task.CompletedTask;
-
-        var ctx = _httpContextAccessor.HttpContext;
-        if (ctx?.User.Identity?.IsAuthenticated != true) return Task.CompletedTask;
-
-        var tenantIdStr = ctx.User.FindFirstValue("tenant_id");
-        var usuarioId = ctx.User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var nome = ctx.User.FindFirstValue(ClaimTypes.Name) ?? string.Empty;
-        // Filho (e qualquer papel que não seja Owner/Membro) só enxerga os próprios registros.
-        var ehOwner = ctx.User.IsInRole("Owner");
-        var restrito = !ehOwner && !ctx.User.IsInRole("Membro");
-
-        if (Guid.TryParse(tenantIdStr, out var tenantId))
-            _tenantContext.Definir(tenantId, usuarioId, nome, restrito, ehOwner);
+        if (!_tenantContext.EstaHidratado)
+            _tenantContext.DefinirAPartirDe(_httpContextAccessor.HttpContext?.User);
 
         return Task.CompletedTask;
     }
