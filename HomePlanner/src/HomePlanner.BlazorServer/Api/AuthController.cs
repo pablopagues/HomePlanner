@@ -9,7 +9,6 @@ namespace HomePlanner.BlazorServer.Api;
 /// <summary>Login e renovação de tokens para os apps mobile.</summary>
 [ApiController]
 [Route("api/[controller]")]
-[AllowAnonymous]
 [Produces("application/json")]
 public class AuthController : ControllerBase
 {
@@ -27,6 +26,7 @@ public class AuthController : ControllerBase
     /// (chame então POST /api/auth/2fa).
     /// </summary>
     [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] LoginApiDTO dto, CancellationToken ct)
     {
         var r = await _auth.LoginAsync(dto, ct);
@@ -35,6 +35,7 @@ public class AuthController : ControllerBase
 
     /// <summary>Segundo passo do login com 2FA: valida o código e devolve o par de tokens.</summary>
     [HttpPost("2fa")]
+    [AllowAnonymous]
     public async Task<IActionResult> Confirmar2FA([FromBody] Confirmar2FADTO dto, CancellationToken ct)
     {
         var r = await _auth.Confirmar2FAAsync(dto, ct);
@@ -43,6 +44,7 @@ public class AuthController : ControllerBase
 
     /// <summary>Troca um refresh token válido por um novo par de tokens (rotação).</summary>
     [HttpPost("refresh")]
+    [AllowAnonymous]
     public async Task<IActionResult> Refresh([FromBody] RefreshApiDTO dto, CancellationToken ct)
     {
         var r = await _auth.RenovarAsync(dto, ct);
@@ -51,6 +53,7 @@ public class AuthController : ControllerBase
 
     /// <summary>Revoga um refresh token (logout do dispositivo).</summary>
     [HttpPost("logout")]
+    [AllowAnonymous]
     public async Task<IActionResult> Logout([FromBody] RefreshApiDTO dto, CancellationToken ct)
     {
         await _auth.RevogarAsync(dto.RefreshToken, ct);
@@ -62,6 +65,7 @@ public class AuthController : ControllerBase
     /// o e-mail ou não — distinguir os casos revelaria quem tem conta.
     /// </summary>
     [HttpPost("esqueci-senha")]
+    [AllowAnonymous]
     public async Task<IActionResult> EsqueciSenha([FromBody] EsqueciSenhaDTO dto, CancellationToken ct)
     {
         var baseUrl = $"{Request.Scheme}://{Request.Host}";
@@ -71,6 +75,7 @@ public class AuthController : ControllerBase
 
     /// <summary>Redefine a senha usando o token recebido por e-mail.</summary>
     [HttpPost("redefinir-senha")]
+    [AllowAnonymous]
     public async Task<IActionResult> RedefinirSenha([FromBody] RedefinirSenhaDTO dto, CancellationToken ct)
     {
         var r = await _senha.RedefinirAsync(dto.UsuarioId, dto.Token, dto.NovaSenha, ct);

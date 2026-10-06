@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>false</IsPackable>
@@ -15,7 +15,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Localization" Version="8.*" />
+    <PackageReference Include="Microsoft.Extensions.Localization" Version="10.*" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Application.HomePlanner\Application.HomePlanner.csproj" />
