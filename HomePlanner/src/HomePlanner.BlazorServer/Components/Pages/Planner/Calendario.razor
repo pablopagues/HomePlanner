@@ -78,11 +78,10 @@ else
                              Style="@($"font-weight:{(ehHoje ? "700" : "500")}; color:{(doMes ? (ehHoje ? "var(--mud-palette-secondary)" : "var(--mud-palette-text-primary)") : "var(--mud-palette-text-disabled)")};")">
                         @dia.Data.Day
                     </MudText>
-                    @if (!Mural.Ativo)
-                    {
-                        <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small"
-                                       Style="padding:2px;" OnClick="@(() => NovaTarefa(dia.Data))" />
-                    }
+                    @* Criar é liberado também no Mural; editar não (ver AbrirEditor). *@
+                    <MudIconButton Icon="@Icons.Material.Filled.Add"
+                                   Size="@(Mural.Ativo ? Size.Medium : Size.Small)"
+                                   Style="padding:2px;" OnClick="@(() => NovaTarefa(dia.Data))" />
                 </MudStack>
 
                 <MudStack Spacing="1" Class="mt-1">
@@ -256,12 +255,13 @@ else
 
     private async Task AbrirEditor(TarefaPersistenciaDTO dto)
     {
-        if (Mural.Ativo) return; // somente-leitura no Modo Mural
+        if (Mural.Ativo && dto.Id != 0) return; // no Mural só se cria, não se edita
 
         var parameters = new DialogParameters<TarefaEditor>
         {
             { x => x.Dto, dto },
             { x => x.Membros, _membros },
+            { x => x.Mural, Mural.Ativo },
         };
 
         var dialog = await Dialog.ShowAsync<TarefaEditor>(string.Empty, parameters,

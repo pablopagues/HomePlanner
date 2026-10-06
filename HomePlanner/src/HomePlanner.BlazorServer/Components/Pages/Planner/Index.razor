@@ -16,14 +16,13 @@
     <MudText Typo="Typo.h5" Style="font-family:'Fraunces',serif; font-weight:300;">
         @L["Planner_Titulo"]
     </MudText>
-    @if (!Mural.Ativo)
-    {
-        <MudButton Variant="Variant.Filled" Color="Color.Primary"
-                   StartIcon="@Icons.Material.Filled.Add"
-                   OnClick="@(() => AbrirEditor(null))">
-            @L["Planner_Nova"]
-        </MudButton>
-    }
+    @* Criar tarefa é liberado também no Mural (anotar no tablet); editar/excluir/concluir não. *@
+    <MudButton Variant="Variant.Filled" Color="Color.Primary"
+               Size="@(Mural.Ativo ? Size.Large : Size.Medium)"
+               StartIcon="@Icons.Material.Filled.Add"
+               OnClick="@(() => AbrirEditor(null))">
+        @L["Planner_Nova"]
+    </MudButton>
 </MudStack>
 
 @* ── Filtros ────────────────────────────────────────────────────────────── *@
@@ -180,6 +179,8 @@ else
 
     private async Task AbrirEditor(TarefaListaDTO? tarefa)
     {
+        if (Mural.Ativo && tarefa is not null) return; // no Mural só se cria
+
         var dto = tarefa is null
             ? new TarefaPersistenciaDTO()
             : new TarefaPersistenciaDTO
@@ -201,6 +202,7 @@ else
             { x => x.Dto, dto },
             { x => x.Membros, _membros },
             { x => x.Restrito, _restrito },
+            { x => x.Mural, Mural.Ativo },
         };
 
         var dialog = await Dialog.ShowAsync<TarefaEditor>(string.Empty, parameters,

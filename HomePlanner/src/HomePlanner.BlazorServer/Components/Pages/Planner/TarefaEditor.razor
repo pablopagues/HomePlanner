@@ -51,9 +51,13 @@
                 <MudSelectItem T="Recorrencia" Value="Recorrencia.Mensal">@L["Recorrencia_Mensal"]</MudSelectItem>
             </MudSelect>
 
-            <MudSwitch T="bool" Value="@_privada"
-                       ValueChanged="@((bool v) => { _privada = v; Dto.Visibilidade = v ? VisibilidadeTarefa.Privada : VisibilidadeTarefa.Familia; })"
-                       Label="@L["Planner_PrivadaLabel"]" Color="Color.Secondary" />
+            @* No Mural a tarefa é sempre da família — privada nunca apareceria no tablet. *@
+            @if (!Mural)
+            {
+                <MudSwitch T="bool" Value="@_privada"
+                           ValueChanged="@((bool v) => { _privada = v; Dto.Visibilidade = v ? VisibilidadeTarefa.Privada : VisibilidadeTarefa.Familia; })"
+                           Label="@L["Planner_PrivadaLabel"]" Color="Color.Secondary" />
+            }
 
             @* Notificar pais (Owner/Membro) no lembrete — não faz sentido em tarefa privada. *@
             @if (!_privada)
@@ -80,6 +84,9 @@
     /// <summary>Papel restrito (Filho): não escolhe responsável, só cria para si.</summary>
     [Parameter] public bool Restrito { get; set; }
 
+    /// <summary>Aberto a partir do Modo Mural: só criação, sempre visível à família.</summary>
+    [Parameter] public bool Mural { get; set; }
+
     private DateTime? _dataPrevista;
     private TimeSpan? _horaInicio;
     private TimeSpan? _horaFim;
@@ -87,6 +94,7 @@
 
     protected override void OnInitialized()
     {
+        if (Mural) Dto.Visibilidade = VisibilidadeTarefa.Familia;
         _dataPrevista = Dto.DataPrevista?.ToDateTime(TimeOnly.MinValue);
         _horaInicio = Dto.HoraInicio?.ToTimeSpan();
         _horaFim = Dto.HoraFim?.ToTimeSpan();

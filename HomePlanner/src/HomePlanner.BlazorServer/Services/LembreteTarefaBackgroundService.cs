@@ -67,6 +67,7 @@ public class LembreteTarefaBackgroundService : BackgroundService
 
         var candidatas = await db.Tarefas
             .IgnoreQueryFilters()
+            .AsNoTracking()
             .Where(t => !t.IsDeleted
                         && !t.Concluida
                         && t.ResponsavelUsuarioId != null
@@ -86,7 +87,6 @@ public class LembreteTarefaBackgroundService : BackgroundService
             .ToDictionaryAsync(c => c.TenantId, ct);
 
         var agoraUtc = DateTimeOffset.UtcNow;
-        var houveMudanca = false;
         var cachePais = new Dictionary<Guid, List<string>>();
         var cacheNomes = new Dictionary<string, string>();
 
@@ -115,35 +115,50 @@ public class LembreteTarefaBackgroundService : BackgroundService
                 continue; // ainda não é hora — reavalia no próximo ciclo
 
             // Velho demais (passou da janela de recuperação): marca como processado e não envia.
-            if (agoraLocal > agendadoLocal.Add(JanelaRecuperacao))
-            {
-                tarefa.LembreteEnviadoEm = agoraUtc.UtcDateTime;
-                houveMudanca = true;
-                continue;
-            }
+            // Marca ANTES de enviar (no máximo uma vez): se o envio falhar no meio, o ciclo seguinte
+            // não reenvia. Antes a marca só era gravada no fim do ciclo, e qualquer exceção no envio
+            // fazia o lembrete sair de novo a cada minuto até estourar a janela de recuperação.
+            var marcada = await MarcarLembreteAsync(db, tarefa.Id, agoraUtc.UtcDateTime, ct);
+            if (!marcada || agoraLocal > agendadoLocal.Add(JanelaRecuperacao))
+                continue; // já marcada por outro ciclo/instância, ou velha demais (só marca, não envia)
 
-            // Texto resolvido no idioma do destinatário dentro do serviço de push.
-            await push.EnviarLembreteTarefaAsync(
-                tarefa.TenantId, tarefa.ResponsavelUsuarioId!, tarefa.Titulo, tarefa.HoraInicio.Value, tarefa.Id, ct);
-
-            // "Notificar pai/mãe": também avisa os Owner/Membro da família (sem duplicar o responsável).
-            if (tarefa.NotificarResponsaveis)
+            try
             {
-                var paisIds = await ObterPaisAsync(db, tarefa.TenantId, cachePais, ct);
-                var nomeResponsavel = await ObterNomeAsync(db, tarefa.ResponsavelUsuarioId!, cacheNomes, ct);
-                foreach (var paiId in paisIds.Where(p => p != tarefa.ResponsavelUsuarioId))
+                // Texto resolvido no idioma do destinatário dentro do serviço de push.
+                await push.EnviarLembreteTarefaAsync(
+                    tarefa.TenantId, tarefa.ResponsavelUsuarioId!, tarefa.Titulo, tarefa.HoraInicio.Value, tarefa.Id, ct);
+
+                // "Notificar pai/mãe": também avisa os Owner/Membro da família (sem duplicar o responsável).
+                if (tarefa.NotificarResponsaveis)
                 {
-                    await push.EnviarLembreteTarefaPaisAsync(
-                        tarefa.TenantId, paiId, nomeResponsavel, tarefa.Titulo, tarefa.HoraInicio.Value, tarefa.Id, ct);
+                    var paisIds = await ObterPaisAsync(db, tarefa.TenantId, cachePais, ct);
+                    var nomeResponsavel = await ObterNomeAsync(db, tarefa.ResponsavelUsuarioId!, cacheNomes, ct);
+                    foreach (var paiId in paisIds.Where(p => p != tarefa.ResponsavelUsuarioId))
+                    {
+                        await push.EnviarLembreteTarefaPaisAsync(
+                            tarefa.TenantId, paiId, nomeResponsavel, tarefa.Titulo, tarefa.HoraInicio.Value, tarefa.Id, ct);
+                    }
                 }
             }
-
-            tarefa.LembreteEnviadoEm = agoraUtc.UtcDateTime;
-            houveMudanca = true;
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                _logger.LogError(ex, "Falha ao enviar lembrete da tarefa {TarefaId} (tenant {Tenant}).", tarefa.Id, tarefa.TenantId);
+            }
         }
+    }
 
-        if (houveMudanca)
-            await db.SaveChangesAsync(ct);
+    /// <summary>
+    /// Grava LembreteEnviadoEm direto no banco (fora do ChangeTracker, que os serviços de push também
+    /// usam). Só marca se ainda estiver null — retorna false se outro ciclo/instância já marcou.
+    /// </summary>
+    private static async Task<bool> MarcarLembreteAsync(
+        HomePlannerDbContext db, int tarefaId, DateTime agoraUtc, CancellationToken ct)
+    {
+        var linhas = await db.Tarefas
+            .IgnoreQueryFilters()
+            .Where(t => t.Id == tarefaId && t.LembreteEnviadoEm == null)
+            .ExecuteUpdateAsync(s => s.SetProperty(t => t.LembreteEnviadoEm, agoraUtc), ct);
+        return linhas > 0;
     }
 
     /// <summary>IDs dos pais (Owner/Membro) de um tenant, com cache por ciclo.</summary>

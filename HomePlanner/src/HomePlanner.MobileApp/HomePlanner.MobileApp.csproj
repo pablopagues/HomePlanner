@@ -32,7 +32,7 @@
         <ApplicationTitle>HomePlanner.MobileApp</ApplicationTitle>
 
         <!-- App Identifier -->
-        <ApplicationId>com.companyname.homeplanner.mobileapp</ApplicationId>
+        <ApplicationId>ca.siderisx.homeplanner.mobileapp</ApplicationId>
 
         <!-- Versions -->
         <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
