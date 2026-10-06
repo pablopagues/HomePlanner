@@ -220,8 +220,19 @@ try
         .AddJsonOptions(opts =>
             opts.JsonSerializerOptions.Converters.Add(
                 new System.Text.Json.Serialization.JsonStringEnumConverter()));
+    // Circuito: aba em segundo plano (sobretudo no celular) perde o WebSocket. O padrão
+    // guarda o circuito desconectado por só 3 min — depois disso a volta exige recarregar.
+    // Com 60 min, voltar à aba reconecta e mantém a tela como estava.
+    // ClientTimeoutInterval maior tolera os pings atrasados de abas com timers
+    // estrangulados pelo navegador (padrão de 30s derrubava a conexão à toa).
     builder.Services.AddRazorComponents()
-        .AddInteractiveServerComponents();
+        .AddInteractiveServerComponents(opts =>
+            opts.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(60))
+        .AddHubOptions(opts =>
+        {
+            opts.ClientTimeoutInterval = TimeSpan.FromMinutes(2);
+            opts.KeepAliveInterval = TimeSpan.FromSeconds(15);
+        });
     builder.Services.AddMudServices();
 
     // ── Cardápio: Repositórios ────────────────────────────────────────────────

@@ -46,7 +46,9 @@ public class LoginModel : PageModel
         [DataType(DataType.Password)]
         public string Senha { get; set; } = string.Empty;
 
-        public bool Lembrar { get; set; }
+        // Marcado por padrão: sem ele o cookie é de sessão e o celular o descarta ao
+        // tirar o navegador da memória, obrigando a logar de novo a cada volta.
+        public bool Lembrar { get; set; } = true;
     }
 
     public void OnGet(string? returnUrl = null) => ReturnUrl = returnUrl;
