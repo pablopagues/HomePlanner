@@ -499,6 +499,12 @@ try
         return Results.File(foto.Conteudo, foto.ContentType, entityTag: etag);
     }).RequireAuthorization();
 
+    // ── Keep-alive (GET /ping) ────────────────────────────────────────────────
+    // Alvo de um monitor externo (ex.: UptimeRobot a cada 5 min). Na hospedagem
+    // compartilhada o IIS derruba o app após ~20 min sem requisições: cai a tela de
+    // quem estava conectado e os lembretes de tarefa param até a próxima visita.
+    app.MapGet("/ping", () => Results.Text("ok")).AllowAnonymous();
+
     app.MapRazorPages();
     app.MapControllers(); // StripeWebhookController
     app.MapRazorComponents<HomePlanner.BlazorServer.Components.App>()
