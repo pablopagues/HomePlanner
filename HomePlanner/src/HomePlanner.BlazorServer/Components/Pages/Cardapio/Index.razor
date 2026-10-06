@@ -79,8 +79,20 @@ else
                     @if (refeicao?.ReceitaId.HasValue == true)
                     {
                         <MudPaper @onclick="@(() => AbrirSeletor(dia, tipo, refeicao))"
-                                  Style="cursor:pointer; height:100%; border-radius:8px; padding:8px; background:var(--mud-palette-primary-hover); border:1px solid var(--mud-palette-primary);"
+                                  Style="cursor:pointer; height:100%; border-radius:8px; padding:8px; background:var(--mud-palette-primary-hover); border:1px solid var(--mud-palette-primary); position:relative;"
                                   Elevation="0">
+                            @if (!Mural.Ativo)
+                            {
+                                @* Atalho para o detalhe da receita — não abre o seletor da célula *@
+                                <span @onclick:stopPropagation="true"
+                                      style="position:absolute; top:2px; right:2px; z-index:1;">
+                                    <MudIconButton Icon="@Icons.Material.Filled.MenuBook"
+                                                   Size="Size.Small" Color="Color.Primary"
+                                                   Href="@UrlReceita(refeicao.ReceitaId!.Value)"
+                                                   title="Ver receita"
+                                                   Style="background:var(--mud-palette-surface); padding:4px;" />
+                                </span>
+                            }
                             @if (!string.IsNullOrWhiteSpace(refeicao.ReceitaImagemSrc))
                             {
                                 <img src="@refeicao.ReceitaImagemSrc" alt=""
@@ -244,6 +256,9 @@ else
         else
             Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
     }
+
+    private string UrlReceita(int receitaId) =>
+        $"/receitas/{receitaId}?voltar={Uri.EscapeDataString($"/cardapio/{_dataInicio:yyyy-MM-dd}")}";
 
     private void SemanaAnterior() =>
         Nav.NavigateTo($"/cardapio/{_dataInicio.AddDays(-7):yyyy-MM-dd}");

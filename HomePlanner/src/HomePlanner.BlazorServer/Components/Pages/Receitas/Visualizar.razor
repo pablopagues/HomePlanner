@@ -19,7 +19,7 @@ else if (_dto is not null)
         <MudStack Row="true" Spacing="2">
             <MudButton Variant="Variant.Outlined" Color="Color.Default"
                        StartIcon="@Icons.Material.Filled.ArrowBack"
-                       Href="/receitas">
+                       Href="@UrlVoltar">
                 Voltar
             </MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary"
@@ -179,6 +179,14 @@ else
 
 @code {
     [Parameter] public int Id { get; set; }
+
+    // Origem da navegação (ex.: o cardápio da semana); só aceita caminho local.
+    [SupplyParameterFromQuery(Name = "voltar")] public string? Voltar { get; set; }
+
+    private string UrlVoltar =>
+        Voltar is { Length: > 1 } v && v.StartsWith('/') && !v.StartsWith("//") && !v.StartsWith("/\\")
+            ? v
+            : "/receitas";
 
     [Inject] IReceitaService Service { get; set; } = null!;
 
