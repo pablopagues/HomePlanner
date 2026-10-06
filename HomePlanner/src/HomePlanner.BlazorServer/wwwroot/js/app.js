@@ -24,6 +24,16 @@ window.appStorage = {
     }
 };
 
+// Classe de tema no <body> (variáveis --hp-*). Usado por MainLayout/PublicLayout.
+// Remove qualquer theme-* anterior e aplica a nova (string vazia = Sage, sem classe).
+window.appTheme = {
+    setBodyClass: (cls) => {
+        const b = document.body;
+        [...b.classList].filter(c => c.startsWith("theme-")).forEach(c => b.classList.remove(c));
+        if (cls) b.classList.add(cls);
+    }
+};
+
 // Cookies de consentimento LGPD. Usado por CookieConsentBanner.razor via JSInterop.
 window.lgpdCookies = {
     // Lê o valor de um cookie. Retorna "" se não existir.

@@ -5,6 +5,7 @@
 @inject IStringLocalizer<SharedResource> L
 @inject PublicLanguageService Lang
 @inject PersistentComponentState PersistentState
+@inject IJSRuntime JS
 @implements IDisposable
 
 @* ─────────────────────────────────────────────────────────────────────────────
@@ -18,7 +19,7 @@
                          reaplicando CultureInfo no thread do circuit antes do 1º render.
    ───────────────────────────────────────────────────────────────────────────── *@
 
-<MudThemeProvider Theme="HomePlannerTheme.Tema" />
+<MudThemeProvider Theme="HomePlannerTheme.Tema" ObserveSystemThemeChange="false" />
 <MudPopoverProvider />
 <MudSnackbarProvider />
 <MudDialogProvider />
@@ -92,6 +93,15 @@
             Lang.SetLang(persisted);
         else
             Lang.SetLang(Lang.Lang);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // As páginas públicas são sempre Sage. Vindo do app pelo circuito (ex.: link de
+        // Privacidade no banner de cookies), o <body> ainda carrega theme-carbon/plum do
+        // MainLayout — fundo escuro com componentes claros. O MainLayout reaplica ao voltar.
+        if (firstRender)
+            await JS.InvokeVoidAsync("appTheme.setBodyClass", "");
     }
 
     private Task PersistLang()

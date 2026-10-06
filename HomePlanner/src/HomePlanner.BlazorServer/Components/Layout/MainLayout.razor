@@ -15,7 +15,11 @@
 @inject IJSRuntime JS
 @implements IDisposable
 
-<MudThemeProvider Theme="_temaAtivo" IsDarkMode="_isDark" />
+@* ObserveSystemThemeChange=false: o claro/escuro é decidido pelo tema escolhido, não pelo
+   SO. Ligado (padrão do MudBlazor 7), quando o SO/navegador troca de modo o provider vira
+   para a paleta oposta — que nos nossos temas é a padrão do MudBlazor — e a tela fica
+   metade no tema escolhido, metade em outro. *@
+<MudThemeProvider Theme="_temaAtivo" IsDarkMode="_isDark" ObserveSystemThemeChange="false" />
 <MudPopoverProvider />
 <MudSnackbarProvider />
 <MudDialogProvider />
@@ -292,7 +296,7 @@ else
                 return;
             }
 
-            var temaSalvo = await JS.InvokeAsync<string?>("localStorage.getItem", ThemeKey);
+            var temaSalvo = await JS.InvokeAsync<string?>("appStorage.get", ThemeKey);
             if (!string.IsNullOrEmpty(temaSalvo) && temaSalvo != _temaNome)
                 await AplicarTema(temaSalvo);
 
@@ -323,11 +327,9 @@ else
             "carbon" => "theme-carbon",
             _        => "",
         };
-        await JS.InvokeVoidAsync("eval",
-            "document.body.className = document.body.className.replace(/theme-\\S+/g, '').trim(); " +
-            (string.IsNullOrEmpty(cssClass) ? "" : $"document.body.classList.add('{cssClass}');"));
+        await JS.InvokeVoidAsync("appTheme.setBodyClass", cssClass);
 
-        await JS.InvokeVoidAsync("localStorage.setItem", ThemeKey, nome);
+        await JS.InvokeVoidAsync("appStorage.set", ThemeKey, nome);
         StateHasChanged();
     }
 
