@@ -13,6 +13,8 @@ public class Receita : ITenantEntity, IDeletableEntity, IAuditable
     public int? TempoPreparoMinutos { get; set; }
     public string? UrlOrigem { get; set; }
     public string? UrlImagem { get; set; }
+    /// <summary>Ingredientes em texto livre (colado/importado); o "Lançar do texto" os estrutura.</summary>
+    public string? IngredientesTexto { get; set; }
     public string? Observacoes { get; set; }
 
     // Foto enviada pelo usuário (uma por receita), já redimensionada/comprimida.

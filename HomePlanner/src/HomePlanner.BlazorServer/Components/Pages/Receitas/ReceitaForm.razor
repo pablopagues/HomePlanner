@@ -72,12 +72,7 @@
     </MudItem>
 
     <MudItem xs="12">
-        <MudTextField @bind-Value="Dto.ModoPreparo" Label="@L["Receita_ModoPreparoLabel"]"
-                      Lines="6" AutoGrow="true" Variant="Variant.Outlined" />
-    </MudItem>
-
-    <MudItem xs="12">
-        <MudTextField @bind-Value="Dto.Observacoes" Label="@L["Receita_ObservacoesLabel"]"
+        <MudTextField @bind-Value="Dto.IngredientesTexto" Label="@L["Receita_IngredientesTextoLabel"]"
                       Lines="3" AutoGrow="true" Variant="Variant.Outlined" />
         @if (Assistente.Habilitado)
         {
@@ -85,7 +80,7 @@
                 <MudButton StartIcon="@Icons.Material.Filled.AutoAwesome" Size="Size.Small"
                            Variant="Variant.Outlined" Color="Color.Secondary"
                            OnClick="OrganizarComIAAsync"
-                           Disabled="@(_organizando || string.IsNullOrWhiteSpace(Dto.Observacoes))">
+                           Disabled="@(_organizando || string.IsNullOrWhiteSpace(Dto.IngredientesTexto))">
                     @(_organizando ? L["Ia_Organizando"] : L["Ia_Organizar"])
                 </MudButton>
                 <MudText Typo="Typo.caption" Color="Color.Secondary">
@@ -93,6 +88,16 @@
                 </MudText>
             </MudStack>
         }
+    </MudItem>
+
+    <MudItem xs="12">
+        <MudTextField @bind-Value="Dto.ModoPreparo" Label="@L["Receita_ModoPreparoLabel"]"
+                      Lines="6" AutoGrow="true" Variant="Variant.Outlined" />
+    </MudItem>
+
+    <MudItem xs="12">
+        <MudTextField @bind-Value="Dto.Observacoes" Label="@L["Receita_ObservacoesLabel"]"
+                      Lines="2" AutoGrow="true" Variant="Variant.Outlined" />
     </MudItem>
 </MudGrid>
 
@@ -372,7 +377,7 @@ else
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && AbrirLancamentoAoIniciar
-            && _linhas.Count == 0 && !string.IsNullOrWhiteSpace(Dto.Observacoes))
+            && _linhas.Count == 0 && !string.IsNullOrWhiteSpace(Dto.IngredientesTexto))
             await AbrirLancarIngredientes(analisarAoAbrir: true);
     }
 
@@ -380,7 +385,7 @@ else
     private async Task OrganizarComIAAsync()
     {
         _organizando = true;
-        var r = await Importador.ImportarDeTextoAsync(Dto.Observacoes);
+        var r = await Importador.ImportarDeTextoAsync(Dto.IngredientesTexto);
         _organizando = false;
 
         if (!r.Sucesso || r.Valor is null)
@@ -402,7 +407,7 @@ else
             else preparoMantido = true;
         }
 
-        Dto.Observacoes = string.Join("\n", p.IngredientesTexto);
+        Dto.IngredientesTexto = string.Join("\n", p.IngredientesTexto);
         Dto.ContarImportacaoIA = true;
         StateHasChanged();
 
@@ -493,7 +498,7 @@ else
     {
         var parameters = new DialogParameters<LancarIngredientesDialog>
         {
-            { x => x.TextoInicial,    Dto.Observacoes ?? string.Empty },
+            { x => x.TextoInicial,    Dto.IngredientesTexto ?? string.Empty },
             { x => x.Unidades,        Unidades },
             { x => x.AnalisarAoAbrir, analisarAoAbrir },
         };

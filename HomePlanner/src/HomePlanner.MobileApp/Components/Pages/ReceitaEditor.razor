@@ -53,6 +53,9 @@ else
         }
     </div>
 
+    <label>@L["Receita_IngredientesTextoLabel"]</label>
+    <textarea rows="3" @bind="_dto.IngredientesTexto"></textarea>
+
     <label>@L["Receita_ModoPreparoLabel"]</label>
     <textarea rows="6" @bind="_dto.ModoPreparo"></textarea>
 
@@ -129,6 +132,7 @@ else
                 {
                     Id = r.Id, Nome = r.Nome, ModoPreparo = r.ModoPreparo,
                     NumeroPorcoesBase = r.NumeroPorcoesBase, TempoPreparoMinutos = r.TempoPreparoMinutos,
+                    IngredientesTexto = r.IngredientesTexto,
                     Observacoes = r.Observacoes,
                     Componentes = r.Componentes.Select(c => new ReceitaComponentePersistReq
                     {

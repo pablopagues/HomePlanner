@@ -9,6 +9,7 @@ public class ReceitaPersistenciaDTO
     public int? TempoPreparoMinutos { get; set; }
     public string? UrlOrigem { get; set; }
     public string? UrlImagem { get; set; }
+    public string? IngredientesTexto { get; set; }
     public string? Observacoes { get; set; }
     public List<ReceitaIngredientePersistenciaDTO> Ingredientes { get; set; } = [];
     public List<ReceitaComponentePersistenciaDTO> Componentes { get; set; } = [];

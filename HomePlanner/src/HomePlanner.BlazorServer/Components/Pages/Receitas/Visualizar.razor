@@ -138,6 +138,14 @@ else if (_dto is not null)
         </MudItem>
     </MudGrid>
 
+    @* Texto livre dos ingredientes: só enquanto não foram lançados (senão repetiria a lista acima). *@
+    @if (!string.IsNullOrWhiteSpace(_dto.IngredientesTexto) && _dto.Ingredientes.Count == 0 && !_dto.EhComposto)
+    {
+        <MudDivider Class="my-4" />
+        <MudText Typo="Typo.h6" GutterBottom="true">@L["Receita_IngredientesTextoLabel"]</MudText>
+        <MudText Typo="Typo.body1" Style="white-space:pre-wrap; overflow-wrap:anywhere;">@_dto.IngredientesTexto</MudText>
+    }
+
     @if (!string.IsNullOrWhiteSpace(_dto.ModoPreparo)
          || _dto.Componentes.Any(c => !string.IsNullOrWhiteSpace(c.ModoPreparo)))
     {

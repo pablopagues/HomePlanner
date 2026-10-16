@@ -227,7 +227,7 @@
             TempoPreparoMinutos = _preview.TempoPreparoMinutos,
             UrlOrigem           = _preview.UrlOrigem,
             UrlImagem           = _preview.UrlImagem,
-            Observacoes         = _preview.IngredientesTexto.Count > 0
+            IngredientesTexto   = _preview.IngredientesTexto.Count > 0
                 ? string.Join("\n", _preview.IngredientesTexto)
                 : null,
         };
@@ -244,7 +244,7 @@
             await Cota.RegistrarImportacaoAsync();
             _salvando = false;
             Snackbar.Add(L["Imp_Salva"], Severity.Success);
-            Nav.NavigateTo(string.IsNullOrWhiteSpace(_dto.Observacoes)
+            Nav.NavigateTo(string.IsNullOrWhiteSpace(_dto.IngredientesTexto)
                 ? $"/receitas/editar/{r.Valor}"
                 : $"/receitas/editar/{r.Valor}?lancar=1");
         }

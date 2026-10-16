@@ -86,7 +86,7 @@
     {
         _salvando = true;
         var obs = _preview!.IngredientesTexto.Count > 0
-            ? "Ingredientes (importados):\n" + string.Join("\n", _preview.IngredientesTexto)
+            ? string.Join("\n", _preview.IngredientesTexto)
             : null;
 
         var (id, err) = await Api.SalvarReceitaAsync(new ReceitaPersistenciaRequest
@@ -97,7 +97,7 @@
             TempoPreparoMinutos = _preview.TempoPreparoMinutos,
             UrlOrigem = _preview.UrlOrigem,
             UrlImagem = _preview.UrlImagem,
-            Observacoes = obs,
+            IngredientesTexto = obs,
         });
         _salvando = false;
         if (err is not null) { erro = err; return; }

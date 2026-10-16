@@ -187,6 +187,7 @@ public class ReceitaService : IReceitaService
             TempoPreparoMinutos = original.TempoPreparoMinutos,
             UrlOrigem          = original.UrlOrigem,
             UrlImagem          = original.UrlImagem,
+            IngredientesTexto  = original.IngredientesTexto,
             Observacoes        = original.Observacoes,
             Foto               = original.Foto,
             FotoContentType    = original.FotoContentType,
@@ -238,6 +239,7 @@ public class ReceitaService : IReceitaService
         entidade.TempoPreparoMinutos = dto.TempoPreparoMinutos;
         entidade.UrlOrigem          = dto.UrlOrigem?.Trim();
         entidade.UrlImagem          = dto.UrlImagem?.Trim();
+        entidade.IngredientesTexto  = dto.IngredientesTexto?.Trim();
         entidade.Observacoes        = dto.Observacoes?.Trim();
     }
 

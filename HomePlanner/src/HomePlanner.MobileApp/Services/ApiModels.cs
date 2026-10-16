@@ -115,6 +115,7 @@ public class ReceitaDetalheDTO
     public string? ModoPreparo { get; set; }
     public int NumeroPorcoesBase { get; set; }
     public int? TempoPreparoMinutos { get; set; }
+    public string? IngredientesTexto { get; set; }
     public string? Observacoes { get; set; }
     public bool TemFoto { get; set; }
     public string? UrlImagem { get; set; }
@@ -153,6 +154,7 @@ public class ReceitaPersistenciaRequest
     public int? TempoPreparoMinutos { get; set; }
     public string? UrlOrigem { get; set; }
     public string? UrlImagem { get; set; }
+    public string? IngredientesTexto { get; set; }
     public string? Observacoes { get; set; }
     public List<ReceitaIngredientePersistReq> Ingredientes { get; set; } = new();
     public List<ReceitaComponentePersistReq> Componentes { get; set; } = new();

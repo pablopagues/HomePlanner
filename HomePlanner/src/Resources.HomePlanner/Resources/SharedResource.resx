@@ -389,7 +389,7 @@
   <data name="Receita_TempoLabel" xml:space="preserve"><value>Tempo (min)</value></data>
   <data name="Receita_UrlImagemLabel" xml:space="preserve"><value>URL da imagem (opcional)</value></data>
   <data name="Receita_ModoPreparoLabel" xml:space="preserve"><value>Modo de preparo</value></data>
-  <data name="Receita_ObservacoesLabel" xml:space="preserve"><value>Ingredientes (texto)</value></data>
+  <data name="Receita_ObservacoesLabel" xml:space="preserve"><value>Observações</value></data>
   <data name="Receita_SalvoOk" xml:space="preserve"><value>Receita salva!</value></data>
   <data name="Receita_CriadaOk" xml:space="preserve"><value>Receita criada com sucesso!</value></data>
   <data name="Receita_ExcluidaOk" xml:space="preserve"><value>Receita excluída.</value></data>
@@ -1128,4 +1128,5 @@
   <data name="Email_ConviteBotao" xml:space="preserve"><value>Criar minha senha</value></data>
   <data name="Email_ConviteValidade" xml:space="preserve"><value>Este convite vale por {0} dias. Se expirar, peça um novo a {1}.</value></data>
   <data name="Email_ConviteAssunto" xml:space="preserve"><value>{0} convidou você para o HomePlanner</value></data>
+  <data name="Receita_IngredientesTextoLabel" xml:space="preserve"><value>Ingredientes (texto)</value></data>
 </root>

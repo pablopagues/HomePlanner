@@ -11,6 +11,7 @@ public class ReceitaDetalheDTO
     public string? UrlImagem { get; init; }
     public bool TemFoto { get; init; }
     public DateTime? FotoAtualizadaEm { get; init; }
+    public string? IngredientesTexto { get; init; }
     public string? Observacoes { get; init; }
     public DateTime DataCriacao { get; init; }
 

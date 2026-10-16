@@ -64,6 +64,7 @@ public class ReceitaRepository : IReceitaRepository
                 UrlImagem         = r.UrlImagem,
                 TemFoto           = r.Foto != null,   // IS NOT NULL — não transfere o blob
                 FotoAtualizadaEm  = r.FotoAtualizadaEm,
+                IngredientesTexto = r.IngredientesTexto,
                 Observacoes       = r.Observacoes,
                 DataCriacao       = r.DataCriacao,
                 Ingredientes      = r.Ingredientes
