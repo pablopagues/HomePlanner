@@ -104,6 +104,32 @@ public class CotaImportacaoService : ICotaImportacaoService
         };
     }
 
+    public async Task<ResultadoOperacao> VerificarPodeGerarCardapioAsync(CancellationToken ct = default)
+    {
+        var uso = await ObterUsoCardapiosIAAsync(ct);
+        if (uso.AtingiuLimite)
+            return ResultadoOperacao.Falha(ErrosApp.LimiteCardapiosIA(uso.Limite));
+        return ResultadoOperacao.Ok();
+    }
+
+    public async Task RegistrarCardapioIAAsync(CancellationToken ct = default)
+    {
+        var uso = await ObterOuCriarUsoDoMesAsync(ct);
+        uso.QuantidadeCardapiosIA += 1;
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task<UsoCotaImportacaoDTO> ObterUsoCardapiosIAAsync(CancellationToken ct = default)
+    {
+        var (plano, uso) = await ObterPlanoEUsoAsync(ct);
+        return new UsoCotaImportacaoDTO
+        {
+            Plano  = plano,
+            Usado  = uso?.QuantidadeCardapiosIA ?? 0,
+            Limite = LimitesPorPlano.CardapiosIAMes(plano),
+        };
+    }
+
     private async Task<(PlanoAssinatura Plano, UsoImportacaoReceita? Uso)> ObterPlanoEUsoAsync(CancellationToken ct)
     {
         await _tenantAccessor.GarantirHidratadoAsync();

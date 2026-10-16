@@ -1,0 +1,434 @@
+@* Cardápio da semana por IA: parâmetros → prévia (sem gravar) → aceitar *@
+@inject IStringLocalizer<SharedResource> L
+@inject PublicLanguageService Lang
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.AutoAwesome" Class="mr-2" Style="vertical-align:middle;" />
+            @L["CardIA_Titulo"]
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        @if (_uso is not null)
+        {
+            @if (_uso.AtingiuLimite && _sugestao is null)
+            {
+                <MudAlert Severity="Severity.Warning" Class="mb-3">
+                    @L["CardIA_LimiteAtingido", _uso.Limite]
+                    <MudButton Variant="Variant.Text" Color="Color.Primary" Class="ml-2" Href="/assinatura">
+                        @L["Ia_FazerUpgrade"]
+                    </MudButton>
+                </MudAlert>
+            }
+            else
+            {
+                <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2 d-block">
+                    @L["CardIA_UsoMes", _uso.Usado, _uso.Limite]
+                </MudText>
+            }
+        }
+
+        @if (_erro is not null)
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-3">@_erro</MudAlert>
+        }
+
+        @if (_gerando)
+        {
+            <MudStack AlignItems="AlignItems.Center" Class="py-8">
+                <MudProgressCircular Indeterminate="true" Color="Color.Secondary" />
+                <MudText Typo="Typo.body2" Color="Color.Secondary">@L["CardIA_Pensando"]</MudText>
+            </MudStack>
+        }
+        else if (_sugestao is null)
+        {
+            @* ── Parâmetros ─────────────────────────────────────────── *@
+            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">@L["CardIA_Intro"]</MudText>
+
+            <MudText Typo="Typo.subtitle2">@L["CardIA_Dias"]</MudText>
+            <div class="d-flex flex-wrap mb-2">
+                @foreach (var d in Enum.GetValues<DiaSemana>())
+                {
+                    <MudCheckBox T="bool" Value="@_pedido.Dias.Contains(d)" Dense="true" Color="Color.Primary"
+                                 ValueChanged="@(v => Alternar(_pedido.Dias, d, v))"
+                                 Label="@DiaHelper.NomeCurto(d)" />
+                }
+            </div>
+
+            <MudText Typo="Typo.subtitle2">@L["CardIA_Refeicoes"]</MudText>
+            <div class="d-flex flex-wrap mb-2">
+                @foreach (var t in TiposAtivos)
+                {
+                    <MudCheckBox T="bool" Value="@_pedido.Tipos.Contains(t)" Dense="true" Color="Color.Primary"
+                                 ValueChanged="@(v => Alternar(_pedido.Tipos, t, v))"
+                                 Label="@NomeTipo(t)" />
+                }
+            </div>
+
+            <MudGrid Spacing="2" Class="align-center">
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="PeriodoSemRepeticao" @bind-Value="_pedido.NaoRepetir" Label="@L["CardIA_NaoRepetir"]"
+                               Variant="Variant.Outlined" Margin="Margin.Dense">
+                        <MudSelectItem Value="PeriodoSemRepeticao.MesCorrente">@L["CardIA_Periodo_Mes"]</MudSelectItem>
+                        <MudSelectItem Value="PeriodoSemRepeticao.DuasSemanas">@L["CardIA_Periodo_Semanas", 2]</MudSelectItem>
+                        <MudSelectItem Value="PeriodoSemRepeticao.TresSemanas">@L["CardIA_Periodo_Semanas", 3]</MudSelectItem>
+                        <MudSelectItem Value="PeriodoSemRepeticao.QuatroSemanas">@L["CardIA_Periodo_Semanas", 4]</MudSelectItem>
+                        <MudSelectItem Value="PeriodoSemRepeticao.Nenhum">@L["CardIA_Periodo_Nenhum"]</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudNumericField T="int?" @bind-Value="_pedido.Porcoes" Label="@L["Ia_Porcoes"]"
+                                     Placeholder="@_porcoesPadrao.ToString()"
+                                     Min="1" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudNumericField T="int?" @bind-Value="_pedido.TempoMaxDiaUtil" Label="@L["CardIA_TempoDiaUtil"]"
+                                     Min="5" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudNumericField T="int?" @bind-Value="_pedido.TempoMaxFimDeSemana" Label="@L["CardIA_TempoFimSemana"]"
+                                     Min="5" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_pedido.Texto" Label="@L["CardIA_PedidoLabel"]"
+                                  Placeholder="@L["CardIA_PedidoPlaceholder"]"
+                                  Lines="2" AutoGrow="true" MaxLength="500" Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudCheckBox @bind-Value="_pedido.SubstituirExistentes" Dense="true" Color="Color.Primary"
+                                 Label="@L["CardIA_Substituir"]" />
+                    <MudCheckBox @bind-Value="_pedido.PermitirRepetirNaSemana" Dense="true" Color="Color.Primary"
+                                 Label="@L["CardIA_PermitirRepetir"]" />
+                </MudItem>
+            </MudGrid>
+
+            @* ── Rascunho automático (usa as regras acima) ──────────────── *@
+            <MudPaper Elevation="0" Class="pa-3 mt-3"
+                      Style="border-radius:8px; border:1px solid var(--mud-palette-lines-default);">
+                <MudSwitch T="bool" @bind-Value="_agendamento.Ativo" Color="Color.Secondary"
+                           Label="@L["CardAuto_Ativar"]" />
+                @if (_agendamento.Ativo)
+                {
+                    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center" Wrap="Wrap.Wrap" Class="mt-1">
+                        <MudSelect T="DiaSemana" @bind-Value="_agendamento.DiaSemana" Label="@L["CardAuto_Dia"]"
+                                   Variant="Variant.Outlined" Margin="Margin.Dense" Style="min-width:150px;">
+                            @foreach (var d in Enum.GetValues<DiaSemana>())
+                            {
+                                <MudSelectItem Value="@d">@DiaHelper.NomeLongo(d)</MudSelectItem>
+                            }
+                        </MudSelect>
+                        <MudSelect T="int" @bind-Value="_agendamento.Hora" Label="@L["CardAuto_Hora"]"
+                                   Variant="Variant.Outlined" Margin="Margin.Dense" Style="min-width:110px;">
+                            @for (var h = 0; h < 24; h++)
+                            {
+                                var hora = h;
+                                <MudSelectItem Value="@hora">@($"{hora:00}:00")</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudStack>
+                }
+                <MudText Typo="Typo.caption" Color="Color.Secondary" Class="d-block mt-1">
+                    @L["CardAuto_Explicacao"]
+                </MudText>
+                <MudButton Variant="Variant.Outlined" Size="Size.Small" Class="mt-2"
+                           StartIcon="@Icons.Material.Filled.Save"
+                           Disabled="_salvandoAgendamento" OnClick="SalvarAgendamentoAsync">
+                    @L["CardAuto_Salvar"]
+                </MudButton>
+            </MudPaper>
+        }
+        else
+        {
+            @* ── Prévia ─────────────────────────────────────────────── *@
+            @if (Rascunho is not null && _sugestao == Rascunho.Sugestao)
+            {
+                <MudChip T="string" Size="Size.Small" Color="Color.Secondary" Icon="@Icons.Material.Filled.Schedule" Class="mb-2 ml-0">
+                    @L["CardAuto_PreparadoEm", Rascunho.GeradoEm.ToLocalTime().ToString("g")]
+                </MudChip>
+            }
+            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-2">@L["CardIA_PreviaIntro"]</MudText>
+
+            @if (!string.IsNullOrWhiteSpace(_sugestao.Observacoes))
+            {
+                <MudAlert Severity="Severity.Info" Dense="true" Class="mb-3" Icon="@Icons.Material.Filled.AutoAwesome">
+                    @_sugestao.Observacoes
+                </MudAlert>
+            }
+            @if (_sugestao.HorariosVazios > 0)
+            {
+                <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-3">
+                    @L["CardIA_HorariosVazios", _sugestao.HorariosVazios]
+                </MudAlert>
+            }
+
+            <div style="max-height:52vh; overflow-y:auto;">
+                @foreach (var grupo in _sugestao.Refeicoes.GroupBy(r => r.DiaSemana))
+                {
+                    <MudText Typo="Typo.subtitle2" Class="mt-2" Style="color:var(--mud-palette-primary); font-weight:600;">
+                        @DiaHelper.NomeLongo(grupo.Key) · @DiaHelper.DiaMes(DataInicio.AddDays((int)grupo.Key - 1))
+                    </MudText>
+                    @foreach (var r in grupo)
+                    {
+                        <MudPaper Elevation="0" Class="pa-2 mb-1"
+                                  Style="@($"border-radius:8px; border:1px {(r.ReceitaId is null ? "dashed var(--mud-palette-lines-default)" : "solid var(--mud-palette-primary)")};")">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudText Typo="Typo.caption" Style="min-width:84px; color:var(--mud-palette-text-secondary);">
+                                    @NomeTipo(r.TipoRefeicao)
+                                </MudText>
+                                <MudStack Spacing="0" Style="flex:1; min-width:0;">
+                                    @if (r.ReceitaId is null)
+                                    {
+                                        <MudText Typo="Typo.body2" Color="Color.Secondary"><i>@L["CardIA_SemSugestao"]</i></MudText>
+                                    }
+                                    else
+                                    {
+                                        <MudText Typo="Typo.body2" Style="font-weight:500;">
+                                            @r.ReceitaNome
+                                            @if (r.TempoPreparoMinutos is int t)
+                                            {
+                                                <span style="color:var(--mud-palette-text-secondary); font-weight:400;"> · @L["Ia_NMin", t]</span>
+                                            }
+                                        </MudText>
+                                        @if (!string.IsNullOrWhiteSpace(r.Motivo))
+                                        {
+                                            <MudText Typo="Typo.caption" Color="Color.Secondary">@r.Motivo</MudText>
+                                        }
+                                    }
+                                </MudStack>
+                                <MudIconButton Icon="@Icons.Material.Filled.SwapHoriz" Size="Size.Small"
+                                               title="@L["CardIA_Trocar"]" OnClick="@(() => TrocarAsync(r))" />
+                                @if (r.ReceitaId is not null)
+                                {
+                                    <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small"
+                                                   title="@L["CardIA_Remover"]" OnClick="@(() => Remover(r))" />
+                                }
+                            </MudStack>
+                        </MudPaper>
+                    }
+                }
+            </div>
+        }
+    </DialogContent>
+    <DialogActions>
+        @if (_sugestao is null)
+        {
+            <MudButton OnClick="Cancelar">@L["Btn_Cancelar"]</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Secondary"
+                       StartIcon="@Icons.Material.Filled.AutoAwesome"
+                       Disabled="@(_gerando || (_uso?.AtingiuLimite ?? false))"
+                       OnClick="GerarAsync">
+                @L["CardIA_Gerar"]
+            </MudButton>
+        }
+        else
+        {
+            <MudButton Variant="Variant.Text" Disabled="@(_gerando || _aplicando)"
+                       StartIcon="@Icons.Material.Filled.Tune" OnClick="Voltar">
+                @L["CardIA_AjustarParametros"]
+            </MudButton>
+            <MudButton Variant="Variant.Text" Disabled="@(_gerando || _aplicando || (_uso?.AtingiuLimite ?? false))"
+                       StartIcon="@Icons.Material.Filled.Refresh" OnClick="GerarAsync">
+                @L["CardIA_GerarOutro"]
+            </MudButton>
+            <MudSpacer />
+            <MudButton OnClick="Cancelar" Disabled="_aplicando">@L["Btn_Cancelar"]</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Check"
+                       Disabled="@(_gerando || _aplicando || _sugestao.Refeicoes.All(r => r.ReceitaId is null))"
+                       OnClick="AceitarAsync">
+                @(_aplicando ? L["CardIA_Aplicando"] : L["CardIA_Aceitar"])
+            </MudButton>
+        }
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter] public DateOnly DataInicio { get; set; }
+    [Parameter] public TipoRefeicao[] TiposAtivos { get; set; } = [];
+
+    /// <summary>Rascunho automático a revisar: o diálogo já abre na prévia.</summary>
+    [Parameter] public RascunhoCardapioIADTO? Rascunho { get; set; }
+
+    [Inject] ICardapioIAService CardapioIA { get; set; } = null!;
+    [Inject] ICardapioAutomaticoService CardapioAuto { get; set; } = null!;
+    [Inject] ISnackbar Snackbar { get; set; } = null!;
+    [Inject] ICotaImportacaoService Cota { get; set; } = null!;
+    [Inject] IReceitaService Receitas { get; set; } = null!;
+    [Inject] Application.HomePlanner.Services.Configuracao.IConfiguracaoFamiliaService Config { get; set; } = null!;
+    [Inject] IDialogService Dialog { get; set; } = null!;
+
+    private readonly PedidoCardapioIADTO _pedido = new();
+    private CardapioSugeridoDTO? _sugestao;
+    private UsoCotaImportacaoDTO? _uso;
+    private int _porcoesPadrao = 4;
+    private bool _gerando;
+    private bool _aplicando;
+    private string? _erro;
+    private AgendamentoCardapioIADTO _agendamento = new();
+    private bool _salvandoAgendamento;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _pedido.Tipos = [.. TiposAtivos];
+
+        // Regras salvas no agendamento valem como padrão do formulário.
+        var salvo = await CardapioAuto.ObterAgendamentoAsync();
+        if (salvo is not null)
+        {
+            _agendamento = salvo;
+            var r = salvo.Regras;
+            _pedido.Dias                    = r.Dias.Count > 0 ? [.. r.Dias] : _pedido.Dias;
+            _pedido.Tipos                   = r.Tipos.Where(TiposAtivos.Contains).ToList() is { Count: > 0 } tipos ? tipos : _pedido.Tipos;
+            _pedido.SubstituirExistentes    = r.SubstituirExistentes;
+            _pedido.NaoRepetir              = r.NaoRepetir;
+            _pedido.PermitirRepetirNaSemana = r.PermitirRepetirNaSemana;
+            _pedido.TempoMaxDiaUtil         = r.TempoMaxDiaUtil;
+            _pedido.TempoMaxFimDeSemana     = r.TempoMaxFimDeSemana;
+            _pedido.Porcoes                 = r.Porcoes;
+            _pedido.Texto                   = r.Texto;
+        }
+        _pedido.DataInicio = DataInicio;
+
+        if (Rascunho is not null)
+            _sugestao = Rascunho.Sugestao;
+
+        _porcoesPadrao = (await Config.ObterAsync()).TamanhoFamiliaPadrao;
+        _uso = await Cota.ObterUsoCardapiosIAAsync();
+    }
+
+    private async Task SalvarAgendamentoAsync()
+    {
+        _salvandoAgendamento = true;
+        _agendamento.Regras = _pedido;
+        var r = await CardapioAuto.SalvarAgendamentoAsync(_agendamento);
+        _salvandoAgendamento = false;
+
+        if (r.Sucesso)
+            Snackbar.Add(_agendamento.Ativo ? L["CardAuto_SalvoAtivo"] : L["CardAuto_SalvoInativo"], Severity.Success);
+        else
+            _erro = L.Traduzir(r.Erros);
+    }
+
+    private static void Alternar<T>(List<T> lista, T valor, bool marcado)
+    {
+        lista.Remove(valor);
+        if (marcado) lista.Add(valor);
+    }
+
+    private async Task GerarAsync()
+    {
+        _erro = null;
+
+        // Pré-check sem IA: avisa antes de gastar a cota quando faltam receitas.
+        var previsao = await CardapioIA.PreverAsync(_pedido);
+        if (!previsao.Sucesso)
+        {
+            _erro = L.Traduzir(previsao.Erros);
+            return;
+        }
+        var p = previsao.Valor!;
+        if (p.Horarios == 0)
+        {
+            _erro = L.Traduzir(ErrosApp.NenhumHorarioParaPreencher);
+            return;
+        }
+        if (p.ReceitasDisponiveis == 0)
+        {
+            _erro = L.Traduzir(ErrosApp.SemReceitasParaCardapio);
+            return;
+        }
+        if (p.ReceitasInsuficientes)
+        {
+            var continuar = await Dialog.ShowMessageBox(
+                L["CardIA_PoucasReceitasTitulo"],
+                L["CardIA_PoucasReceitas", p.ReceitasDisponiveis, p.Horarios],
+                yesText: L["CardIA_GerarMesmoAssim"], cancelText: L["Btn_Cancelar"]);
+            if (continuar != true) return;
+        }
+
+        _gerando = true;
+        StateHasChanged();
+        var r = await CardapioIA.GerarAsync(_pedido, Lang.Lang);
+        _gerando = false;
+
+        if (r.Sucesso)
+            _sugestao = r.Valor;
+        else
+            _erro = L.Traduzir(r.Erros);
+
+        _uso = await Cota.ObterUsoCardapiosIAAsync();
+    }
+
+    private async Task TrocarAsync(RefeicaoSugeridaDTO r)
+    {
+        var parameters = new DialogParameters<SeletorReceita>
+        {
+            { x => x.DiaSemana,      r.DiaSemana },
+            { x => x.TipoRefeicao,   r.TipoRefeicao },
+            { x => x.ReceitaIdAtual, r.ReceitaId },
+            { x => x.PorcoesAtual,   r.PorcoesDesejadas ?? _porcoesPadrao },
+        };
+        var dialog = await Dialog.ShowAsync<SeletorReceita>(string.Empty, parameters,
+            new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true });
+        var result = await dialog.Result;
+        if (result is null || result.Canceled || result.Data is not ValueTuple<int?, int> escolha) return;
+
+        var (receitaId, porcoes) = escolha;
+        if (receitaId is null)
+        {
+            Remover(r);
+            return;
+        }
+
+        var detalhe = await Receitas.ObterAsync(receitaId.Value);
+        if (!detalhe.Sucesso) return;
+
+        r.ReceitaId            = receitaId;
+        r.ReceitaNome          = detalhe.Valor!.Nome;
+        r.TempoPreparoMinutos  = detalhe.Valor.TempoPreparoMinutos;
+        r.PorcoesDesejadas     = porcoes;
+        r.Motivo               = null; // escolha da família, não da IA
+    }
+
+    private static void Remover(RefeicaoSugeridaDTO r)
+    {
+        r.ReceitaId = null;
+        r.ReceitaNome = null;
+        r.TempoPreparoMinutos = null;
+        r.Motivo = null;
+    }
+
+    private void Voltar()
+    {
+        _sugestao = null;
+        _erro = null;
+    }
+
+    private async Task AceitarAsync()
+    {
+        _aplicando = true;
+        // Também encerra o rascunho automático da semana, se houver.
+        var r = await CardapioAuto.AplicarAsync(_sugestao!);
+        _aplicando = false;
+
+        if (r.Sucesso)
+            MudDialog.Close(DialogResult.Ok(true));
+        else
+            _erro = L.Traduzir(r.Erros);
+    }
+
+    private void Cancelar() => MudDialog.Cancel();
+
+    private string NomeTipo(TipoRefeicao t) => t switch
+    {
+        TipoRefeicao.CafeManha => L["Refeicao_CafeManha"],
+        TipoRefeicao.Almoco    => L["Refeicao_Almoco"],
+        TipoRefeicao.Lanche    => L["Refeicao_Lanche"],
+        TipoRefeicao.Jantar    => L["Refeicao_Jantar"],
+        TipoRefeicao.Ceia      => L["Refeicao_Ceia"],
+        _                      => t.ToString(),
+    };
+}

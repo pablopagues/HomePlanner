@@ -42,7 +42,31 @@
 }
 else
 {
+    @* ── Rascunho automático da IA aguardando revisão ─────────────── *@
+    @if (_rascunho is not null && !Mural.Ativo)
+    {
+        <MudAlert Severity="Severity.Info" Icon="@Icons.Material.Filled.AutoAwesome" Class="mb-4">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Wrap="Wrap.Wrap" Spacing="2">
+                <MudText Typo="Typo.body2">@L["CardAuto_Banner"]</MudText>
+                <MudButton Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small"
+                           OnClick="RevisarRascunhoAsync">@L["CardAuto_Revisar"]</MudButton>
+                <MudButton Variant="Variant.Text" Size="Size.Small"
+                           OnClick="DescartarRascunhoAsync">@L["CardAuto_Descartar"]</MudButton>
+            </MudStack>
+        </MudAlert>
+    }
+
     @* ── Grade semanal ─────────────────────────────────────────── *@
+    @* Cada célula é uma zona de soltar: arrastar um prato para outra célula move-o
+       (ou troca com o prato que estiver lá). Desligado no Modo Mural. *@
+    <MudDropContainer T="RefeicaoDiaDTO" @ref="_drop"
+                      Items="@RefeicoesComPrato"
+                      ItemsSelector="@((r, zona) => zona == Zona(r.DiaSemana, r.TipoRefeicao))"
+                      ItemDisabled="@(_ => Mural.Ativo)"
+                      ItemDropped="SoltarAsync"
+                      CanDropClass="cardapio-pode-soltar"
+                      ItemDraggingClass="cardapio-arrastando">
+        <ChildContent>
     <div style="display:grid; grid-template-columns: 90px repeat(7, 1fr); gap:8px; overflow-x:auto;">
 
         @* Linha de cabeçalho — nomes dos dias *@
@@ -75,41 +99,9 @@ else
             @foreach (var dia in _dias)
             {
                 var refeicao = ObterRefeicao(dia.DiaSemana, tipo);
-                <div style="min-height:80px;">
-                    @if (refeicao?.ReceitaId.HasValue == true)
-                    {
-                        <MudPaper @onclick="@(() => AbrirSeletor(dia, tipo, refeicao))"
-                                  Style="cursor:pointer; height:100%; border-radius:8px; padding:8px; background:var(--mud-palette-primary-hover); border:1px solid var(--mud-palette-primary); position:relative;"
-                                  Elevation="0">
-                            @if (!Mural.Ativo)
-                            {
-                                @* Atalho para o detalhe da receita — não abre o seletor da célula *@
-                                <span @onclick:stopPropagation="true"
-                                      style="position:absolute; top:2px; right:2px; z-index:1;">
-                                    <MudIconButton Icon="@Icons.Material.Filled.MenuBook"
-                                                   Size="Size.Small" Color="Color.Primary"
-                                                   Href="@UrlReceita(refeicao.ReceitaId!.Value)"
-                                                   title="@L["Sug_VerReceita"]"
-                                                   Style="background:var(--mud-palette-surface); padding:4px;" />
-                                </span>
-                            }
-                            @if (!string.IsNullOrWhiteSpace(refeicao.ReceitaImagemSrc))
-                            {
-                                <img src="@refeicao.ReceitaImagemSrc" alt=""
-                                     style="width:100%;height:50px;object-fit:cover;border-radius:6px;margin-bottom:4px;" />
-                            }
-                            <MudText Typo="Typo.caption" Style="font-weight:500; line-height:1.2; display:block;">
-                                @refeicao.ReceitaNome
-                            </MudText>
-                            @if (refeicao.PorcoesDesejadas.HasValue)
-                            {
-                                <MudText Typo="Typo.caption" Style="color:var(--mud-palette-text-secondary); font-size:0.7rem;">
-                                    @refeicao.PorcoesDesejadas @L["App_PorcoesAbrev"]
-                                </MudText>
-                            }
-                        </MudPaper>
-                    }
-                    else if (!Mural.Ativo)
+                <MudDropZone T="RefeicaoDiaDTO" Identifier="@Zona(dia.DiaSemana, tipo)"
+                             Class="cardapio-celula">
+                    @if (refeicao?.ReceitaId.HasValue != true && !Mural.Ativo)
                     {
                         <MudPaper @onclick="@(() => AbrirSeletor(dia, tipo, refeicao))"
                                   Style="cursor:pointer; height:100%; min-height:70px; border-radius:8px; border:1px dashed var(--mud-palette-lines-default); background:transparent; display:flex; align-items:center; justify-content:center;"
@@ -118,15 +110,66 @@ else
                                      Style="color:var(--mud-palette-text-disabled);" Size="Size.Small" />
                         </MudPaper>
                     }
-                </div>
+                </MudDropZone>
             }
         }
     </div>
+        </ChildContent>
+        <ItemRenderer>
+            @{ var refeicao = context; }
+            <MudPaper @onclick="@(() => AbrirSeletor(DiaDe(refeicao.DiaSemana), refeicao.TipoRefeicao, refeicao))"
+                      Style="@($"cursor:{(Mural.Ativo ? "default" : "grab")}; height:100%; min-height:70px; border-radius:8px; padding:8px; background:var(--mud-palette-primary-hover); border:1px solid var(--mud-palette-primary); position:relative;")"
+                      Elevation="0">
+                @if (!Mural.Ativo)
+                {
+                    @* Atalho para o detalhe da receita — não abre o seletor da célula *@
+                    <span @onclick:stopPropagation="true"
+                          style="position:absolute; top:2px; right:2px; z-index:1;">
+                        <MudIconButton Icon="@Icons.Material.Filled.MenuBook"
+                                       Size="Size.Small" Color="Color.Primary"
+                                       Href="@UrlReceita(refeicao.ReceitaId!.Value)"
+                                       title="@L["Sug_VerReceita"]"
+                                       Style="background:var(--mud-palette-surface); padding:4px;" />
+                    </span>
+                }
+                @if (!string.IsNullOrWhiteSpace(refeicao.ReceitaImagemSrc))
+                {
+                    <img src="@refeicao.ReceitaImagemSrc" alt="" draggable="false"
+                         style="width:100%;height:50px;object-fit:cover;border-radius:6px;margin-bottom:4px;" />
+                }
+                <MudText Typo="Typo.caption" Style="font-weight:500; line-height:1.2; display:block;">
+                    @refeicao.ReceitaNome
+                </MudText>
+                @if (refeicao.PorcoesDesejadas.HasValue)
+                {
+                    <MudText Typo="Typo.caption" Style="color:var(--mud-palette-text-secondary); font-size:0.7rem;">
+                        @refeicao.PorcoesDesejadas @L["App_PorcoesAbrev"]
+                    </MudText>
+                }
+            </MudPaper>
+        </ItemRenderer>
+    </MudDropContainer>
+
+    @if (!Mural.Ativo)
+    {
+        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-2 d-block">
+            <MudIcon Icon="@Icons.Material.Filled.OpenWith" Size="Size.Small" Style="vertical-align:middle;" />
+            @L["Cardapio_DicaArrastar"]
+        </MudText>
+    }
 
     @* ── Ações da semana ─────────────────────────────────────────── *@
     @if (!Mural.Ativo)
     {
-        <MudStack Row="true" Spacing="2" Class="mt-4">
+        <MudStack Row="true" Spacing="2" Class="mt-4" Wrap="Wrap.Wrap">
+            @if (_podeGerarIA)
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.AutoAwesome"
+                           OnClick="GerarComIAAsync">
+                    @L["CardIA_Botao"]
+                </MudButton>
+            }
             <MudButton Variant="Variant.Outlined" Size="Size.Small"
                        StartIcon="@Icons.Material.Filled.ContentCopy"
                        OnClick="CopiarSemana">
@@ -141,6 +184,13 @@ else
     }
 }
 
+<style>
+    .cardapio-celula { min-height:80px; height:100%; display:flex; flex-direction:column; border-radius:8px; }
+    .cardapio-celula > .mud-drop-item { flex:1; }
+    .cardapio-pode-soltar { outline:2px dashed var(--mud-palette-primary); outline-offset:2px; }
+    .cardapio-arrastando { opacity:0.5; }
+</style>
+
 @code {
     [Parameter] public string? DataStr { get; set; }
 
@@ -151,6 +201,49 @@ else
     [Inject] ISnackbar Snackbar { get; set; } = null!;
     [Inject] NavigationManager Nav { get; set; } = null!;
     [Inject] IJSRuntime JS { get; set; } = null!;
+    [Inject] ICardapioIAService CardapioIA { get; set; } = null!;
+    [Inject] ICardapioAutomaticoService CardapioAuto { get; set; } = null!;
+
+    private bool _podeGerarIA;
+    private RascunhoCardapioIADTO? _rascunho;
+
+    protected override async Task OnInitializedAsync()
+        => _podeGerarIA = await CardapioIA.PodeGerarAsync();
+
+    private Task GerarComIAAsync() => AbrirDialogoIAAsync(null);
+
+    private Task RevisarRascunhoAsync() => AbrirDialogoIAAsync(_rascunho);
+
+    private async Task DescartarRascunhoAsync()
+    {
+        if (_rascunho is null) return;
+        var r = await CardapioAuto.DescartarRascunhoAsync(_rascunho.Id);
+        if (r.Sucesso)
+        {
+            _rascunho = null;
+            Snackbar.Add(L["CardAuto_Descartado"], Severity.Info);
+        }
+        else
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
+    }
+
+    private async Task AbrirDialogoIAAsync(RascunhoCardapioIADTO? rascunho)
+    {
+        var parameters = new DialogParameters<GerarCardapioIADialog>
+        {
+            { x => x.DataInicio,  _dataInicio },
+            { x => x.TiposAtivos, _tiposAtivos },
+            { x => x.Rascunho,    rascunho },
+        };
+        var dialog = await Dialog.ShowAsync<GerarCardapioIADialog>(string.Empty, parameters,
+            new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true, BackdropClick = false });
+
+        var result = await dialog.Result;
+        if (result is null || result.Canceled) return;
+
+        Snackbar.Add(L["CardIA_Aplicado"], Severity.Success);
+        await CarregarSemanaAsync(silencioso: true);
+    }
 
     private DateOnly _dataInicio;
     private DateOnly _dataFim;
@@ -197,18 +290,60 @@ else
             _tiposAtivos = tipos;
     }
 
-    private async Task CarregarSemanaAsync()
+    // silencioso: recarrega sem esconder a grade (após arrastar, para não piscar).
+    private async Task CarregarSemanaAsync(bool silencioso = false)
     {
-        _carregando = true;
+        if (!silencioso) _carregando = true;
         var r = await CardapioService.ObterOuCriarSemanaAsync(_dataInicio);
         _cardapio = r.Sucesso ? r.Valor : null;
         if (!r.Sucesso)
             Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
+        _rascunho = _podeGerarIA ? await CardapioAuto.ObterRascunhoProntoAsync(_dataInicio) : null;
         _carregando = false;
+        if (silencioso) _drop?.Refresh();
     }
 
     private RefeicaoDiaDTO? ObterRefeicao(DiaSemana dia, TipoRefeicao tipo)
         => _cardapio?.Refeicoes.FirstOrDefault(r => r.DiaSemana == dia && r.TipoRefeicao == tipo);
+
+    // ── Arrastar e soltar ────────────────────────────────────────────────────
+    private MudDropContainer<RefeicaoDiaDTO>? _drop;
+
+    // Só pratos de refeições visíveis (tipos ativos) viram itens arrastáveis.
+    private IEnumerable<RefeicaoDiaDTO> RefeicoesComPrato =>
+        _cardapio?.Refeicoes.Where(r => r.ReceitaId.HasValue && _tiposAtivos.Contains(r.TipoRefeicao)) ?? [];
+
+    private static string Zona(DiaSemana dia, TipoRefeicao tipo) => $"{(int)dia}-{(int)tipo}";
+
+    private DiaInfo DiaDe(DiaSemana dia) => _dias.First(d => d.DiaSemana == dia);
+
+    private async Task SoltarAsync(MudItemDropInfo<RefeicaoDiaDTO> info)
+    {
+        if (Mural.Ativo || info.Item is null || info.DropzoneIdentifier is null) return;
+
+        var partes = info.DropzoneIdentifier.Split('-');
+        var destinoDia  = (DiaSemana)int.Parse(partes[0]);
+        var destinoTipo = (TipoRefeicao)int.Parse(partes[1]);
+
+        await MoverAsync(info.Item.DiaSemana, info.Item.TipoRefeicao, destinoDia, destinoTipo);
+    }
+
+    private async Task MoverAsync(DiaSemana diaOrigem, TipoRefeicao tipoOrigem, DiaSemana diaDestino, TipoRefeicao tipoDestino)
+    {
+        var r = await CardapioService.MoverRefeicaoAsync(new MoverRefeicaoCommand
+        {
+            DataInicio  = _dataInicio,
+            DiaOrigem   = diaOrigem,
+            TipoOrigem  = tipoOrigem,
+            DiaDestino  = diaDestino,
+            TipoDestino = tipoDestino,
+        });
+        if (!r.Sucesso)
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
+
+        // Recarrega mesmo em falha, para desfazer o movimento visual.
+        await CarregarSemanaAsync(silencioso: true);
+    }
 
     private async Task AbrirSeletor(DiaInfo dia, TipoRefeicao tipo, RefeicaoDiaDTO? refeicao)
     {
@@ -220,6 +355,7 @@ else
             { x => x.TipoRefeicao,  tipo },
             { x => x.ReceitaIdAtual, refeicao?.ReceitaId },
             { x => x.PorcoesAtual,  refeicao?.PorcoesDesejadas ?? 4 },
+            { x => x.TiposAtivos,   _tiposAtivos },
         };
 
         var dialog = await Dialog.ShowAsync<SeletorReceita>(string.Empty, parameters,
@@ -227,6 +363,13 @@ else
 
         var result = await dialog.Result;
         if (result is null || result.Canceled) return;
+
+        // "Mover para…" (alternativa ao arrastar, útil no celular).
+        if (result.Data is SeletorReceita.MoverPara mover)
+        {
+            await MoverAsync(dia.DiaSemana, tipo, mover.Dia, mover.Tipo);
+            return;
+        }
 
         var (receitaId, porcoes) = ((int?, int))result.Data!;
 

@@ -151,13 +151,13 @@
   <data name="Landing_StdPreco" xml:space="preserve"><value>R$25</value></data>
   <data name="Landing_StdItem1" xml:space="preserve"><value>Até 5 membros</value></data>
   <data name="Landing_StdItem2" xml:space="preserve"><value>Cardápio + lista de compras</value></data>
-  <data name="Landing_StdItem3" xml:space="preserve"><value>Importação e sugestões de receitas com IA</value></data>
-  <data name="Landing_StdItem4" xml:space="preserve"><value>Até 50 importações e 30 sugestões IA/mês</value></data>
+  <data name="Landing_StdItem3" xml:space="preserve"><value>Importação, sugestões e cardápio da semana com IA</value></data>
+  <data name="Landing_StdItem4" xml:space="preserve"><value>Até 50 importações, 30 sugestões e 15 cardápios IA/mês</value></data>
   <data name="Landing_ProPreco" xml:space="preserve"><value>R$45</value></data>
   <data name="Landing_ProItem1" xml:space="preserve"><value>Até 10 membros</value></data>
   <data name="Landing_ProItem2" xml:space="preserve"><value>Tudo do Standard</value></data>
   <data name="Landing_ProItem3" xml:space="preserve"><value>Modelos de semana ilimitados</value></data>
-  <data name="Landing_ProItem4" xml:space="preserve"><value>Até 200 importações e 100 sugestões IA/mês</value></data>
+  <data name="Landing_ProItem4" xml:space="preserve"><value>Até 200 importações, 100 sugestões e 50 cardápios IA/mês</value></data>
   <data name="Landing_ProPopular" xml:space="preserve"><value>Mais popular</value></data>
   <data name="Landing_PrecosRodape" xml:space="preserve"><value>Planos anuais com desconto. Cancele quando quiser.</value></data>
 
@@ -1162,4 +1162,68 @@
   <data name="IngLote_CriadosOk" xml:space="preserve"><value>{0} ingrediente(s) cadastrado(s).</value></data>
   <data name="Erro_ingrediente_em_uso" xml:space="preserve"><value>Este ingrediente é usado nas receitas: {0}. Remova-o delas antes de excluir.</value></data>
   <data name="Erro_sem_permissao_receitas" xml:space="preserve"><value>Você não tem permissão para alterar receitas e ingredientes.</value></data>
+  <!-- Cardápio: arrastar e soltar -->
+  <data name="Cardapio_DicaArrastar" xml:space="preserve"><value>Arraste um prato para outro dia ou refeição para mudá-lo de lugar. Se já houver um prato lá, os dois trocam.</value></data>
+  <data name="Seletor_MoverPara" xml:space="preserve"><value>Mover para outro dia ou refeição</value></data>
+  <data name="Seletor_MoverDia" xml:space="preserve"><value>Dia</value></data>
+  <data name="Seletor_MoverRefeicao" xml:space="preserve"><value>Refeição</value></data>
+  <data name="Seletor_Mover" xml:space="preserve"><value>Mover</value></data>
+  <data name="Seletor_MoverDica" xml:space="preserve"><value>Se já houver um prato no destino, os dois trocam de lugar.</value></data>
+  <!-- Cardápio da semana por IA -->
+  <data name="CardIA_Botao" xml:space="preserve"><value>Gerar com IA</value></data>
+  <data name="CardIA_Titulo" xml:space="preserve"><value>Cardápio da semana com IA</value></data>
+  <data name="CardIA_Intro" xml:space="preserve"><value>A IA monta a semana com as receitas que vocês já têm, seguindo as regras abaixo. Você revisa antes de salvar.</value></data>
+  <data name="CardIA_UsoMes" xml:space="preserve"><value>Cardápios por IA este mês: {0} de {1}</value></data>
+  <data name="CardIA_LimiteAtingido" xml:space="preserve"><value>Você atingiu o limite de {0} cardápios por IA este mês no seu plano.</value></data>
+  <data name="CardIA_Pensando" xml:space="preserve"><value>Montando o cardápio… isso pode levar alguns segundos.</value></data>
+  <data name="CardIA_Dias" xml:space="preserve"><value>Dias</value></data>
+  <data name="CardIA_Refeicoes" xml:space="preserve"><value>Refeições</value></data>
+  <data name="CardIA_NaoRepetir" xml:space="preserve"><value>Não repetir pratos de</value></data>
+  <data name="CardIA_Periodo_Mes" xml:space="preserve"><value>Este mês</value></data>
+  <data name="CardIA_Periodo_Semanas" xml:space="preserve"><value>Últimas {0} semanas</value></data>
+  <data name="CardIA_Periodo_Nenhum" xml:space="preserve"><value>Pode repetir</value></data>
+  <data name="CardIA_TempoDiaUtil" xml:space="preserve"><value>Tempo máx. (dias úteis, min)</value></data>
+  <data name="CardIA_TempoFimSemana" xml:space="preserve"><value>Tempo máx. (fim de semana, min)</value></data>
+  <data name="CardIA_PedidoLabel" xml:space="preserve"><value>Algum pedido especial?</value></data>
+  <data name="CardIA_PedidoPlaceholder" xml:space="preserve"><value>Ex.: sem carne vermelha; peixe na sexta; algo especial no domingo</value></data>
+  <data name="CardIA_Substituir" xml:space="preserve"><value>Substituir também os pratos que já estão no cardápio</value></data>
+  <data name="CardIA_PermitirRepetir" xml:space="preserve"><value>Permitir repetir um prato na mesma semana (ex.: sobras)</value></data>
+  <data name="CardIA_Gerar" xml:space="preserve"><value>Gerar cardápio</value></data>
+  <data name="CardIA_PreviaIntro" xml:space="preserve"><value>Revise a sugestão. Você pode trocar ou remover pratos antes de salvar no cardápio.</value></data>
+  <data name="CardIA_HorariosVazios" xml:space="preserve"><value>{0} horário(s) ficaram sem sugestão. Você pode escolher um prato ou deixar vazio.</value></data>
+  <data name="CardIA_SemSugestao" xml:space="preserve"><value>Sem sugestão</value></data>
+  <data name="CardIA_Trocar" xml:space="preserve"><value>Escolher outro prato</value></data>
+  <data name="CardIA_Remover" xml:space="preserve"><value>Remover</value></data>
+  <data name="CardIA_AjustarParametros" xml:space="preserve"><value>Ajustar regras</value></data>
+  <data name="CardIA_GerarOutro" xml:space="preserve"><value>Gerar outro</value></data>
+  <data name="CardIA_Aceitar" xml:space="preserve"><value>Salvar no cardápio</value></data>
+  <data name="CardIA_Aplicando" xml:space="preserve"><value>Salvando…</value></data>
+  <data name="CardIA_Aplicado" xml:space="preserve"><value>Cardápio da semana salvo!</value></data>
+  <data name="CardIA_PoucasReceitasTitulo" xml:space="preserve"><value>Poucas receitas disponíveis</value></data>
+  <data name="CardIA_PoucasReceitas" xml:space="preserve"><value>Com essas regras, há só {0} receita(s) disponível(is) para {1} horário(s). Alguns horários vão ficar vazios. Gerar mesmo assim?</value></data>
+  <data name="CardIA_GerarMesmoAssim" xml:space="preserve"><value>Gerar mesmo assim</value></data>
+  <data name="Assin_CardapiosIA" xml:space="preserve"><value>cardápios IA/mês</value></data>
+  <data name="Landing_AiItem5Titulo" xml:space="preserve"><value>Cardápio da semana pronto</value></data>
+  <data name="Landing_AiItem5Desc" xml:space="preserve"><value>Diga as regras — não repetir pratos do mês, tempo de preparo, peixe na sexta — e a IA monta a semana com as receitas da sua família. Se quiser, ela prepara sozinha toda semana e avisa no celular. Você revisa, troca o que quiser e a lista de compras sai pronta.</value></data>
+  <data name="Erro_slot_origem_vazio" xml:space="preserve"><value>Não há prato neste horário para mover.</value></data>
+  <data name="Erro_limite_cardapios_ia" xml:space="preserve"><value>Você atingiu o limite de {0} cardápios gerados por IA este mês no seu plano.</value></data>
+  <data name="Erro_cardapio_ia_nao_gerado" xml:space="preserve"><value>Não foi possível gerar o cardápio agora. Tente novamente em instantes.</value></data>
+  <data name="Erro_sem_receitas_para_cardapio" xml:space="preserve"><value>Não há receitas disponíveis para montar o cardápio com essas regras. Cadastre mais receitas ou afrouxe a regra de não repetir.</value></data>
+  <data name="Erro_nenhum_horario_para_preencher" xml:space="preserve"><value>Não há horários para preencher. Escolha outros dias ou marque a opção de substituir o que já existe.</value></data>
+  <data name="Erro_sem_permissao_cardapio_ia" xml:space="preserve"><value>Só os adultos da família podem gerar o cardápio com IA.</value></data>
+  <!-- Cardápio automático (rascunho semanal da IA) -->
+  <data name="CardAuto_Ativar" xml:space="preserve"><value>Preparar um rascunho automaticamente toda semana</value></data>
+  <data name="CardAuto_Dia" xml:space="preserve"><value>Dia</value></data>
+  <data name="CardAuto_Hora" xml:space="preserve"><value>Hora</value></data>
+  <data name="CardAuto_Explicacao" xml:space="preserve"><value>Nesse dia e hora, a IA monta o cardápio da semana seguinte com as regras acima e avisa os adultos por notificação. Nada é salvo sem a revisão de vocês. Cada rascunho conta na cota mensal de cardápios por IA.</value></data>
+  <data name="CardAuto_Salvar" xml:space="preserve"><value>Salvar regras e agendamento</value></data>
+  <data name="CardAuto_SalvoAtivo" xml:space="preserve"><value>Agendamento salvo. A IA vai preparar o rascunho da próxima semana no horário escolhido.</value></data>
+  <data name="CardAuto_SalvoInativo" xml:space="preserve"><value>Regras salvas como padrão. O rascunho automático está desligado.</value></data>
+  <data name="CardAuto_PreparadoEm" xml:space="preserve"><value>Preparado automaticamente em {0}</value></data>
+  <data name="CardAuto_Banner" xml:space="preserve"><value>A IA preparou um rascunho do cardápio desta semana.</value></data>
+  <data name="CardAuto_Revisar" xml:space="preserve"><value>Revisar</value></data>
+  <data name="CardAuto_Descartar" xml:space="preserve"><value>Descartar</value></data>
+  <data name="CardAuto_Descartado" xml:space="preserve"><value>Rascunho descartado.</value></data>
+  <data name="Push_CardapioPronto_Titulo" xml:space="preserve"><value>Cardápio da semana pronto</value></data>
+  <data name="Push_CardapioPronto_Corpo" xml:space="preserve"><value>A IA preparou o cardápio da semana de {0}. Toque para revisar.</value></data>
 </root>

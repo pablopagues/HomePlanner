@@ -31,4 +31,15 @@ public interface ICotaImportacaoService
 
     /// <summary>Uso atual da cota de sugestões (usado/limite) para exibição na UI.</summary>
     Task<UsoCotaImportacaoDTO> ObterUsoSugestoesAsync(CancellationToken ct = default);
+
+    // ── Cardápio da semana por IA (cota própria, contada ao gerar) ───────────
+
+    /// <summary>Pré-check (read-only): o tenant ainda pode gerar cardápios por IA este mês?</summary>
+    Task<ResultadoOperacao> VerificarPodeGerarCardapioAsync(CancellationToken ct = default);
+
+    /// <summary>Incrementa o contador de cardápios IA do mês (após gerar com sucesso).</summary>
+    Task RegistrarCardapioIAAsync(CancellationToken ct = default);
+
+    /// <summary>Uso atual da cota de cardápios IA (usado/limite) para exibição na UI.</summary>
+    Task<UsoCotaImportacaoDTO> ObterUsoCardapiosIAAsync(CancellationToken ct = default);
 }

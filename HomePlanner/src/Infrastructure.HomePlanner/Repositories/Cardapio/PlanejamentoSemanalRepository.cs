@@ -1,4 +1,5 @@
 using Application.HomePlanner.DTOs.Cardapio.Cardapio;
+using Application.HomePlanner.DTOs.Cardapio.CardapioIA;
 using Application.HomePlanner.Repositories.Cardapio;
 using Domain.HomePlanner.Models.Cardapio;
 using Domain.HomePlanner.Models.Enums;
@@ -61,6 +62,36 @@ public class PlanejamentoSemanalRepository : IPlanejamentoSemanalRepository
                     .ToList(),
             })
             .FirstOrDefaultAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<RefeicaoHistoricoDTO>> ListarRefeicoesPeriodoAsync(
+        DateOnly de, DateOnly ate, CancellationToken ct = default)
+    {
+        await using var db = await _dbFactory.CreateDbContextAsync(ct);
+
+        // Parte pelo planejamento (filtro de tenant); uma semana que começa até 6 dias
+        // antes de "de" ainda pode ter dias dentro do período.
+        var deSemana = de.AddDays(-6);
+        var linhas = await db.PlanejamentosSemanais
+            .Where(p => p.DataInicio >= deSemana && p.DataInicio <= ate)
+            .SelectMany(p => p.RefeicoesDia
+                .Where(r => !r.IsDeleted && r.ReceitaId != null)
+                .Select(r => new
+                {
+                    p.DataInicio,
+                    r.DiaSemana,
+                    r.TipoRefeicao,
+                    ReceitaId = r.ReceitaId!.Value,
+                    Nome = r.Receita != null ? r.Receita.Nome : null,
+                }))
+            .ToListAsync(ct);
+
+        return linhas
+            .Select(l => new RefeicaoHistoricoDTO(
+                l.DataInicio.AddDays((int)l.DiaSemana - 1), l.TipoRefeicao, l.ReceitaId, l.Nome))
+            .Where(r => r.Data >= de && r.Data <= ate)
+            .OrderBy(r => r.Data).ThenBy(r => r.Tipo)
+            .ToList();
     }
 
     public async Task<RefeicaoDia?> ObterRefeicaoDiaAsync(

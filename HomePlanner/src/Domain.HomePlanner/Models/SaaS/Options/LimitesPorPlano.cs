@@ -40,4 +40,16 @@ public static class LimitesPorPlano
         PlanoAssinatura.ProMensal      or PlanoAssinatura.ProAnual      => 100,
         _                                                              => 0
     };
+
+    /// <summary>
+    /// Limite de cardápios da semana gerados pela IA por mês-calendário. Contado ao
+    /// gerar (cada geração é uma chamada ao modelo maior, com todo o catálogo da casa).
+    /// </summary>
+    public static int CardapiosIAMes(PlanoAssinatura plano) => plano switch
+    {
+        PlanoAssinatura.Gratis                                          => 4,
+        PlanoAssinatura.StandardMensal or PlanoAssinatura.StandardAnual => 15,
+        PlanoAssinatura.ProMensal      or PlanoAssinatura.ProAnual      => 50,
+        _                                                              => 0
+    };
 }

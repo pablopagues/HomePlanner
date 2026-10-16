@@ -145,13 +145,13 @@
   <data name="Landing_StdPreco" xml:space="preserve"><value>CA$10</value></data>
   <data name="Landing_StdItem1" xml:space="preserve"><value>Jusqu'à 5 membres</value></data>
   <data name="Landing_StdItem2" xml:space="preserve"><value>Menu + liste de courses</value></data>
-  <data name="Landing_StdItem3" xml:space="preserve"><value>Import et suggestions de recettes par IA</value></data>
-  <data name="Landing_StdItem4" xml:space="preserve"><value>Jusqu'à 50 importations et 30 suggestions IA/mois</value></data>
+  <data name="Landing_StdItem3" xml:space="preserve"><value>Import, suggestions et menu de la semaine par IA</value></data>
+  <data name="Landing_StdItem4" xml:space="preserve"><value>Jusqu'à 50 importations, 30 suggestions et 15 menus IA/mois</value></data>
   <data name="Landing_ProPreco" xml:space="preserve"><value>CA$18</value></data>
   <data name="Landing_ProItem1" xml:space="preserve"><value>Jusqu'à 10 membres</value></data>
   <data name="Landing_ProItem2" xml:space="preserve"><value>Tout ce qui est inclus dans Standard</value></data>
   <data name="Landing_ProItem3" xml:space="preserve"><value>Modèles de semaine illimités</value></data>
-  <data name="Landing_ProItem4" xml:space="preserve"><value>Jusqu'à 200 importations et 100 suggestions IA/mois</value></data>
+  <data name="Landing_ProItem4" xml:space="preserve"><value>Jusqu'à 200 importations, 100 suggestions et 50 menus IA/mois</value></data>
   <data name="Landing_ProPopular" xml:space="preserve"><value>Le plus populaire</value></data>
   <data name="Landing_PrecosRodape" xml:space="preserve"><value>Forfaits annuels à prix réduit. Annulez à tout moment.</value></data>
 
@@ -1139,4 +1139,68 @@
   <data name="IngLote_CriadosOk" xml:space="preserve"><value>{0} ingrédient(s) ajouté(s).</value></data>
   <data name="Erro_ingrediente_em_uso" xml:space="preserve"><value>Cet ingrédient est utilisé dans les recettes : {0}. Retirez-le de celles-ci avant de le supprimer.</value></data>
   <data name="Erro_sem_permissao_receitas" xml:space="preserve"><value>Vous n'avez pas l'autorisation de modifier les recettes et les ingrédients.</value></data>
+  <!-- Menu : glisser-déposer -->
+  <data name="Cardapio_DicaArrastar" xml:space="preserve"><value>Faites glisser un plat vers un autre jour ou repas pour le déplacer. S'il y a déjà un plat, les deux sont échangés.</value></data>
+  <data name="Seletor_MoverPara" xml:space="preserve"><value>Déplacer vers un autre jour ou repas</value></data>
+  <data name="Seletor_MoverDia" xml:space="preserve"><value>Jour</value></data>
+  <data name="Seletor_MoverRefeicao" xml:space="preserve"><value>Repas</value></data>
+  <data name="Seletor_Mover" xml:space="preserve"><value>Déplacer</value></data>
+  <data name="Seletor_MoverDica" xml:space="preserve"><value>S'il y a déjà un plat à destination, les deux sont échangés.</value></data>
+  <!-- Menu de la semaine par IA -->
+  <data name="CardIA_Botao" xml:space="preserve"><value>Générer avec l'IA</value></data>
+  <data name="CardIA_Titulo" xml:space="preserve"><value>Menu de la semaine avec l'IA</value></data>
+  <data name="CardIA_Intro" xml:space="preserve"><value>L'IA compose la semaine avec les recettes que vous avez déjà, selon les règles ci-dessous. Vous la vérifiez avant d'enregistrer.</value></data>
+  <data name="CardIA_UsoMes" xml:space="preserve"><value>Menus IA ce mois-ci : {0} sur {1}</value></data>
+  <data name="CardIA_LimiteAtingido" xml:space="preserve"><value>Vous avez atteint la limite de {0} menus IA ce mois-ci sur votre formule.</value></data>
+  <data name="CardIA_Pensando" xml:space="preserve"><value>Composition du menu… cela peut prendre quelques secondes.</value></data>
+  <data name="CardIA_Dias" xml:space="preserve"><value>Jours</value></data>
+  <data name="CardIA_Refeicoes" xml:space="preserve"><value>Repas</value></data>
+  <data name="CardIA_NaoRepetir" xml:space="preserve"><value>Ne pas répéter les plats de</value></data>
+  <data name="CardIA_Periodo_Mes" xml:space="preserve"><value>Ce mois-ci</value></data>
+  <data name="CardIA_Periodo_Semanas" xml:space="preserve"><value>Les {0} dernières semaines</value></data>
+  <data name="CardIA_Periodo_Nenhum" xml:space="preserve"><value>Répétitions permises</value></data>
+  <data name="CardIA_TempoDiaUtil" xml:space="preserve"><value>Temps max. (semaine, min)</value></data>
+  <data name="CardIA_TempoFimSemana" xml:space="preserve"><value>Temps max. (week-end, min)</value></data>
+  <data name="CardIA_PedidoLabel" xml:space="preserve"><value>Une demande particulière ?</value></data>
+  <data name="CardIA_PedidoPlaceholder" xml:space="preserve"><value>Ex. : pas de viande rouge ; poisson le vendredi ; quelque chose de spécial le dimanche</value></data>
+  <data name="CardIA_Substituir" xml:space="preserve"><value>Remplacer aussi les plats déjà au menu</value></data>
+  <data name="CardIA_PermitirRepetir" xml:space="preserve"><value>Permettre le même plat deux fois dans la semaine (ex. : restes)</value></data>
+  <data name="CardIA_Gerar" xml:space="preserve"><value>Générer le menu</value></data>
+  <data name="CardIA_PreviaIntro" xml:space="preserve"><value>Vérifiez la suggestion. Vous pouvez changer ou retirer des plats avant de l'enregistrer au menu.</value></data>
+  <data name="CardIA_HorariosVazios" xml:space="preserve"><value>{0} repas sans suggestion. Vous pouvez choisir un plat ou les laisser vides.</value></data>
+  <data name="CardIA_SemSugestao" xml:space="preserve"><value>Aucune suggestion</value></data>
+  <data name="CardIA_Trocar" xml:space="preserve"><value>Choisir un autre plat</value></data>
+  <data name="CardIA_Remover" xml:space="preserve"><value>Retirer</value></data>
+  <data name="CardIA_AjustarParametros" xml:space="preserve"><value>Ajuster les règles</value></data>
+  <data name="CardIA_GerarOutro" xml:space="preserve"><value>En générer un autre</value></data>
+  <data name="CardIA_Aceitar" xml:space="preserve"><value>Enregistrer au menu</value></data>
+  <data name="CardIA_Aplicando" xml:space="preserve"><value>Enregistrement…</value></data>
+  <data name="CardIA_Aplicado" xml:space="preserve"><value>Menu de la semaine enregistré !</value></data>
+  <data name="CardIA_PoucasReceitasTitulo" xml:space="preserve"><value>Peu de recettes disponibles</value></data>
+  <data name="CardIA_PoucasReceitas" xml:space="preserve"><value>Avec ces règles, il n'y a que {0} recette(s) disponible(s) pour {1} repas. Certains resteront vides. Générer quand même ?</value></data>
+  <data name="CardIA_GerarMesmoAssim" xml:space="preserve"><value>Générer quand même</value></data>
+  <data name="Assin_CardapiosIA" xml:space="preserve"><value>menus IA/mois</value></data>
+  <data name="Landing_AiItem5Titulo" xml:space="preserve"><value>Le menu de la semaine, prêt</value></data>
+  <data name="Landing_AiItem5Desc" xml:space="preserve"><value>Fixez les règles — pas de plats répétés dans le mois, temps de préparation, poisson le vendredi — et l'IA compose la semaine avec les recettes de votre famille. Si vous le souhaitez, elle le fait toute seule chaque semaine et vous prévient sur votre téléphone. Vous vérifiez, changez ce que vous voulez, et la liste de courses est prête.</value></data>
+  <data name="Erro_slot_origem_vazio" xml:space="preserve"><value>Il n'y a aucun plat à déplacer à ce repas.</value></data>
+  <data name="Erro_limite_cardapios_ia" xml:space="preserve"><value>Vous avez atteint la limite de {0} menus générés par IA ce mois-ci sur votre formule.</value></data>
+  <data name="Erro_cardapio_ia_nao_gerado" xml:space="preserve"><value>Impossible de générer le menu pour le moment. Réessayez dans un instant.</value></data>
+  <data name="Erro_sem_receitas_para_cardapio" xml:space="preserve"><value>Aucune recette disponible pour composer le menu avec ces règles. Ajoutez des recettes ou assouplissez la règle de non-répétition.</value></data>
+  <data name="Erro_nenhum_horario_para_preencher" xml:space="preserve"><value>Aucun repas à remplir. Choisissez d'autres jours ou cochez l'option pour remplacer les plats existants.</value></data>
+  <data name="Erro_sem_permissao_cardapio_ia" xml:space="preserve"><value>Seuls les adultes de la famille peuvent générer le menu avec l'IA.</value></data>
+  <!-- Menu automatique (brouillon hebdomadaire de l'IA) -->
+  <data name="CardAuto_Ativar" xml:space="preserve"><value>Préparer un brouillon automatiquement chaque semaine</value></data>
+  <data name="CardAuto_Dia" xml:space="preserve"><value>Jour</value></data>
+  <data name="CardAuto_Hora" xml:space="preserve"><value>Heure</value></data>
+  <data name="CardAuto_Explicacao" xml:space="preserve"><value>Ce jour-là, à cette heure, l'IA compose le menu de la semaine suivante avec les règles ci-dessus et prévient les adultes par notification. Rien n'est enregistré sans votre vérification. Chaque brouillon compte dans le quota mensuel de menus IA.</value></data>
+  <data name="CardAuto_Salvar" xml:space="preserve"><value>Enregistrer les règles et la planification</value></data>
+  <data name="CardAuto_SalvoAtivo" xml:space="preserve"><value>Planification enregistrée. L'IA préparera le brouillon de la semaine prochaine à l'heure choisie.</value></data>
+  <data name="CardAuto_SalvoInativo" xml:space="preserve"><value>Règles enregistrées par défaut. Le brouillon automatique est désactivé.</value></data>
+  <data name="CardAuto_PreparadoEm" xml:space="preserve"><value>Préparé automatiquement le {0}</value></data>
+  <data name="CardAuto_Banner" xml:space="preserve"><value>L'IA a préparé un brouillon du menu de cette semaine.</value></data>
+  <data name="CardAuto_Revisar" xml:space="preserve"><value>Vérifier</value></data>
+  <data name="CardAuto_Descartar" xml:space="preserve"><value>Écarter</value></data>
+  <data name="CardAuto_Descartado" xml:space="preserve"><value>Brouillon écarté.</value></data>
+  <data name="Push_CardapioPronto_Titulo" xml:space="preserve"><value>Menu de la semaine prêt</value></data>
+  <data name="Push_CardapioPronto_Corpo" xml:space="preserve"><value>L'IA a préparé le menu de la semaine du {0}. Touchez pour le vérifier.</value></data>
 </root>

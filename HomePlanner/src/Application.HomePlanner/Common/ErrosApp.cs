@@ -192,6 +192,25 @@ public static class ErrosApp
         "limite_sugestoes",
         $"Você atingiu o limite de {limite} pedidos de sugestão de receitas este mês no seu plano.", limite);
 
+    /// <summary>{0} = limite de cardápios IA do plano.</summary>
+    public static ErroOperacao LimiteCardapiosIA(int limite) => ErroOperacao.De(
+        "limite_cardapios_ia",
+        $"Você atingiu o limite de {limite} cardápios gerados por IA este mês no seu plano.", limite);
+
+    public static ErroOperacao CardapioIANaoGerado => ErroOperacao.De(
+        "cardapio_ia_nao_gerado", "Não foi possível gerar o cardápio agora. Tente novamente em instantes.");
+
+    public static ErroOperacao SemReceitasParaCardapio => ErroOperacao.De(
+        "sem_receitas_para_cardapio",
+        "Não há receitas disponíveis para montar o cardápio com essas regras. Cadastre mais receitas ou afrouxe a regra de não repetir.");
+
+    public static ErroOperacao NenhumHorarioParaPreencher => ErroOperacao.De(
+        "nenhum_horario_para_preencher",
+        "Não há horários para preencher. Escolha outros dias ou marque a opção de substituir o que já existe.");
+
+    public static ErroOperacao SemPermissaoCardapioIA => ErroOperacao.De(
+        "sem_permissao_cardapio_ia", "Só os adultos da família podem gerar o cardápio com IA.");
+
     // ── Envio de mensagens ───────────────────────────────────────────────────
     public static ErroOperacao EnvioIndisponivel => ErroOperacao.De(
         "envio_indisponivel", "Não conseguimos enviar sua mensagem agora. Tente novamente em instantes.");
@@ -306,6 +325,9 @@ public static class ErrosApp
     public static ErroOperacao SemanaSemCardapio => ErroOperacao.De(
         "semana_sem_cardapio", "Semana não encontrada. Crie o cardápio primeiro.");
 
+    public static ErroOperacao SlotOrigemVazio => ErroOperacao.De(
+        "slot_origem_vazio", "Não há prato neste horário para mover.");
+
     public static ErroOperacao FalhaLimparMarcacoes => ErroOperacao.De(
         "falha_limpar_marcacoes", "Não foi possível limpar as marcações.");
 
@@ -373,6 +395,6 @@ public static class ErrosApp
         "muito_curto", "limite_membros_plano", "convite_aguarde_reenvio", "limite_importacoes",
         "ingrediente_duplicado", "receita_usada_componente", "ingrediente_em_uso", "unidade_nao_encontrada",
         "unidades_incompativeis", "imagem_entrada_muito_grande", "imagem_final_acima_limite",
-        "url_inacessivel", "texto_receita_muito_longo", "limite_sugestoes",
+        "url_inacessivel", "texto_receita_muito_longo", "limite_sugestoes", "limite_cardapios_ia",
     ];
 }

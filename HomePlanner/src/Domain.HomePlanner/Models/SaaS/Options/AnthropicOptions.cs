@@ -22,6 +22,12 @@ public class AnthropicOptions
     /// </summary>
     public string ModelSugestao { get; set; } = "claude-haiku-4-5";
 
+    /// <summary>
+    /// Modelo do cardápio da semana por IA: muitas restrições ao mesmo tempo (não repetir,
+    /// variedade, tempo, pedido livre), por isso começa num modelo maior que o das sugestões.
+    /// </summary>
+    public string ModelCardapio { get; set; } = "claude-sonnet-5-5";
+
     /// <summary>Teto de itens parseados por chamada (proteção de custo/payload).</summary>
     public int MaxIngredientesPorChamada { get; set; } = 60;
 

@@ -92,7 +92,8 @@
             <MudGrid Spacing="3" Class="mt-8" Style="text-align:left;">
                 @foreach (var (icone, n) in _recursosIA)
                 {
-                    <MudItem xs="12" sm="6">
+                    @* Número ímpar de cards: o último ocupa a linha inteira *@
+                    <MudItem xs="12" sm="@(n == _recursosIA.Length && n % 2 == 1 ? 12 : 6)">
                         <div class="landing-ai-item">
                             <MudIcon Icon="@icone" Style="color:#F2C3A9;" />
                             <div>
@@ -239,6 +240,7 @@
         (Icons.Material.Filled.ContentPaste, 2),
         (Icons.Material.Filled.AutoAwesome, 3),
         (Icons.Material.Filled.Translate, 4),
+        (Icons.Material.Filled.CalendarMonth, 5),
     ];
 
     protected override async Task OnInitializedAsync()

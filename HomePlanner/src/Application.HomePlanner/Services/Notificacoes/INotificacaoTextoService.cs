@@ -12,4 +12,7 @@ public interface INotificacaoTextoService
     (string Titulo, string Corpo) LembreteTarefaPais(string? idioma, string tituloTarefa, string nomeResponsavel, TimeOnly hora);
 
     (string Titulo, string Corpo) TarefaAtribuida(string? idioma, string tituloTarefa);
+
+    /// <summary>Rascunho automático do cardápio da semana pronto para revisar.</summary>
+    (string Titulo, string Corpo) CardapioPronto(string? idioma, DateOnly dataInicio);
 }

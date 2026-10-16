@@ -1,3 +1,4 @@
+using Application.HomePlanner.DTOs.Cardapio.CardapioIA;
 using Application.HomePlanner.DTOs.Cardapio.Receita;
 using Application.HomePlanner.Services.Cardapio;
 using Domain.HomePlanner.Models.Cardapio;
@@ -23,6 +24,9 @@ public interface IReceitaRepository
 
     /// <summary>Receitas (autocomplete) por texto, excluindo opcionalmente um id.</summary>
     Task<IReadOnlyList<ReceitaListaDTO>> BuscarAutoCompleteAsync(string textoNormalizado, int limite, int? excluirId, CancellationToken ct = default);
+
+    /// <summary>Todas as receitas da casa como candidatas ao cardápio por IA (resumo leve, sem blobs).</summary>
+    Task<IReadOnlyList<ReceitaCandidataCardapioDTO>> ListarCandidatasCardapioAsync(CancellationToken ct = default);
 
     Task AdicionarAsync(Receita entidade, CancellationToken ct = default);
     Task<int> SalvarAsync(CancellationToken ct = default);

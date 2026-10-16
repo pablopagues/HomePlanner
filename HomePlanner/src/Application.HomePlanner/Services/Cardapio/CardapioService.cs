@@ -88,6 +88,78 @@ public class CardapioService : ICardapioService
         return ResultadoOperacao.Ok();
     }
 
+    public async Task<ResultadoOperacao> MoverRefeicaoAsync(
+        MoverRefeicaoCommand cmd, CancellationToken ct = default)
+    {
+        await _tenantAccessor.GarantirHidratadoAsync();
+
+        if (cmd.DiaOrigem == cmd.DiaDestino && cmd.TipoOrigem == cmd.TipoDestino)
+            return ResultadoOperacao.Ok();
+
+        var planejamento = await _repo.ObterPorDataInicioAsync(cmd.DataInicio, ct);
+        if (planejamento is null)
+            return ResultadoOperacao.Falha(ErrosApp.SemanaSemCardapio);
+
+        var origem = await _repo.ObterRefeicaoDiaAsync(planejamento.Id, cmd.DiaOrigem, cmd.TipoOrigem, ct);
+        if (origem?.ReceitaId is null)
+            return ResultadoOperacao.Falha(ErrosApp.SlotOrigemVazio);
+
+        var destino = await _repo.ObterRefeicaoDiaAsync(planejamento.Id, cmd.DiaDestino, cmd.TipoDestino, ct);
+        if (destino is null)
+        {
+            destino = new RefeicaoDia
+            {
+                PlanejamentoSemanalId = planejamento.Id,
+                DiaSemana             = cmd.DiaDestino,
+                TipoRefeicao          = cmd.TipoDestino,
+            };
+            await _repo.AdicionarRefeicaoDiaAsync(destino, ct);
+        }
+
+        // Troca o conteúdo dos dois slots (destino vazio = a origem fica vazia).
+        (origem.ReceitaId, destino.ReceitaId) = (destino.ReceitaId, origem.ReceitaId);
+        (origem.PorcoesDesejadas, destino.PorcoesDesejadas) = (destino.PorcoesDesejadas, origem.PorcoesDesejadas);
+        (origem.Observacao, destino.Observacao) = (destino.Observacao, origem.Observacao);
+
+        await _repo.SalvarAsync(ct);
+        return ResultadoOperacao.Ok();
+    }
+
+    public async Task<ResultadoOperacao> DefinirRefeicoesEmLoteAsync(
+        DateOnly dataInicio, IReadOnlyList<DefinirRefeicaoCommand> refeicoes, CancellationToken ct = default)
+    {
+        await _tenantAccessor.GarantirHidratadoAsync();
+
+        var planejamento = await _repo.ObterPorDataInicioAsync(dataInicio, ct);
+        if (planejamento is null)
+            return ResultadoOperacao.Falha(ErrosApp.SemanaSemCardapio);
+
+        foreach (var cmd in refeicoes)
+        {
+            var refeicao = await _repo.ObterRefeicaoDiaAsync(
+                planejamento.Id, cmd.DiaSemana, cmd.TipoRefeicao, ct);
+
+            if (refeicao is null)
+            {
+                refeicao = new RefeicaoDia
+                {
+                    PlanejamentoSemanalId = planejamento.Id,
+                    DiaSemana             = cmd.DiaSemana,
+                    TipoRefeicao          = cmd.TipoRefeicao,
+                };
+                await _repo.AdicionarRefeicaoDiaAsync(refeicao, ct);
+            }
+
+            refeicao.ReceitaId        = cmd.ReceitaId;
+            refeicao.PorcoesDesejadas = cmd.PorcoesDesejadas;
+            refeicao.Observacao       = cmd.Observacao;
+        }
+
+        // Uma única gravação: ou entra o cardápio todo, ou nada.
+        await _repo.SalvarAsync(ct);
+        return ResultadoOperacao.Ok();
+    }
+
     public async Task<ResultadoOperacao> LimparSlotAsync(
         int planejamentoId, int refeicaoDiaId, CancellationToken ct = default)
     {

@@ -38,4 +38,7 @@ public interface IPushNotificationService
 
     /// <summary>Aviso de tarefa atribuída, no idioma do destinatário.</summary>
     Task<int> EnviarTarefaAtribuidaAsync(Guid tenantId, string usuarioId, string tituloTarefa, int tarefaId, CancellationToken ct = default);
+
+    /// <summary>Aviso de rascunho automático do cardápio pronto, no idioma do destinatário.</summary>
+    Task<int> EnviarCardapioProntoAsync(Guid tenantId, string usuarioId, DateOnly dataInicio, CancellationToken ct = default);
 }

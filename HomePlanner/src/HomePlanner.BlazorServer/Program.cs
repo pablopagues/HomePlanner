@@ -285,6 +285,10 @@ try
     builder.Services.AddScoped<ICotaImportacaoService, CotaImportacaoService>();
     builder.Services.AddScoped<IAssistenteReceitaIA, AssistenteReceitaIAService>();
     builder.Services.AddScoped<ISugestaoReceitaService, SugestaoReceitaService>();
+    builder.Services.AddScoped<IGeradorCardapioIA, GeradorCardapioIAService>();
+    builder.Services.AddScoped<ICardapioIAService, CardapioIAService>();
+    builder.Services.AddScoped<ICardapioAutomaticoRepository, CardapioAutomaticoRepository>();
+    builder.Services.AddScoped<ICardapioAutomaticoService, CardapioAutomaticoService>();
 
     // ── Lista de Compras ──────────────────────────────────────────────────────
     builder.Services.AddScoped<IListaComprasService, ListaComprasService>();
@@ -375,6 +379,7 @@ try
     builder.Services.AddSingleton<INotificacaoTextoService, HomePlanner.BlazorServer.Services.NotificacaoTextoService>();
     // Lembretes de tarefa por horário (varre o banco e dispara push na hora).
     builder.Services.AddHostedService<HomePlanner.BlazorServer.Services.LembreteTarefaBackgroundService>();
+    builder.Services.AddHostedService<HomePlanner.BlazorServer.Services.CardapioAutomaticoBackgroundService>();
 
     // ── Contato (formulário público) ──────────────────────────────────────────
     builder.Services.Configure<ContatoOptions>(builder.Configuration.GetSection(ContatoOptions.SectionName));

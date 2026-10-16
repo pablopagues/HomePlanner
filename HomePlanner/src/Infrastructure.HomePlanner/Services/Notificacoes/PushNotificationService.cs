@@ -168,6 +168,18 @@ public class PushNotificationService : IPushNotificationService
         }, ct);
     }
 
+    public async Task<int> EnviarCardapioProntoAsync(
+        Guid tenantId, string usuarioId, DateOnly dataInicio, CancellationToken ct = default)
+    {
+        var idioma = await ObterIdiomaAsync(usuarioId, ct);
+        var (titulo, corpo) = _texto.CardapioPronto(idioma, dataInicio);
+        return await EnviarParaUsuarioAsync(tenantId, usuarioId, new NotificacaoPushDTO
+        {
+            Titulo = titulo, Corpo = corpo,
+            Url = $"/cardapio/{dataInicio:yyyy-MM-dd}", Tag = $"cardapio-ia-{dataInicio:yyyyMMdd}",
+        }, ct);
+    }
+
     private async Task<string?> ObterIdiomaAsync(string usuarioId, CancellationToken ct)
         => await _db.Users.IgnoreQueryFilters()
             .Where(u => u.Id == usuarioId)

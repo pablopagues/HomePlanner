@@ -19,4 +19,7 @@ public class UsoImportacaoReceita : ITenantEntity
 
     /// <summary>Pedidos de sugestão de receitas à IA no mês (cota separada das importações).</summary>
     public int QuantidadeSugestoes { get; set; }
+
+    /// <summary>Cardápios da semana gerados pela IA no mês (cota própria).</summary>
+    public int QuantidadeCardapiosIA { get; set; }
 }

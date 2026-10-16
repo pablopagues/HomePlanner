@@ -1,3 +1,4 @@
+using Application.HomePlanner.DTOs.Cardapio.CardapioIA;
 using Application.HomePlanner.DTOs.Cardapio.Receita;
 using Application.HomePlanner.Repositories.Cardapio;
 using Application.HomePlanner.Services.Cardapio;
@@ -38,6 +39,31 @@ public class ReceitaRepository : IReceitaRepository
                 TotalIngredientes = r.Ingredientes.Count(ri => !ri.IsDeleted),
                 TotalComponentes  = r.Componentes.Count(rc => !rc.IsDeleted),
                 DataCriacao       = r.DataCriacao,
+            })
+            .ToListAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<ReceitaCandidataCardapioDTO>> ListarCandidatasCardapioAsync(CancellationToken ct = default)
+    {
+        await using var db = await _dbFactory.CreateDbContextAsync(ct);
+        return await db.Receitas
+            .Where(r => !r.IsDeleted)
+            .OrderBy(r => r.Nome)
+            .Select(r => new ReceitaCandidataCardapioDTO
+            {
+                Id                  = r.Id,
+                Nome                = r.Nome,
+                TempoPreparoMinutos = r.TempoPreparoMinutos,
+                // Os primeiros ingredientes dizem à IA a proteína/estilo do prato.
+                Ingredientes        = r.Ingredientes
+                    .Where(ri => !ri.IsDeleted)
+                    .OrderBy(ri => ri.Ordem)
+                    .Select(ri => ri.Ingrediente.Nome)
+                    .Take(6)
+                    .ToList(),
+                IngredientesTexto   = r.IngredientesTexto,
+                EhComponente        = db.ReceitasComponentes.Any(c =>
+                    c.ReceitaComponenteId == r.Id && !c.IsDeleted && !c.ReceitaPai.IsDeleted),
             })
             .ToListAsync(ct);
     }

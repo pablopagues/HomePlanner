@@ -28,6 +28,9 @@ public class AssinaturaAtualDTO
     /// <summary>Limite de pedidos de sugestão de receitas (IA) por mês no plano atual.</summary>
     public int LimiteSugestoesReceita { get; set; }
 
+    /// <summary>Limite de cardápios da semana gerados por IA por mês no plano atual.</summary>
+    public int LimiteCardapiosIA { get; set; }
+
     /// <summary>Dias restantes no trial (null se já é paga).</summary>
     public int? DiasRestantesTrial { get; set; }
 

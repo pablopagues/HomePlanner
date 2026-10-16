@@ -59,6 +59,10 @@ else if (_atual is not null)
                              Icon="@Icons.Material.Filled.AutoAwesome">
                         @_atual.LimiteSugestoesReceita @L["Assin_SugestoesReceita"]
                     </MudChip>
+                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined"
+                             Icon="@Icons.Material.Filled.CalendarMonth">
+                        @_atual.LimiteCardapiosIA @L["Assin_CardapiosIA"]
+                    </MudChip>
                 </MudStack>
             </div>
             @if (_atual.TemAssinaturaStripe)
@@ -134,6 +138,10 @@ else if (_atual is not null)
                         <MudText Typo="Typo.caption" Color="Color.Secondary" Class="d-block">
                             <MudIcon Icon="@Icons.Material.Filled.AutoAwesome" Size="Size.Small" Class="mr-1" />
                             @LimitesPorPlano.SugestoesReceitaMes(p) @L["Assin_SugestoesReceita"]
+                        </MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="d-block">
+                            <MudIcon Icon="@Icons.Material.Filled.CalendarMonth" Size="Size.Small" Class="mr-1" />
+                            @LimitesPorPlano.CardapiosIAMes(p) @L["Assin_CardapiosIA"]
                         </MudText>
                     </MudCardContent>
                     <MudCardActions>

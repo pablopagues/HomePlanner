@@ -53,6 +53,16 @@ public class NotificacaoTextoService : INotificacaoTextoService
         return (titulo, corpo);
     }
 
+    public (string Titulo, string Corpo) CardapioPronto(string? idioma, DateOnly dataInicio)
+    {
+        var c = Cultura(idioma);
+        var titulo = Rm.GetString("Push_CardapioPronto_Titulo", c) ?? "Cardápio da semana pronto";
+        var corpo = string.Format(c,
+            Rm.GetString("Push_CardapioPronto_Corpo", c) ?? "A IA preparou o cardápio da semana de {0}. Toque para revisar.",
+            dataInicio.ToString(c.DateTimeFormat.MonthDayPattern, c));
+        return (titulo, corpo);
+    }
+
     private CultureInfo Cultura(string? idioma)
     {
         var lang = PublicLanguageService.IsLangValida(idioma) ? idioma! : _idiomaPadrao;
