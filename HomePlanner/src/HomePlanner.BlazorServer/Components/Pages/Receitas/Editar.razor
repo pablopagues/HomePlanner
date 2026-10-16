@@ -50,6 +50,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        // Filho só consulta: vai para a visualização da receita.
+        if (!await Service.PodeGerenciarAsync()) { Nav.NavigateTo($"/receitas/{Id}"); return; }
         _unidades = (await UnidadeRepo.ListarAtivasAsync()).ToList();
 
         var r = await Service.ObterAsync(Id);

@@ -5,6 +5,9 @@ namespace Application.HomePlanner.Services.Cardapio;
 
 public interface IReceitaService
 {
+    /// <summary>False para o papel Filho: só consulta receitas e ingredientes, não altera.</summary>
+    Task<bool> PodeGerenciarAsync();
+
     Task<ResultadoListagem<ReceitaListaDTO>> ListarAsync(ReceitaFiltroDTO filtro, CancellationToken ct = default);
     Task<ResultadoOperacao<ReceitaDetalheDTO>> ObterAsync(int id, CancellationToken ct = default);
 

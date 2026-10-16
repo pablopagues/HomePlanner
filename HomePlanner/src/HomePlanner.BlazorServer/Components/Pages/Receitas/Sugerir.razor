@@ -149,7 +149,11 @@
     private string? _ultimoTexto;
 
     protected override async Task OnInitializedAsync()
-        => _uso = await Cota.ObterUsoSugestoesAsync();
+    {
+        // Filho só consulta receitas (e não gasta a cota de IA da família).
+        if (!await Service.PodeGerenciarAsync()) { Nav.NavigateTo("/receitas"); return; }
+        _uso = await Cota.ObterUsoSugestoesAsync();
+    }
 
     private async Task SugerirAsync()
     {

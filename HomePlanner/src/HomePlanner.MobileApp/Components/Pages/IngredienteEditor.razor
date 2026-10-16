@@ -14,6 +14,12 @@
 <label>@L["App_Categoria"]</label>
 <input @bind="_dto.Categoria" placeholder="@L["App_CategoriaPlaceholder"]" />
 
+<label>@L["IngCat_UnidadePadrao"]</label>
+<select @bind="_dto.UnidadeMedidaPadraoId">
+    <option value="">@L["IngCat_SemUnidade"]</option>
+    @foreach (var u in _unidades) { <option value="@u.Id">@u.Codigo</option> }
+</select>
+
 <button class="btn-acao" @onclick="SalvarAsync" disabled="@ocupado">
     @(ocupado ? L["Btn_Salvando"] : L["Btn_Salvar"])
 </button>
@@ -27,18 +33,29 @@
     [Parameter] public int? Id { get; set; }
 
     private IngredientePersistenciaRequest _dto = new();
+    private List<UnidadeMedidaDTO> _unidades = new();
     private bool ocupado;
     private string? erro;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var (unidades, _) = await Api.ListarUnidadesAsync();
+        _unidades = unidades ?? new();
+    }
 
     protected override async Task OnParametersSetAsync()
     {
         if (Id.HasValue && _dto.Id != Id.Value)
         {
-            // Não há GET por id — busca na listagem para pré-preencher.
-            var (lista, _) = await Api.ListarIngredientesAsync(null, 1);
-            var i = lista?.Itens.FirstOrDefault(x => x.Id == Id.Value);
+            // Carrega a unidade padrão junto: o salvar sobrescreve tudo, e sem ela a unidade se perdia.
+            var (i, err) = await Api.ObterIngredienteAsync(Id.Value);
+            if (err is not null) { erro = err; return; }
             if (i is not null)
-                _dto = new IngredientePersistenciaRequest { Id = i.Id, Nome = i.Nome, Categoria = i.Categoria };
+                _dto = new IngredientePersistenciaRequest
+                {
+                    Id = i.Id, Nome = i.Nome, Categoria = i.Categoria,
+                    UnidadeMedidaPadraoId = i.UnidadeMedidaPadraoId,
+                };
         }
     }
 

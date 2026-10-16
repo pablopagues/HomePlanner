@@ -32,6 +32,9 @@ public class IngredienteRepository : IIngredienteRepository
                 Categoria            = i.Categoria,
                 UnidadeMedidaPadraoId = i.UnidadeMedidaPadraoId,
                 CodigoUnidadePadrao  = i.UnidadeMedidaPadrao != null ? i.UnidadeMedidaPadrao.Codigo : null,
+                TotalReceitas        = i.ReceitasIngredientes
+                    .Where(ri => !ri.IsDeleted && !ri.Receita.IsDeleted)
+                    .Select(ri => ri.ReceitaId).Distinct().Count(),
             })
             .ToListAsync(ct);
     }
@@ -111,6 +114,28 @@ public class IngredienteRepository : IIngredienteRepository
         var query = db.Ingredientes.Where(i => i.NomeNormalizado == nomeNormalizado);
         if (excluirId.HasValue) query = query.Where(i => i.Id != excluirId.Value);
         return await query.AnyAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<string>> ListarCategoriasAsync(CancellationToken ct = default)
+    {
+        await using var db = await _dbFactory.CreateDbContextAsync(ct);
+        return await db.Ingredientes
+            .Where(i => i.Categoria != null && i.Categoria != "")
+            .Select(i => i.Categoria!)
+            .Distinct()
+            .OrderBy(c => c)
+            .ToListAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<string>> ObterReceitasQueUsamAsync(
+        int ingredienteId, CancellationToken ct = default)
+    {
+        await using var db = await _dbFactory.CreateDbContextAsync(ct);
+        return await db.Receitas
+            .Where(r => r.Ingredientes.Any(ri => !ri.IsDeleted && ri.IngredienteId == ingredienteId))
+            .OrderBy(r => r.Nome)
+            .Select(r => r.Nome)
+            .ToListAsync(ct);
     }
 
     public async Task<IReadOnlyDictionary<int, ProdutoBaseInfo>> ObterMapaBaseAsync(

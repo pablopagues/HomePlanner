@@ -25,6 +25,10 @@ public class SugestaoReceitaService : ISugestaoReceitaService
     public async Task<ResultadoOperacao<IReadOnlyList<ReceitaImportadaPreviewDTO>>> SugerirAsync(
         PedidoSugestaoReceitaDTO pedido, string idioma, CancellationToken ct = default)
     {
+        // Gera custo de IA e consome a cota da família: só quem pode criar receitas.
+        if (!await _receitas.PodeGerenciarAsync())
+            return ResultadoOperacao<IReadOnlyList<ReceitaImportadaPreviewDTO>>.Falha(ErrosApp.SemPermissaoReceitas);
+
         if (!_assistenteIA.Habilitado)
             return ResultadoOperacao<IReadOnlyList<ReceitaImportadaPreviewDTO>>.Falha(ErrosApp.IaIndisponivel);
 

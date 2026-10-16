@@ -12,16 +12,26 @@ public class IngredienteService : IIngredienteService
 {
     private readonly IIngredienteRepository _repo;
     private readonly TenantContextAccessor _tenantAccessor;
+    private readonly TenantContext _tenantContext;
     private readonly ILogger<IngredienteService> _logger;
 
     public IngredienteService(
         IIngredienteRepository repo,
         TenantContextAccessor tenantAccessor,
+        TenantContext tenantContext,
         ILogger<IngredienteService> logger)
     {
         _repo = repo;
         _tenantAccessor = tenantAccessor;
+        _tenantContext = tenantContext;
         _logger = logger;
+    }
+
+    // Mesma regra das receitas: Filho só consulta o catálogo.
+    public async Task<bool> PodeGerenciarAsync()
+    {
+        await _tenantAccessor.GarantirHidratadoAsync();
+        return !_tenantContext.RestritoAsProprias;
     }
 
     public async Task<ResultadoListagem<IngredienteListaDTO>> ListarAsync(
@@ -31,6 +41,9 @@ public class IngredienteService : IIngredienteService
 
         filtro.Pagina = Math.Max(1, filtro.Pagina);
         filtro.TamanhoPagina = Math.Clamp(filtro.TamanhoPagina, 1, 100);
+        // Mesmo critério do NomeNormalizado: "acucar" encontra "Açúcar".
+        if (!string.IsNullOrWhiteSpace(filtro.TextoBusca))
+            filtro.TextoBusca = TextoHelper.NormalizarNome(filtro.TextoBusca);
 
         var itens = await _repo.ListarAsync(filtro, ct);
         var total = await _repo.ContarAsync(filtro, ct);
@@ -55,7 +68,8 @@ public class IngredienteService : IIngredienteService
     public async Task<ResultadoOperacao<int>> SalvarAsync(
         IngredientePersistenciaDTO dto, CancellationToken ct = default)
     {
-        await _tenantAccessor.GarantirHidratadoAsync();
+        if (!await PodeGerenciarAsync())
+            return ResultadoOperacao<int>.Falha(ErrosApp.SemPermissaoReceitas);
 
         dto.Nome = dto.Nome?.Trim() ?? string.Empty;
         if (dto.Nome.Length < 2)
@@ -96,15 +110,33 @@ public class IngredienteService : IIngredienteService
 
     public async Task<ResultadoOperacao> DeletarAsync(int id, CancellationToken ct = default)
     {
-        await _tenantAccessor.GarantirHidratadoAsync();
+        if (!await PodeGerenciarAsync())
+            return ResultadoOperacao.Falha(ErrosApp.SemPermissaoReceitas);
 
         var entidade = await _repo.ObterEntidadeAsync(id, ct);
         if (entidade is null)
             return ResultadoOperacao.Falha(ErrosApp.IngredienteNaoEncontrado);
 
+        // Bloqueia se alguma receita ainda usa o ingrediente: com o filtro de soft-delete,
+        // a linha sumiria em silêncio da receita e da lista de compras.
+        var receitas = await _repo.ObterReceitasQueUsamAsync(id, ct);
+        if (receitas.Count > 0)
+            return ResultadoOperacao.Falha(ErrosApp.IngredienteEmUso(string.Join(", ", receitas)));
+
+        // Variantes agrupadas sob ele voltam a ser o próprio produto base.
+        foreach (var filho in await _repo.ObterFilhosDiretosAsync(id, ct))
+            filho.IngredienteBaseId = null;
+
         entidade.IsDeleted = true;
         await _repo.SalvarAsync(ct);
+        _logger.LogInformation("Ingrediente {Id} '{Nome}' excluído.", entidade.Id, entidade.Nome);
         return ResultadoOperacao.Ok();
+    }
+
+    public async Task<IReadOnlyList<string>> ListarCategoriasAsync(CancellationToken ct = default)
+    {
+        await _tenantAccessor.GarantirHidratadoAsync();
+        return await _repo.ListarCategoriasAsync(ct);
     }
 
     public async Task<IReadOnlyList<IngredienteListaDTO>> BuscarAutoCompleteAsync(
@@ -126,7 +158,8 @@ public class IngredienteService : IIngredienteService
     public async Task<ResultadoOperacao> DefinirProdutoBaseAsync(
         int ingredienteId, int? baseId, CancellationToken ct = default)
     {
-        await _tenantAccessor.GarantirHidratadoAsync();
+        if (!await PodeGerenciarAsync())
+            return ResultadoOperacao.Falha(ErrosApp.SemPermissaoReceitas);
 
         var ingrediente = await _repo.ObterEntidadeAsync(ingredienteId, ct);
         if (ingrediente is null)

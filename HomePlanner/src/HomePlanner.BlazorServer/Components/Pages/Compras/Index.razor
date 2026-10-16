@@ -636,10 +636,13 @@ else if (_lista is not null)
                         <MenuMoverLoja Lojas="_lojas" ListaAtualId="item.ListaId"
                                        OnMover="@(id => MoverItemCardapio(item, id))" />
                     }
-                    <MudTooltip Text="@L["Compras_Agrupar"]">
-                        <MudIconButton Icon="@Icons.Material.Filled.Merge" Size="Size.Small"
-                                       Color="Color.Default" OnClick="@(() => AbrirAgrupar(item))" />
-                    </MudTooltip>
+                    @if (_podeGerenciar)
+                    {
+                        <MudTooltip Text="@L["Compras_Agrupar"]">
+                            <MudIconButton Icon="@Icons.Material.Filled.Merge" Size="Size.Small"
+                                           Color="Color.Default" OnClick="@(() => AbrirAgrupar(item))" />
+                        </MudTooltip>
+                    }
                 }
             </MudStack>
         </MudPaper>

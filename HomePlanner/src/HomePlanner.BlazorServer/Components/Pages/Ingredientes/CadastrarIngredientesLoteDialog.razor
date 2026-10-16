@@ -1,0 +1,218 @@
+@* Diálogo: cadastra vários ingredientes no catálogo a partir de um texto livre.
+   Usa o mesmo parser do "Lançar do texto" (IA com fallback regex), mas só aproveita
+   nome e unidade — quantidade e preparo pertencem à receita, não ao catálogo. *@
+@using Application.HomePlanner.Helpers
+@inject IImportadorReceitaService Importador
+@inject IIngredienteService IngService
+@inject ICotaImportacaoService Cota
+@inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResource> L
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">@L["IngLote_Titulo"]</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-2">@L["IngLote_Ajuda"]</MudText>
+
+        <MudTextField @bind-Value="_texto" Label="@L["IngLote_TextoLabel"]"
+                      Lines="6" AutoGrow="true" Variant="Variant.Outlined" Class="mb-2" />
+
+        <MudButton StartIcon="@Icons.Material.Filled.AutoFixHigh" Variant="Variant.Outlined"
+                   Color="Color.Primary" OnClick="Analisar" Class="mb-3"
+                   Disabled="@(_analisando || string.IsNullOrWhiteSpace(_texto))">
+            @(_analisando ? L["Lanc_Analisando"] : L["Lanc_Analisar"])
+        </MudButton>
+
+        @if (_analisando)
+        {
+            <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-3" />
+        }
+        else if (_linhas.Count > 0)
+        {
+            <MudDivider Class="mb-3" />
+            <MudText Typo="Typo.subtitle2" Class="mb-2">
+                @L["IngLote_Resumo", _linhas.Count, Novas.Count(), _linhas.Count(l => l.Existente is not null)]
+            </MudText>
+
+            <MudAutocomplete T="string" @bind-Value="_categoria"
+                             Label="@L["IngLote_CategoriaTodos"]"
+                             SearchFunc="BuscarCategorias" CoerceValue="true" Clearable="true"
+                             MaxLength="100" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
+
+            @foreach (var linha in _linhas)
+            {
+                <MudPaper Class="pa-2 mb-2" Elevation="0"
+                          Style="@($"background:var(--mud-palette-background-gray); border-radius:8px; border:1px solid var(--mud-palette-lines-default);{(linha.Existente is not null ? " opacity:.6;" : "")}")">
+                    <MudGrid Spacing="2" Class="align-center">
+                        <MudItem xs="12" sm="6">
+                            <MudTextField Value="linha.Nome"
+                                          ValueChanged="@((string v) => AtualizarNome(linha, v))"
+                                          Label="@L["Lanc_NomeIngrediente"]" MaxLength="200"
+                                          Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                        <MudItem xs="6" sm="3">
+                            <MudSelect T="int?" @bind-Value="linha.UnidadeMedidaId" Label="@L["IngCat_UnidadePadrao"]"
+                                       Disabled="@(linha.Existente is not null)"
+                                       Variant="Variant.Outlined" Margin="Margin.Dense">
+                                <MudSelectItem T="int?" Value="@((int?)null)">@L["IngCat_SemUnidade"]</MudSelectItem>
+                                @foreach (var u in Unidades)
+                                {
+                                    <MudSelectItem T="int?" Value="@((int?)u.Id)">@L.AbrevUnidade(u.Codigo)</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="4" sm="2">
+                            @if (linha.Existente is null)
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Text"
+                                         Icon="@Icons.Material.Filled.AddCircleOutline">@L["Lanc_Novo"]</MudChip>
+                            }
+                            else
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Text"
+                                         Icon="@Icons.Material.Filled.CheckCircle">@L["IngLote_JaCadastrado"]</MudChip>
+                            }
+                        </MudItem>
+                        <MudItem xs="2" sm="1" Class="d-flex justify-end">
+                            <MudIconButton Icon="@Icons.Material.Filled.DeleteOutline" Color="Color.Error"
+                                           Size="Size.Small" OnClick="@(() => _linhas.Remove(linha))" />
+                        </MudItem>
+                    </MudGrid>
+                </MudPaper>
+            }
+        }
+        else if (_analisou)
+        {
+            <MudAlert Severity="Severity.Warning" Dense="true">@L["Receita_NenhumIngredienteTexto"]</MudAlert>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => MudDialog.Cancel())">@L["Btn_Cancelar"]</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Cadastrar"
+                   Disabled="@(!Novas.Any() || _cadastrando)">
+            @(_cadastrando ? L["IngLote_Cadastrando"] : L["IngLote_CadastrarN", Novas.Count()])
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter] public List<UnidadeMedidaListaDTO> Unidades { get; set; } = [];
+    [Parameter] public List<string> Categorias { get; set; } = [];
+
+    private string _texto = string.Empty;
+    private string? _categoria;
+    private bool _analisou;
+    private bool _analisando;
+    private bool _cadastrando;
+    private readonly List<LinhaLote> _linhas = [];
+
+    private IEnumerable<LinhaLote> Novas =>
+        _linhas.Where(l => l.Existente is null && !string.IsNullOrWhiteSpace(l.Nome));
+
+    private async Task Analisar()
+    {
+        _analisando = true;
+        try { await AnalisarInterno(); }
+        finally { _analisando = false; }
+    }
+
+    private async Task AnalisarInterno()
+    {
+        _analisou = true;
+        _linhas.Clear();
+
+        var throttle = await Cota.VerificarThrottleIAAsync();
+        if (!throttle.Sucesso)
+        {
+            Snackbar.Add(L.Traduzir(throttle.Erros), Severity.Warning);
+            return;
+        }
+
+        // A mesma linha colada duas vezes ("sal" / "Sal a gosto") vira um item só.
+        var vistos = new HashSet<string>();
+        foreach (var p in await Importador.ParsearTextoAsync(_texto, null))
+        {
+            var nome = Capitalizar(p.NomeIngrediente.Trim());
+            if (string.IsNullOrWhiteSpace(nome) || !vistos.Add(TextoHelper.NormalizarNome(nome))) continue;
+
+            var linha = new LinhaLote { Nome = nome, UnidadeMedidaId = ResolverUnidade(p.CodigoUnidade) };
+            await ResolverExistente(linha);
+            _linhas.Add(linha);
+        }
+    }
+
+    // Sem unidade detectada → sem unidade padrão (não chuta "un" como no lançamento da receita).
+    private int? ResolverUnidade(string? codigo)
+    {
+        if (string.IsNullOrWhiteSpace(codigo)) return null;
+        return Unidades.FirstOrDefault(x => string.Equals(x.Codigo, codigo, StringComparison.OrdinalIgnoreCase))?.Id;
+    }
+
+    private async Task ResolverExistente(LinhaLote linha)
+    {
+        linha.Existente = null;
+        if (string.IsNullOrWhiteSpace(linha.Nome)) return;
+        var candidatos = await IngService.BuscarAutoCompleteAsync(linha.Nome, 5);
+        var alvo = TextoHelper.NormalizarNome(linha.Nome);
+        linha.Existente = candidatos.FirstOrDefault(c => TextoHelper.NormalizarNome(c.Nome) == alvo);
+        if (linha.Existente is not null) linha.UnidadeMedidaId = linha.Existente.UnidadeMedidaPadraoId;
+    }
+
+    private async Task AtualizarNome(LinhaLote linha, string nome)
+    {
+        linha.Nome = nome;
+        await ResolverExistente(linha);
+    }
+
+    private Task<IEnumerable<string>> BuscarCategorias(string texto, CancellationToken ct)
+    {
+        IEnumerable<string> res = string.IsNullOrWhiteSpace(texto)
+            ? Categorias
+            : Categorias.Where(c => c.Contains(texto.Trim(), StringComparison.OrdinalIgnoreCase));
+        return Task.FromResult(res);
+    }
+
+    private async Task Cadastrar()
+    {
+        _cadastrando = true;
+        var criados = 0;
+        var categoria = string.IsNullOrWhiteSpace(_categoria) ? null : _categoria.Trim();
+
+        try
+        {
+            foreach (var l in Novas.ToList())
+            {
+                var nome = Capitalizar(l.Nome.Trim());
+                var r = await IngService.SalvarAsync(new IngredientePersistenciaDTO
+                {
+                    Nome                  = nome,
+                    Categoria             = categoria,
+                    UnidadeMedidaPadraoId = l.UnidadeMedidaId,
+                });
+
+                if (r.Sucesso) criados++;
+                else Snackbar.Add(L["Lanc_FalhaCriar", nome, L.Traduzir(r.Erros)], Severity.Warning);
+            }
+        }
+        finally
+        {
+            _cadastrando = false;
+        }
+
+        if (criados > 0)
+            MudDialog.Close(DialogResult.Ok(criados));
+    }
+
+    private static string Capitalizar(string s)
+        => string.IsNullOrWhiteSpace(s) ? s : char.ToUpper(s[0]) + s[1..];
+
+    private class LinhaLote
+    {
+        public string Nome { get; set; } = string.Empty;
+        public int? UnidadeMedidaId { get; set; }
+        public IngredienteListaDTO? Existente { get; set; }
+    }
+}

@@ -1,0 +1,242 @@
+@page "/ingredientes"
+@page "/ingredients"
+@attribute [Authorize]
+@inject IStringLocalizer<SharedResource> L
+
+@* Catálogo de ingredientes da família: cadastro avulso, sem quantidade — a quantidade
+   é definida em cada receita. Os ingredientes cadastrados aqui aparecem no
+   autocomplete do formulário de receita, já com a unidade padrão. *@
+
+<PageTitle>@L["Nav_Ingredientes"]</PageTitle>
+
+<MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-1" Wrap="Wrap.Wrap">
+    <MudText Typo="Typo.h5" Style="font-family:'Fraunces',serif; font-weight:300;">@L["Nav_Ingredientes"]</MudText>
+    @if (_podeGerenciar)
+    {
+        <MudStack Row="true" Spacing="2" Wrap="Wrap.Wrap" Justify="Justify.FlexEnd">
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary"
+                       StartIcon="@Icons.Material.Filled.PlaylistAdd"
+                       OnClick="AbrirLote">
+                @L["IngCat_Lote"]
+            </MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="@(() => AbrirEditor(null))">
+                @L["IngCat_Novo"]
+            </MudButton>
+        </MudStack>
+    }
+</MudStack>
+<MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">@L["IngCat_Subtitulo"]</MudText>
+
+<MudPaper Class="pa-4 mb-4" Elevation="0" Style="background:var(--mud-palette-background-gray); border-radius:10px;">
+    <MudGrid Spacing="2">
+        <MudItem xs="12" sm="8">
+            <MudTextField Value="@_busca" Placeholder="@L["IngCat_Buscar"]"
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true" DebounceInterval="300"
+                          ValueChanged="@((string v) => BuscarAsync(v))"
+                          Variant="Variant.Outlined" Margin="Margin.Dense" />
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudSelect T="string" Value="@_categoria" ValueChanged="FiltrarCategoriaAsync"
+                       Placeholder="@L["IngCat_TodasCategorias"]" Clearable="true"
+                       Variant="Variant.Outlined" Margin="Margin.Dense">
+                @foreach (var c in _categorias)
+                {
+                    <MudSelectItem Value="@c">@c</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@if (_carregando && _itens.Count == 0)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else if (_itens.Count == 0)
+{
+    <MudAlert Severity="Severity.Info" Class="mt-4">
+        @(string.IsNullOrWhiteSpace(_busca) && _categoria is null ? L["IngCat_Nenhum"] : L["IngCat_NenhumBusca"])
+    </MudAlert>
+}
+else
+{
+    <MudTable Items="_itens" Dense="true" Hover="true" Elevation="0" Loading="_carregando"
+              Breakpoint="Breakpoint.Sm" Style="border-radius:10px;">
+        <HeaderContent>
+            <MudTh>@L["IngCat_Nome"]</MudTh>
+            <MudTh>@L["IngCat_Categoria"]</MudTh>
+            <MudTh>@L["IngCat_UnidadePadrao"]</MudTh>
+            <MudTh>@L["IngCat_UsadoEm"]</MudTh>
+            @if (_podeGerenciar)
+            {
+                <MudTh Style="text-align:right">@L["Fam_Acoes"]</MudTh>
+            }
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="@L["IngCat_Nome"]">
+                @if (_podeGerenciar)
+                {
+                    <MudLink OnClick="@(() => AbrirEditor(context))" Typo="Typo.body2" Color="Color.Inherit">
+                        @context.Nome
+                    </MudLink>
+                }
+                else
+                {
+                    @context.Nome
+                }
+            </MudTd>
+            <MudTd DataLabel="@L["IngCat_Categoria"]">
+                @if (!string.IsNullOrWhiteSpace(context.Categoria))
+                {
+                    <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@context.Categoria</MudChip>
+                }
+            </MudTd>
+            <MudTd DataLabel="@L["IngCat_UnidadePadrao"]">
+                @(context.CodigoUnidadePadrao is null ? "—" : L.AbrevUnidade(context.CodigoUnidadePadrao))
+            </MudTd>
+            <MudTd DataLabel="@L["IngCat_UsadoEm"]">
+                @if (context.TotalReceitas > 0)
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Text"
+                             Icon="@Icons.Material.Filled.MenuBook">
+                        @L["IngCat_NReceitas", context.TotalReceitas]
+                    </MudChip>
+                }
+                else
+                {
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">@L["IngCat_NaoUsado"]</MudText>
+                }
+            </MudTd>
+            @if (_podeGerenciar)
+            {
+                <MudTd Style="text-align:right; white-space:nowrap;">
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                                   OnClick="@(() => AbrirEditor(context))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                                   OnClick="@(() => ConfirmarExclusao(context))" />
+                </MudTd>
+            }
+        </RowTemplate>
+    </MudTable>
+
+    @if (_totalPaginas > 1)
+    {
+        <MudPagination Class="mt-4" Count="_totalPaginas" Selected="_pagina"
+                       SelectedChanged="@(async (int p) => { _pagina = p; await CarregarAsync(); })"
+                       Color="Color.Primary" />
+    }
+}
+
+@code {
+    [Inject] IIngredienteService Service { get; set; } = null!;
+    [Inject] IUnidadeMedidaRepository UnidadeRepo { get; set; } = null!;
+    [Inject] ISnackbar Snackbar { get; set; } = null!;
+    [Inject] IDialogService Dialog { get; set; } = null!;
+
+    private List<IngredienteListaDTO> _itens = [];
+    private List<UnidadeMedidaListaDTO> _unidades = [];
+    private List<string> _categorias = [];
+    private bool _carregando = true;
+    private string _busca = string.Empty;
+    private string? _categoria;
+    private int _pagina = 1;
+    private int _totalPaginas;
+    private bool _podeGerenciar; // Filho só consulta o catálogo
+
+    protected override async Task OnInitializedAsync()
+    {
+        _podeGerenciar = await Service.PodeGerenciarAsync();
+        _unidades = (await UnidadeRepo.ListarAtivasAsync()).ToList();
+        await CarregarCategoriasAsync();
+        await CarregarAsync();
+    }
+
+    private async Task CarregarAsync()
+    {
+        _carregando = true;
+        var r = await Service.ListarAsync(new IngredienteFiltroDTO
+        {
+            Pagina = _pagina, TamanhoPagina = 25, TextoBusca = _busca, Categoria = _categoria,
+        });
+        _itens = r.Itens.ToList();
+        _totalPaginas = r.TotalPaginas;
+        _carregando = false;
+    }
+
+    private async Task CarregarCategoriasAsync()
+        => _categorias = (await Service.ListarCategoriasAsync()).ToList();
+
+    private async Task BuscarAsync(string v)
+    {
+        _busca = v;
+        _pagina = 1;
+        await CarregarAsync();
+    }
+
+    private async Task FiltrarCategoriaAsync(string? c)
+    {
+        _categoria = string.IsNullOrWhiteSpace(c) ? null : c;
+        _pagina = 1;
+        await CarregarAsync();
+    }
+
+    private async Task AbrirEditor(IngredienteListaDTO? ingrediente)
+    {
+        var parameters = new DialogParameters<IngredienteDialog>
+        {
+            { x => x.Ingrediente, ingrediente },
+            { x => x.Unidades,    _unidades },
+            { x => x.Categorias,  _categorias },
+        };
+        var dialog = await Dialog.ShowAsync<IngredienteDialog>(
+            string.Empty, parameters, new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true });
+
+        var result = await dialog.Result;
+        if (result is null || result.Canceled) return;
+
+        Snackbar.Add(L["IngCat_SalvoOk"], Severity.Success);
+        await CarregarCategoriasAsync();
+        await CarregarAsync();
+    }
+
+    private async Task AbrirLote()
+    {
+        var parameters = new DialogParameters<CadastrarIngredientesLoteDialog>
+        {
+            { x => x.Unidades,   _unidades },
+            { x => x.Categorias, _categorias },
+        };
+        var dialog = await Dialog.ShowAsync<CadastrarIngredientesLoteDialog>(
+            string.Empty, parameters, new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true });
+
+        var result = await dialog.Result;
+        if (result is null || result.Canceled || result.Data is not int criados) return;
+
+        Snackbar.Add(L["IngLote_CriadosOk", criados], Severity.Success);
+        await CarregarCategoriasAsync();
+        await CarregarAsync();
+    }
+
+    private async Task ConfirmarExclusao(IngredienteListaDTO ingrediente)
+    {
+        var confirm = await Dialog.ShowMessageBox(
+            L["Confirmacao_Titulo"],
+            L["Msg_ExcluirItem", ingrediente.Nome],
+            yesText: L["Btn_Excluir"], cancelText: L["Btn_Cancelar"]);
+        if (confirm != true) return;
+
+        // Em uso por receitas → o serviço recusa e diz quais são.
+        var r = await Service.DeletarAsync(ingrediente.Id);
+        if (r.Sucesso)
+        {
+            Snackbar.Add(L["IngCat_ExcluidoOk"], Severity.Success);
+            await CarregarCategoriasAsync();
+            await CarregarAsync();
+        }
+        else
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
+    }
+}

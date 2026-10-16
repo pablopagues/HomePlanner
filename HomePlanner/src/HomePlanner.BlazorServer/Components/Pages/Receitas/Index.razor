@@ -10,23 +10,26 @@
 
 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-4">
     <MudText Typo="Typo.h5" Style="font-family:'Fraunces',serif; font-weight:300;">@L["Receita_Titulo"]</MudText>
-    <MudStack Row="true" Spacing="2" Wrap="Wrap.Wrap" Justify="Justify.FlexEnd">
-        <MudButton Variant="Variant.Outlined" Color="Color.Secondary"
-                   StartIcon="@Icons.Material.Filled.AutoAwesome"
-                   Href="/receitas/sugerir">
-            @L["Receita_Sugerir"]
-        </MudButton>
-        <MudButton Variant="Variant.Outlined" Color="Color.Secondary"
-                   StartIcon="@Icons.Material.Filled.Download"
-                   Href="/receitas/importar">
-            @L["Receita_ImportarUrl"]
-        </MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary"
-                   StartIcon="@Icons.Material.Filled.Add"
-                   Href="/receitas/criar">
-            @L["Receita_Nova"]
-        </MudButton>
-    </MudStack>
+    @if (_podeGerenciar)
+    {
+        <MudStack Row="true" Spacing="2" Wrap="Wrap.Wrap" Justify="Justify.FlexEnd">
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary"
+                       StartIcon="@Icons.Material.Filled.AutoAwesome"
+                       Href="/receitas/sugerir">
+                @L["Receita_Sugerir"]
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary"
+                       StartIcon="@Icons.Material.Filled.Download"
+                       Href="/receitas/importar">
+                @L["Receita_ImportarUrl"]
+            </MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       Href="/receitas/criar">
+                @L["Receita_Nova"]
+            </MudButton>
+        </MudStack>
+    }
 </MudStack>
 
 <MudPaper Class="pa-4 mb-4" Elevation="0" Style="background:var(--mud-palette-background-gray); border-radius:10px;">
@@ -45,7 +48,10 @@ else if (_itens.Count == 0)
 {
     <MudAlert Severity="Severity.Info" Class="mt-4">
         @L["Receita_Nenhuma"]
-        <MudLink Href="/receitas/criar">@L["Receita_PrimeiraCriar"]</MudLink>
+        @if (_podeGerenciar)
+        {
+            <MudLink Href="/receitas/criar">@L["Receita_PrimeiraCriar"]</MudLink>
+        }
     </MudAlert>
 }
 else
@@ -94,18 +100,21 @@ else
                                    Href="@($"/receitas/{r.Id}")">
                             @L["Btn_Ver"]
                         </MudButton>
-                        <MudButton Size="Size.Small" Color="Color.Default"
-                                   Href="@($"/receitas/editar/{r.Id}")">
-                            @L["Btn_Editar"]
-                        </MudButton>
-                        <MudButton Size="Size.Small" Color="Color.Default"
-                                   OnClick="@(() => DuplicarAsync(r.Id))">
-                            @L["Btn_Duplicar"]
-                        </MudButton>
-                        <MudSpacer />
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                       Size="Size.Small" Color="Color.Error"
-                                       OnClick="@(() => ConfirmarExclusao(r))" />
+                        @if (_podeGerenciar)
+                        {
+                            <MudButton Size="Size.Small" Color="Color.Default"
+                                       Href="@($"/receitas/editar/{r.Id}")">
+                                @L["Btn_Editar"]
+                            </MudButton>
+                            <MudButton Size="Size.Small" Color="Color.Default"
+                                       OnClick="@(() => DuplicarAsync(r.Id))">
+                                @L["Btn_Duplicar"]
+                            </MudButton>
+                            <MudSpacer />
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                           Size="Size.Small" Color="Color.Error"
+                                           OnClick="@(() => ConfirmarExclusao(r))" />
+                        }
                     </MudCardActions>
                 </MudCard>
             </MudItem>
@@ -131,8 +140,13 @@ else
     private string _busca = string.Empty;
     private int _pagina = 1;
     private int _totalPaginas;
+    private bool _podeGerenciar;
 
-    protected override async Task OnInitializedAsync() => await CarregarAsync();
+    protected override async Task OnInitializedAsync()
+    {
+        _podeGerenciar = await Service.PodeGerenciarAsync();
+        await CarregarAsync();
+    }
 
     private async Task CarregarAsync()
     {

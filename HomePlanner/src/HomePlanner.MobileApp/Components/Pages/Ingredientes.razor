@@ -20,6 +20,7 @@ else
                 <h3>@i.Nome</h3>
                 @if (!string.IsNullOrWhiteSpace(i.Categoria)) { <span class="pill">@i.Categoria</span> }
             </div>
+            @if (i.TotalReceitas > 0) { <p class="muted">@L["IngCat_UsadoEm"] @L["IngCat_NReceitas", i.TotalReceitas]</p> }
         </div>
     }
 }

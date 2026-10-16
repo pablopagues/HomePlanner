@@ -12,16 +12,26 @@ public class ReceitaService : IReceitaService
 {
     private readonly IReceitaRepository _repo;
     private readonly TenantContextAccessor _tenantAccessor;
+    private readonly TenantContext _tenantContext;
     private readonly ILogger<ReceitaService> _logger;
 
     public ReceitaService(
         IReceitaRepository repo,
         TenantContextAccessor tenantAccessor,
+        TenantContext tenantContext,
         ILogger<ReceitaService> logger)
     {
         _repo = repo;
         _tenantAccessor = tenantAccessor;
+        _tenantContext = tenantContext;
         _logger = logger;
+    }
+
+    // Filho só consulta receitas e ingredientes; criar/editar/excluir é dos pais.
+    public async Task<bool> PodeGerenciarAsync()
+    {
+        await _tenantAccessor.GarantirHidratadoAsync();
+        return !_tenantContext.RestritoAsProprias;
     }
 
     public async Task<ResultadoListagem<ReceitaListaDTO>> ListarAsync(
@@ -108,7 +118,8 @@ public class ReceitaService : IReceitaService
     public async Task<ResultadoOperacao<int>> SalvarAsync(
         ReceitaPersistenciaDTO dto, CancellationToken ct = default)
     {
-        await _tenantAccessor.GarantirHidratadoAsync();
+        if (!await PodeGerenciarAsync())
+            return ResultadoOperacao<int>.Falha(ErrosApp.SemPermissaoReceitas);
 
         dto.Nome = dto.Nome?.Trim() ?? string.Empty;
         if (dto.Nome.Length < 2)
@@ -154,7 +165,8 @@ public class ReceitaService : IReceitaService
 
     public async Task<ResultadoOperacao> DeletarAsync(int id, CancellationToken ct = default)
     {
-        await _tenantAccessor.GarantirHidratadoAsync();
+        if (!await PodeGerenciarAsync())
+            return ResultadoOperacao.Falha(ErrosApp.SemPermissaoReceitas);
 
         var entidade = await _repo.ObterEntidadeComIngredientesAsync(id, ct);
         if (entidade is null)
@@ -172,7 +184,8 @@ public class ReceitaService : IReceitaService
 
     public async Task<ResultadoOperacao<int>> DuplicarAsync(int id, CancellationToken ct = default)
     {
-        await _tenantAccessor.GarantirHidratadoAsync();
+        if (!await PodeGerenciarAsync())
+            return ResultadoOperacao<int>.Falha(ErrosApp.SemPermissaoReceitas);
 
         var original = await _repo.ObterEntidadeComIngredientesAsync(id, ct);
         if (original is null)

@@ -1106,4 +1106,37 @@
   <data name="Email_ConviteValidade" xml:space="preserve"><value>Esta invitación es válida por {0} días. Si caduca, pide una nueva a {1}.</value></data>
   <data name="Email_ConviteAssunto" xml:space="preserve"><value>{0} te invitó a HomePlanner</value></data>
   <data name="Receita_IngredientesTextoLabel" xml:space="preserve"><value>Ingredientes (texto)</value></data>
+  <data name="Nav_MinhasReceitas" xml:space="preserve"><value>Mis recetas</value></data>
+  <data name="Nav_Ingredientes" xml:space="preserve"><value>Ingredientes</value></data>
+  <data name="IngCat_Subtitulo" xml:space="preserve"><value>Registra ingredientes para usarlos después en tus recetas. La cantidad se define en cada receta.</value></data>
+  <data name="IngCat_Novo" xml:space="preserve"><value>Nuevo ingrediente</value></data>
+  <data name="IngCat_Editar" xml:space="preserve"><value>Editar ingrediente</value></data>
+  <data name="IngCat_Lote" xml:space="preserve"><value>Registrar varios</value></data>
+  <data name="IngCat_Buscar" xml:space="preserve"><value>Buscar ingrediente...</value></data>
+  <data name="IngCat_TodasCategorias" xml:space="preserve"><value>Todas las categorías</value></data>
+  <data name="IngCat_Nome" xml:space="preserve"><value>Nombre</value></data>
+  <data name="IngCat_Categoria" xml:space="preserve"><value>Categoría</value></data>
+  <data name="IngCat_CategoriaAjuda" xml:space="preserve"><value>Opcional. Ej.: Lácteos, Frutas y verduras, Especias</value></data>
+  <data name="IngCat_UnidadePadrao" xml:space="preserve"><value>Unidad predeterminada</value></data>
+  <data name="IngCat_UnidadeAjuda" xml:space="preserve"><value>Se sugiere automáticamente al usar el ingrediente en una receta.</value></data>
+  <data name="IngCat_SemUnidade" xml:space="preserve"><value>Ninguna</value></data>
+  <data name="IngCat_UsadoEm" xml:space="preserve"><value>Usado en</value></data>
+  <data name="IngCat_NReceitas" xml:space="preserve"><value>{0} receta(s)</value></data>
+  <data name="IngCat_NaoUsado" xml:space="preserve"><value>Aún sin usar</value></data>
+  <data name="IngCat_Nenhum" xml:space="preserve"><value>Aún no hay ingredientes registrados.</value></data>
+  <data name="IngCat_NenhumBusca" xml:space="preserve"><value>No se encontraron ingredientes.</value></data>
+  <data name="IngCat_Similares" xml:space="preserve"><value>Parecidos ya registrados: {0}</value></data>
+  <data name="IngCat_SalvoOk" xml:space="preserve"><value>Ingrediente guardado.</value></data>
+  <data name="IngCat_ExcluidoOk" xml:space="preserve"><value>Ingrediente eliminado.</value></data>
+  <data name="IngLote_Titulo" xml:space="preserve"><value>Registrar varios ingredientes</value></data>
+  <data name="IngLote_Ajuda" xml:space="preserve"><value>Pega o escribe un ingrediente por línea y haz clic en Analizar. Los que ya existen se ignoran.</value></data>
+  <data name="IngLote_TextoLabel" xml:space="preserve"><value>Ingredientes (uno por línea)</value></data>
+  <data name="IngLote_CategoriaTodos" xml:space="preserve"><value>Categoría para los nuevos (opcional)</value></data>
+  <data name="IngLote_Resumo" xml:space="preserve"><value>{0} elemento(s) — {1} nuevo(s), {2} ya registrado(s)</value></data>
+  <data name="IngLote_JaCadastrado" xml:space="preserve"><value>ya registrado</value></data>
+  <data name="IngLote_CadastrarN" xml:space="preserve"><value>Registrar {0} nuevo(s)</value></data>
+  <data name="IngLote_Cadastrando" xml:space="preserve"><value>Registrando...</value></data>
+  <data name="IngLote_CriadosOk" xml:space="preserve"><value>{0} ingrediente(s) registrado(s).</value></data>
+  <data name="Erro_ingrediente_em_uso" xml:space="preserve"><value>Este ingrediente se usa en las recetas: {0}. Quítalo de ellas antes de eliminarlo.</value></data>
+  <data name="Erro_sem_permissao_receitas" xml:space="preserve"><value>No tienes permiso para modificar recetas e ingredientes.</value></data>
 </root>

@@ -164,10 +164,17 @@ else
                             Icon="@Icons.Material.Filled.CalendarMonth">
                     @L["Nav_Cardapio"]
                 </MudNavLink>
-                <MudNavLink Href="@Lang.U("/receitas")"
-                            Icon="@Icons.Material.Filled.MenuBook">
-                    @L["Nav_Receitas"]
-                </MudNavLink>
+                <MudNavGroup Title="@L["Nav_Receitas"]" Icon="@Icons.Material.Filled.MenuBook"
+                             Expanded="@NoGrupoReceitas">
+                    <MudNavLink Href="@Lang.U("/receitas")"
+                                Icon="@Icons.Material.Filled.RestaurantMenu">
+                        @L["Nav_MinhasReceitas"]
+                    </MudNavLink>
+                    <MudNavLink Href="@Lang.U("/ingredientes")"
+                                Icon="@Icons.Material.Filled.Egg">
+                        @L["Nav_Ingredientes"]
+                    </MudNavLink>
+                </MudNavGroup>
                 <MudNavLink Href="@Lang.U("/modelos")"
                             Icon="@Icons.Material.Filled.ContentCopy">
                     @L["Nav_Modelos"]
@@ -256,6 +263,12 @@ else
             return idx < 0 ? p : p[..idx];
         }
     }
+
+    private static readonly string[] _rotasGrupoReceitas =
+        ["receitas", "recipes", "recetas", "ingredientes", "ingredients"];
+
+    // Abre o grupo "Receitas" do menu quando a página atual é uma das suas.
+    private bool NoGrupoReceitas => _rotasGrupoReceitas.Contains(SegmentoAtual, StringComparer.OrdinalIgnoreCase);
 
     private bool NaTelaDeBloqueio => _rotasDeBloqueio.Contains(SegmentoAtual, StringComparer.OrdinalIgnoreCase);
     private bool NaTelaDePlanos   => _rotasDePlanos.Contains(SegmentoAtual, StringComparer.OrdinalIgnoreCase);

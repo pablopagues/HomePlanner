@@ -70,6 +70,9 @@ public static class ErrosApp
     public static ErroOperacao SemPermissaoRecorrentes => ErroOperacao.De(
         "sem_permissao_recorrentes", "Você não tem permissão para gerenciar produtos recorrentes.");
 
+    public static ErroOperacao SemPermissaoReceitas => ErroOperacao.De(
+        "sem_permissao_receitas", "Você não tem permissão para alterar receitas e ingredientes.");
+
     public static ErroOperacao SomenteTarefasProprias => ErroOperacao.De(
         "somente_proprias_tarefas", "Você só pode alterar as suas próprias tarefas.");
 
@@ -283,6 +286,10 @@ public static class ErrosApp
     public static ErroOperacao ReceitaUsadaComoComponente(string receitas) => ErroOperacao.De(
         "receita_usada_componente", $"Esta receita é usada como componente em: {receitas}", receitas);
 
+    /// <summary>{0} = receitas que usam o ingrediente.</summary>
+    public static ErroOperacao IngredienteEmUso(string receitas) => ErroOperacao.De(
+        "ingrediente_em_uso", $"Este ingrediente é usado nas receitas: {receitas}", receitas);
+
     /// <summary>{0} = id da unidade.</summary>
     public static ErroOperacao UnidadeNaoEncontrada(object id) => ErroOperacao.De(
         "unidade_nao_encontrada", $"Unidade de medida {id} não encontrada.", id);
@@ -364,7 +371,7 @@ public static class ErrosApp
     private static readonly string[] CodigosComParametro =
     [
         "muito_curto", "limite_membros_plano", "convite_aguarde_reenvio", "limite_importacoes",
-        "ingrediente_duplicado", "receita_usada_componente", "unidade_nao_encontrada",
+        "ingrediente_duplicado", "receita_usada_componente", "ingrediente_em_uso", "unidade_nao_encontrada",
         "unidades_incompativeis", "imagem_entrada_muito_grande", "imagem_final_acima_limite",
         "url_inacessivel", "texto_receita_muito_longo", "limite_sugestoes",
     ];

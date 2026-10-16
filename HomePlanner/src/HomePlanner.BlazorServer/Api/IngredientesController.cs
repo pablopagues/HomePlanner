@@ -26,7 +26,12 @@ public class IngredientesController : ApiControllerBase
     public async Task<IActionResult> Salvar([FromBody] IngredientePersistenciaDTO dto, CancellationToken ct)
         => Responder(await _ingredientes.SalvarAsync(dto, ct));
 
-    /// <summary>Remove (soft-delete) um ingrediente.</summary>
+    /// <summary>Categorias já usadas no catálogo.</summary>
+    [HttpGet("categorias")]
+    public async Task<IActionResult> Categorias(CancellationToken ct)
+        => Ok(await _ingredientes.ListarCategoriasAsync(ct));
+
+    /// <summary>Remove (soft-delete) um ingrediente. Falha se alguma receita ainda o usa.</summary>
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Deletar(int id, CancellationToken ct)
         => Responder(await _ingredientes.DeletarAsync(id, ct));

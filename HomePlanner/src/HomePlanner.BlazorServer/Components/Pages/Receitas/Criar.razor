@@ -36,7 +36,11 @@
     ];
 
     protected override async Task OnInitializedAsync()
-        => _unidades = (await UnidadeRepo.ListarAtivasAsync()).ToList();
+    {
+        // Filho só consulta receitas.
+        if (!await Service.PodeGerenciarAsync()) { Nav.NavigateTo("/receitas"); return; }
+        _unidades = (await UnidadeRepo.ListarAtivasAsync()).ToList();
+    }
 
     private async Task<IEnumerable<IngredienteListaDTO>> BuscarIngredientes(string texto, CancellationToken ct)
         => await IngService.BuscarAutoCompleteAsync(texto, 10, ct);

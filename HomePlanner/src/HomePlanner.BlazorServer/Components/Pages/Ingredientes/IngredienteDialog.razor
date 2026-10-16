@@ -1,0 +1,110 @@
+@* Diálogo: cria ou edita um ingrediente do catálogo (sem quantidade) *@
+@inject IIngredienteService IngService
+@inject IStringLocalizer<SharedResource> L
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">@(Ingrediente is null ? L["IngCat_Novo"] : L["IngCat_Editar"])</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField Value="_dto.Nome" ValueChanged="@((string v) => AoMudarNome(v))"
+                      Label="@L["IngCat_Nome"]" Immediate="true" DebounceInterval="400"
+                      Variant="Variant.Outlined" Class="mb-1" AutoFocus="true" MaxLength="200" />
+        @if (_similares.Count > 0)
+        {
+            <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-3">
+                @L["IngCat_Similares", string.Join(", ", _similares.Select(s => s.Nome))]
+            </MudAlert>
+        }
+
+        <MudAutocomplete T="string" @bind-Value="_dto.Categoria"
+                         Label="@L["IngCat_Categoria"]" HelperText="@L["IngCat_CategoriaAjuda"]"
+                         SearchFunc="BuscarCategorias" CoerceValue="true" Clearable="true"
+                         MaxLength="100" Variant="Variant.Outlined" Class="mt-3 mb-3" />
+
+        <MudSelect T="int?" @bind-Value="_dto.UnidadeMedidaPadraoId"
+                   Label="@L["IngCat_UnidadePadrao"]" HelperText="@L["IngCat_UnidadeAjuda"]"
+                   Variant="Variant.Outlined">
+            <MudSelectItem T="int?" Value="@((int?)null)">@L["IngCat_SemUnidade"]</MudSelectItem>
+            @foreach (var u in Unidades)
+            {
+                <MudSelectItem T="int?" Value="@((int?)u.Id)">@L.AbrevUnidade(u.Codigo)</MudSelectItem>
+            }
+        </MudSelect>
+
+        @if (_erro is not null)
+        {
+            <MudAlert Severity="Severity.Error" Dense="true" Class="mt-3">@_erro</MudAlert>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => MudDialog.Cancel())">@L["Btn_Cancelar"]</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Salvar"
+                   Disabled="@(_salvando || string.IsNullOrWhiteSpace(_dto.Nome))">
+            @(_salvando ? L["Btn_Salvando"] : L["Btn_Salvar"])
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+
+    /// <summary>Nulo = novo ingrediente.</summary>
+    [Parameter] public IngredienteListaDTO? Ingrediente { get; set; }
+    [Parameter] public List<UnidadeMedidaListaDTO> Unidades { get; set; } = [];
+    [Parameter] public List<string> Categorias { get; set; } = [];
+
+    private IngredientePersistenciaDTO _dto = new();
+    private List<IngredienteListaDTO> _similares = [];
+    private bool _salvando;
+    private string? _erro;
+
+    protected override void OnInitialized()
+    {
+        if (Ingrediente is not null)
+            _dto = new IngredientePersistenciaDTO
+            {
+                Id                    = Ingrediente.Id,
+                Nome                  = Ingrediente.Nome,
+                Categoria             = Ingrediente.Categoria,
+                UnidadeMedidaPadraoId = Ingrediente.UnidadeMedidaPadraoId,
+            };
+    }
+
+    // Avisa (sem bloquear) quando já há algo parecido: "Cebola" x "Cebolas".
+    private async Task AoMudarNome(string nome)
+    {
+        _dto.Nome = nome;
+        _erro = null;
+        _similares = nome.Trim().Length < 3
+            ? []
+            : (await IngService.DetectarSimilaresAsync(nome, Ingrediente?.Id)).ToList();
+    }
+
+    private Task<IEnumerable<string>> BuscarCategorias(string texto, CancellationToken ct)
+    {
+        IEnumerable<string> res = string.IsNullOrWhiteSpace(texto)
+            ? Categorias
+            : Categorias.Where(c => c.Contains(texto.Trim(), StringComparison.OrdinalIgnoreCase));
+        return Task.FromResult(res);
+    }
+
+    private async Task Salvar()
+    {
+        _salvando = true;
+        _erro = null;
+        try
+        {
+            if (string.IsNullOrWhiteSpace(_dto.Categoria)) _dto.Categoria = null;
+            var r = await IngService.SalvarAsync(_dto);
+            if (r.Sucesso)
+                MudDialog.Close(DialogResult.Ok(r.Valor));
+            else
+                _erro = L.Traduzir(r.Erros);
+        }
+        finally
+        {
+            _salvando = false;
+        }
+    }
+}

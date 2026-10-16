@@ -171,7 +171,11 @@
     private UsoCotaImportacaoDTO? _uso;
 
     protected override async Task OnInitializedAsync()
-        => _uso = await Cota.ObterUsoAsync();
+    {
+        // Filho só consulta receitas (e não gasta a cota de IA da família).
+        if (!await Service.PodeGerenciarAsync()) { Nav.NavigateTo("/receitas"); return; }
+        _uso = await Cota.ObterUsoAsync();
+    }
 
     private async Task ImportarUrlAsync()
     {

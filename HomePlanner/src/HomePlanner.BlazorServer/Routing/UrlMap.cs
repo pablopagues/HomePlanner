@@ -22,6 +22,7 @@ public static class UrlMap
             ["/dashboard"]     = ("/dashboard",   "/dashboard",   "/dashboard"),
             ["/cardapio"]      = ("/menu",        "/menu",        "/menu"),
             ["/receitas"]      = ("/recipes",     "/recetas",     "/recipes"),
+            ["/ingredientes"]  = ("/ingredients", "/ingredientes", "/ingredients"),
             ["/modelos"]       = ("/templates",   "/plantillas",  "/templates"),
             ["/compras"]       = ("/shopping",    "/compras",     "/shopping"),
             ["/planner"]       = ("/tasks",       "/tareas",      "/tasks"),

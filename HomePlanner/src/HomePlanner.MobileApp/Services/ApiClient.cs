@@ -149,6 +149,9 @@ public class ApiClient
     public Task<(ResultadoListagem<IngredienteListaDTO>? dados, string? erro)> ListarIngredientesAsync(string? busca, int pagina = 1, CancellationToken ct = default)
         => GetAsync<ResultadoListagem<IngredienteListaDTO>>($"/api/ingredientes?pagina={pagina}&tamanhoPagina=20&textoBusca={Uri.EscapeDataString(busca ?? "")}", ct);
 
+    public Task<(IngredienteDetalheDTO? dados, string? erro)> ObterIngredienteAsync(int id, CancellationToken ct = default)
+        => GetAsync<IngredienteDetalheDTO>($"/api/ingredientes/{id}", ct);
+
     public Task<(int dados, string? erro)> SalvarIngredienteAsync(IngredientePersistenciaRequest dto, CancellationToken ct = default)
         => EnviarAsync<int>(HttpMethod.Post, "/api/ingredientes", dto, ct);
 

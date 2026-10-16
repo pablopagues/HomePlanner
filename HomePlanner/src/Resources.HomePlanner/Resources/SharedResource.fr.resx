@@ -1106,4 +1106,37 @@
   <data name="Email_ConviteValidade" xml:space="preserve"><value>Cette invitation est valable {0} jours. Si elle expire, demandez-en une nouvelle à {1}.</value></data>
   <data name="Email_ConviteAssunto" xml:space="preserve"><value>{0} vous a invité sur HomePlanner</value></data>
   <data name="Receita_IngredientesTextoLabel" xml:space="preserve"><value>Ingrédients (texte)</value></data>
+  <data name="Nav_MinhasReceitas" xml:space="preserve"><value>Mes recettes</value></data>
+  <data name="Nav_Ingredientes" xml:space="preserve"><value>Ingrédients</value></data>
+  <data name="IngCat_Subtitulo" xml:space="preserve"><value>Enregistrez des ingrédients pour les utiliser plus tard dans vos recettes. La quantité se définit dans chaque recette.</value></data>
+  <data name="IngCat_Novo" xml:space="preserve"><value>Nouvel ingrédient</value></data>
+  <data name="IngCat_Editar" xml:space="preserve"><value>Modifier l&apos;ingrédient</value></data>
+  <data name="IngCat_Lote" xml:space="preserve"><value>En ajouter plusieurs</value></data>
+  <data name="IngCat_Buscar" xml:space="preserve"><value>Rechercher un ingrédient...</value></data>
+  <data name="IngCat_TodasCategorias" xml:space="preserve"><value>Toutes les catégories</value></data>
+  <data name="IngCat_Nome" xml:space="preserve"><value>Nom</value></data>
+  <data name="IngCat_Categoria" xml:space="preserve"><value>Catégorie</value></data>
+  <data name="IngCat_CategoriaAjuda" xml:space="preserve"><value>Facultatif. Ex. : Produits laitiers, Fruits et légumes, Épices</value></data>
+  <data name="IngCat_UnidadePadrao" xml:space="preserve"><value>Unité par défaut</value></data>
+  <data name="IngCat_UnidadeAjuda" xml:space="preserve"><value>Proposée automatiquement lorsque vous utilisez l&apos;ingrédient dans une recette.</value></data>
+  <data name="IngCat_SemUnidade" xml:space="preserve"><value>Aucune</value></data>
+  <data name="IngCat_UsadoEm" xml:space="preserve"><value>Utilisé dans</value></data>
+  <data name="IngCat_NReceitas" xml:space="preserve"><value>{0} recette(s)</value></data>
+  <data name="IngCat_NaoUsado" xml:space="preserve"><value>Pas encore utilisé</value></data>
+  <data name="IngCat_Nenhum" xml:space="preserve"><value>Aucun ingrédient pour l&apos;instant.</value></data>
+  <data name="IngCat_NenhumBusca" xml:space="preserve"><value>Aucun ingrédient trouvé.</value></data>
+  <data name="IngCat_Similares" xml:space="preserve"><value>Ingrédients similaires déjà enregistrés : {0}</value></data>
+  <data name="IngCat_SalvoOk" xml:space="preserve"><value>Ingrédient enregistré.</value></data>
+  <data name="IngCat_ExcluidoOk" xml:space="preserve"><value>Ingrédient supprimé.</value></data>
+  <data name="IngLote_Titulo" xml:space="preserve"><value>Ajouter plusieurs ingrédients</value></data>
+  <data name="IngLote_Ajuda" xml:space="preserve"><value>Collez ou saisissez un ingrédient par ligne, puis cliquez sur Analyser. Ceux qui existent déjà sont ignorés.</value></data>
+  <data name="IngLote_TextoLabel" xml:space="preserve"><value>Ingrédients (un par ligne)</value></data>
+  <data name="IngLote_CategoriaTodos" xml:space="preserve"><value>Catégorie pour les nouveaux (facultatif)</value></data>
+  <data name="IngLote_Resumo" xml:space="preserve"><value>{0} élément(s) — {1} nouveau(x), {2} déjà enregistré(s)</value></data>
+  <data name="IngLote_JaCadastrado" xml:space="preserve"><value>déjà enregistré</value></data>
+  <data name="IngLote_CadastrarN" xml:space="preserve"><value>Ajouter {0} nouveau(x)</value></data>
+  <data name="IngLote_Cadastrando" xml:space="preserve"><value>Ajout en cours...</value></data>
+  <data name="IngLote_CriadosOk" xml:space="preserve"><value>{0} ingrédient(s) ajouté(s).</value></data>
+  <data name="Erro_ingrediente_em_uso" xml:space="preserve"><value>Cet ingrédient est utilisé dans les recettes : {0}. Retirez-le de celles-ci avant de le supprimer.</value></data>
+  <data name="Erro_sem_permissao_receitas" xml:space="preserve"><value>Vous n'avez pas l'autorisation de modifier les recettes et les ingrédients.</value></data>
 </root>

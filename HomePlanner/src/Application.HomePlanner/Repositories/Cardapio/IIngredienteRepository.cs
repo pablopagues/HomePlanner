@@ -13,6 +13,12 @@ public interface IIngredienteRepository
     Task<IReadOnlyList<IngredienteListaDTO>> DetectarSimilaresAsync(string nomeNormalizado, int? excluirId, CancellationToken ct = default);
     Task<bool> ExisteNomeDuplicadoAsync(string nomeNormalizado, int? excluirId, CancellationToken ct = default);
 
+    /// <summary>Categorias distintas já usadas no catálogo (para sugestão e filtro).</summary>
+    Task<IReadOnlyList<string>> ListarCategoriasAsync(CancellationToken ct = default);
+
+    /// <summary>Nomes das receitas (não excluídas) que usam o ingrediente.</summary>
+    Task<IReadOnlyList<string>> ObterReceitasQueUsamAsync(int ingredienteId, CancellationToken ct = default);
+
     /// <summary>Resolve, para cada id, o produto base efetivo (id + nome) usado na lista de compras.</summary>
     Task<IReadOnlyDictionary<int, ProdutoBaseInfo>> ObterMapaBaseAsync(IReadOnlyCollection<int> ids, CancellationToken ct = default);
 

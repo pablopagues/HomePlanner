@@ -23,11 +23,14 @@ else if (_dto is not null)
                        Href="@UrlVoltar">
                 @L["Btn_Voltar"]
             </MudButton>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary"
-                       StartIcon="@Icons.Material.Filled.Edit"
-                       Href="@($"/receitas/editar/{_dto.Id}")">
-                @L["Btn_Editar"]
-            </MudButton>
+            @if (_podeGerenciar)
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Edit"
+                           Href="@($"/receitas/editar/{_dto.Id}")">
+                    @L["Btn_Editar"]
+                </MudButton>
+            }
         </MudStack>
     </MudStack>
 
@@ -202,9 +205,11 @@ else
     private ReceitaDetalheDTO? _dto;
     private List<BreadcrumbItem> _breadcrumbs = [];
     private bool _carregando = true;
+    private bool _podeGerenciar;
 
     protected override async Task OnInitializedAsync()
     {
+        _podeGerenciar = await Service.PodeGerenciarAsync();
         var r = await Service.ObterAsync(Id);
         if (r.Sucesso && r.Valor is not null)
         {

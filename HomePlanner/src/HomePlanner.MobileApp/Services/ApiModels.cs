@@ -199,6 +199,17 @@ public class IngredienteListaDTO
     public int Id { get; set; }
     public string Nome { get; set; } = string.Empty;
     public string? Categoria { get; set; }
+    public int? UnidadeMedidaPadraoId { get; set; }
+    public string? CodigoUnidadePadrao { get; set; }
+    public int TotalReceitas { get; set; }
+}
+
+public class IngredienteDetalheDTO
+{
+    public int Id { get; set; }
+    public string Nome { get; set; } = string.Empty;
+    public string? Categoria { get; set; }
+    public int? UnidadeMedidaPadraoId { get; set; }
 }
 
 public class IngredientePersistenciaRequest
