@@ -26,6 +26,12 @@ public class ReceitaPersistenciaDTO
     // para exibir a prévia e os botões "alterar/remover".
     public bool TemFotoAtual { get; set; }
     public DateTime? FotoAtualizadaEm { get; set; }
+
+    /// <summary>
+    /// Só UI: o conteúdo veio do "Organizar com IA" (texto colado). A página conta
+    /// 1 importação na cota do mês ao salvar com sucesso.
+    /// </summary>
+    public bool ContarImportacaoIA { get; set; }
 }
 
 public class ReceitaComponentePersistenciaDTO

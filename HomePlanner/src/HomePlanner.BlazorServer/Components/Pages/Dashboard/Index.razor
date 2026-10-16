@@ -9,7 +9,7 @@
 @inject IEmpresaService EmpresaService
 @inject ITarefaService TarefaService
 
-<PageTitle>Dashboard — HomePlanner</PageTitle>
+<PageTitle>@L["Nav_Dashboard"] — HomePlanner</PageTitle>
 
 @if (!_emailConfirmado)
 {
@@ -30,7 +30,7 @@
     @L["Dashboard_Saudacao"]
 </MudText>
 <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-6">
-    @DateTime.Today.ToString("dddd, dd 'de' MMMM", new System.Globalization.CultureInfo("pt-BR"))
+    @DateTime.Today.ToLongDateString()
 </MudText>
 
 <MudGrid Spacing="3">
@@ -40,9 +40,9 @@
             <MudCardContent>
                 <MudIcon Icon="@Icons.Material.Filled.CalendarMonth"
                          Style="color:var(--mud-palette-primary); font-size:2.5rem;" />
-                <MudText Typo="Typo.h6" Class="mt-2">Cardápio</MudText>
+                <MudText Typo="Typo.h6" Class="mt-2">@L["Nav_Cardapio"]</MudText>
                 <MudText Typo="Typo.body2" Color="Color.Secondary">
-                    Planeje as refeições da semana
+                    @L["Dashboard_CardapioDesc"]
                 </MudText>
             </MudCardContent>
         </MudCard>
@@ -54,9 +54,9 @@
             <MudCardContent>
                 <MudIcon Icon="@Icons.Material.Filled.MenuBook"
                          Style="color:var(--mud-palette-secondary); font-size:2.5rem;" />
-                <MudText Typo="Typo.h6" Class="mt-2">Receitas</MudText>
+                <MudText Typo="Typo.h6" Class="mt-2">@L["Nav_Receitas"]</MudText>
                 <MudText Typo="Typo.body2" Color="Color.Secondary">
-                    @_totalReceitas receitas cadastradas
+                    @_totalReceitas @L["Dashboard_ReceitasDesc"]
                 </MudText>
             </MudCardContent>
         </MudCard>
@@ -68,9 +68,9 @@
             <MudCardContent>
                 <MudIcon Icon="@Icons.Material.Filled.ContentCopy"
                          Style="color:var(--mud-palette-text-secondary); font-size:2.5rem;" />
-                <MudText Typo="Typo.h6" Class="mt-2">Modelos</MudText>
+                <MudText Typo="Typo.h6" Class="mt-2">@L["Nav_Modelos"]</MudText>
                 <MudText Typo="Typo.body2" Color="Color.Secondary">
-                    Semanas favoritas para reusar
+                    @L["Dashboard_ModelosDesc"]
                 </MudText>
             </MudCardContent>
         </MudCard>
@@ -82,9 +82,9 @@
             <MudCardContent>
                 <MudIcon Icon="@Icons.Material.Filled.ShoppingCart"
                          Style="color:var(--mud-palette-text-secondary); font-size:2.5rem;" />
-                <MudText Typo="Typo.h6" Class="mt-2">Lista de Compras</MudText>
+                <MudText Typo="Typo.h6" Class="mt-2">@L["Nav_ListaCompras"]</MudText>
                 <MudText Typo="Typo.body2" Color="Color.Secondary">
-                    Organize as compras da semana
+                    @L["Dashboard_ComprasDesc"]
                 </MudText>
             </MudCardContent>
         </MudCard>
@@ -94,11 +94,11 @@
 <MudDivider Class="my-6" />
 
 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-3">
-    <MudText Typo="Typo.h6">Tarefas de hoje</MudText>
+    <MudText Typo="Typo.h6">@L["Dashboard_TarefasHoje"]</MudText>
     <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
                EndIcon="@Icons.Material.Filled.ChevronRight"
                @onclick='@(() => Nav.NavigateTo("/planner"))'>
-        Ver todas
+        @L["Dashboard_VerTodas"]
     </MudButton>
 </MudStack>
 
@@ -109,7 +109,7 @@
 else if (_gruposTarefas.Count == 0)
 {
     <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
-        Nenhuma tarefa agendada para hoje.
+        @L["Dashboard_SemTarefasHoje"]
     </MudAlert>
 }
 else
@@ -126,7 +126,7 @@ else
                         <MudStack Spacing="0" Style="min-width:0;">
                             <MudText Typo="Typo.subtitle2" Style="font-weight:600;">@grupo.Nome</MudText>
                             <MudText Typo="Typo.caption" Color="Color.Secondary">
-                                @grupo.Tarefas.Count(t => !t.Concluida) pendente(s)
+                                @L["Dashboard_NPendentes", grupo.Tarefas.Count(t => !t.Concluida)]
                             </MudText>
                         </MudStack>
                     </MudStack>
@@ -197,7 +197,7 @@ else
             .GroupBy(t => t.ResponsavelUsuarioId)
             .Select(g => new GrupoTarefas(
                 g.Key,
-                g.First().ResponsavelNome ?? "Sem responsável",
+                g.First().ResponsavelNome ?? L["Dashboard_SemResponsavel"],
                 g.First().ResponsavelFotoVersao,
                 g.OrderBy(t => t.Concluida)
                  .ThenBy(t => t.HoraInicio ?? TimeOnly.MaxValue)

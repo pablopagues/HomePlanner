@@ -33,7 +33,7 @@
                     <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
                         <MudIcon Icon="@Icons.Material.Filled.Event" Size="Size.Small" />
                         <MudText Typo="Typo.body2">
-                            @Tarefa.DataPrevista.Value.ToString("dd/MM/yyyy")
+                            @Tarefa.DataPrevista.Value.ToString("d")
                             @if (Tarefa.HoraInicio.HasValue)
                             {
                                 <span> · @FormatarHorario(Tarefa.HoraInicio, Tarefa.HoraFim)</span>

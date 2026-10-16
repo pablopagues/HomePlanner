@@ -8,31 +8,31 @@
 
 <MudDialog>
     <TitleContent>
-        <MudText Typo="Typo.h6">Novo componente rápido</MudText>
+        <MudText Typo="Typo.h6">@L["Comp_NovoRapido"]</MudText>
     </TitleContent>
     <DialogContent>
         <MudGrid Spacing="2" Class="mb-2">
             <MudItem xs="8">
-                <MudTextField @bind-Value="_nome" Label="Nome do componente" Required="true"
+                <MudTextField @bind-Value="_nome" Label="@L["Comp_Nome"]" Required="true"
                               Variant="Variant.Outlined" Margin="Margin.Dense" />
             </MudItem>
             <MudItem xs="4">
-                <MudNumericField @bind-Value="_porcoes" Label="Porções" Min="1"
+                <MudNumericField @bind-Value="_porcoes" Label="@L["Ia_Porcoes"]" Min="1"
                                  Variant="Variant.Outlined" Margin="Margin.Dense" />
             </MudItem>
         </MudGrid>
 
         <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-1">
-            Ingredientes (um por linha — cole da receita):
+            @L["Comp_IngredientesUmPorLinha"]
         </MudText>
         <MudTextField @bind-Value="_texto" Lines="6" AutoGrow="true"
-                      Variant="Variant.Outlined" Placeholder="4 batatas grandes em rodelas&#10;2 colheres (sopa) de azeite&#10;sal a gosto" />
+                      Variant="Variant.Outlined" Placeholder="@L["Comp_IngredientesPlaceholder"]" />
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="@(() => MudDialog.Cancel())">Cancelar</MudButton>
+        <MudButton OnClick="@(() => MudDialog.Cancel())">@L["Btn_Cancelar"]</MudButton>
         <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Confirmar"
                    Disabled="@(_salvando || string.IsNullOrWhiteSpace(_nome))">
-            @(_salvando ? "Criando..." : "Criar e adicionar")
+            @(_salvando ? L["Sug_Criando"] : L["Comp_CriarAdicionar"])
         </MudButton>
     </DialogActions>
 </MudDialog>
@@ -87,7 +87,7 @@
         }
 
         if (linhas.Count == 0)
-            Snackbar.Add("Componente criado sem ingredientes — dá para preencher depois.", Severity.Info);
+            Snackbar.Add(L["Comp_SemIngredientes"], Severity.Info);
 
         MudDialog.Close(DialogResult.Ok(new ComponenteCriado(r.Valor, novo.Nome, novo.NumeroPorcoesBase)));
     }

@@ -1,41 +1,41 @@
 @page
 @model HomePlanner.BlazorServer.Areas.Identity.Pages.Account.LoginModel
 @{
-    ViewData["Title"] = "Entrar";
+    ViewData["Title"] = L["Auth_Entrar"];
 }
 
-<h1 class="auth-title">Entrar</h1>
+<h1 class="auth-title">@L["Auth_Entrar"]</h1>
 
 @if (Model.Confirmado)
 {
-    <div class="alert-success">E-mail confirmado! Agora você já pode entrar.</div>
+    <div class="alert-success">@L["Conta_EmailConfirmadoEntrar"]</div>
 }
 
 <form method="post">
     <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
 
     <div class="form-group">
-        <label asp-for="Input.Email">E-mail</label>
+        <label asp-for="Input.Email">@L["Auth_Email"]</label>
         <input asp-for="Input.Email" autocomplete="email" />
         <span asp-validation-for="Input.Email" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="Input.Senha">Senha</label>
+        <label asp-for="Input.Senha">@L["Auth_Senha"]</label>
         <input asp-for="Input.Senha" autocomplete="current-password" />
         <span asp-validation-for="Input.Senha" class="text-danger"></span>
     </div>
 
     <div class="checkbox-row">
         <input asp-for="Input.Lembrar" />
-        <label asp-for="Input.Lembrar" style="font-weight:400; margin:0;">Manter conectado</label>
+        <label asp-for="Input.Lembrar" style="font-weight:400; margin:0;">@L["Conta_ManterConectado"]</label>
     </div>
 
-    <button type="submit" class="btn-primary">Entrar</button>
+    <button type="submit" class="btn-primary">@L["Auth_Entrar"]</button>
 </form>
 
 <div class="auth-links">
-    <a asp-page="./EsqueciSenha">Esqueci minha senha</a>
+    <a asp-page="./EsqueciSenha">@L["Auth_EsqueciSenha"]</a>
     <br /><br />
-    Ainda não tem conta? <a asp-page="./Registro">Criar conta</a>
+    @L["Conta_AindaNaoTem"] <a asp-page="./Registro">@L["Auth_RegistroTitulo"]</a>
 </div>

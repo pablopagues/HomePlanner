@@ -1,7 +1,8 @@
 @page "/receitas/{Id:int}"
 @attribute [Authorize]
+@inject IStringLocalizer<SharedResource> L
 
-<PageTitle>@(_dto?.Nome ?? "Receita")</PageTitle>
+<PageTitle>@(_dto?.Nome ?? L["Receita_Singular"])</PageTitle>
 
 <MudBreadcrumbs Items="_breadcrumbs" Class="mb-4 pa-0" />
 
@@ -20,12 +21,12 @@ else if (_dto is not null)
             <MudButton Variant="Variant.Outlined" Color="Color.Default"
                        StartIcon="@Icons.Material.Filled.ArrowBack"
                        Href="@UrlVoltar">
-                Voltar
+                @L["Btn_Voltar"]
             </MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary"
                        StartIcon="@Icons.Material.Filled.Edit"
                        Href="@($"/receitas/editar/{_dto.Id}")">
-                Editar
+                @L["Btn_Editar"]
             </MudButton>
         </MudStack>
     </MudStack>
@@ -44,31 +45,31 @@ else if (_dto is not null)
             <MudStack Row="true" Spacing="1" Wrap="Wrap.Wrap" Class="mb-4">
                 <MudChip T="string" Size="Size.Small" Color="Color.Default"
                          Icon="@Icons.Material.Filled.People">
-                    @_dto.NumeroPorcoesBase porções
+                    @L["Ia_NPorcoes", _dto.NumeroPorcoesBase]
                 </MudChip>
                 @if (_dto.TempoPreparoMinutos.HasValue)
                 {
                     <MudChip T="string" Size="Size.Small" Color="Color.Default"
                              Icon="@Icons.Material.Filled.Timer">
-                        @_dto.TempoPreparoMinutos min
+                        @L["Ia_NMin", _dto.TempoPreparoMinutos]
                     </MudChip>
                 }
                 <MudChip T="string" Size="Size.Small" Color="Color.Default"
                          Icon="@Icons.Material.Filled.List">
-                    @_dto.Ingredientes.Count ingr.
+                    @L["Receita_NIngr", _dto.Ingredientes.Count]
                 </MudChip>
                 @if (_dto.EhComposto)
                 {
                     <MudChip T="string" Size="Size.Small" Color="Color.Primary"
                              Icon="@Icons.Material.Filled.Bolt">
-                        @_dto.Componentes.Count componentes
+                        @L["Receita_NComponentes", _dto.Componentes.Count]
                     </MudChip>
                 }
             </MudStack>
 
             @if (_dto.EhComposto)
             {
-                <MudText Typo="Typo.h6" GutterBottom="true">Componentes</MudText>
+                <MudText Typo="Typo.h6" GutterBottom="true">@L["App_Componentes"]</MudText>
                 <MudList T="string" Dense="true" Class="mb-3">
                     @foreach (var c in _dto.Componentes.OrderBy(x => x.Ordem))
                     {
@@ -77,21 +78,21 @@ else if (_dto is not null)
                             <MudText Typo="Typo.body2">
                                 <strong>@c.Nome</strong>
                                 <MudText Component="@("span")" Typo="Typo.body2" Color="Color.Secondary">
-                                    — @c.PorcoesDesejadas porções
+                                    — @L["Ia_NPorcoes", c.PorcoesDesejadas]
                                 </MudText>
                             </MudText>
                         </MudListItem>
                     }
                 </MudList>
 
-                <MudText Typo="Typo.h6" GutterBottom="true">Ingredientes (prato completo)</MudText>
+                <MudText Typo="Typo.h6" GutterBottom="true">@L["Receita_IngredientesPratoCompleto"]</MudText>
                 <MudList T="string" Dense="true">
                     @foreach (var i in _dto.IngredientesExpandidos)
                     {
                         <MudListItem T="string" Icon="@Icons.Material.Filled.FiberManualRecord"
                                      IconSize="Size.Small">
                             <MudText Typo="Typo.body2">
-                                <strong>@FormatarQuantidade(i.Quantidade) @i.CodigoUnidade</strong>
+                                <strong>@L.FormatarQuantidade(i.Quantidade, i.CodigoUnidade)</strong>
                                 @i.NomeIngrediente
                             </MudText>
                         </MudListItem>
@@ -100,11 +101,11 @@ else if (_dto is not null)
             }
             else
             {
-                <MudText Typo="Typo.h6" GutterBottom="true">Ingredientes</MudText>
+                <MudText Typo="Typo.h6" GutterBottom="true">@L["Ing_Label"]</MudText>
                 @if (_dto.Ingredientes.Count == 0)
                 {
                     <MudText Typo="Typo.body2" Color="Color.Secondary">
-                        Nenhum ingrediente cadastrado.
+                        @L["App_SemIngredientesCad"]
                     </MudText>
                 }
                 else
@@ -115,7 +116,7 @@ else if (_dto is not null)
                             <MudListItem T="string" Icon="@Icons.Material.Filled.FiberManualRecord"
                                          IconSize="Size.Small">
                                 <MudText Typo="Typo.body2">
-                                    <strong>@FormatarQuantidade(i.Quantidade) @i.CodigoUnidade</strong>
+                                    <strong>@L.FormatarQuantidade(i.Quantidade, i.CodigoUnidade)</strong>
                                     @i.NomeIngrediente
                                     @if (!string.IsNullOrWhiteSpace(i.Observacao))
                                     {
@@ -126,7 +127,7 @@ else if (_dto is not null)
                                     @if (i.Opcional)
                                     {
                                         <MudChip T="string" Size="Size.Small" Color="Color.Secondary"
-                                                 Variant="Variant.Text" Class="ml-1">opcional</MudChip>
+                                                 Variant="Variant.Text" Class="ml-1">@L["Receita_Opcional"]</MudChip>
                                     }
                                 </MudText>
                             </MudListItem>
@@ -141,7 +142,7 @@ else if (_dto is not null)
          || _dto.Componentes.Any(c => !string.IsNullOrWhiteSpace(c.ModoPreparo)))
     {
         <MudDivider Class="my-4" />
-        <MudText Typo="Typo.h6" GutterBottom="true">Modo de preparo</MudText>
+        <MudText Typo="Typo.h6" GutterBottom="true">@L["Receita_ModoPreparoLabel"]</MudText>
         @if (!string.IsNullOrWhiteSpace(_dto.ModoPreparo))
         {
             <MudText Typo="Typo.body1" Style="white-space:pre-wrap; overflow-wrap:anywhere;">@_dto.ModoPreparo</MudText>
@@ -158,7 +159,7 @@ else if (_dto is not null)
     @if (!string.IsNullOrWhiteSpace(_dto.Observacoes))
     {
         <MudDivider Class="my-4" />
-        <MudText Typo="Typo.h6" GutterBottom="true">Observações</MudText>
+        <MudText Typo="Typo.h6" GutterBottom="true">@L["Receita_ObservacoesLabel"]</MudText>
         <MudText Typo="Typo.body1" Style="white-space:pre-wrap; overflow-wrap:anywhere;">@_dto.Observacoes</MudText>
     }
 
@@ -168,13 +169,13 @@ else if (_dto is not null)
         <MudButton Href="@_dto.UrlOrigem" Target="_blank"
                    Variant="Variant.Text" Color="Color.Primary" Size="Size.Small"
                    StartIcon="@Icons.Material.Filled.Link" Class="pa-0">
-            Receita original
+            @L["Receita_Original"]
         </MudButton>
     }
 }
 else
 {
-    <MudAlert Severity="Severity.Error">Receita não encontrada.</MudAlert>
+    <MudAlert Severity="Severity.Error">@L["Receita_NaoEncontrada"]</MudAlert>
 }
 
 @code {
@@ -202,7 +203,7 @@ else
             _dto = r.Valor;
             _breadcrumbs =
             [
-                new("Receitas", "/receitas"),
+                new(L["Receita_Titulo"], "/receitas"),
                 new(_dto.Nome, null, disabled: true),
             ];
         }

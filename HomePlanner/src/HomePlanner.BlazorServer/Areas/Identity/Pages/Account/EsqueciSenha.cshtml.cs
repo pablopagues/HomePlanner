@@ -10,7 +10,7 @@ namespace HomePlanner.BlazorServer.Areas.Identity.Pages.Account;
 /// vivem no <see cref="ISenhaService"/>, compartilhado com a API do app. Duplicar
 /// aqui faria a web escapar do throttle.
 /// </summary>
-public class EsqueciSenhaModel : PageModel
+public class EsqueciSenhaModel : PaginaLocalizada
 {
     private readonly ISenhaService _senha;
 
@@ -23,8 +23,8 @@ public class EsqueciSenhaModel : PageModel
 
     public class InputModel
     {
-        [Required(ErrorMessage = "Informe seu e-mail.")]
-        [EmailAddress(ErrorMessage = "E-mail inválido.")]
+        [Required(ErrorMessage = "Val_InformeEmail")]
+        [EmailAddress(ErrorMessage = "Val_EmailInvalido")]
         public string Email { get; set; } = string.Empty;
     }
 

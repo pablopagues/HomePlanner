@@ -1,0 +1,205 @@
+@page "/receitas/sugerir"
+@attribute [Authorize]
+@using HomePlanner.BlazorServer.Services
+@inject IStringLocalizer<SharedResource> L
+@inject PublicLanguageService Lang
+
+<PageTitle>@L["Sug_Titulo"]</PageTitle>
+
+<MudBreadcrumbs Items='[new(L["Receita_Titulo"],"/receitas"), new(L["Sug_Breadcrumb"],null,disabled:true)]'
+                Class="mb-4 pa-0" />
+
+<MudText Typo="Typo.h5" GutterBottom="true"
+         Style="font-family:'Fraunces',serif; font-weight:300;">
+    @L["Sug_Titulo"]
+</MudText>
+<MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+    @L["Sug_Intro"]
+</MudText>
+
+@if (!Assistente.Habilitado)
+{
+    <MudAlert Severity="Severity.Info">@L["Ia_Indisponivel"]</MudAlert>
+    return;
+}
+
+@if (_uso is not null)
+{
+    @if (_uso.AtingiuLimite)
+    {
+        <MudAlert Severity="Severity.Warning" Class="mb-4">
+            @L["Sug_LimiteAtingido", _uso.Limite]
+            <MudButton Variant="Variant.Text" Color="Color.Primary" Class="ml-2"
+                       OnClick="@(() => Nav.NavigateTo("/assinatura"))">
+                @L["Ia_FazerUpgrade"]
+            </MudButton>
+        </MudAlert>
+    }
+    else
+    {
+        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2 d-block">
+            @L["Sug_UsoMes", _uso.Usado, _uso.Limite]
+        </MudText>
+    }
+}
+
+<MudPaper Class="pa-4 mb-4" Elevation="1" Style="border-radius:10px;">
+    <MudTextField @bind-Value="_pedido.Texto" Label="@L["Sug_PedidoLabel"]"
+                  Placeholder="@L["Sug_PedidoPlaceholder"]"
+                  Lines="2" AutoGrow="true" MaxLength="500" Variant="Variant.Outlined" />
+    <MudGrid Spacing="2" Class="mt-1 align-center">
+        <MudItem xs="6" md="3">
+            <MudNumericField @bind-Value="_pedido.TempoMaximoMinutos" Label="@L["Sug_TempoMax"]"
+                             Min="5" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+        </MudItem>
+        <MudItem xs="6" md="2">
+            <MudNumericField @bind-Value="_pedido.Porcoes" Label="@L["Ia_Porcoes"]"
+                             Min="1" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense" />
+        </MudItem>
+        <MudItem xs="12" md="7">
+            <MudCheckBox @bind-Value="_pedido.ConsiderarReceitasDaCasa" Color="Color.Primary" Dense="true"
+                         Label="@L["Sug_ConsiderarCasa"]" />
+        </MudItem>
+    </MudGrid>
+    <MudButton Variant="Variant.Filled" Color="Color.Secondary" Class="mt-3"
+               StartIcon="@Icons.Material.Filled.AutoAwesome"
+               OnClick="SugerirAsync" Disabled="@(_sugerindo || (_uso?.AtingiuLimite ?? false))">
+        @(_sugerindo ? L["Sug_Pensando"] : _sugestoes.Count > 0 ? L["Sug_SugerirOutras"] : L["Receita_Sugerir"])
+    </MudButton>
+</MudPaper>
+
+@if (_sugerindo)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Secondary" Class="mb-4" />
+}
+
+@if (_erro is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="mb-4">@_erro</MudAlert>
+}
+
+@if (_sugestoes.Count > 0)
+{
+    <MudGrid Spacing="3">
+        @foreach (var (s, idx) in _sugestoes.Select((s, i) => (s, i)))
+        {
+            <MudItem xs="12" md="4">
+                <MudCard Elevation="1" Style="border-radius:10px; height:100%; display:flex; flex-direction:column;">
+                    <MudCardContent Style="flex:1;">
+                        <MudText Typo="Typo.h6" Style="font-size:1.05rem;">@s.Nome</MudText>
+                        @if (!string.IsNullOrWhiteSpace(s.Descricao))
+                        {
+                            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1">@s.Descricao</MudText>
+                        }
+                        <MudStack Row="true" Spacing="1" Class="mt-2">
+                            @if (s.TempoPreparoMinutos is int t)
+                            {
+                                <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined"
+                                         Icon="@Icons.Material.Filled.Schedule">@L["Ia_NMin", t]</MudChip>
+                            }
+                            <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined"
+                                     Icon="@Icons.Material.Filled.Restaurant">@L["Ia_NPorcoes", s.NumeroPorcoesBase]</MudChip>
+                        </MudStack>
+
+                        <MudExpansionPanels Elevation="0" Class="mt-2">
+                            <MudExpansionPanel Text="@L["Sug_VerReceita"]" Dense="true" Gutters="false">
+                                <MudText Typo="Typo.subtitle2" Class="mb-1">@L["Ia_Ingredientes"]</MudText>
+                                <ul style="margin:0 0 12px 18px; padding:0;">
+                                    @foreach (var ing in s.IngredientesTexto)
+                                    {
+                                        <li><MudText Typo="Typo.body2">@ing</MudText></li>
+                                    }
+                                </ul>
+                                @if (!string.IsNullOrWhiteSpace(s.ModoPreparo))
+                                {
+                                    <MudText Typo="Typo.subtitle2" Class="mb-1">@L["Ia_ModoPreparo"]</MudText>
+                                    <MudText Typo="Typo.body2" Style="white-space:pre-wrap; overflow-wrap:anywhere;">@s.ModoPreparo</MudText>
+                                }
+                            </MudExpansionPanel>
+                        </MudExpansionPanels>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
+                                   StartIcon="@Icons.Material.Filled.Add"
+                                   OnClick="@(() => CriarReceitaAsync(idx))"
+                                   Disabled="@(_criando is not null)">
+                            @(_criando == idx ? L["Sug_Criando"] : L["Sug_Criar"])
+                        </MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+}
+
+@code {
+    [Inject] ISugestaoReceitaService Sugestao { get; set; } = null!;
+    [Inject] IAssistenteReceitaIA Assistente { get; set; } = null!;
+    [Inject] IReceitaService Service { get; set; } = null!;
+    [Inject] ICotaImportacaoService Cota { get; set; } = null!;
+    [Inject] ISnackbar Snackbar { get; set; } = null!;
+    [Inject] NavigationManager Nav { get; set; } = null!;
+
+    private readonly PedidoSugestaoReceitaDTO _pedido = new();
+    private IReadOnlyList<ReceitaImportadaPreviewDTO> _sugestoes = [];
+    private UsoCotaImportacaoDTO? _uso;
+    private bool _sugerindo;
+    private int? _criando;
+    private string? _erro;
+    private string? _ultimoTexto;
+
+    protected override async Task OnInitializedAsync()
+        => _uso = await Cota.ObterUsoSugestoesAsync();
+
+    private async Task SugerirAsync()
+    {
+        _erro = null;
+
+        // "Sugerir outras" com o mesmo pedido: evita repetir o que já apareceu.
+        if (_pedido.Texto?.Trim() != _ultimoTexto)
+            _pedido.JaSugeridas.Clear();
+        else
+            _pedido.JaSugeridas.AddRange(_sugestoes.Select(s => s.Nome));
+        _ultimoTexto = _pedido.Texto?.Trim();
+
+        _sugerindo = true;
+        var r = await Sugestao.SugerirAsync(_pedido, Lang.Lang);
+        _sugerindo = false;
+
+        if (!r.Sucesso || r.Valor is null)
+        {
+            _erro = L.Traduzir(r.Erros);
+        }
+        else
+        {
+            _sugestoes = r.Valor;
+        }
+        _uso = await Cota.ObterUsoSugestoesAsync();
+    }
+
+    // Grava a sugestão como receita e abre a edição já lançando os ingredientes.
+    // Não conta na cota de importações (o custo já entrou na cota de sugestões).
+    private async Task CriarReceitaAsync(int idx)
+    {
+        var s = _sugestoes[idx];
+        _criando = idx;
+        var r = await Service.SalvarAsync(new ReceitaPersistenciaDTO
+        {
+            Nome                = s.Nome,
+            ModoPreparo         = s.ModoPreparo,
+            NumeroPorcoesBase   = s.NumeroPorcoesBase,
+            TempoPreparoMinutos = s.TempoPreparoMinutos,
+            Observacoes         = string.Join("\n", s.IngredientesTexto),
+        });
+        _criando = null;
+
+        if (!r.Sucesso)
+        {
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
+            return;
+        }
+
+        Snackbar.Add(L["Sug_Criada"], Severity.Success);
+        Nav.NavigateTo($"/receitas/editar/{r.Valor}?lancar=1");
+    }
+}

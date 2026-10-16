@@ -52,7 +52,7 @@
         <MudAvatar Style="height:96px; width:96px;" Color="Color.Primary">
             @if (_versaoFoto is not null)
             {
-                <MudImage Src="@($"/perfil/foto?v={_versaoFoto}")" Alt="Foto de perfil"
+                <MudImage Src="@($"/perfil/foto?v={_versaoFoto}")" Alt="@L["App_FotoPerfil"]"
                           ObjectFit="ObjectFit.Cover" Width="96" Height="96" />
             }
             else
@@ -165,7 +165,7 @@ else
                     @if (!string.IsNullOrEmpty(_qrCodeBase64))
                     {
                         <div class="d-flex flex-column align-center mb-3">
-                            <img src="data:image/png;base64,@_qrCodeBase64" alt="QR Code 2FA"
+                            <img src="data:image/png;base64,@_qrCodeBase64" alt="QR Code"
                                  style="width:200px; height:200px; border:1px solid #eee; border-radius:8px; padding:8px;" />
                         </div>
                     }

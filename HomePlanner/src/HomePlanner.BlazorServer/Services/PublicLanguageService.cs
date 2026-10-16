@@ -15,28 +15,31 @@ public sealed class PublicLanguageService
 
     public PublicLanguageService(IHttpContextAccessor accessor)
     {
-        _lang = "pt";
-
         var ctx = accessor.HttpContext;
-        if (ctx is null) return;
+        _lang = ctx is null ? "pt" : ResolverLang(ctx.Request);
+    }
 
+    /// <summary>
+    /// Regra única do idioma das páginas: cookie (escolha explícita) → Accept-Language do
+    /// navegador → "pt". Usada também pelo <see cref="PublicLangCookieProvider"/>, para a
+    /// cultura dos textos e o seletor de idioma nunca divergirem.
+    /// </summary>
+    public static string ResolverLang(HttpRequest request)
+    {
         // Prioridade 1: cookie
-        if (ctx.Request.Cookies.TryGetValue(CookieName, out var cookie)
-            && IsLangValida(cookie))
-        {
-            _lang = cookie;
-            return;
-        }
+        if (request.Cookies.TryGetValue(CookieName, out var cookie) && IsLangValida(cookie))
+            return cookie!;
 
         // Prioridade 2: Accept-Language do browser
-        var acceptLang = ctx.Request.Headers.AcceptLanguage.ToString();
+        var acceptLang = request.Headers.AcceptLanguage.ToString();
         if (!string.IsNullOrEmpty(acceptLang))
         {
             var primary = acceptLang.Split(',')[0].Split(';')[0].Trim().ToLowerInvariant();
-            if (primary.StartsWith("en")) _lang = "en";
-            else if (primary.StartsWith("es")) _lang = "es";
-            else if (primary.StartsWith("fr")) _lang = "fr";
+            if (primary.StartsWith("en")) return "en";
+            if (primary.StartsWith("es")) return "es";
+            if (primary.StartsWith("fr")) return "fr";
         }
+        return "pt";
     }
 
     public string Lang => _lang;

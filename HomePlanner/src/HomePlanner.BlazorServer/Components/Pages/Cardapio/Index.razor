@@ -15,11 +15,11 @@
 <MudPaper Class="pa-4 mb-4" Elevation="1" Style="border-radius:10px;">
     <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
         <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft"
-                       OnClick="SemanaAnterior" title="Semana anterior" />
+                       OnClick="SemanaAnterior" title="@L["Cardapio_SemanaAnterior"]" />
 
         <MudStack AlignItems="AlignItems.Center" Spacing="0">
             <MudText Typo="Typo.h6" Style="font-family:'Fraunces',serif; font-weight:300;">
-                @_dataInicio.ToString("dd/MM") a @_dataFim.ToString("dd/MM/yyyy")
+                @L["Cardapio_Periodo", DiaHelper.DiaMes(_dataInicio), DiaHelper.Data(_dataFim)]
             </MudText>
             @if (_dataInicio == SegundaDeHoje())
             {
@@ -31,7 +31,7 @@
             <MudButton Size="Size.Small" Variant="Variant.Outlined"
                        OnClick="IrParaHoje">@L["Cardapio_Hoje"]</MudButton>
             <MudIconButton Icon="@Icons.Material.Filled.ChevronRight"
-                           OnClick="ProximaSemana" title="Próxima semana" />
+                           OnClick="ProximaSemana" title="@L["Cardapio_ProximaSemana"]" />
         </MudStack>
     </MudStack>
 </MudPaper>
@@ -54,7 +54,7 @@ else
                     @dia.NomeCurto
                 </MudText>
                 <MudText Typo="Typo.caption" Color="Color.Secondary">
-                    @dia.Data.ToString("dd/MM")
+                    @DiaHelper.DiaMes(dia.Data)
                 </MudText>
                 @if (dia.Data == DateOnly.FromDateTime(DateTime.Today))
                 {
@@ -89,7 +89,7 @@ else
                                     <MudIconButton Icon="@Icons.Material.Filled.MenuBook"
                                                    Size="Size.Small" Color="Color.Primary"
                                                    Href="@UrlReceita(refeicao.ReceitaId!.Value)"
-                                                   title="Ver receita"
+                                                   title="@L["Sug_VerReceita"]"
                                                    Style="background:var(--mud-palette-surface); padding:4px;" />
                                 </span>
                             }
@@ -104,7 +104,7 @@ else
                             @if (refeicao.PorcoesDesejadas.HasValue)
                             {
                                 <MudText Typo="Typo.caption" Style="color:var(--mud-palette-text-secondary); font-size:0.7rem;">
-                                    @refeicao.PorcoesDesejadas porç.
+                                    @refeicao.PorcoesDesejadas @L["App_PorcoesAbrev"]
                                 </MudText>
                             }
                         </MudPaper>
@@ -176,18 +176,7 @@ else
             {
                 var data = _dataInicio.AddDays(i);
                 var diaSemana = (DiaSemana)(i + 1);
-                var nome = diaSemana switch
-                {
-                    DiaSemana.Segunda => "Seg",
-                    DiaSemana.Terca   => "Ter",
-                    DiaSemana.Quarta  => "Qua",
-                    DiaSemana.Quinta  => "Qui",
-                    DiaSemana.Sexta   => "Sex",
-                    DiaSemana.Sabado  => "Sáb",
-                    DiaSemana.Domingo => "Dom",
-                    _                  => diaSemana.ToString(),
-                };
-                return new DiaInfo(diaSemana, nome, data);
+                return new DiaInfo(diaSemana, DiaHelper.NomeCurto(diaSemana), data);
             })
             .ToList();
 
@@ -275,7 +264,7 @@ else
         var r = await CardapioService.CopiarSemanaAsync(_dataInicio, destino);
         if (r.Sucesso)
         {
-            Snackbar.Add($"Semana copiada para {destino:dd/MM}!", Severity.Success);
+            Snackbar.Add(L["Cardapio_SemanaCopiadaPara", DiaHelper.DiaMes(destino)], Severity.Success);
             Nav.NavigateTo($"/cardapio/{destino:yyyy-MM-dd}");
         }
         else
@@ -285,13 +274,13 @@ else
     private async Task SalvarComoModelo()
     {
         var result = await JS.InvokeAsync<string?>("prompt",
-            "Nome do modelo:", "Minha semana favorita");
+            L["Cardapio_NomeModelo"].Value, L["Cardapio_NomeModeloPadrao"].Value);
 
         if (string.IsNullOrWhiteSpace(result)) return;
 
         var r = await ModeloService.SalvarPlanejamentoComoModeloAsync(_dataInicio, result);
         if (r.Sucesso)
-            Snackbar.Add("Modelo salvo!", Severity.Success);
+            Snackbar.Add(L["Cardapio_ModeloSalvo"], Severity.Success);
         else
             Snackbar.Add(L.Traduzir(r.Erros), Severity.Error);
     }
@@ -303,13 +292,13 @@ else
         return hoje.AddDays(-diasAteSegunda);
     }
 
-    private static string NomeTipo(TipoRefeicao t) => t switch
+    private string NomeTipo(TipoRefeicao t) => t switch
     {
-        TipoRefeicao.CafeManha => "Café",
-        TipoRefeicao.Almoco    => "Almoço",
-        TipoRefeicao.Lanche    => "Lanche",
-        TipoRefeicao.Jantar    => "Jantar",
-        TipoRefeicao.Ceia      => "Ceia",
+        TipoRefeicao.CafeManha => L["Refeicao_CafeManha"],
+        TipoRefeicao.Almoco    => L["Refeicao_Almoco"],
+        TipoRefeicao.Lanche    => L["Refeicao_Lanche"],
+        TipoRefeicao.Jantar    => L["Refeicao_Jantar"],
+        TipoRefeicao.Ceia      => L["Refeicao_Ceia"],
         _                      => t.ToString(),
     };
 }

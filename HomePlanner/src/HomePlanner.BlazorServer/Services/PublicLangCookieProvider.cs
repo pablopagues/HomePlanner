@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Localization;
 namespace HomePlanner.BlazorServer.Services;
 
 /// <summary>
-/// IRequestCultureProvider que lê o cookie .HomePlanner.Lang e resolve a cultura das páginas.
-/// Como sempre devolve um resultado, ele encerra a cadeia — é o que impede o Accept-Language
-/// do navegador de sobrescrever a escolha explícita do usuário na web.
+/// IRequestCultureProvider que resolve a cultura das páginas pela mesma regra do
+/// <see cref="PublicLanguageService"/>: cookie .HomePlanner.Lang → Accept-Language → pt-BR.
+/// Como sempre devolve um resultado, ele encerra a cadeia — a escolha explícita do usuário
+/// (cookie) prevalece sobre o navegador. Sem cookie (primeira visita), segue o navegador;
+/// antes caía em pt-BR enquanto o seletor mostrava o idioma do navegador.
 ///
 /// Em /api ele se abstém (devolve null) para o provider de Accept-Language assumir: o app
 /// não manda cookie, e sem isso toda resposta da API sairia em pt-BR.
@@ -18,9 +20,7 @@ public sealed class PublicLangCookieProvider : IRequestCultureProvider
         if (httpContext.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
             return Task.FromResult<ProviderCultureResult?>(null);
 
-        var cookie = httpContext.Request.Cookies[PublicLanguageService.CookieName];
-
-        var result = cookie switch
+        var result = PublicLanguageService.ResolverLang(httpContext.Request) switch
         {
             "en" => new ProviderCultureResult("en", "en"),
             "es" => new ProviderCultureResult("es", "es"),

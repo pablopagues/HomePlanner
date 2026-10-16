@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using Application.HomePlanner.Common;
 using Application.HomePlanner.DTOs.Auth;
 using Application.HomePlanner.Middleware;
 using Application.HomePlanner.Services.Auth;
@@ -14,7 +15,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HomePlanner.BlazorServer.Areas.Identity.Pages.Account;
 
-public class RegistroModel : PageModel
+public class RegistroModel : PaginaLocalizada
 {
     private readonly IRegistroTenantService _registroService;
     private readonly UserManager<Usuario> _userManager;
@@ -44,27 +45,27 @@ public class RegistroModel : PageModel
 
     public class InputModel
     {
-        [Required(ErrorMessage = "Informe seu nome.")]
-        [Display(Name = "Seu nome")]
+        [Required(ErrorMessage = "Val_InformeNome")]
+        [Display(Name = "Auth_SeuNome")]
         public string NomeResponsavel { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Informe um e-mail.")]
-        [EmailAddress(ErrorMessage = "E-mail inválido.")]
+        [Required(ErrorMessage = "Val_InformeUmEmail")]
+        [EmailAddress(ErrorMessage = "Val_EmailInvalido")]
         public string Email { get; set; } = string.Empty;
 
         [Required]
         public string PaisId { get; set; } = "BR";
 
-        [Required(ErrorMessage = "Informe uma senha.")]
-        [StringLength(100, MinimumLength = 8, ErrorMessage = "A senha deve ter ao menos 8 caracteres.")]
+        [Required(ErrorMessage = "Val_InformeUmaSenha")]
+        [StringLength(100, MinimumLength = 8, ErrorMessage = "Val_SenhaMinimo")]
         [DataType(DataType.Password)]
         public string Senha { get; set; } = string.Empty;
 
         [DataType(DataType.Password)]
-        [Compare(nameof(Senha), ErrorMessage = "As senhas não coincidem.")]
+        [Compare(nameof(Senha), ErrorMessage = "Val_SenhasNaoCoincidem")]
         public string ConfirmacaoSenha { get; set; } = string.Empty;
 
-        [Range(typeof(bool), "true", "true", ErrorMessage = "Você precisa aceitar os termos.")]
+        [Range(typeof(bool), "true", "true", ErrorMessage = "Val_AceitarTermos")]
         public bool AceitaTermos { get; set; }
     }
 
@@ -86,7 +87,7 @@ public class RegistroModel : PageModel
         if (!resultado.Sucesso)
         {
             foreach (var erro in resultado.Erros)
-                ModelState.AddModelError(string.Empty, erro);
+                ModelState.AddModelError(string.Empty, L.Traduzir(erro));
             return Page();
         }
 

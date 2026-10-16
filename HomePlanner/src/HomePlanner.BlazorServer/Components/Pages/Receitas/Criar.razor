@@ -2,13 +2,13 @@
 @attribute [Authorize]
 @inject IStringLocalizer<SharedResource> L
 
-<PageTitle>Nova Receita</PageTitle>
+<PageTitle>@L["Receita_NovaTitle"]</PageTitle>
 
 <MudBreadcrumbs Items="_breadcrumbs" Class="mb-4 pa-0" />
 
 <MudText Typo="Typo.h5" GutterBottom="true"
          Style="font-family:'Fraunces',serif; font-weight:300;">
-    Nova receita
+    @L["Receita_NovaTitle"]
 </MudText>
 
 <ReceitaForm Dto="_dto" Unidades="_unidades"
@@ -19,6 +19,7 @@
 
 @code {
     [Inject] IReceitaService Service { get; set; } = null!;
+    [Inject] ICotaImportacaoService Cota { get; set; } = null!;
     [Inject] IIngredienteService IngService { get; set; } = null!;
     [Inject] IUnidadeMedidaRepository UnidadeRepo { get; set; } = null!;
     [Inject] ISnackbar Snackbar { get; set; } = null!;
@@ -28,10 +29,10 @@
     private List<UnidadeMedidaListaDTO> _unidades = [];
     private bool _salvando;
 
-    private readonly List<BreadcrumbItem> _breadcrumbs =
+    private List<BreadcrumbItem> _breadcrumbs =>
     [
-        new("Receitas", "/receitas"),
-        new("Nova receita", null, disabled: true),
+        new(L["Receita_Titulo"], "/receitas"),
+        new(L["Receita_NovaTitle"], null, disabled: true),
     ];
 
     protected override async Task OnInitializedAsync()
@@ -48,7 +49,8 @@
             var r = await Service.SalvarAsync(_dto);
             if (r.Sucesso)
             {
-                Snackbar.Add("Receita criada com sucesso!", Severity.Success);
+                if (_dto.ContarImportacaoIA) await Cota.RegistrarImportacaoAsync();
+                Snackbar.Add(L["Receita_CriadaOk"], Severity.Success);
                 Nav.NavigateTo("/receitas");
             }
             else
@@ -56,7 +58,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro ao salvar a receita: {ex.Message}", Severity.Error);
+            Snackbar.Add(L["Receita_ErroSalvar", ex.Message], Severity.Error);
         }
         finally
         {

@@ -27,7 +27,7 @@
 
         <MudStack AlignItems="AlignItems.Center" Spacing="0">
             <MudText Typo="Typo.h6" Style="font-family:'Fraunces',serif; font-weight:300;">
-                @L["Compras_Semana"] @_dataInicio.ToString("dd/MM") — @_dataFim.ToString("dd/MM/yyyy")
+                @L["Compras_Semana"] @DiaHelper.DiaMes(_dataInicio) — @DiaHelper.Data(_dataFim)
             </MudText>
         </MudStack>
 
@@ -494,12 +494,12 @@ else if (_lista is not null)
         var r = await IngService.DefinirProdutoBaseAsync(item.IngredienteId, baseEscolhido.Id);
         if (r.Sucesso)
         {
-            Snackbar.Add($"\"{item.NomeIngrediente}\" agrupado sob \"{baseEscolhido.Nome}\".", Severity.Success);
+            Snackbar.Add(L["Agrupar_Ok", item.NomeIngrediente, baseEscolhido.Nome], Severity.Success);
             await CarregarAsync();
         }
         else
         {
-            Snackbar.Add(r.Erros.FirstOrDefault() ?? "Não foi possível agrupar.", Severity.Warning);
+            Snackbar.Add(r.Erros.Count > 0 ? L.Traduzir(r.Erros) : L["Agrupar_Falha"], Severity.Warning);
         }
     }
 
@@ -510,7 +510,7 @@ else if (_lista is not null)
         if (!r.Sucesso)
         {
             _jaTenho[ingredienteId] = !valor; // desfaz em caso de erro
-            Snackbar.Add(r.Erros.FirstOrDefault() ?? "Não foi possível marcar o item.", Severity.Warning);
+            Snackbar.Add(r.Erros.Count > 0 ? L.Traduzir(r.Erros) : L["Compras_FalhaMarcar"], Severity.Warning);
         }
     }
 
@@ -521,7 +521,7 @@ else if (_lista is not null)
 
         var r = await Service.LimparMarcacoesSemanaAsync(_dataInicio);
         if (!r.Sucesso)
-            Snackbar.Add(r.Erros.FirstOrDefault() ?? "Não foi possível limpar.", Severity.Warning);
+            Snackbar.Add(r.Erros.Count > 0 ? L.Traduzir(r.Erros) : L["Compras_FalhaLimpar"], Severity.Warning);
     }
 
     // ── Remanejar itens entre lojas ──────────────────────────────────────
@@ -533,7 +533,7 @@ else if (_lista is not null)
         if (!r.Sucesso)
         {
             item.ListaId = anterior;
-            Snackbar.Add(r.Erros.FirstOrDefault() ?? "Não foi possível mover o item.", Severity.Warning);
+            Snackbar.Add(r.Erros.Count > 0 ? L.Traduzir(r.Erros) : L["Compras_FalhaMover"], Severity.Warning);
         }
     }
 
@@ -545,7 +545,7 @@ else if (_lista is not null)
         if (!r.Sucesso)
         {
             pedido.ListaId = anterior;
-            Snackbar.Add(r.Erros.FirstOrDefault() ?? "Não foi possível mover o pedido.", Severity.Warning);
+            Snackbar.Add(r.Erros.Count > 0 ? L.Traduzir(r.Erros) : L["Compras_FalhaMoverPedido"], Severity.Warning);
         }
     }
 
@@ -626,7 +626,7 @@ else if (_lista is not null)
                         @item.NomeIngrediente
                     </MudText>
                     <MudText Typo="Typo.caption" Color="Color.Secondary">
-                        @item.QuantidadeFormatada@(mostrarOrigem ? " · " + L["Compras_CategoriaCardapio"] : "")
+                        @L.FormatarQuantidade(item.Quantidade, item.CodigoUnidade)@(mostrarOrigem ? " · " + L["Compras_CategoriaCardapio"] : "")
                     </MudText>
                 </MudStack>
                 @if (!Mural.Ativo)

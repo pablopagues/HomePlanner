@@ -98,7 +98,8 @@ public class RegistroTenantService : IRegistroTenantService
             {
                 await transaction.RollbackAsync(ct);
                 return RegistroResultadoDTO.Falha(
-                    resultado.Errors.Select(e => TraduzirErroIdentity(e.Code, e.Description)).ToArray());
+                    // Descrições já vêm traduzidas pelo IdentityErrorDescriberLocalizado.
+                    resultado.Errors.Select(e => e.Description).ToArray());
             }
 
             // 4. Atribui papel Owner.
@@ -158,15 +159,4 @@ public class RegistroTenantService : IRegistroTenantService
         await _roleManager.CreateAsync(papel);
         return papel;
     }
-
-    private static string TraduzirErroIdentity(string code, string descricaoPadrao) => code switch
-    {
-        "PasswordTooShort"            => "A senha deve ter ao menos 8 caracteres.",
-        "PasswordRequiresDigit"       => "A senha deve conter pelo menos um número.",
-        "PasswordRequiresLower"       => "A senha deve conter pelo menos uma letra minúscula.",
-        "PasswordRequiresUpper"       => "A senha deve conter pelo menos uma letra maiúscula.",
-        "PasswordRequiresNonAlphanumeric" => "A senha deve conter pelo menos um caractere especial.",
-        "DuplicateUserName" or "DuplicateEmail" => "Já existe uma conta com este e-mail.",
-        _                             => descricaoPadrao,
-    };
 }

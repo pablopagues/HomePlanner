@@ -10,41 +10,45 @@
 
 <MudDialog>
     <TitleContent>
-        <MudText Typo="Typo.h6">Lançar ingredientes do texto</MudText>
+        <MudText Typo="Typo.h6">@L["Lanc_Titulo"]</MudText>
     </TitleContent>
     <DialogContent>
         <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-2">
-            Ajuste a lista (um ingrediente por linha) e clique em <b>Analisar</b>. Revise
-            <b>nome</b>, quantidade, unidade e observação de cada item — você pode editar tudo.
-            Ingredientes com nome igual a um já cadastrado são reaproveitados; os demais são
-            criados ao lançar.
+            @L["Lanc_Ajuda"]
+            
+            
+            
         </MudText>
 
-        <MudTextField @bind-Value="_texto" Label="Texto dos ingredientes"
+        <MudTextField @bind-Value="_texto" Label="@L["Lanc_TextoLabel"]"
                       Lines="6" AutoGrow="true" Variant="Variant.Outlined" Class="mb-2" />
 
         <MudCheckBox @bind-Value="_traduzir" Color="Color.Primary" Dense="true" Class="mb-2"
-                     Label="@($"Traduzir a receita para o meu idioma ({IdiomaLabel})")" />
+                     Label="@L["Lanc_Traduzir", IdiomaLabel]" />
         <MudText Typo="Typo.caption" Color="Color.Secondary" Class="d-block mb-3">
-            Traduz os ingredientes, o nome e o modo de preparo. Fica gravado nesse idioma — não é possível traduzir de novo depois.
+            @L["Lanc_TraduzirAjuda"]
         </MudText>
 
         <MudButton StartIcon="@Icons.Material.Filled.AutoFixHigh" Variant="Variant.Outlined"
-                   Color="Color.Primary" OnClick="Analisar" Class="mb-3">
-            Analisar
+                   Color="Color.Primary" OnClick="Analisar" Class="mb-3" Disabled="_analisando">
+            @(_analisando ? L["Lanc_Analisando"] : L["Lanc_Analisar"])
         </MudButton>
 
-        @if (_linhas.Count > 0)
+        @if (_analisando)
+        {
+            <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mb-3" />
+        }
+        else if (_linhas.Count > 0)
         {
             <MudDivider Class="mb-3" />
             <div class="d-flex justify-space-between align-center mb-2 flex-wrap">
                 <MudText Typo="Typo.subtitle2">
-                    @_linhas.Count item(ns) — @_linhas.Count(l => l.Selecionado is null) será(ão) criado(s) no cadastro
+                    @L["Lanc_Resumo", _linhas.Count, _linhas.Count(l => l.Selecionado is null)]
                 </MudText>
                 <MudToggleGroup T="SistemaMedida" Value="_sistema" ValueChanged="TrocarSistema"
                                 Size="Size.Small" Color="Color.Primary" CheckMark="true">
-                    <MudToggleItem Value="SistemaMedida.Metrico" Text="Métrico" />
-                    <MudToggleItem Value="SistemaMedida.Imperial" Text="Imperial" />
+                    <MudToggleItem Value="SistemaMedida.Metrico" Text="@L["Medida_Metrico"]" />
+                    <MudToggleItem Value="SistemaMedida.Imperial" Text="@L["Medida_Imperial"]" />
                 </MudToggleGroup>
             </div>
 
@@ -54,42 +58,42 @@
                           Style="background:var(--mud-palette-background-gray); border-radius:8px; border:1px solid var(--mud-palette-lines-default);">
                     <MudGrid Spacing="2" Class="align-center">
                         <MudItem xs="6" md="2">
-                            <MudNumericField @bind-Value="linha.Quantidade" Label="Qtde" Min="0m"
+                            <MudNumericField @bind-Value="linha.Quantidade" Label="@L["Ing_Qtde"]" Min="0m"
                                              Format="G" Variant="Variant.Outlined" Margin="Margin.Dense" />
                         </MudItem>
                         <MudItem xs="6" md="2">
-                            <MudSelect T="int" @bind-Value="linha.UnidadeMedidaId" Label="Unidade"
+                            <MudSelect T="int" @bind-Value="linha.UnidadeMedidaId" Label="@L["Ing_Unidade"]"
                                        Variant="Variant.Outlined" Margin="Margin.Dense">
                                 @foreach (var u in Unidades)
                                 {
-                                    <MudSelectItem Value="@u.Id">@u.Codigo</MudSelectItem>
+                                    <MudSelectItem Value="@u.Id">@L.AbrevUnidade(u.Codigo)</MudSelectItem>
                                 }
                             </MudSelect>
                         </MudItem>
                         <MudItem xs="12" md="3">
                             <MudTextField Value="linha.Nome"
                                           ValueChanged="@((string v) => AtualizarNome(linha, v))"
-                                          Immediate="false" Label="Nome do ingrediente"
+                                          Immediate="false" Label="@L["Lanc_NomeIngrediente"]"
                                           Variant="Variant.Outlined" Margin="Margin.Dense" />
                         </MudItem>
                         <MudItem xs="10" md="2">
-                            <MudTextField @bind-Value="linha.Observacao" Label="Obs. (preparo)"
+                            <MudTextField @bind-Value="linha.Observacao" Label="@L["Lanc_ObsPreparo"]"
                                           Variant="Variant.Outlined" Margin="Margin.Dense" />
                         </MudItem>
                         <MudItem xs="6" md="1">
                             @if (linha.Selecionado is null)
                             {
                                 <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Text"
-                                         Icon="@Icons.Material.Filled.AddCircleOutline">novo</MudChip>
+                                         Icon="@Icons.Material.Filled.AddCircleOutline">@L["Lanc_Novo"]</MudChip>
                             }
                             else
                             {
                                 <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Text"
-                                         Icon="@Icons.Material.Filled.CheckCircle">existente</MudChip>
+                                         Icon="@Icons.Material.Filled.CheckCircle">@L["Lanc_Existente"]</MudChip>
                             }
                         </MudItem>
                         <MudItem xs="4" md="1">
-                            <MudCheckBox @bind-Value="linha.Opcional" Label="Opt." Size="Size.Small" />
+                            <MudCheckBox @bind-Value="linha.Opcional" Label="@L["Ing_Opcional"]" Size="Size.Small" />
                         </MudItem>
                         <MudItem xs="2" md="1" Class="d-flex justify-end">
                             <MudIconButton Icon="@Icons.Material.Filled.DeleteOutline" Color="Color.Error"
@@ -102,15 +106,15 @@
         else if (_analisou)
         {
             <MudAlert Severity="Severity.Warning" Dense="true">
-                Nenhum ingrediente foi identificado no texto.
+                @L["Receita_NenhumIngredienteTexto"]
             </MudAlert>
         }
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="@(() => MudDialog.Cancel())">Cancelar</MudButton>
+        <MudButton OnClick="@(() => MudDialog.Cancel())">@L["Btn_Cancelar"]</MudButton>
         <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Aplicar"
                    Disabled="@(_linhas.Count == 0 || _aplicando)">
-            @(_aplicando ? "Lançando..." : $"Lançar {_linhas.Count} ingrediente(s)")
+            @(_aplicando ? L["Lanc_Lancando"] : L["Lanc_LancarN", _linhas.Count])
         </MudButton>
     </DialogActions>
 </MudDialog>
@@ -121,8 +125,12 @@
     [Parameter] public string TextoInicial { get; set; } = string.Empty;
     [Parameter] public List<UnidadeMedidaListaDTO> Unidades { get; set; } = [];
 
+    /// <summary>Já analisa o texto ao abrir (vindo do "Organizar com IA" ou de uma importação).</summary>
+    [Parameter] public bool AnalisarAoAbrir { get; set; }
+
     private string _texto = string.Empty;
     private bool _analisou;
+    private bool _analisando;
     private bool _aplicando;
     private bool _traduzir;
     private SistemaMedida _sistema = SistemaMedida.Metrico;
@@ -132,12 +140,31 @@
     {
         "en" => "English",
         "es" => "español",
+        "fr" => "français",
         _    => "português",
     };
 
     protected override void OnInitialized() => _texto = TextoInicial;
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && AnalisarAoAbrir && !string.IsNullOrWhiteSpace(_texto))
+        {
+            _analisando = true;
+            StateHasChanged(); // mostra o progresso — OnAfterRender não re-renderiza sozinho
+            await Analisar();
+            StateHasChanged();
+        }
+    }
+
     private async Task Analisar()
+    {
+        _analisando = true;
+        try { await AnalisarInterno(); }
+        finally { _analisando = false; }
+    }
+
+    private async Task AnalisarInterno()
     {
         _analisou = true;
         _linhas.Clear();
@@ -145,7 +172,7 @@
         var throttle = await Cota.VerificarThrottleIAAsync();
         if (!throttle.Sucesso)
         {
-            Snackbar.Add(throttle.Erros.FirstOrDefault() ?? "Tente novamente em instantes.", Severity.Warning);
+            Snackbar.Add(L.Traduzir(throttle.Erros), Severity.Warning);
             return;
         }
 
@@ -230,7 +257,7 @@
 
         if (resultado.Count == 0)
         {
-            Snackbar.Add("Nenhum ingrediente pôde ser lançado.", Severity.Warning);
+            Snackbar.Add(L["Lanc_NenhumLancado"], Severity.Warning);
             return;
         }
         MudDialog.Close(DialogResult.Ok(new LancamentoIngredientesDTO
@@ -261,7 +288,7 @@
         var existente = await ResolverIngredienteExistente(nomeNovo);
         if (existente is not null) return (existente.Id, existente.Nome);
 
-        Snackbar.Add($"Não foi possível criar '{nomeNovo}': {L.Traduzir(r.Erros)}", Severity.Warning);
+        Snackbar.Add(L["Lanc_FalhaCriar", nomeNovo, L.Traduzir(r.Erros)], Severity.Warning);
         return (0, string.Empty);
     }
 

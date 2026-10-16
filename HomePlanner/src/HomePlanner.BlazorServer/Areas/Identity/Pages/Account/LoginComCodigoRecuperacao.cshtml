@@ -1,14 +1,14 @@
 @page
 @model HomePlanner.BlazorServer.Areas.Identity.Pages.Account.LoginComCodigoRecuperacaoModel
 @{
-    ViewData["Title"] = "Código de recuperação";
+    ViewData["Title"] = L["Conta_CodigoRecuperacao"];
 }
 
-<h1 class="auth-title">Código de recuperação</h1>
+<h1 class="auth-title">@L["Conta_CodigoRecuperacao"]</h1>
 
 <p class="auth-sub" style="margin-bottom:20px;">
-    Informe um dos códigos de recuperação que você salvou ao ativar a verificação em duas etapas.
-    Cada código só pode ser usado uma vez.
+    @L["Conta_RecuperacaoAjuda"]
+    
 </p>
 
 <form method="post">
@@ -16,7 +16,7 @@
     <input type="hidden" asp-for="ReturnUrl" />
 
     <div class="form-group">
-        <label asp-for="CodigoRecuperacao">Código de recuperação</label>
+        <label asp-for="CodigoRecuperacao">@L["Conta_CodigoRecuperacao"]</label>
         <input asp-for="CodigoRecuperacao"
                type="text"
                autocomplete="off"
@@ -26,11 +26,11 @@
         <span asp-validation-for="CodigoRecuperacao" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn-primary">Verificar</button>
+    <button type="submit" class="btn-primary">@L["Conta_Verificar"]</button>
 </form>
 
 <div class="auth-links">
-    <a asp-page="./LoginCom2FA" asp-route-returnUrl="@Model.ReturnUrl">Usar o app autenticador</a>
+    <a asp-page="./LoginCom2FA" asp-route-returnUrl="@Model.ReturnUrl">@L["Auth_2FAUsarApp"]</a>
     <br /><br />
-    <a asp-page="./Login">Voltar ao login</a>
+    <a asp-page="./Login">@L["Auth_VoltarLogin"]</a>
 </div>

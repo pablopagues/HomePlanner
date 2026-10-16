@@ -16,4 +16,7 @@ public class UsoImportacaoReceita : ITenantEntity
     public int AnoMes { get; set; }
 
     public int Quantidade { get; set; }
+
+    /// <summary>Pedidos de sugestão de receitas à IA no mês (cota separada das importações).</summary>
+    public int QuantidadeSugestoes { get; set; }
 }

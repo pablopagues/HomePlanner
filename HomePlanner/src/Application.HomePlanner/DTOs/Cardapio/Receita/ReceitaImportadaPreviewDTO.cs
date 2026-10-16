@@ -5,6 +5,8 @@ public class ReceitaImportadaPreviewDTO
     public bool Sucesso { get; init; }
     public string? MensagemErro { get; init; }
     public string Nome { get; init; } = string.Empty;
+    /// <summary>Descrição curta (só nas sugestões geradas pela IA).</summary>
+    public string? Descricao { get; init; }
     public string? ModoPreparo { get; init; }
     public int NumeroPorcoesBase { get; init; } = 4;
     public int? TempoPreparoMinutos { get; init; }

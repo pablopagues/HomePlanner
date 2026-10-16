@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HomePlanner.BlazorServer.Areas.Identity.Pages.Account;
 
-public class VerificarEmailModel : PageModel
+public class VerificarEmailModel : PaginaLocalizada
 {
     public string Email { get; set; } = string.Empty;
 

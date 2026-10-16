@@ -51,7 +51,8 @@ public class AssinaturaService : IAssinaturaService
                 Status        = StatusAssinatura.Trial,
                 LimiteMembros = LimitesPorPlano.Membros(PlanoAssinatura.Gratis),
                 LimiteImportacoesReceita = LimitesPorPlano.ImportacoesReceitaMes(PlanoAssinatura.Gratis),
-                Moeda         = moeda,
+                LimiteSugestoesReceita = LimitesPorPlano.SugestoesReceitaMes(PlanoAssinatura.Gratis),
+                Moeda        = moeda,
                 SimboloMoeda  = SimboloDaMoeda(moeda),
                 PrecosDisplay = MontarPrecosDisplay(paisId),
             };
@@ -70,6 +71,7 @@ public class AssinaturaService : IAssinaturaService
             TemAssinaturaStripe     = !string.IsNullOrWhiteSpace(a.StripeCustomerId),
             LimiteMembros           = LimitesPorPlano.Membros(a.Plano),
             LimiteImportacoesReceita = LimitesPorPlano.ImportacoesReceitaMes(a.Plano),
+            LimiteSugestoesReceita  = LimitesPorPlano.SugestoesReceitaMes(a.Plano),
             Moeda                   = moeda,
             SimboloMoeda            = SimboloDaMoeda(moeda),
             PrecosDisplay           = MontarPrecosDisplay(paisId),

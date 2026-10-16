@@ -2,24 +2,24 @@
 @model HomePlanner.BlazorServer.Areas.Identity.Pages.Account.RedefinirSenhaModel
 @{
     var ehConvite = Model.Input.Convite;
-    ViewData["Title"] = ehConvite ? "Criar senha" : "Nova senha";
+    ViewData["Title"] = ehConvite ? L["Conta_CriarSenha"] : L["Conta_NovaSenha"];
 }
 
-<h1 class="auth-title">@(ehConvite ? "Bem-vindo(a) ao HomePlanner" : "Criar nova senha")</h1>
+<h1 class="auth-title">@(ehConvite ? L["Conta_BemVindo"] : L["Conta_CriarNovaSenha"])</h1>
 
 @if (Model.Concluido)
 {
     <div class="alert-success">
-        @(ehConvite ? "Senha criada com sucesso! Já pode entrar." : "Senha redefinida com sucesso!")
+        @(ehConvite ? L["Conta_SenhaCriadaOk"] : L["Conta_SenhaRedefinidaOk"])
     </div>
-    <div class="auth-links"><a asp-page="./Login">Entrar</a></div>
+    <div class="auth-links"><a asp-page="./Login">@L["Auth_Entrar"]</a></div>
 }
 else
 {
     @if (ehConvite)
     {
         <p style="font-size:14px; color:#7A8278;">
-            Defina a senha que você vai usar para entrar na conta da sua família.
+            @L["Conta_DefinaSenha"]
         </p>
     }
 
@@ -30,15 +30,15 @@ else
         <input asp-for="Input.Convite" type="hidden" />
 
         <div class="form-group">
-            <label asp-for="Input.Senha">@(ehConvite ? "Sua senha" : "Nova senha")</label>
+            <label asp-for="Input.Senha">@(ehConvite ? L["Conta_SuaSenha"] : L["Conta_NovaSenha"])</label>
             <input asp-for="Input.Senha" autocomplete="new-password" />
             <span asp-validation-for="Input.Senha" class="text-danger"></span>
         </div>
         <div class="form-group">
-            <label asp-for="Input.ConfirmacaoSenha">Confirmar senha</label>
+            <label asp-for="Input.ConfirmacaoSenha">@L["Conta_ConfirmarSenha"]</label>
             <input asp-for="Input.ConfirmacaoSenha" autocomplete="new-password" />
             <span asp-validation-for="Input.ConfirmacaoSenha" class="text-danger"></span>
         </div>
-        <button type="submit" class="btn-primary">@(ehConvite ? "Criar senha e entrar" : "Redefinir senha")</button>
+        <button type="submit" class="btn-primary">@(ehConvite ? L["Conta_CriarSenhaEntrar"] : L["Conta_RedefinirSenha"])</button>
     </form>
 }

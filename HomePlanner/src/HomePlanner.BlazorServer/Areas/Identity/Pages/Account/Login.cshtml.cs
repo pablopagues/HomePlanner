@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HomePlanner.BlazorServer.Areas.Identity.Pages.Account;
 
-public class LoginModel : PageModel
+public class LoginModel : PaginaLocalizada
 {
     private readonly SignInManager<Usuario> _signInManager;
     private readonly TenantContext _tenantContext;
@@ -38,11 +38,11 @@ public class LoginModel : PageModel
 
     public class InputModel
     {
-        [Required(ErrorMessage = "Informe seu e-mail.")]
-        [EmailAddress(ErrorMessage = "E-mail inválido.")]
+        [Required(ErrorMessage = "Val_InformeEmail")]
+        [EmailAddress(ErrorMessage = "Val_EmailInvalido")]
         public string Email { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Informe sua senha.")]
+        [Required(ErrorMessage = "Val_InformeSenha")]
         [DataType(DataType.Password)]
         public string Senha { get; set; } = string.Empty;
 
@@ -66,7 +66,7 @@ public class LoginModel : PageModel
 
         if (usuario is null)
         {
-            ModelState.AddModelError(string.Empty, "E-mail ou senha inválidos.");
+            ModelState.AddModelError(string.Empty, L["Conta_LoginInvalido"]);
             return Page();
         }
 
@@ -94,11 +94,11 @@ public class LoginModel : PageModel
         if (resultado.IsLockedOut)
         {
             ModelState.AddModelError(string.Empty,
-                "Conta temporariamente bloqueada após várias tentativas. Tente novamente em 15 minutos.");
+                L["Conta_Bloqueada"]);
             return Page();
         }
 
-        ModelState.AddModelError(string.Empty, "E-mail ou senha inválidos.");
+        ModelState.AddModelError(string.Empty, L["Conta_LoginInvalido"]);
         return Page();
     }
 }

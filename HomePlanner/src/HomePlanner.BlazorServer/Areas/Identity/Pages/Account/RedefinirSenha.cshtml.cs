@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HomePlanner.BlazorServer.Areas.Identity.Pages.Account;
 
-public class RedefinirSenhaModel : PageModel
+public class RedefinirSenhaModel : PaginaLocalizada
 {
     private readonly UserManager<Usuario> _userManager;
     private readonly TenantContext _tenantContext;
@@ -42,13 +42,13 @@ public class RedefinirSenhaModel : PageModel
         /// validade longa) e não do fluxo de "esqueci minha senha".</summary>
         public bool Convite { get; set; }
 
-        [Required(ErrorMessage = "Informe uma senha.")]
-        [StringLength(100, MinimumLength = 8, ErrorMessage = "A senha deve ter ao menos 8 caracteres.")]
+        [Required(ErrorMessage = "Val_InformeUmaSenha")]
+        [StringLength(100, MinimumLength = 8, ErrorMessage = "Val_SenhaMinimo")]
         [DataType(DataType.Password)]
         public string Senha { get; set; } = string.Empty;
 
         [DataType(DataType.Password)]
-        [Compare(nameof(Senha), ErrorMessage = "As senhas não coincidem.")]
+        [Compare(nameof(Senha), ErrorMessage = "Val_SenhasNaoCoincidem")]
         public string ConfirmacaoSenha { get; set; } = string.Empty;
     }
 
@@ -109,14 +109,14 @@ public class RedefinirSenhaModel : PageModel
             return IdentityResult.Failed(new IdentityError
             {
                 Code = "ConviteInvalido",
-                Description = "Este convite expirou ou já foi usado. Peça um novo convite a quem administra a família.",
+                Description = L["Conta_ConviteInvalido"],
             });
 
         if (usuario.PasswordHash is not null)
             return IdentityResult.Failed(new IdentityError
             {
                 Code = "ContaJaAtivada",
-                Description = "Esta conta já tem senha definida. Use \"Esqueci minha senha\" na tela de login.",
+                Description = L["Conta_JaAtivada"],
             });
 
         // AddPasswordAsync renova o SecurityStamp, o que invalida qualquer outro convite pendente.

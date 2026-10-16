@@ -55,6 +55,10 @@ else if (_atual is not null)
                              Icon="@Icons.Material.Filled.Download">
                         @_atual.LimiteImportacoesReceita @L["Assin_ImportacoesReceita"]
                     </MudChip>
+                    <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined"
+                             Icon="@Icons.Material.Filled.AutoAwesome">
+                        @_atual.LimiteSugestoesReceita @L["Assin_SugestoesReceita"]
+                    </MudChip>
                 </MudStack>
             </div>
             @if (_atual.TemAssinaturaStripe)
@@ -84,7 +88,7 @@ else if (_atual is not null)
             {
                 <MudItem xs="6" md="3">
                     <MudText Typo="Typo.caption" Color="Color.Secondary">@L["Assin_ProximaCobranca"]</MudText>
-                    <MudText Typo="Typo.body1">@_atual.DataProximaCobranca.Value.ToString("dd/MM/yyyy")</MudText>
+                    <MudText Typo="Typo.body1">@_atual.DataProximaCobranca.Value.ToString("d")</MudText>
                 </MudItem>
             }
             @if (!string.IsNullOrWhiteSpace(_atual.UltimoCartaoFinal))
@@ -126,6 +130,10 @@ else if (_atual is not null)
                         <MudText Typo="Typo.caption" Color="Color.Secondary" Class="d-block">
                             <MudIcon Icon="@Icons.Material.Filled.Download" Size="Size.Small" Class="mr-1" />
                             @LimitesPorPlano.ImportacoesReceitaMes(p) @L["Assin_ImportacoesReceita"]
+                        </MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="d-block">
+                            <MudIcon Icon="@Icons.Material.Filled.AutoAwesome" Size="Size.Small" Class="mr-1" />
+                            @LimitesPorPlano.SugestoesReceitaMes(p) @L["Assin_SugestoesReceita"]
                         </MudText>
                     </MudCardContent>
                     <MudCardActions>

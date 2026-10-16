@@ -1,19 +1,20 @@
 @* Diálogo: agrupa um ingrediente sob um produto base de compra *@
 @inject IIngredienteService IngService
+@inject IStringLocalizer<SharedResource> L
 
 <MudDialog>
     <TitleContent>
-        <MudText Typo="Typo.h6">Agrupar "@NomeItem"</MudText>
+        <MudText Typo="Typo.h6">@L["Agrupar_Titulo", NomeItem]</MudText>
     </TitleContent>
     <DialogContent>
         <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
-            Escolha o <b>produto base</b> de compra. Itens agrupados são somados como um
-            só na lista — ex.: "Cebola picada" e "Cebolas grandes" sob "Cebola".
-            Cortes de carne diferentes (bife, carne em cubos) devem ficar separados.
+            @L["Agrupar_Ajuda"]
+            
+            
         </MudText>
 
         <MudAutocomplete T="IngredienteListaDTO?"
-                         Label="Produto base"
+                         Label="@L["Agrupar_ProdutoBase"]"
                          @bind-Value="_base"
                          SearchFunc="Buscar"
                          ToStringFunc="@(i => i?.Nome ?? string.Empty)"
@@ -21,10 +22,10 @@
                          Variant="Variant.Outlined" />
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="@(() => MudDialog.Cancel())">Cancelar</MudButton>
+        <MudButton OnClick="@(() => MudDialog.Cancel())">@L["Btn_Cancelar"]</MudButton>
         <MudButton Color="Color.Primary" Variant="Variant.Filled"
                    Disabled="@(_base is null)" OnClick="Confirmar">
-            Agrupar
+            @L["Agrupar_Btn"]
         </MudButton>
     </DialogActions>
 </MudDialog>

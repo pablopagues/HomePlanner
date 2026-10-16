@@ -4,18 +4,18 @@
 @attribute [Authorize]
 @inject IStringLocalizer<SharedResource> L
 
-<PageTitle>Modelos de Semana</PageTitle>
+<PageTitle>@L["Modelo_Titulo"]</PageTitle>
 
 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-4">
     <MudText Typo="Typo.h5" Style="font-family:'Fraunces',serif; font-weight:300;">
-        Modelos de semana
+        @L["Modelo_Titulo"]
     </MudText>
 </MudStack>
 
 <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
-    Salve semanas favoritas como modelos para reutilizar facilmente.
-    Para criar um modelo, vá ao <MudLink Href="/cardapio">Cardápio</MudLink> e
-    clique em "Salvar como modelo".
+    @L["Modelo_Descricao"]
+    @L["Modelo_CriarDica"]
+    
 </MudText>
 
 @if (_carregando)
@@ -25,7 +25,7 @@
 else if (_itens.Count == 0)
 {
     <MudAlert Severity="Severity.Info">
-        Nenhum modelo criado ainda. Planeje uma semana no cardápio e salve-a como modelo!
+        @L["Modelo_Nenhum"]
     </MudAlert>
 }
 else
@@ -48,7 +48,7 @@ else
                                 }
                             </div>
                             <MudChip T="string" Size="Size.Small" Color="Color.Default">
-                                @m.TotalRefeicoes refeições
+                                @m.TotalRefeicoes @L["Modelo_Refeicoes"]
                             </MudChip>
                         </MudStack>
                     </MudCardContent>
@@ -56,7 +56,7 @@ else
                         <MudButton Size="Size.Small" Color="Color.Primary"
                                    StartIcon="@Icons.Material.Filled.CalendarMonth"
                                    OnClick="@(() => AplicarModelo(m))">
-                            Aplicar na semana
+                            @L["Modelo_Aplicar"]
                         </MudButton>
                         <MudSpacer />
                         <MudIconButton Icon="@Icons.Material.Filled.Delete"
@@ -98,7 +98,7 @@ else
         var r = await Service.AplicarModeloAsync(modelo.Id, segunda);
         if (r.Sucesso)
         {
-            Snackbar.Add($"Modelo '{modelo.Nome}' aplicado à semana de {segunda:dd/MM}!", Severity.Success);
+            Snackbar.Add(L["Modelo_AplicadoSemana", modelo.Nome, DiaHelper.DiaMes(segunda)], Severity.Success);
             Nav.NavigateTo($"/cardapio/{segunda:yyyy-MM-dd}");
         }
         else
@@ -108,16 +108,16 @@ else
     private async Task ConfirmarExclusao(ModeloSemanaListaDTO modelo)
     {
         var confirm = await Dialog.ShowMessageBox(
-            "Confirmar exclusão",
-            $"Excluir o modelo '{modelo.Nome}'?",
-            yesText: "Excluir", cancelText: "Cancelar");
+            L["Confirmacao_Titulo"],
+            L["Msg_ExcluirItem", modelo.Nome],
+            yesText: L["Btn_Excluir"], cancelText: L["Btn_Cancelar"]);
 
         if (confirm == true)
         {
             var r = await Service.DeletarAsync(modelo.Id);
             if (r.Sucesso)
             {
-                Snackbar.Add("Modelo excluído.", Severity.Success);
+                Snackbar.Add(L["Modelo_ExcluidoOk"], Severity.Success);
                 await CarregarAsync();
             }
             else

@@ -8,6 +8,13 @@ public interface IImportadorReceitaService
     Task<ResultadoOperacao<ReceitaImportadaPreviewDTO>> ImportarDeUrlAsync(string url, CancellationToken ct = default);
 
     /// <summary>
+    /// Extrai uma receita de um texto livre colado (site, ChatGPT, mensagem) via IA.
+    /// Faz o pré-check da cota mensal de importações e o throttle da IA; a cota em si
+    /// só é contada quando a receita for salva (<see cref="ICotaImportacaoService.RegistrarImportacaoAsync"/>).
+    /// </summary>
+    Task<ResultadoOperacao<ReceitaImportadaPreviewDTO>> ImportarDeTextoAsync(string? texto, CancellationToken ct = default);
+
+    /// <summary>
     /// Parseia um texto livre de ingredientes (um por linha) em itens estruturados,
     /// detectando quantidade, unidade, opcionalidade e nome. Não acessa o banco.
     /// Versão síncrona via regex (PT/EN) — usada como fallback.

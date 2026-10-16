@@ -14,6 +14,8 @@ public class ImportadorReceitaService : IImportadorReceitaService
     private readonly HttpClient _http;
     private readonly IUnidadeMedidaRepository _unidadeRepo;
     private readonly IParserIngredientesIA _parserIA;
+    private readonly IAssistenteReceitaIA _assistenteIA;
+    private readonly ICotaImportacaoService _cota;
     private readonly ILogger<ImportadorReceitaService> _logger;
 
     // Mapeamento de unidades comuns em inglês/português → codigo interno
@@ -72,12 +74,48 @@ public class ImportadorReceitaService : IImportadorReceitaService
         HttpClient http,
         IUnidadeMedidaRepository unidadeRepo,
         IParserIngredientesIA parserIA,
+        IAssistenteReceitaIA assistenteIA,
+        ICotaImportacaoService cota,
         ILogger<ImportadorReceitaService> logger)
     {
         _http = http;
         _unidadeRepo = unidadeRepo;
         _parserIA = parserIA;
+        _assistenteIA = assistenteIA;
+        _cota = cota;
         _logger = logger;
+    }
+
+    public async Task<ResultadoOperacao<ReceitaImportadaPreviewDTO>> ImportarDeTextoAsync(
+        string? texto, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(texto))
+            return ResultadoOperacao<ReceitaImportadaPreviewDTO>.Falha(ErrosApp.TextoReceitaVazio);
+
+        if (!_assistenteIA.Habilitado)
+            return ResultadoOperacao<ReceitaImportadaPreviewDTO>.Falha(ErrosApp.IaIndisponivel);
+
+        if (texto.Length > _assistenteIA.MaxCaracteresTexto)
+            return ResultadoOperacao<ReceitaImportadaPreviewDTO>.Falha(
+                ErrosApp.TextoReceitaMuitoLongo(_assistenteIA.MaxCaracteresTexto));
+
+        var cota = await _cota.VerificarPodeImportarAsync(ct);
+        if (!cota.Sucesso)
+            return ResultadoOperacao<ReceitaImportadaPreviewDTO>.Falha(cota.Erros.ToArray());
+
+        var throttle = await _cota.VerificarThrottleIAAsync(ct);
+        if (!throttle.Sucesso)
+            return ResultadoOperacao<ReceitaImportadaPreviewDTO>.Falha(throttle.Erros.ToArray());
+
+        var preview = await _assistenteIA.ExtrairDeTextoAsync(texto, ct);
+        if (preview is null)
+            return ResultadoOperacao<ReceitaImportadaPreviewDTO>.Falha(ErrosApp.IaIndisponivel);
+        if (!preview.Sucesso)
+            return ResultadoOperacao<ReceitaImportadaPreviewDTO>.Falha(ErrosApp.ReceitaNaoIdentificadaTexto);
+
+        _logger.LogInformation(
+            "Receita extraída de texto via IA: {Ingredientes} ingrediente(s).", preview.IngredientesTexto.Count);
+        return ResultadoOperacao<ReceitaImportadaPreviewDTO>.Ok(preview);
     }
 
     public async Task<ResultadoOperacao<ReceitaImportadaPreviewDTO>> ImportarDeUrlAsync(

@@ -10,9 +10,14 @@
 
 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-4">
     <MudText Typo="Typo.h5" Style="font-family:'Fraunces',serif; font-weight:300;">@L["Receita_Titulo"]</MudText>
-    <MudStack Row="true" Spacing="2">
+    <MudStack Row="true" Spacing="2" Wrap="Wrap.Wrap" Justify="Justify.FlexEnd">
         <MudButton Variant="Variant.Outlined" Color="Color.Secondary"
-                   StartIcon="@Icons.Material.Filled.Link"
+                   StartIcon="@Icons.Material.Filled.AutoAwesome"
+                   Href="/receitas/sugerir">
+            @L["Receita_Sugerir"]
+        </MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Secondary"
+                   StartIcon="@Icons.Material.Filled.Download"
                    Href="/receitas/importar">
             @L["Receita_ImportarUrl"]
         </MudButton>
@@ -25,7 +30,7 @@
 </MudStack>
 
 <MudPaper Class="pa-4 mb-4" Elevation="0" Style="background:var(--mud-palette-background-gray); border-radius:10px;">
-    <MudTextField Value="@_busca" Placeholder="Buscar receitas..."
+    <MudTextField Value="@_busca" Placeholder="@L["Receita_Buscar"]"
                   Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
                   Immediate="true" DebounceInterval="300"
                   ValueChanged="@((string v) => BuscarAsync(v))"
@@ -39,8 +44,8 @@
 else if (_itens.Count == 0)
 {
     <MudAlert Severity="Severity.Info" Class="mt-4">
-        Nenhuma receita encontrada.
-        <MudLink Href="/receitas/criar">Criar a primeira!</MudLink>
+        @L["Receita_Nenhuma"]
+        <MudLink Href="/receitas/criar">@L["Receita_PrimeiraCriar"]</MudLink>
     </MudAlert>
 }
 else
@@ -62,24 +67,24 @@ else
                         <MudStack Row="true" Spacing="1" Wrap="Wrap.Wrap" Class="mt-2">
                             <MudChip T="string" Size="Size.Small" Color="Color.Default"
                                      Icon="@Icons.Material.Filled.People">
-                                @r.NumeroPorcoesBase porções
+                                @L["Ia_NPorcoes", r.NumeroPorcoesBase]
                             </MudChip>
                             @if (r.TempoPreparoMinutos.HasValue)
                             {
                                 <MudChip T="string" Size="Size.Small" Color="Color.Default"
                                          Icon="@Icons.Material.Filled.Timer">
-                                    @r.TempoPreparoMinutos min
+                                    @L["Ia_NMin", r.TempoPreparoMinutos]
                                 </MudChip>
                             }
                             <MudChip T="string" Size="Size.Small" Color="Color.Default"
                                      Icon="@Icons.Material.Filled.List">
-                                @r.TotalIngredientes ingr.
+                                @L["Receita_NIngr", r.TotalIngredientes]
                             </MudChip>
                             @if (r.TotalComponentes > 0)
                             {
                                 <MudChip T="string" Size="Size.Small" Color="Color.Primary"
                                          Icon="@Icons.Material.Filled.Bolt">
-                                    @r.TotalComponentes componentes
+                                    @L["Receita_NComponentes", r.TotalComponentes]
                                 </MudChip>
                             }
                         </MudStack>
@@ -87,15 +92,15 @@ else
                     <MudCardActions>
                         <MudButton Size="Size.Small" Color="Color.Primary"
                                    Href="@($"/receitas/{r.Id}")">
-                            Ver
+                            @L["Btn_Ver"]
                         </MudButton>
                         <MudButton Size="Size.Small" Color="Color.Default"
                                    Href="@($"/receitas/editar/{r.Id}")">
-                            Editar
+                            @L["Btn_Editar"]
                         </MudButton>
                         <MudButton Size="Size.Small" Color="Color.Default"
                                    OnClick="@(() => DuplicarAsync(r.Id))">
-                            Duplicar
+                            @L["Btn_Duplicar"]
                         </MudButton>
                         <MudSpacer />
                         <MudIconButton Icon="@Icons.Material.Filled.Delete"
@@ -153,7 +158,7 @@ else
         var r = await Service.DuplicarAsync(id);
         if (r.Sucesso)
         {
-            Snackbar.Add("Receita duplicada!", Severity.Success);
+            Snackbar.Add(L["Receita_DuplicadaOk"], Severity.Success);
             await CarregarAsync();
         }
         else
@@ -163,16 +168,16 @@ else
     private async Task ConfirmarExclusao(ReceitaListaDTO receita)
     {
         var confirm = await Dialog.ShowMessageBox(
-            "Confirmar exclusão",
-            $"Excluir '{receita.Nome}'?",
-            yesText: "Excluir", cancelText: "Cancelar");
+            L["Confirmacao_Titulo"],
+            L["Msg_ExcluirItem", receita.Nome],
+            yesText: L["Btn_Excluir"], cancelText: L["Btn_Cancelar"]);
 
         if (confirm == true)
         {
             var r = await Service.DeletarAsync(receita.Id);
             if (r.Sucesso)
             {
-                Snackbar.Add("Receita excluída.", Severity.Success);
+                Snackbar.Add(L["Receita_ExcluidaOk"], Severity.Success);
                 await CarregarAsync();
             }
             else

@@ -2,17 +2,14 @@
 @attribute [Authorize]
 @inject IStringLocalizer<SharedResource> L
 
-<PageTitle>Importar Receita</PageTitle>
+<PageTitle>@L["Receita_ImportarUrl"]</PageTitle>
 
-<MudBreadcrumbs Items='[new("Receitas","/receitas"), new("Importar da URL",null,disabled:true)]'
+<MudBreadcrumbs Items='[new(L["Receita_Titulo"],"/receitas"), new(L["Imp_Breadcrumb"],null,disabled:true)]'
                 Class="mb-4 pa-0" />
 
 <MudText Typo="Typo.h5" GutterBottom="true"
          Style="font-family:'Fraunces',serif; font-weight:300;">
-    Importar receita de um site
-</MudText>
-<MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
-    Cole a URL de qualquer site que use o formato schema.org/Recipe (Tudo Gostoso, AllRecipes, Tasty, etc.)
+    @L["Receita_ImportarUrl"]
 </MudText>
 
 @if (_uso is not null)
@@ -20,39 +17,70 @@
     @if (_uso.AtingiuLimite)
     {
         <MudAlert Severity="Severity.Warning" Class="mb-4">
-            Você atingiu o limite de @_uso.Limite importações de receita este mês no seu plano.
+            @L["Imp_LimiteAtingido", _uso.Limite]
             <MudButton Variant="Variant.Text" Color="Color.Primary" Class="ml-2"
                        OnClick="@(() => Nav.NavigateTo("/assinatura"))">
-                Fazer upgrade
+                @L["Ia_FazerUpgrade"]
             </MudButton>
         </MudAlert>
     }
     else
     {
         <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2 d-block">
-            Importações este mês: @_uso.Usado de @_uso.Limite
+            @L["Imp_UsoMes", _uso.Usado, _uso.Limite]
         </MudText>
     }
 }
 
-<MudPaper Class="pa-4 mb-4" Elevation="1" Style="border-radius:10px;">
-    <MudGrid Spacing="2" Class="align-end">
-        <MudItem xs="12" md="9">
-            <MudTextField @bind-Value="_url" Label="URL da receita"
-                          Placeholder="https://www.tudogostoso.com.br/receita/..."
-                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Link"
-                          Variant="Variant.Outlined" />
-        </MudItem>
-        <MudItem xs="12" md="3">
-            <MudButton Variant="Variant.Filled" Color="Color.Secondary"
-                       StartIcon="@Icons.Material.Filled.Download"
-                       OnClick="ImportarAsync" Disabled="_importando"
-                       FullWidth="true">
-                @(_importando ? "Importando..." : "Importar")
-            </MudButton>
-        </MudItem>
-    </MudGrid>
+<MudPaper Class="mb-4" Elevation="1" Style="border-radius:10px;">
+    <MudTabs @bind-ActivePanelIndex="_aba" Elevation="0" Rounded="true" PanelClass="pa-4"
+             ApplyEffectsToContainer="true">
+        <MudTabPanel Text="@L["Imp_AbaLink"]" Icon="@Icons.Material.Filled.Link">
+            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
+                @L["Imp_LinkIntro"]
+            </MudText>
+            <MudGrid Spacing="2" Class="align-end">
+                <MudItem xs="12" md="9">
+                    <MudTextField @bind-Value="_url" Label="@L["Imp_UrlLabel"]"
+                                  Placeholder="https://..."
+                                  Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Link"
+                                  Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="12" md="3">
+                    <MudButton Variant="Variant.Filled" Color="Color.Secondary"
+                               StartIcon="@Icons.Material.Filled.Download"
+                               OnClick="ImportarUrlAsync" Disabled="_importando"
+                               FullWidth="true">
+                        @(_importando ? L["Imp_Importando"] : L["Imp_Importar"])
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudTabPanel>
+
+        @if (Assistente.Habilitado)
+        {
+            <MudTabPanel Text="@L["Imp_AbaTexto"]" Icon="@Icons.Material.Filled.ContentPaste">
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
+                    @L["Imp_TextoIntro"]
+                </MudText>
+                <MudTextField @bind-Value="_texto" Label="@L["Imp_TextoLabel"]"
+                              Lines="8" AutoGrow="true" MaxLines="20" Variant="Variant.Outlined"
+                              Counter="@Assistente.MaxCaracteresTexto" MaxLength="@Assistente.MaxCaracteresTexto" />
+                <MudButton Variant="Variant.Filled" Color="Color.Secondary" Class="mt-3"
+                           StartIcon="@Icons.Material.Filled.AutoAwesome"
+                           OnClick="ImportarTextoAsync"
+                           Disabled="@(_importando || string.IsNullOrWhiteSpace(_texto))">
+                    @(_importando ? L["Ia_Organizando"] : L["Ia_Organizar"])
+                </MudButton>
+            </MudTabPanel>
+        }
+    </MudTabs>
 </MudPaper>
+
+@if (_importando)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Secondary" Class="mb-4" />
+}
 
 @if (_erro is not null)
 {
@@ -62,25 +90,25 @@
 @if (_preview is not null)
 {
     <MudPaper Class="pa-4" Elevation="1" Style="border-radius:10px; border-left:4px solid #4A6B5C;">
-        <MudText Typo="Typo.h6" Class="mb-3">Preview da receita importada</MudText>
+        <MudText Typo="Typo.h6" Class="mb-3">@L["Imp_Preview"]</MudText>
 
         <MudGrid Spacing="3">
             @if (!string.IsNullOrWhiteSpace(_preview.UrlImagem))
             {
                 <MudItem xs="12" md="3">
-                    <MudImage Src="@_preview.UrlImagem" Alt="Imagem da receita"
+                    <MudImage Src="@_preview.UrlImagem" Alt="@L["Imp_ImagemAlt"]"
                               ObjectFit="ObjectFit.Cover" Style="border-radius:8px; width:100%; max-height:200px;" />
                 </MudItem>
             }
             <MudItem xs="12" md="@(_preview.UrlImagem != null ? 9 : 12)">
-                <MudTextField @bind-Value="_dto.Nome" Label="Nome" Variant="Variant.Outlined" />
+                <MudTextField @bind-Value="_dto.Nome" Label="@L["Imp_Nome"]" Variant="Variant.Outlined" />
                 <MudGrid Spacing="2" Class="mt-2">
                     <MudItem xs="6">
-                        <MudNumericField @bind-Value="_dto.NumeroPorcoesBase" Label="Porções"
+                        <MudNumericField @bind-Value="_dto.NumeroPorcoesBase" Label="@L["Ia_Porcoes"]"
                                          Variant="Variant.Outlined" Min="1" />
                     </MudItem>
                     <MudItem xs="6">
-                        <MudNumericField @bind-Value="_dto.TempoPreparoMinutos" Label="Tempo (min)"
+                        <MudNumericField @bind-Value="_dto.TempoPreparoMinutos" Label="@L["Imp_Tempo"]"
                                          Variant="Variant.Outlined" />
                     </MudItem>
                 </MudGrid>
@@ -90,7 +118,7 @@
         @if (_preview.IngredientesTexto.Count > 0)
         {
             <MudDivider Class="my-3" />
-            <MudText Typo="Typo.subtitle2" Class="mb-2">Ingredientes importados</MudText>
+            <MudText Typo="Typo.subtitle2" Class="mb-2">@L["Imp_Ingredientes"]</MudText>
             <MudList T="string" Dense="true">
                 @foreach (var ing in _preview.IngredientesTexto)
                 {
@@ -101,15 +129,14 @@
                 }
             </MudList>
             <MudAlert Severity="Severity.Info" Class="mt-2" Dense="true">
-                Os ingredientes serão salvos como texto. Você poderá vinculá-los
-                ao cadastro de ingredientes na edição da receita.
+                @L["Imp_AvisoLancar"]
             </MudAlert>
         }
 
         @if (!string.IsNullOrWhiteSpace(_preview.ModoPreparo))
         {
             <MudDivider Class="my-3" />
-            <MudText Typo="Typo.subtitle2" Class="mb-2">Modo de preparo</MudText>
+            <MudText Typo="Typo.subtitle2" Class="mb-2">@L["Ia_ModoPreparo"]</MudText>
             <MudTextField Value="@_preview.ModoPreparo" Lines="5" ReadOnly="true"
                           Variant="Variant.Outlined" />
         }
@@ -118,21 +145,24 @@
             <MudButton Variant="Variant.Filled" Color="Color.Primary"
                        StartIcon="@Icons.Material.Filled.Save"
                        OnClick="SalvarAsync" Disabled="_salvando">
-                @(_salvando ? "Salvando..." : "Salvar receita")
+                @(_salvando ? L["Imp_Salvando"] : L["Imp_Salvar"])
             </MudButton>
-            <MudButton Variant="Variant.Text" OnClick="LimparPreview">Cancelar</MudButton>
+            <MudButton Variant="Variant.Text" OnClick="LimparPreview">@L["Imp_Cancelar"]</MudButton>
         </MudStack>
     </MudPaper>
 }
 
 @code {
     [Inject] IImportadorReceitaService Importador { get; set; } = null!;
+    [Inject] IAssistenteReceitaIA Assistente { get; set; } = null!;
     [Inject] IReceitaService Service { get; set; } = null!;
     [Inject] ICotaImportacaoService Cota { get; set; } = null!;
     [Inject] ISnackbar Snackbar { get; set; } = null!;
     [Inject] NavigationManager Nav { get; set; } = null!;
 
+    private int _aba;
     private string _url = string.Empty;
+    private string _texto = string.Empty;
     private bool _importando;
     private bool _salvando;
     private string? _erro;
@@ -143,14 +173,14 @@
     protected override async Task OnInitializedAsync()
         => _uso = await Cota.ObterUsoAsync();
 
-    private async Task ImportarAsync()
+    private async Task ImportarUrlAsync()
     {
         _erro = null;
         _preview = null;
 
         if (string.IsNullOrWhiteSpace(_url))
         {
-            _erro = "Informe uma URL válida.";
+            _erro = L["Imp_InformeUrl"];
             return;
         }
 
@@ -158,31 +188,47 @@
         var cota = await Cota.VerificarPodeImportarAsync();
         if (!cota.Sucesso)
         {
-            _erro = cota.Erros.FirstOrDefault() ?? "Limite de importações atingido.";
+            _erro = L.Traduzir(cota.Erros);
             return;
         }
 
         _importando = true;
         var r = await Importador.ImportarDeUrlAsync(_url);
         _importando = false;
+        AplicarResultado(r);
+    }
 
+    private async Task ImportarTextoAsync()
+    {
+        _erro = null;
+        _preview = null;
+
+        // O serviço já faz o pré-check da cota e o throttle da IA.
+        _importando = true;
+        var r = await Importador.ImportarDeTextoAsync(_texto);
+        _importando = false;
+        AplicarResultado(r);
+    }
+
+    private void AplicarResultado(ResultadoOperacao<ReceitaImportadaPreviewDTO> r)
+    {
         if (!r.Sucesso || r.Valor is null)
         {
-            _erro = r.Erros.FirstOrDefault() ?? "Falha ao importar.";
+            _erro = r.Erros.Count > 0 ? L.Traduzir(r.Erros) : L["Imp_Falha"];
             return;
         }
 
         _preview = r.Valor;
         _dto = new ReceitaPersistenciaDTO
         {
-            Nome               = _preview.Nome,
-            ModoPreparo        = _preview.ModoPreparo,
-            NumeroPorcoesBase  = _preview.NumeroPorcoesBase,
+            Nome                = _preview.Nome,
+            ModoPreparo         = _preview.ModoPreparo,
+            NumeroPorcoesBase   = _preview.NumeroPorcoesBase,
             TempoPreparoMinutos = _preview.TempoPreparoMinutos,
-            UrlOrigem          = _preview.UrlOrigem,
-            UrlImagem          = _preview.UrlImagem,
-            Observacoes        = _preview.IngredientesTexto.Count > 0
-                ? "Ingredientes originais:\n" + string.Join("\n", _preview.IngredientesTexto)
+            UrlOrigem           = _preview.UrlOrigem,
+            UrlImagem           = _preview.UrlImagem,
+            Observacoes         = _preview.IngredientesTexto.Count > 0
+                ? string.Join("\n", _preview.IngredientesTexto)
                 : null,
         };
     }
@@ -197,8 +243,10 @@
             // Conta a importação na cota mensal apenas ao salvar com sucesso.
             await Cota.RegistrarImportacaoAsync();
             _salvando = false;
-            Snackbar.Add("Receita importada e salva!", Severity.Success);
-            Nav.NavigateTo($"/receitas/editar/{r.Valor}");
+            Snackbar.Add(L["Imp_Salva"], Severity.Success);
+            Nav.NavigateTo(string.IsNullOrWhiteSpace(_dto.Observacoes)
+                ? $"/receitas/editar/{r.Valor}"
+                : $"/receitas/editar/{r.Valor}?lancar=1");
         }
         else
         {
@@ -212,5 +260,6 @@
         _preview = null;
         _dto = new ReceitaPersistenciaDTO();
         _url = string.Empty;
+        _texto = string.Empty;
     }
 }

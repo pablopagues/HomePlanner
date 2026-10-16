@@ -2,7 +2,7 @@
 @attribute [Authorize]
 @inject IStringLocalizer<SharedResource> L
 
-<PageTitle>Editar Receita</PageTitle>
+<PageTitle>@L["Receita_EditarTitle"]</PageTitle>
 
 <MudBreadcrumbs Items="_breadcrumbs" Class="mb-4 pa-0" />
 
@@ -20,18 +20,23 @@ else if (_dto is not null)
     <ReceitaForm Dto="_dto" Unidades="_unidades"
                  BuscarIngredientes="BuscarIngredientes"
                  Salvando="_salvando"
+                 AbrirLancamentoAoIniciar="@(Lancar == 1)"
                  OnSalvar="SalvarAsync"
                  OnCancelar='@(() => Nav.NavigateTo("/receitas"))' />
 }
 else
 {
-    <MudAlert Severity="Severity.Error">Receita não encontrada.</MudAlert>
+    <MudAlert Severity="Severity.Error">@L["Receita_NaoEncontrada"]</MudAlert>
 }
 
 @code {
     [Parameter] public int Id { get; set; }
 
+    /// <summary>?lancar=1 — vindo de importação/sugestão: já abre o lançamento de ingredientes.</summary>
+    [SupplyParameterFromQuery] public int? Lancar { get; set; }
+
     [Inject] IReceitaService Service { get; set; } = null!;
+    [Inject] ICotaImportacaoService Cota { get; set; } = null!;
     [Inject] IIngredienteService IngService { get; set; } = null!;
     [Inject] IUnidadeMedidaRepository UnidadeRepo { get; set; } = null!;
     [Inject] ISnackbar Snackbar { get; set; } = null!;
@@ -86,7 +91,7 @@ else
 
             _breadcrumbs =
             [
-                new("Receitas", "/receitas"),
+                new(L["Receita_Titulo"], "/receitas"),
                 new(detalhe.Nome, null, disabled: true),
             ];
         }
@@ -105,7 +110,8 @@ else
             var r = await Service.SalvarAsync(_dto);
             if (r.Sucesso)
             {
-                Snackbar.Add("Receita salva!", Severity.Success);
+                if (_dto.ContarImportacaoIA) await Cota.RegistrarImportacaoAsync();
+                Snackbar.Add(L["Receita_SalvoOk"], Severity.Success);
                 Nav.NavigateTo("/receitas");
             }
             else
@@ -113,7 +119,7 @@ else
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Erro ao salvar a receita: {ex.Message}", Severity.Error);
+            Snackbar.Add(L["Receita_ErroSalvar", ex.Message], Severity.Error);
         }
         finally
         {

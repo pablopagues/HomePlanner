@@ -62,6 +62,64 @@ public class CotaImportacaoService : ICotaImportacaoService
 
     public async Task RegistrarImportacaoAsync(CancellationToken ct = default)
     {
+        var uso = await ObterOuCriarUsoDoMesAsync(ct);
+        uso.Quantidade += 1;
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task<UsoCotaImportacaoDTO> ObterUsoAsync(CancellationToken ct = default)
+    {
+        var (plano, uso) = await ObterPlanoEUsoAsync(ct);
+        return new UsoCotaImportacaoDTO
+        {
+            Plano  = plano,
+            Usado  = uso?.Quantidade ?? 0,
+            Limite = LimitesPorPlano.ImportacoesReceitaMes(plano),
+        };
+    }
+
+    public async Task<ResultadoOperacao> VerificarPodeSugerirAsync(CancellationToken ct = default)
+    {
+        var uso = await ObterUsoSugestoesAsync(ct);
+        if (uso.AtingiuLimite)
+            return ResultadoOperacao.Falha(ErrosApp.LimiteSugestoes(uso.Limite));
+        return ResultadoOperacao.Ok();
+    }
+
+    public async Task RegistrarSugestaoAsync(CancellationToken ct = default)
+    {
+        var uso = await ObterOuCriarUsoDoMesAsync(ct);
+        uso.QuantidadeSugestoes += 1;
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task<UsoCotaImportacaoDTO> ObterUsoSugestoesAsync(CancellationToken ct = default)
+    {
+        var (plano, uso) = await ObterPlanoEUsoAsync(ct);
+        return new UsoCotaImportacaoDTO
+        {
+            Plano  = plano,
+            Usado  = uso?.QuantidadeSugestoes ?? 0,
+            Limite = LimitesPorPlano.SugestoesReceitaMes(plano),
+        };
+    }
+
+    private async Task<(PlanoAssinatura Plano, UsoImportacaoReceita? Uso)> ObterPlanoEUsoAsync(CancellationToken ct)
+    {
+        await _tenantAccessor.GarantirHidratadoAsync();
+
+        var assinatura = await _assinaturaRepo.ObterMinhaAssinaturaAsync(ct);
+        var plano = assinatura?.Plano ?? PlanoAssinatura.Gratis;
+
+        var anoMes = AnoMesAtual();
+        var uso = await _db.UsosImportacaoReceita
+            .FirstOrDefaultAsync(u => u.AnoMes == anoMes, ct);
+
+        return (plano, uso);
+    }
+
+    private async Task<UsoImportacaoReceita> ObterOuCriarUsoDoMesAsync(CancellationToken ct)
+    {
         await _tenantAccessor.GarantirHidratadoAsync();
         var anoMes = AnoMesAtual();
 
@@ -70,32 +128,10 @@ public class CotaImportacaoService : ICotaImportacaoService
 
         if (uso is null)
         {
-            uso = new UsoImportacaoReceita { AnoMes = anoMes, Quantidade = 0 };
+            uso = new UsoImportacaoReceita { AnoMes = anoMes };
             _db.UsosImportacaoReceita.Add(uso);
         }
-
-        uso.Quantidade += 1;
-        await _db.SaveChangesAsync(ct);
-    }
-
-    public async Task<UsoCotaImportacaoDTO> ObterUsoAsync(CancellationToken ct = default)
-    {
-        await _tenantAccessor.GarantirHidratadoAsync();
-
-        var assinatura = await _assinaturaRepo.ObterMinhaAssinaturaAsync(ct);
-        var plano = assinatura?.Plano ?? PlanoAssinatura.Gratis;
-        var limite = LimitesPorPlano.ImportacoesReceitaMes(plano);
-
-        var anoMes = AnoMesAtual();
-        var uso = await _db.UsosImportacaoReceita
-            .FirstOrDefaultAsync(u => u.AnoMes == anoMes, ct);
-
-        return new UsoCotaImportacaoDTO
-        {
-            Plano  = plano,
-            Usado  = uso?.Quantidade ?? 0,
-            Limite = limite,
-        };
+        return uso;
     }
 
     private static int AnoMesAtual()

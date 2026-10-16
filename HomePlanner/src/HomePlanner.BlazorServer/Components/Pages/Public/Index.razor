@@ -67,7 +67,7 @@
                                  Titulo="@L["Landing_Feat2Titulo"]" Descricao="@L["Landing_Feat2Desc"]" />
                 </MudItem>
                 <MudItem xs="12" md="4">
-                    <FeatureCard Icon="@Icons.Material.Filled.Link" Cor="#7A8278"
+                    <FeatureCard Icon="@Icons.Material.Filled.AutoAwesome" Cor="#7A8278"
                                  Titulo="@L["Landing_Feat3Titulo"]" Descricao="@L["Landing_Feat3Desc"]" />
                 </MudItem>
             </MudGrid>
@@ -88,6 +88,21 @@
             <MudText Typo="Typo.body1" Class="mb-2" Style="color:#E8DDD1; max-width:640px; margin:0 auto;">
                 @L["Landing_AiDesc"]
             </MudText>
+
+            <MudGrid Spacing="3" Class="mt-8" Style="text-align:left;">
+                @foreach (var (icone, n) in _recursosIA)
+                {
+                    <MudItem xs="12" sm="6">
+                        <div class="landing-ai-item">
+                            <MudIcon Icon="@icone" Style="color:#F2C3A9;" />
+                            <div>
+                                <div class="landing-ai-item-titulo">@L[$"Landing_AiItem{n}Titulo"]</div>
+                                <div class="landing-ai-item-desc">@L[$"Landing_AiItem{n}Desc"]</div>
+                            </div>
+                        </div>
+                    </MudItem>
+                }
+            </MudGrid>
         </MudContainer>
     </section>
 
@@ -192,6 +207,13 @@
         font-size:0.8rem; font-weight:600; letter-spacing:0.5px;
         padding:6px 16px; border-radius:999px; text-transform:uppercase;
     }
+    .landing-ai-item {
+        display:flex; gap:12px; align-items:flex-start; height:100%;
+        background: rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.14);
+        border-radius:12px; padding:16px;
+    }
+    .landing-ai-item-titulo { color:#FFFFFF; font-weight:600; margin-bottom:4px; }
+    .landing-ai-item-desc { color:#E8DDD1; font-size:0.92rem; line-height:1.45; }
 
     /* Mobile: empilha logo acima do menu e centraliza a navegação,
        para a quebra de linha ficar equilibrada em vez de jogar só o CTA para baixo. */
@@ -210,6 +232,15 @@
 </style>
 
 @code {
+    // Recursos de IA exibidos na seção "IA Claude" (textos em Landing_AiItem{n}Titulo/Desc).
+    private static readonly (string Icone, int N)[] _recursosIA =
+    [
+        (Icons.Material.Filled.Link, 1),
+        (Icons.Material.Filled.ContentPaste, 2),
+        (Icons.Material.Filled.AutoAwesome, 3),
+        (Icons.Material.Filled.Translate, 4),
+    ];
+
     protected override async Task OnInitializedAsync()
     {
         Lang.SetLang(Lang.Lang);

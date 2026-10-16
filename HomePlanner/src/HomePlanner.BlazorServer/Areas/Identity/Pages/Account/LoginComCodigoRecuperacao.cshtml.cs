@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 namespace HomePlanner.BlazorServer.Areas.Identity.Pages.Account;
 
 [AllowAnonymous]
-public class LoginComCodigoRecuperacaoModel : PageModel
+public class LoginComCodigoRecuperacaoModel : PaginaLocalizada
 {
     private readonly SignInManager<Usuario> _signInManager;
     private readonly HomePlannerDbContext _db;
@@ -33,7 +33,7 @@ public class LoginComCodigoRecuperacaoModel : PageModel
     }
 
     [BindProperty]
-    [Required(ErrorMessage = "Informe um código de recuperação.")]
+    [Required(ErrorMessage = "Val_InformeCodigoRecuperacao")]
     public string CodigoRecuperacao { get; set; } = string.Empty;
 
     [BindProperty(SupportsGet = true)]
@@ -70,12 +70,12 @@ public class LoginComCodigoRecuperacaoModel : PageModel
         if (resultado.IsLockedOut)
         {
             ModelState.AddModelError(string.Empty,
-                "Conta bloqueada temporariamente após várias tentativas. Tente novamente em 15 minutos.");
+                L["Conta_Bloqueada"]);
             return Page();
         }
 
         _logger.LogWarning("Código de recuperação inválido para {Email}", usuario.Email);
-        ModelState.AddModelError(string.Empty, "Código de recuperação inválido.");
+        ModelState.AddModelError(string.Empty, L["Conta_RecuperacaoInvalido"]);
         return Page();
     }
 

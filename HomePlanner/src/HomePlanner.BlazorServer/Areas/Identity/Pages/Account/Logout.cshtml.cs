@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace HomePlanner.BlazorServer.Areas.Identity.Pages.Account;
 
 [IgnoreAntiforgeryToken]
-public class LogoutModel : PageModel
+public class LogoutModel : PaginaLocalizada
 {
     private readonly SignInManager<Usuario> _signInManager;
 

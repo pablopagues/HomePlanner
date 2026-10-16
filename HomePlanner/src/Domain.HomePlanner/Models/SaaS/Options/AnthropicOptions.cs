@@ -16,8 +16,17 @@ public class AnthropicOptions
     /// <summary>Modelo a usar. Padrão: Haiku 4.5 (barato e suficiente para parsing).</summary>
     public string Model { get; set; } = "claude-haiku-4-5";
 
+    /// <summary>
+    /// Modelo das sugestões de receitas (tarefa criativa). Separado do <see cref="Model"/>
+    /// para poder testar um modelo maior aqui sem encarecer o parsing.
+    /// </summary>
+    public string ModelSugestao { get; set; } = "claude-haiku-4-5";
+
     /// <summary>Teto de itens parseados por chamada (proteção de custo/payload).</summary>
     public int MaxIngredientesPorChamada { get; set; } = 60;
+
+    /// <summary>Tamanho máximo do texto colado para extrair uma receita (proteção de custo).</summary>
+    public int MaxCaracteresTextoReceita { get; set; } = 15000;
 
     /// <summary>true quando há chave configurada — habilita o parser por IA.</summary>
     public bool IsEnabled => !string.IsNullOrWhiteSpace(ApiKey);

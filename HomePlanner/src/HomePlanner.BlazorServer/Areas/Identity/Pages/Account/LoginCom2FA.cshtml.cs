@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 namespace HomePlanner.BlazorServer.Areas.Identity.Pages.Account;
 
 [AllowAnonymous]
-public class LoginCom2FAModel : PageModel
+public class LoginCom2FAModel : PaginaLocalizada
 {
     private readonly SignInManager<Usuario> _signInManager;
     private readonly UserManager<Usuario> _userManager;
@@ -36,7 +36,7 @@ public class LoginCom2FAModel : PageModel
     }
 
     [BindProperty]
-    [Required(ErrorMessage = "Informe o código.")]
+    [Required(ErrorMessage = "Val_InformeCodigo")]
     public string Codigo { get; set; } = string.Empty;
 
     [BindProperty]
@@ -82,12 +82,12 @@ public class LoginCom2FAModel : PageModel
         if (resultado.IsLockedOut)
         {
             ModelState.AddModelError(string.Empty,
-                "Conta bloqueada temporariamente após várias tentativas. Tente novamente em 15 minutos.");
+                L["Conta_Bloqueada"]);
             return Page();
         }
 
         _logger.LogWarning("Código TOTP inválido para {Email}", usuario.Email);
-        ModelState.AddModelError(string.Empty, "Código inválido. Verifique o app autenticador e tente novamente.");
+        ModelState.AddModelError(string.Empty, L["Conta_2FACodigoInvalido"]);
         return Page();
     }
 

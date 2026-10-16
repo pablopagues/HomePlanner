@@ -20,4 +20,15 @@ public interface ICotaImportacaoService
 
     /// <summary>Uso atual (usado/limite) para exibição na UI.</summary>
     Task<UsoCotaImportacaoDTO> ObterUsoAsync(CancellationToken ct = default);
+
+    // ── Sugestões de receitas (cota própria, contada ao gerar) ───────────────
+
+    /// <summary>Pré-check (read-only): o tenant ainda pode pedir sugestões este mês?</summary>
+    Task<ResultadoOperacao> VerificarPodeSugerirAsync(CancellationToken ct = default);
+
+    /// <summary>Incrementa o contador de sugestões do mês (após gerar com sucesso).</summary>
+    Task RegistrarSugestaoAsync(CancellationToken ct = default);
+
+    /// <summary>Uso atual da cota de sugestões (usado/limite) para exibição na UI.</summary>
+    Task<UsoCotaImportacaoDTO> ObterUsoSugestoesAsync(CancellationToken ct = default);
 }

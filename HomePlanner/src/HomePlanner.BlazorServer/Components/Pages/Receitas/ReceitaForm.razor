@@ -7,28 +7,31 @@
 @inject IImagemReceitaProcessor ImagemProcessor
 @inject ITradutorReceitaIA Tradutor
 @inject ICotaImportacaoService Cota
+@inject IImportadorReceitaService Importador
+@inject IAssistenteReceitaIA Assistente
+@inject IStringLocalizer<SharedResource> L
 @inject ISnackbar Snackbar
 
 <MudGrid Spacing="3">
     <MudItem xs="12" md="7">
-        <MudTextField @bind-Value="Dto.Nome" Label="Nome da receita" Required="true"
+        <MudTextField @bind-Value="Dto.Nome" Label="@L["Receita_NomeLabel"]" Required="true"
                       Variant="Variant.Outlined" />
     </MudItem>
     <MudItem xs="6" md="2">
-        <MudNumericField @bind-Value="Dto.NumeroPorcoesBase" Label="Porções" Min="1"
+        <MudNumericField @bind-Value="Dto.NumeroPorcoesBase" Label="@L["Ia_Porcoes"]" Min="1"
                          Variant="Variant.Outlined" />
     </MudItem>
     <MudItem xs="6" md="3">
-        <MudNumericField @bind-Value="Dto.TempoPreparoMinutos" Label="Tempo (min)"
+        <MudNumericField @bind-Value="Dto.TempoPreparoMinutos" Label="@L["Receita_TempoLabel"]"
                          Variant="Variant.Outlined" />
     </MudItem>
 
     <MudItem xs="12">
-        <MudText Typo="Typo.subtitle2" Class="mb-2">Foto da receita</MudText>
+        <MudText Typo="Typo.subtitle2" Class="mb-2">@L["Receita_Foto"]</MudText>
         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="4" Wrap="Wrap.Wrap" Class="mb-2">
             @if (PreviewSrc is not null)
             {
-                <MudImage Src="@PreviewSrc" Alt="Foto da receita" ObjectFit="ObjectFit.Cover"
+                <MudImage Src="@PreviewSrc" Alt="@L["Receita_Foto"]" ObjectFit="ObjectFit.Cover"
                           Width="120" Height="120" Style="border-radius:10px;" />
             }
             else
@@ -45,7 +48,7 @@
                     <ActivatorContent>
                         <MudButton Variant="Variant.Outlined" Color="Color.Primary"
                                    StartIcon="@Icons.Material.Filled.PhotoCamera" Disabled="_enviandoFoto">
-                            @(PreviewSrc is null ? "Enviar foto" : "Trocar foto")
+                            @(PreviewSrc is null ? L["Receita_EnviarFoto"] : L["Receita_TrocarFoto"])
                         </MudButton>
                     </ActivatorContent>
                 </MudFileUpload>
@@ -54,28 +57,42 @@
                     <MudButton Variant="Variant.Text" Color="Color.Error" Size="Size.Small"
                                StartIcon="@Icons.Material.Filled.Delete"
                                OnClick="RemoverFoto" Disabled="_enviandoFoto">
-                        Remover foto
+                        @L["Receita_RemoverFoto"]
                     </MudButton>
                 }
                 <MudText Typo="Typo.caption" Color="Color.Secondary">
-                    A foto é reduzida automaticamente. Uma foto por receita — enviar outra substitui a atual.
+                    @L["Receita_FotoAjuda"]
                 </MudText>
             </MudStack>
         </MudStack>
-        <MudTextField @bind-Value="Dto.UrlImagem" Label="URL da imagem (opcional)"
+        <MudTextField @bind-Value="Dto.UrlImagem" Label="@L["Receita_UrlImagemLabel"]"
                       Variant="Variant.Outlined" Adornment="Adornment.Start"
                       AdornmentIcon="@Icons.Material.Filled.Link"
-                      HelperText="Para receitas de sites. Se você enviar uma foto acima, ela tem preferência." />
+                      HelperText="@L["Receita_UrlImagemAjuda"]" />
     </MudItem>
 
     <MudItem xs="12">
-        <MudTextField @bind-Value="Dto.ModoPreparo" Label="Modo de preparo"
+        <MudTextField @bind-Value="Dto.ModoPreparo" Label="@L["Receita_ModoPreparoLabel"]"
                       Lines="6" AutoGrow="true" Variant="Variant.Outlined" />
     </MudItem>
 
     <MudItem xs="12">
-        <MudTextField @bind-Value="Dto.Observacoes" Label="Observações"
-                      Lines="2" AutoGrow="true" Variant="Variant.Outlined" />
+        <MudTextField @bind-Value="Dto.Observacoes" Label="@L["Receita_ObservacoesLabel"]"
+                      Lines="3" AutoGrow="true" Variant="Variant.Outlined" />
+        @if (Assistente.Habilitado)
+        {
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mt-2" Wrap="Wrap.Wrap">
+                <MudButton StartIcon="@Icons.Material.Filled.AutoAwesome" Size="Size.Small"
+                           Variant="Variant.Outlined" Color="Color.Secondary"
+                           OnClick="OrganizarComIAAsync"
+                           Disabled="@(_organizando || string.IsNullOrWhiteSpace(Dto.Observacoes))">
+                    @(_organizando ? L["Ia_Organizando"] : L["Ia_Organizar"])
+                </MudButton>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                    @L["Receita_OrganizarAjuda"]
+                </MudText>
+            </MudStack>
+        }
     </MudItem>
 </MudGrid>
 
@@ -84,21 +101,21 @@
 @* ── Componentes (outras receitas que compõem este prato) ─────────────────── *@
 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-2" Wrap="Wrap.Wrap">
     <MudStack Spacing="0">
-        <MudText Typo="Typo.h6">Componentes (pratos que compõem)</MudText>
+        <MudText Typo="Typo.h6">@L["Receita_ComponentesTitulo"]</MudText>
         <MudText Typo="Typo.caption" Color="Color.Secondary">
-            Combine outras receitas neste prato. Opcional.
+            @L["Receita_ComponentesAjuda"]
         </MudText>
     </MudStack>
     <MudStack Row="true" Spacing="2">
         <MudButton StartIcon="@Icons.Material.Filled.Bolt" Size="Size.Small"
                    Variant="Variant.Text" Color="Color.Secondary"
                    OnClick="CriarComponenteRapido">
-            Criar componente
+            @L["Receita_CriarComponente"]
         </MudButton>
         <MudButton StartIcon="@Icons.Material.Filled.Add" Size="Size.Small"
                    Variant="Variant.Outlined" Color="Color.Primary"
                    OnClick="AdicionarComponente">
-            Adicionar
+            @L["Btn_Adicionar"]
         </MudButton>
     </MudStack>
 </MudStack>
@@ -109,7 +126,7 @@
               Style="background:var(--mud-palette-background-gray); border-radius:8px; border:1px solid var(--mud-palette-lines-default);">
         <MudGrid Spacing="2" Class="align-center">
             <MudItem xs="12" md="7">
-                <MudAutocomplete T="ReceitaListaDTO?" Label="Receita componente"
+                <MudAutocomplete T="ReceitaListaDTO?" Label="@L["Receita_ComponenteLabel"]"
                                  Value="comp.Selecionado"
                                  Text="@comp.Texto"
                                  TextChanged="@(t => comp.Texto = t)"
@@ -124,7 +141,7 @@
             <MudItem xs="8" md="3">
                 <MudNumericField Value="comp.Dto.PorcoesDesejadas"
                                  ValueChanged="@((int v) => { comp.Dto.PorcoesDesejadas = v; })"
-                                 Label="Porções" Min="1"
+                                 Label="@L["Ia_Porcoes"]" Min="1"
                                  Variant="Variant.Outlined" Margin="Margin.Dense" />
             </MudItem>
             <MudItem xs="4" md="2" Class="d-flex justify-end">
@@ -137,21 +154,21 @@
 @if (_componentes.Count == 0)
 {
     <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-2">
-        Nenhum componente. Este prato usa só os ingredientes abaixo.
+        @L["Receita_SemComponentes"]
     </MudText>
 }
 
 <MudDivider Class="my-4" />
 
 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-3" Wrap="Wrap.Wrap">
-    <MudText Typo="Typo.h6">Ingredientes próprios</MudText>
+    <MudText Typo="Typo.h6">@L["Receita_IngredientesProprios"]</MudText>
     <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
         @if (_linhas.Count > 0)
         {
             <MudToggleGroup T="SistemaMedida" Value="_sistema" ValueChanged="TrocarSistema"
                             Size="Size.Small" Color="Color.Primary" CheckMark="true">
-                <MudToggleItem Value="SistemaMedida.Metrico" Text="Métrico" />
-                <MudToggleItem Value="SistemaMedida.Imperial" Text="Imperial" />
+                <MudToggleItem Value="SistemaMedida.Metrico" Text="@L["Medida_Metrico"]" />
+                <MudToggleItem Value="SistemaMedida.Imperial" Text="@L["Medida_Imperial"]" />
             </MudToggleGroup>
         }
         @if (_linhas.Any(l => l.Selecionada))
@@ -159,18 +176,18 @@
             <MudButton StartIcon="@Icons.Material.Filled.CallSplit" Size="Size.Small"
                        Variant="Variant.Text" Color="Color.Secondary"
                        OnClick="ExtrairComponente">
-                Extrair como componente
+                @L["Receita_ExtrairComponente"]
             </MudButton>
         }
         <MudButton StartIcon="@Icons.Material.Filled.AutoFixHigh" Size="Size.Small"
                    Variant="Variant.Text" Color="Color.Secondary"
-                   OnClick="AbrirLancarIngredientes">
-            Lançar do texto
+                   OnClick="@(() => AbrirLancarIngredientes())">
+            @L["Receita_LancarTexto"]
         </MudButton>
         <MudButton StartIcon="@Icons.Material.Filled.Add" Size="Size.Small"
                    Variant="Variant.Outlined" Color="Color.Primary"
                    OnClick="AdicionarIngrediente">
-            Adicionar
+            @L["Btn_Adicionar"]
         </MudButton>
     </MudStack>
 </MudStack>
@@ -186,7 +203,7 @@
             </MudItem>
             <MudItem xs="10" md="3">
                 <MudAutocomplete T="IngredienteListaDTO?"
-                                 Label="Ingrediente"
+                                 Label="@L["Ing_IngredienteLabel"]"
                                  Value="item.Selecionado"
                                  Text="@item.Texto"
                                  TextChanged="@(t => item.Texto = t)"
@@ -199,26 +216,26 @@
                                  Margin="Margin.Dense" />
             </MudItem>
             <MudItem xs="5" md="2">
-                <MudNumericField @bind-Value="item.Dto.Quantidade" Label="Qtde"
+                <MudNumericField @bind-Value="item.Dto.Quantidade" Label="@L["Ing_Qtde"]"
                                  Min="0m" Format="G"
                                  Variant="Variant.Outlined" Margin="Margin.Dense" />
             </MudItem>
             <MudItem xs="7" md="2">
-                <MudSelect T="int" @bind-Value="item.Dto.UnidadeMedidaId" Label="Unidade"
+                <MudSelect T="int" @bind-Value="item.Dto.UnidadeMedidaId" Label="@L["Ing_Unidade"]"
                            Variant="Variant.Outlined" Margin="Margin.Dense">
                     @foreach (var u in Unidades)
                     {
-                        <MudSelectItem Value="@u.Id">@u.Codigo — @u.Nome</MudSelectItem>
+                        <MudSelectItem Value="@u.Id">@L.AbrevUnidade(u.Codigo) — @L.NomeUnidade(u.Codigo, u.Nome)</MudSelectItem>
                     }
                 </MudSelect>
             </MudItem>
             <MudItem xs="9" md="3">
-                <MudTextField @bind-Value="item.Dto.Observacao" Label="Obs."
+                <MudTextField @bind-Value="item.Dto.Observacao" Label="@L["Ing_Obs"]"
                               Variant="Variant.Outlined" Margin="Margin.Dense" />
             </MudItem>
             <MudItem xs="2" md="1">
                 <MudStack AlignItems="AlignItems.Center">
-                    <MudCheckBox @bind-Value="item.Dto.Opcional" Label="Opt." Size="Size.Small" />
+                    <MudCheckBox @bind-Value="item.Dto.Opcional" Label="@L["Ing_Opcional"]" Size="Size.Small" />
                     <MudIconButton Icon="@Icons.Material.Filled.DeleteOutline"
                                    Color="Color.Error" Size="Size.Small"
                                    OnClick="@(() => RemoverIngrediente(item))" />
@@ -231,17 +248,17 @@
 @if (_linhas.Count == 0)
 {
     <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
-        Nenhum ingrediente adicionado.
+        @L["Ing_Nenhum"]
     </MudText>
 }
 
 @* ── Prévia da compra deste prato (próprios + componentes) ────────────────── *@
 <MudDivider Class="my-4" />
 <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-2" Wrap="Wrap.Wrap">
-    <MudText Typo="Typo.subtitle1">Prévia da compra deste prato</MudText>
+    <MudText Typo="Typo.subtitle1">@L["Receita_PreviaCompra"]</MudText>
     <MudButton StartIcon="@Icons.Material.Filled.Refresh" Size="Size.Small" Variant="Variant.Text"
                OnClick="AtualizarPrevia" Disabled="_carregandoPrevia">
-        Atualizar prévia
+        @L["Receita_AtualizarPrevia"]
     </MudButton>
 </MudStack>
 @if (_carregandoPrevia)
@@ -251,7 +268,7 @@
 else if (_previa.Count == 0)
 {
     <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-2">
-        Adicione componentes ou ingredientes e clique em <b>Atualizar prévia</b>.
+        @L["Receita_PreviaVazia"]
     </MudText>
 }
 else
@@ -263,7 +280,7 @@ else
             {
                 <MudItem xs="12" sm="6" md="4">
                     <MudText Typo="Typo.body2">
-                        <strong>@FormatarQtd(p.Quantidade) @p.CodigoUnidade</strong> @p.NomeIngrediente
+                        <strong>@L.FormatarQuantidade(p.Quantidade, p.CodigoUnidade)</strong> @p.NomeIngrediente
                     </MudText>
                 </MudItem>
             }
@@ -276,9 +293,9 @@ else
 <MudStack Row="true" Spacing="2">
     <MudButton Variant="Variant.Filled" Color="Color.Primary"
                OnClick="HandleSalvar" Disabled="Salvando">
-        @(Salvando ? "Salvando..." : "Salvar receita")
+        @(Salvando ? L["Btn_Salvando"] : L["Receita_SalvarBtn"])
     </MudButton>
-    <MudButton Variant="Variant.Text" OnClick="OnCancelar">Cancelar</MudButton>
+    <MudButton Variant="Variant.Text" OnClick="OnCancelar">@L["Btn_Cancelar"]</MudButton>
 </MudStack>
 
 @code {
@@ -288,6 +305,14 @@ else
     [Parameter] public bool Salvando { get; set; }
     [Parameter] public EventCallback OnSalvar { get; set; }
     [Parameter] public EventCallback OnCancelar { get; set; }
+
+    /// <summary>
+    /// Abre o "Lançar ingredientes" já analisando o texto ao carregar (receita recém
+    /// importada/sugerida, ainda sem ingredientes estruturados).
+    /// </summary>
+    [Parameter] public bool AbrirLancamentoAoIniciar { get; set; }
+
+    private bool _organizando;
 
     private List<IngredienteLinhaForm> _linhas = [];
     private List<ComponenteLinhaForm> _componentes = [];
@@ -344,6 +369,52 @@ else
         }
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && AbrirLancamentoAoIniciar
+            && _linhas.Count == 0 && !string.IsNullOrWhiteSpace(Dto.Observacoes))
+            await AbrirLancarIngredientes(analisarAoAbrir: true);
+    }
+
+    // ── Organizar com IA (receita inteira colada no campo de ingredientes) ───
+    private async Task OrganizarComIAAsync()
+    {
+        _organizando = true;
+        var r = await Importador.ImportarDeTextoAsync(Dto.Observacoes);
+        _organizando = false;
+
+        if (!r.Sucesso || r.Valor is null)
+        {
+            Snackbar.Add(L.Traduzir(r.Erros), Severity.Warning);
+            return;
+        }
+
+        var p = r.Valor;
+        if (string.IsNullOrWhiteSpace(Dto.Nome)) Dto.Nome = p.Nome;
+        if (Dto.Id == 0) Dto.NumeroPorcoesBase = p.NumeroPorcoesBase;
+        Dto.TempoPreparoMinutos ??= p.TempoPreparoMinutos;
+
+        // Não sobrescreve um modo de preparo que já foi digitado.
+        var preparoMantido = false;
+        if (!string.IsNullOrWhiteSpace(p.ModoPreparo))
+        {
+            if (string.IsNullOrWhiteSpace(Dto.ModoPreparo)) Dto.ModoPreparo = p.ModoPreparo;
+            else preparoMantido = true;
+        }
+
+        Dto.Observacoes = string.Join("\n", p.IngredientesTexto);
+        Dto.ContarImportacaoIA = true;
+        StateHasChanged();
+
+        if (preparoMantido)
+            Snackbar.Add(L["Receita_PreparoMantido"], Severity.Info);
+
+        if (p.IngredientesTexto.Count > 0)
+            await AbrirLancarIngredientes(analisarAoAbrir: true);
+        else
+            Snackbar.Add(L["Receita_NenhumIngredienteTexto"], Severity.Warning);
+    }
+
     private static IngredienteLinhaForm CriarLinhaIngrediente(ReceitaIngredientePersistenciaDTO d)
         => new()
         {
@@ -362,7 +433,7 @@ else
         if (file.Size > ImagemProcessor.TamanhoMaximoEntradaBytes)
         {
             Snackbar.Add(
-                $"Imagem muito grande. Máximo {ImagemProcessor.TamanhoMaximoEntradaBytes / (1024 * 1024)} MB.",
+                L["Receita_ImagemGrande", ImagemProcessor.TamanhoMaximoEntradaBytes / (1024 * 1024)],
                 Severity.Warning);
             return;
         }
@@ -377,7 +448,7 @@ else
             var r = await ImagemProcessor.ProcessarAsync(ms.ToArray(), file.ContentType);
             if (!r.Sucesso || r.Valor is null)
             {
-                Snackbar.Add(r.Erros.FirstOrDefault() ?? "Não foi possível processar a imagem.", Severity.Error);
+                Snackbar.Add(r.Erros.Count > 0 ? L.Traduzir(r.Erros) : L["Receita_ImagemFalha"], Severity.Error);
                 return;
             }
 
@@ -385,11 +456,11 @@ else
             Dto.FotoContentType = r.Valor.ContentType;
             Dto.RemoverFoto = false;
             _novaFotoPreview = $"data:{r.Valor.ContentType};base64,{Convert.ToBase64String(r.Valor.Conteudo)}";
-            Snackbar.Add("Foto pronta. Clique em Salvar para confirmar.", Severity.Success);
+            Snackbar.Add(L["Receita_FotoPronta"], Severity.Success);
         }
         catch (IOException)
         {
-            Snackbar.Add("Não foi possível ler o arquivo. Tente novamente.", Severity.Warning);
+            Snackbar.Add(L["Receita_ArquivoIlegivel"], Severity.Warning);
         }
         finally
         {
@@ -418,12 +489,13 @@ else
         _linhas.Add(new IngredienteLinhaForm { Dto = novo });
     }
 
-    private async Task AbrirLancarIngredientes()
+    private async Task AbrirLancarIngredientes(bool analisarAoAbrir = false)
     {
         var parameters = new DialogParameters<LancarIngredientesDialog>
         {
-            { x => x.TextoInicial, Dto.Observacoes ?? string.Empty },
-            { x => x.Unidades,     Unidades },
+            { x => x.TextoInicial,    Dto.Observacoes ?? string.Empty },
+            { x => x.Unidades,        Unidades },
+            { x => x.AnalisarAoAbrir, analisarAoAbrir },
         };
 
         var dialog = await DialogService.ShowAsync<LancarIngredientesDialog>(
@@ -473,8 +545,8 @@ else
 
         Snackbar.Add(
             mesclados > 0
-                ? $"{adicionados} lançado(s), {mesclados} mesclado(s) a itens já na lista. Revise antes de salvar."
-                : $"{adicionados} ingrediente(s) lançado(s). Revise antes de salvar.",
+                ? L["Receita_LancadosMesclados", adicionados, mesclados]
+                : L["Receita_Lancados", adicionados],
             Severity.Success);
 
         // Se o usuário pediu tradução, traduz também o texto livre da receita.
@@ -482,6 +554,8 @@ else
             await TraduzirTextoReceitaAsync(idioma);
 
         await AtualizarPrevia();
+        // Pode ter sido aberto de OnAfterRenderAsync, que não re-renderiza sozinho.
+        StateHasChanged();
     }
 
     // Traduz nome + modo de preparo + observações da receita para o idioma escolhido.
@@ -490,14 +564,14 @@ else
         var throttle = await Cota.VerificarThrottleIAAsync();
         if (!throttle.Sucesso)
         {
-            Snackbar.Add(throttle.Erros.FirstOrDefault() ?? "Tente novamente em instantes.", Severity.Warning);
+            Snackbar.Add(L.Traduzir(throttle.Erros), Severity.Warning);
             return;
         }
 
         var t = await Tradutor.TraduzirAsync(Dto.Nome, Dto.ModoPreparo, Dto.Observacoes, idioma);
         if (t is null)
         {
-            Snackbar.Add("Não foi possível traduzir o texto da receita; mantive o original.", Severity.Warning);
+            Snackbar.Add(L["Receita_TraducaoFalhou"], Severity.Warning);
             return;
         }
 
@@ -588,12 +662,12 @@ else
         }
         if (Dto.Id != 0 && sel.Id == Dto.Id)
         {
-            Snackbar.Add("Uma receita não pode ser componente de si mesma.", Severity.Warning);
+            Snackbar.Add(L["Receita_ComponenteDeSiMesma"], Severity.Warning);
             return;
         }
         if (_componentes.Any(c => c != linha && c.Dto.ReceitaComponenteId == sel.Id))
         {
-            Snackbar.Add("Esse componente já está na lista.", Severity.Warning);
+            Snackbar.Add(L["Receita_ComponenteDuplicado"], Severity.Warning);
             return;
         }
 
@@ -650,7 +724,7 @@ else
 
         AdicionarComponenteCriado(criado);
         await AtualizarPrevia();
-        Snackbar.Add($"Componente \"{criado.Nome}\" criado e adicionado.", Severity.Success);
+        Snackbar.Add(L["Receita_ComponenteCriado", criado.Nome], Severity.Success);
     }
 
     private async Task ExtrairComponente()
@@ -658,7 +732,7 @@ else
         var selecionadas = _linhas.Where(l => l.Selecionada && l.Dto.IngredienteId > 0).ToList();
         if (selecionadas.Count == 0)
         {
-            Snackbar.Add("Marque ao menos um ingrediente vinculado para extrair.", Severity.Warning);
+            Snackbar.Add(L["Receita_MarqueParaExtrair"], Severity.Warning);
             return;
         }
 
@@ -681,7 +755,7 @@ else
         RecalcularOrdem();
         AdicionarComponenteCriado(criado);
         await AtualizarPrevia();
-        Snackbar.Add($"\"{criado.Nome}\" extraído como componente.", Severity.Success);
+        Snackbar.Add(L["Receita_ExtraidoComponente", criado.Nome], Severity.Success);
     }
 
     // ── Prévia ─────────────────────────────────────────────────────────────────

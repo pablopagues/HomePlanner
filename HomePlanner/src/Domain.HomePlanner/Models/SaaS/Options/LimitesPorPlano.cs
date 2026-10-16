@@ -28,4 +28,16 @@ public static class LimitesPorPlano
         PlanoAssinatura.ProMensal      or PlanoAssinatura.ProAnual      => 200,
         _                                                              => 0
     };
+
+    /// <summary>
+    /// Limite de pedidos de sugestão de receitas à IA por mês-calendário. Cada pedido
+    /// gera 3 sugestões e é contado ao gerar (é ali que está o custo).
+    /// </summary>
+    public static int SugestoesReceitaMes(PlanoAssinatura plano) => plano switch
+    {
+        PlanoAssinatura.Gratis                                          => 10,
+        PlanoAssinatura.StandardMensal or PlanoAssinatura.StandardAnual => 30,
+        PlanoAssinatura.ProMensal      or PlanoAssinatura.ProAnual      => 100,
+        _                                                              => 0
+    };
 }

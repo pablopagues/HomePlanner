@@ -216,7 +216,7 @@ else
         {
             var inicio = InicioSemana(_referencia);
             var fim = inicio.AddDays(6);
-            return $"{inicio:dd/MM} – {fim:dd/MM/yyyy}";
+            return $"{DiaHelper.DiaMes(inicio)} – {DiaHelper.Data(fim)}";
         }
         var nome = cultura.DateTimeFormat.GetMonthName(_referencia.Month);
         if (nome.Length > 0) nome = char.ToUpper(nome[0], cultura) + nome[1..];

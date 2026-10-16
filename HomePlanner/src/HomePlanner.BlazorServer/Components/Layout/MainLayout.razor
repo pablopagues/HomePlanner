@@ -84,7 +84,7 @@ else
                     <MudAvatar Size="Size.Medium" Color="Color.Primary" Style="cursor:pointer;">
                         @if (_versaoFoto is not null)
                         {
-                            <MudImage Src="@($"/perfil/foto?v={_versaoFoto}")" Alt="Foto de perfil"
+                            <MudImage Src="@($"/perfil/foto?v={_versaoFoto}")" Alt="@L["App_FotoPerfil"]"
                                       ObjectFit="ObjectFit.Cover" Width="40" Height="40" />
                         }
                         else

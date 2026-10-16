@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Domain.HomePlanner\Domain.HomePlanner.csproj" />
     <ProjectReference Include="..\Application.HomePlanner\Application.HomePlanner.csproj" />
+    <ProjectReference Include="..\Resources.HomePlanner\Resources.HomePlanner.csproj" />
     <ProjectReference Include="..\Framework.HomePlanner\Framework.HomePlanner.csproj" />
   </ItemGroup>
 </Project>

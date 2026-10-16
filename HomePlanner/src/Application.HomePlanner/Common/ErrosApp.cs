@@ -167,6 +167,28 @@ public static class ErrosApp
         "muitas_analises_ia",
         "Muitas análises de ingredientes em pouco tempo. Aguarde alguns minutos e tente novamente.");
 
+    public static ErroOperacao IaIndisponivel => ErroOperacao.De(
+        "ia_indisponivel", "O assistente de receitas está indisponível no momento. Tente novamente mais tarde.");
+
+    public static ErroOperacao TextoReceitaVazio => ErroOperacao.De(
+        "texto_receita_vazio", "Cole o texto da receita antes de continuar.");
+
+    /// <summary>{0} = máximo de caracteres aceito.</summary>
+    public static ErroOperacao TextoReceitaMuitoLongo(int maximo) => ErroOperacao.De(
+        "texto_receita_muito_longo",
+        $"O texto é muito longo (máximo de {maximo} caracteres). Cole só a parte da receita.", maximo);
+
+    public static ErroOperacao ReceitaNaoIdentificadaTexto => ErroOperacao.De(
+        "receita_nao_identificada_texto", "Não foi possível identificar uma receita neste texto.");
+
+    public static ErroOperacao SugestoesNaoGeradas => ErroOperacao.De(
+        "sugestoes_nao_geradas", "Não foi possível gerar sugestões agora. Tente novamente em instantes.");
+
+    /// <summary>{0} = limite de sugestões do plano.</summary>
+    public static ErroOperacao LimiteSugestoes(int limite) => ErroOperacao.De(
+        "limite_sugestoes",
+        $"Você atingiu o limite de {limite} pedidos de sugestão de receitas este mês no seu plano.", limite);
+
     // ── Envio de mensagens ───────────────────────────────────────────────────
     public static ErroOperacao EnvioIndisponivel => ErroOperacao.De(
         "envio_indisponivel", "Não conseguimos enviar sua mensagem agora. Tente novamente em instantes.");
@@ -344,6 +366,6 @@ public static class ErrosApp
         "muito_curto", "limite_membros_plano", "convite_aguarde_reenvio", "limite_importacoes",
         "ingrediente_duplicado", "receita_usada_componente", "unidade_nao_encontrada",
         "unidades_incompativeis", "imagem_entrada_muito_grande", "imagem_final_acima_limite",
-        "url_inacessivel",
+        "url_inacessivel", "texto_receita_muito_longo", "limite_sugestoes",
     ];
 }

@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HomePlanner.BlazorServer.Areas.Identity.Pages.Account;
 
-public class ConfirmarEmailModel : PageModel
+public class ConfirmarEmailModel : PaginaLocalizada
 {
     private readonly UserManager<Usuario> _userManager;
     private readonly TenantContext _tenantContext;
@@ -32,7 +32,7 @@ public class ConfirmarEmailModel : PageModel
     {
         if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(token))
         {
-            Mensagem = "Link de confirmação inválido.";
+            Mensagem = L["Conta_LinkInvalido"];
             return;
         }
 
@@ -40,14 +40,14 @@ public class ConfirmarEmailModel : PageModel
             .FirstOrDefaultAsync(u => u.Id == userId);
         if (usuario is null)
         {
-            Mensagem = "Usuário não encontrado.";
+            Mensagem = L["Conta_UsuarioNaoEncontrado"];
             return;
         }
 
         if (usuario.EmailConfirmed)
         {
             Sucesso = true;
-            Mensagem = "Seu e-mail já estava confirmado. Você pode entrar normalmente.";
+            Mensagem = L["Conta_EmailJaConfirmado"];
             return;
         }
 
@@ -60,16 +60,16 @@ public class ConfirmarEmailModel : PageModel
             if (resultado.Succeeded)
             {
                 Sucesso = true;
-                Mensagem = "E-mail confirmado com sucesso! Bem-vindo(a) ao HomePlanner.";
+                Mensagem = L["Conta_EmailConfirmadoOk"];
             }
             else
             {
-                Mensagem = "Não foi possível confirmar o e-mail. O link pode ter expirado.";
+                Mensagem = L["Conta_EmailNaoConfirmado"];
             }
         }
         catch
         {
-            Mensagem = "Link de confirmação inválido ou expirado.";
+            Mensagem = L["Conta_LinkInvalidoExpirado"];
         }
     }
 }

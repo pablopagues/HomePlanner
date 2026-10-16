@@ -80,7 +80,7 @@ else
                                 <MudText Typo="Typo.caption" Color="Color.Secondary">
                                     <MudIcon Icon="@Icons.Material.Filled.Event" Size="Size.Small"
                                              Style="vertical-align:middle; font-size:0.9rem;" />
-                                    @t.DataPrevista.Value.ToString("dd/MM/yyyy")
+                                    @t.DataPrevista.Value.ToString("d")
                                     @if (t.HoraInicio.HasValue)
                                     {
                                         <span> · @FormatarHorario(t.HoraInicio, t.HoraFim)</span>

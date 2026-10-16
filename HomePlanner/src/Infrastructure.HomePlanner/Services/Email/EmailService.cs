@@ -2,9 +2,11 @@ using Application.HomePlanner.Services.Email;
 using Domain.HomePlanner.Models.SaaS.Options;
 using MailKit.Net.Smtp;
 using MailKit.Security;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
+using Resources.HomePlanner;
 
 namespace Infrastructure.HomePlanner.Services.Email;
 
@@ -12,11 +14,14 @@ public class EmailService : IEmailService
 {
     private readonly GmailOptions _opts;
     private readonly ILogger<EmailService> _logger;
+    // Textos no idioma da requisição/circuito de quem dispara o envio.
+    private readonly IStringLocalizer<SharedResource> _l;
 
-    public EmailService(IOptions<GmailOptions> opts, ILogger<EmailService> logger)
+    public EmailService(IOptions<GmailOptions> opts, ILogger<EmailService> logger, IStringLocalizer<SharedResource> l)
     {
         _opts = opts.Value;
         _logger = logger;
+        _l = l;
     }
 
     public bool Habilitado =>
@@ -51,32 +56,31 @@ public class EmailService : IEmailService
     public Task EnviarConfirmacaoEmailAsync(string para, string nome, string linkConfirmacao, CancellationToken ct = default)
     {
         var corpo = Template(
-            $"Olá, {nome}!",
-            "Bem-vindo(a) ao HomePlanner. Confirme seu e-mail para começar a organizar a semana da sua família.",
-            "Confirmar e-mail", linkConfirmacao);
-        return EnviarAsync(para, "Confirme seu e-mail — HomePlanner", corpo, ct);
+            _l["Email_Ola", nome],
+            _l["Email_ConfirmacaoTexto"],
+            _l["Email_ConfirmacaoBotao"], linkConfirmacao);
+        return EnviarAsync(para, _l["Email_ConfirmacaoAssunto"], corpo, ct);
     }
 
     public Task EnviarResetSenhaAsync(string para, string nome, string linkReset, CancellationToken ct = default)
     {
         var corpo = Template(
-            $"Olá, {nome}!",
-            "Recebemos um pedido para redefinir sua senha. Se foi você, clique no botão abaixo. Caso contrário, ignore este e-mail.",
-            "Redefinir senha", linkReset);
-        return EnviarAsync(para, "Redefinição de senha — HomePlanner", corpo, ct);
+            _l["Email_Ola", nome],
+            _l["Email_ResetTexto"],
+            _l["Email_ResetBotao"], linkReset);
+        return EnviarAsync(para, _l["Email_ResetAssunto"], corpo, ct);
     }
 
     public Task EnviarConviteMembroAsync(string para, string nome, string nomeConvidante,
         string linkConvite, int diasValidade, CancellationToken ct = default)
     {
-        var convidante = string.IsNullOrWhiteSpace(nomeConvidante) ? "Sua família" : nomeConvidante;
+        var convidante = string.IsNullOrWhiteSpace(nomeConvidante) ? _l["Email_SuaFamilia"].Value : nomeConvidante;
         var corpo = Template(
-            $"Olá, {nome}!",
-            $"{convidante} convidou você para o HomePlanner — onde a família organiza junto o cardápio da " +
-            "semana, as tarefas de casa e a lista de compras. Crie sua senha para entrar.",
-            "Criar minha senha", linkConvite,
-            $"Este convite vale por {diasValidade} dias. Se expirar, peça um novo a {convidante}.");
-        return EnviarAsync(para, $"{convidante} convidou você para o HomePlanner", corpo, ct);
+            _l["Email_Ola", nome],
+            _l["Email_ConviteTexto", convidante],
+            _l["Email_ConviteBotao"], linkConvite,
+            _l["Email_ConviteValidade", diasValidade, convidante]);
+        return EnviarAsync(para, _l["Email_ConviteAssunto", convidante], corpo, ct);
     }
 
     private static string Template(string titulo, string texto, string textoBotao, string link,

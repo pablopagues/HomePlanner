@@ -15,6 +15,7 @@ public class ImportadorReceitaParserTests
     {
         var svc = new ImportadorReceitaService(
             http: null!, unidadeRepo: null!, parserIA: null!,
+            assistenteIA: null!, cota: null!,
             logger: NullLogger<ImportadorReceitaService>.Instance);
         return svc.ParsearTexto(linha);
     }

@@ -1,5 +1,6 @@
 @* Dialog de seleção de receita para um slot do cardápio *@
 @inject IReceitaService ReceitaService
+@inject IStringLocalizer<SharedResource> L
 
 <MudDialog>
     <TitleContent>
@@ -8,13 +9,13 @@
         </MudText>
     </TitleContent>
     <DialogContent>
-        <MudTextField Value="@_busca" Placeholder="Buscar receita..."
+        <MudTextField Value="@_busca" Placeholder="@L["Seletor_Buscar"]"
                       Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
                       Immediate="true" DebounceInterval="300"
                       ValueChanged="@((string v) => BuscarAsync(v))"
                       Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
 
-        <MudNumericField @bind-Value="PorcoesDesejadas" Label="Porções desejadas"
+        <MudNumericField @bind-Value="PorcoesDesejadas" Label="@L["Seletor_Porcoes"]"
                          Min="1" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-3" />
 
         @if (_carregando)
@@ -40,7 +41,7 @@
                             <MudStack Spacing="0">
                                 <MudText Typo="Typo.body1" Style="font-weight:500;">@r.Nome</MudText>
                                 <MudText Typo="Typo.caption" Color="Color.Secondary">
-                                    @r.NumeroPorcoesBase porções base
+                                    @r.NumeroPorcoesBase @L["Seletor_PorcoesBase"]
                                     @(r.TempoPreparoMinutos.HasValue ? $" · {r.TempoPreparoMinutos} min" : "")
                                 </MudText>
                             </MudStack>
@@ -55,7 +56,7 @@
                 }
                 @if (_receitas.Count == 0 && !_carregando)
                 {
-                    <MudText Color="Color.Secondary">Nenhuma receita encontrada.</MudText>
+                    <MudText Color="Color.Secondary">@L["Seletor_Nenhuma"]</MudText>
                 }
             </div>
         }
@@ -64,14 +65,14 @@
         @if (_selecionadoId.HasValue)
         {
             <MudButton Color="Color.Error" Variant="Variant.Text" OnClick="Limpar">
-                Limpar slot
+                @L["Seletor_LimparSlot"]
             </MudButton>
         }
         <MudSpacer />
-        <MudButton OnClick="Cancelar">Cancelar</MudButton>
+        <MudButton OnClick="Cancelar">@L["Btn_Cancelar"]</MudButton>
         <MudButton Color="Color.Primary" Variant="Variant.Filled"
                    OnClick="Confirmar" Disabled="@(!_selecionadoId.HasValue)">
-            Confirmar
+            @L["Btn_Confirmar"]
         </MudButton>
     </DialogActions>
 </MudDialog>
@@ -92,11 +93,11 @@
 
     private string _titulo => TipoRefeicao switch
     {
-        TipoRefeicao.CafeManha => "Café da manhã",
-        TipoRefeicao.Almoco    => "Almoço",
-        TipoRefeicao.Lanche    => "Lanche",
-        TipoRefeicao.Jantar    => "Jantar",
-        TipoRefeicao.Ceia      => "Ceia",
+        TipoRefeicao.CafeManha => L["Refeicao_CafeManha"],
+        TipoRefeicao.Almoco    => L["Refeicao_Almoco"],
+        TipoRefeicao.Lanche    => L["Refeicao_Lanche"],
+        TipoRefeicao.Jantar    => L["Refeicao_Jantar"],
+        TipoRefeicao.Ceia      => L["Refeicao_Ceia"],
         _                      => TipoRefeicao.ToString()
     };
 
@@ -134,15 +135,5 @@
 
     private void Cancelar() => MudDialog.Cancel();
 
-    private static string NomeDia(DiaSemana d) => d switch
-    {
-        DiaSemana.Segunda => "Segunda",
-        DiaSemana.Terca   => "Terça",
-        DiaSemana.Quarta  => "Quarta",
-        DiaSemana.Quinta  => "Quinta",
-        DiaSemana.Sexta   => "Sexta",
-        DiaSemana.Sabado  => "Sábado",
-        DiaSemana.Domingo => "Domingo",
-        _                  => d.ToString()
-    };
+    private static string NomeDia(DiaSemana d) => DiaHelper.NomeLongo(d);
 }

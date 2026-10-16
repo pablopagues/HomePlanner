@@ -5,30 +5,30 @@
 
 <MudDialog>
     <TitleContent>
-        <MudText Typo="Typo.h6">Extrair como componente</MudText>
+        <MudText Typo="Typo.h6">@L["Receita_ExtrairComponente"]</MudText>
     </TitleContent>
     <DialogContent>
         <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
-            As @Ingredientes.Count linha(s) marcada(s) viram uma nova receita reutilizável,
-            que entra no lugar como componente.
+            @L["Comp_ExtrairAjuda", Ingredientes.Count]
+            
         </MudText>
 
         <MudGrid Spacing="2">
             <MudItem xs="8">
-                <MudTextField @bind-Value="_nome" Label="Nome do componente" Required="true"
+                <MudTextField @bind-Value="_nome" Label="@L["Comp_Nome"]" Required="true"
                               Variant="Variant.Outlined" Margin="Margin.Dense" />
             </MudItem>
             <MudItem xs="4">
-                <MudNumericField @bind-Value="_porcoes" Label="Porções" Min="1"
+                <MudNumericField @bind-Value="_porcoes" Label="@L["Ia_Porcoes"]" Min="1"
                                  Variant="Variant.Outlined" Margin="Margin.Dense" />
             </MudItem>
         </MudGrid>
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="@(() => MudDialog.Cancel())">Cancelar</MudButton>
+        <MudButton OnClick="@(() => MudDialog.Cancel())">@L["Btn_Cancelar"]</MudButton>
         <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Confirmar"
                    Disabled="@(_salvando || string.IsNullOrWhiteSpace(_nome))">
-            @(_salvando ? "Criando..." : "Extrair e adicionar")
+            @(_salvando ? L["Sug_Criando"] : L["Comp_ExtrairAdicionar"])
         </MudButton>
     </DialogActions>
 </MudDialog>

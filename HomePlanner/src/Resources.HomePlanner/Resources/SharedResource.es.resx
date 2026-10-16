@@ -85,6 +85,7 @@
   <data name="Assin_PlanoAtual" xml:space="preserve"><value>Plan actual</value></data>
   <data name="Assin_Membros" xml:space="preserve"><value>miembros</value></data>
   <data name="Assin_ImportacoesReceita" xml:space="preserve"><value>importaciones/mes</value></data>
+  <data name="Assin_SugestoesReceita" xml:space="preserve"><value>sugerencias IA/mes</value></data>
   <data name="Assin_Gerenciar" xml:space="preserve"><value>Gestionar pago</value></data>
   <data name="Assin_DiasTrial" xml:space="preserve"><value>Días restantes (prueba)</value></data>
   <data name="Assin_ProximaCobranca" xml:space="preserve"><value>Próximo cobro</value></data>
@@ -124,25 +125,33 @@
   <data name="Landing_HeroLegenda" xml:space="preserve"><value>30 días gratis · sin tarjeta de crédito</value></data>
   <data name="Landing_Feat1Titulo" xml:space="preserve"><value>Menú semanal</value></data>
   <data name="Landing_Feat1Desc" xml:space="preserve"><value>Planifica las comidas de la semana en una cuadrícula que respira — sin hojas de cálculo confusas.</value></data>
-  <data name="Landing_Feat2Titulo" xml:space="preserve"><value>Lista de compras automática</value></data>
-  <data name="Landing_Feat2Desc" xml:space="preserve"><value>La lista nace del menú, sumando ingredientes y ajustando porciones automáticamente.</value></data>
-  <data name="Landing_Feat3Titulo" xml:space="preserve"><value>Importa recetas de cualquier sitio</value></data>
-  <data name="Landing_Feat3Desc" xml:space="preserve"><value>Pega el enlace, mira la vista previa y guarda. Sin fricción, sin reescribir todo.</value></data>
+  <data name="Landing_Feat2Titulo" xml:space="preserve"><value>Una lista de compras que ahorra</value></data>
+  <data name="Landing_Feat2Desc" xml:space="preserve"><value>La lista nace del menú: suma los ingredientes de todas las recetas y ajusta las porciones automáticamente. Compras solo lo que vas a usar — sin olvidar nada y sin gastar en lo que no necesitas.</value></data>
+  <data name="Landing_Feat3Titulo" xml:space="preserve"><value>Recetas de cualquier lugar, con IA</value></data>
+  <data name="Landing_Feat3Desc" xml:space="preserve"><value>El enlace de un sitio, un texto de ChatGPT o de un mensaje — o pide sugerencias. La receta llega lista, sin reescribir todo.</value></data>
   <data name="Landing_AiBadge" xml:space="preserve"><value>Con inteligencia artificial Claude</value></data>
   <data name="Landing_AiTitulo" xml:space="preserve"><value>Recetas que se organizan solas, con IA</value></data>
-  <data name="Landing_AiDesc" xml:space="preserve"><value>Pega el enlace de cualquier receta y Claude, la inteligencia artificial de Anthropic, lee la página, entiende los ingredientes y lo organiza todo por ti — cantidades, porciones y lista de compras. Tecnología de punta al servicio de tu cocina.</value></data>
+  <data name="Landing_AiDesc" xml:space="preserve"><value>Claude, la inteligencia artificial de Anthropic, se encarga de la parte aburrida de la cocina: lee recetas de cualquier lugar, entiende los ingredientes y lo organiza todo por ti — cantidades, porciones y lista de compras.</value></data>
+  <data name="Landing_AiItem1Titulo" xml:space="preserve"><value>De cualquier sitio web</value></data>
+  <data name="Landing_AiItem1Desc" xml:space="preserve"><value>Pega el enlace y la receta llega con ingredientes, porciones y preparación.</value></data>
+  <data name="Landing_AiItem2Titulo" xml:space="preserve"><value>De ChatGPT o de un mensaje</value></data>
+  <data name="Landing_AiItem2Desc" xml:space="preserve"><value>Pega el texto y la IA separa el nombre, los ingredientes y los pasos. Sin reescribir nada.</value></data>
+  <data name="Landing_AiItem3Titulo" xml:space="preserve"><value>Sugerencias a medida</value></data>
+  <data name="Landing_AiItem3Desc" xml:space="preserve"><value>Di qué te apetece comer — tiempo, porciones, restricciones — y recibe 3 recetas al gusto de tu familia. ¿Te gustó una? Un clic y es tuya.</value></data>
+  <data name="Landing_AiItem4Titulo" xml:space="preserve"><value>En cualquier idioma</value></data>
+  <data name="Landing_AiItem4Desc" xml:space="preserve"><value>¿Receta en inglés, portugués o francés? La IA la entiende y, si quieres, la traduce a tu idioma.</value></data>
   <data name="Landing_PrecosTitulo" xml:space="preserve"><value>Planes simples</value></data>
   <data name="Landing_PrecosSubtitulo" xml:space="preserve"><value>Empieza gratis. Mejora cuando la familia crezca.</value></data>
   <data name="Landing_StdPreco" xml:space="preserve"><value>CA$10</value></data>
   <data name="Landing_StdItem1" xml:space="preserve"><value>Hasta 5 miembros</value></data>
   <data name="Landing_StdItem2" xml:space="preserve"><value>Menú + lista de compras</value></data>
-  <data name="Landing_StdItem3" xml:space="preserve"><value>Importación de recetas</value></data>
-  <data name="Landing_StdItem4" xml:space="preserve"><value>Hasta 50 importaciones de recetas/mes</value></data>
+  <data name="Landing_StdItem3" xml:space="preserve"><value>Importación y sugerencias de recetas con IA</value></data>
+  <data name="Landing_StdItem4" xml:space="preserve"><value>Hasta 50 importaciones y 30 sugerencias IA/mes</value></data>
   <data name="Landing_ProPreco" xml:space="preserve"><value>CA$18</value></data>
   <data name="Landing_ProItem1" xml:space="preserve"><value>Hasta 10 miembros</value></data>
   <data name="Landing_ProItem2" xml:space="preserve"><value>Todo lo de Standard</value></data>
   <data name="Landing_ProItem3" xml:space="preserve"><value>Plantillas de semana ilimitadas</value></data>
-  <data name="Landing_ProItem4" xml:space="preserve"><value>Hasta 200 importaciones de recetas/mes</value></data>
+  <data name="Landing_ProItem4" xml:space="preserve"><value>Hasta 200 importaciones y 100 sugerencias IA/mes</value></data>
   <data name="Landing_ProPopular" xml:space="preserve"><value>Más popular</value></data>
   <data name="Landing_PrecosRodape" xml:space="preserve"><value>Planes anuales con descuento. Cancela cuando quieras.</value></data>
 
@@ -350,7 +359,8 @@
 
   <data name="Receita_Titulo" xml:space="preserve"><value>Recetas</value></data>
   <data name="Receita_Nova" xml:space="preserve"><value>Nueva receta</value></data>
-  <data name="Receita_ImportarUrl" xml:space="preserve"><value>Importar de URL</value></data>
+  <data name="Receita_ImportarUrl" xml:space="preserve"><value>Importar receta</value></data>
+  <data name="Receita_Sugerir" xml:space="preserve"><value>Sugerir recetas</value></data>
   <data name="Receita_Buscar" xml:space="preserve"><value>Buscar recetas...</value></data>
   <data name="Receita_Nenhuma" xml:space="preserve"><value>No se encontraron recetas.</value></data>
   <data name="Receita_PrimeiraCriar" xml:space="preserve"><value>¡Crea la primera!</value></data>
@@ -363,7 +373,7 @@
   <data name="Receita_TempoLabel" xml:space="preserve"><value>Tiempo (min)</value></data>
   <data name="Receita_UrlImagemLabel" xml:space="preserve"><value>URL de imagen (opcional)</value></data>
   <data name="Receita_ModoPreparoLabel" xml:space="preserve"><value>Modo de preparación</value></data>
-  <data name="Receita_ObservacoesLabel" xml:space="preserve"><value>Observaciones</value></data>
+  <data name="Receita_ObservacoesLabel" xml:space="preserve"><value>Ingredientes (texto)</value></data>
   <data name="Receita_SalvoOk" xml:space="preserve"><value>¡Receta guardada!</value></data>
   <data name="Receita_CriadaOk" xml:space="preserve"><value>¡Receta creada con éxito!</value></data>
   <data name="Receita_ExcluidaOk" xml:space="preserve"><value>Receta eliminada.</value></data>
@@ -768,6 +778,12 @@
   <data name="Erro_url_invalida" xml:space="preserve"><value>URL no válida.</value></data>
   <data name="Erro_receita_nao_identificada" xml:space="preserve"><value>No pudimos identificar una receta en esta página.</value></data>
   <data name="Erro_muitas_analises_ia" xml:space="preserve"><value>Demasiados análisis de ingredientes en poco tiempo. Espera unos minutos e inténtalo de nuevo.</value></data>
+  <data name="Erro_ia_indisponivel" xml:space="preserve"><value>El asistente de recetas no está disponible en este momento. Inténtalo más tarde.</value></data>
+  <data name="Erro_texto_receita_vazio" xml:space="preserve"><value>Pega el texto de la receta antes de continuar.</value></data>
+  <data name="Erro_texto_receita_muito_longo" xml:space="preserve"><value>El texto es demasiado largo (máximo de {0} caracteres). Pega solo la parte de la receta.</value></data>
+  <data name="Erro_receita_nao_identificada_texto" xml:space="preserve"><value>No se pudo identificar una receta en este texto.</value></data>
+  <data name="Erro_sugestoes_nao_geradas" xml:space="preserve"><value>No se pudieron generar sugerencias ahora. Inténtalo de nuevo en unos instantes.</value></data>
+  <data name="Erro_limite_sugestoes" xml:space="preserve"><value>Has alcanzado el límite de {0} pedidos de sugerencias de recetas este mes en tu plan.</value></data>
   <data name="Erro_envio_indisponivel" xml:space="preserve"><value>No pudimos enviar tu mensaje ahora. Inténtalo de nuevo en unos instantes.</value></data>
   <data name="Erro_sem_permissao" xml:space="preserve"><value>No tienes permiso para esta acción.</value></data>
   <data name="Erro_nao_encontrado" xml:space="preserve"><value>No encontrado.</value></data>
@@ -815,4 +831,278 @@
   <data name="Erro_checkout_falhou" xml:space="preserve"><value>No se pudo iniciar el pago. Inténtalo de nuevo.</value></data>
   <data name="Erro_portal_falhou" xml:space="preserve"><value>No se pudo abrir la gestión. Inténtalo de nuevo.</value></data>
   <data name="Erro_cadastro_falhou" xml:space="preserve"><value>No se pudo completar el registro. Inténtalo de nuevo.</value></data>
+  <!-- Asistente de recetas (IA): Importar / Sugerir -->
+  <data name="Ia_FazerUpgrade" xml:space="preserve"><value>Mejorar plan</value></data>
+  <data name="Ia_Organizar" xml:space="preserve"><value>Organizar con IA</value></data>
+  <data name="Ia_Organizando" xml:space="preserve"><value>Organizando...</value></data>
+  <data name="Ia_Indisponivel" xml:space="preserve"><value>El asistente de recetas no está disponible en este momento.</value></data>
+  <data name="Ia_Porcoes" xml:space="preserve"><value>Porciones</value></data>
+  <data name="Ia_NPorcoes" xml:space="preserve"><value>{0} porciones</value></data>
+  <data name="Ia_NMin" xml:space="preserve"><value>{0} min</value></data>
+  <data name="Ia_Ingredientes" xml:space="preserve"><value>Ingredientes</value></data>
+  <data name="Ia_ModoPreparo" xml:space="preserve"><value>Preparación</value></data>
+  <data name="Sug_Breadcrumb" xml:space="preserve"><value>Sugerencias</value></data>
+  <data name="Sug_Titulo" xml:space="preserve"><value>Sugerencias de recetas</value></data>
+  <data name="Sug_Intro" xml:space="preserve"><value>Dinos qué te apetece cocinar y la IA sugiere 3 recetas. ¿Te gusta una? Solo créala.</value></data>
+  <data name="Sug_LimiteAtingido" xml:space="preserve"><value>Has alcanzado el límite de {0} pedidos de sugerencias este mes en tu plan.</value></data>
+  <data name="Sug_UsoMes" xml:space="preserve"><value>Sugerencias este mes: {0} de {1}</value></data>
+  <data name="Sug_PedidoLabel" xml:space="preserve"><value>¿Qué quieren comer?</value></data>
+  <data name="Sug_PedidoPlaceholder" xml:space="preserve"><value>Ej.: cena rápida con pollo, sin lactosa; o: postre con plátano</value></data>
+  <data name="Sug_TempoMax" xml:space="preserve"><value>Tiempo máximo (min)</value></data>
+  <data name="Sug_ConsiderarCasa" xml:space="preserve"><value>Considerar las recetas de casa (sigue el gusto de la familia y evita repetir)</value></data>
+  <data name="Sug_Pensando" xml:space="preserve"><value>Pensando...</value></data>
+  <data name="Sug_SugerirOutras" xml:space="preserve"><value>Sugerir otras</value></data>
+  <data name="Sug_VerReceita" xml:space="preserve"><value>Ver receta</value></data>
+  <data name="Sug_Criar" xml:space="preserve"><value>Crear receta</value></data>
+  <data name="Sug_Criando" xml:space="preserve"><value>Creando...</value></data>
+  <data name="Sug_Criada" xml:space="preserve"><value>¡Receta creada! Revisa los ingredientes.</value></data>
+  <data name="Imp_Breadcrumb" xml:space="preserve"><value>Importar</value></data>
+  <data name="Imp_LimiteAtingido" xml:space="preserve"><value>Has alcanzado el límite de {0} importaciones de recetas este mes en tu plan.</value></data>
+  <data name="Imp_UsoMes" xml:space="preserve"><value>Importaciones este mes: {0} de {1}</value></data>
+  <data name="Imp_AbaLink" xml:space="preserve"><value>Enlace de un sitio</value></data>
+  <data name="Imp_LinkIntro" xml:space="preserve"><value>Pega la URL de cualquier sitio que use el formato schema.org/Recipe (AllRecipes, Tasty, Cookpad, etc.)</value></data>
+  <data name="Imp_UrlLabel" xml:space="preserve"><value>URL de la receta</value></data>
+  <data name="Imp_Importar" xml:space="preserve"><value>Importar</value></data>
+  <data name="Imp_Importando" xml:space="preserve"><value>Importando...</value></data>
+  <data name="Imp_AbaTexto" xml:space="preserve"><value>Pegar texto</value></data>
+  <data name="Imp_TextoIntro" xml:space="preserve"><value>Pega la receta completa — de un sitio, de ChatGPT, de un mensaje. La IA identifica el nombre, las porciones, los ingredientes y la preparación.</value></data>
+  <data name="Imp_TextoLabel" xml:space="preserve"><value>Texto de la receta</value></data>
+  <data name="Imp_InformeUrl" xml:space="preserve"><value>Introduce una URL válida.</value></data>
+  <data name="Imp_Falha" xml:space="preserve"><value>Error al importar.</value></data>
+  <data name="Imp_Preview" xml:space="preserve"><value>Vista previa de la receta importada</value></data>
+  <data name="Imp_ImagemAlt" xml:space="preserve"><value>Imagen de la receta</value></data>
+  <data name="Imp_Nome" xml:space="preserve"><value>Nombre</value></data>
+  <data name="Imp_Tempo" xml:space="preserve"><value>Tiempo (min)</value></data>
+  <data name="Imp_Ingredientes" xml:space="preserve"><value>Ingredientes importados</value></data>
+  <data name="Imp_AvisoLancar" xml:space="preserve"><value>Al guardar, la receta se abre para que revises y registres los ingredientes.</value></data>
+  <data name="Imp_Salvar" xml:space="preserve"><value>Guardar receta</value></data>
+  <data name="Imp_Salvando" xml:space="preserve"><value>Guardando...</value></data>
+  <data name="Imp_Cancelar" xml:space="preserve"><value>Cancelar</value></data>
+  <data name="Imp_Salva" xml:space="preserve"><value>¡Receta importada y guardada! Revisa los ingredientes.</value></data>
+  <data name="Btn_Ver" xml:space="preserve"><value>Ver</value></data>
+  <data name="Receita_NIngr" xml:space="preserve"><value>{0} ingr.</value></data>
+  <data name="Receita_NComponentes" xml:space="preserve"><value>{0} componentes</value></data>
+  <data name="Msg_ExcluirItem" xml:space="preserve"><value>¿Eliminar &apos;{0}&apos;?</value></data>
+  <data name="Receita_Foto" xml:space="preserve"><value>Foto de la receta</value></data>
+  <data name="Receita_EnviarFoto" xml:space="preserve"><value>Subir foto</value></data>
+  <data name="Receita_TrocarFoto" xml:space="preserve"><value>Cambiar foto</value></data>
+  <data name="Receita_RemoverFoto" xml:space="preserve"><value>Quitar foto</value></data>
+  <data name="Receita_FotoAjuda" xml:space="preserve"><value>La foto se reduce automáticamente. Una foto por receta — subir otra reemplaza la actual.</value></data>
+  <data name="Receita_UrlImagemAjuda" xml:space="preserve"><value>Para recetas de sitios web. Si subes una foto arriba, tiene prioridad.</value></data>
+  <data name="Receita_OrganizarAjuda" xml:space="preserve"><value>¿Pegaste la receta completa (de un sitio, de ChatGPT...)? La IA separa el nombre, los ingredientes y la preparación.</value></data>
+  <data name="Receita_ComponentesTitulo" xml:space="preserve"><value>Componentes (platos que lo componen)</value></data>
+  <data name="Receita_ComponentesAjuda" xml:space="preserve"><value>Combina otras recetas en este plato. Opcional.</value></data>
+  <data name="Receita_CriarComponente" xml:space="preserve"><value>Crear componente</value></data>
+  <data name="Receita_ComponenteLabel" xml:space="preserve"><value>Receta componente</value></data>
+  <data name="Receita_SemComponentes" xml:space="preserve"><value>Sin componentes. Este plato solo usa los ingredientes de abajo.</value></data>
+  <data name="Receita_IngredientesProprios" xml:space="preserve"><value>Ingredientes propios</value></data>
+  <data name="Medida_Metrico" xml:space="preserve"><value>Métrico</value></data>
+  <data name="Medida_Imperial" xml:space="preserve"><value>Imperial</value></data>
+  <data name="Receita_ExtrairComponente" xml:space="preserve"><value>Extraer como componente</value></data>
+  <data name="Receita_LancarTexto" xml:space="preserve"><value>Agregar desde texto</value></data>
+  <data name="Receita_PreviaCompra" xml:space="preserve"><value>Vista previa de compra de este plato</value></data>
+  <data name="Receita_AtualizarPrevia" xml:space="preserve"><value>Actualizar vista previa</value></data>
+  <data name="Receita_PreviaVazia" xml:space="preserve"><value>Agrega componentes o ingredientes y haz clic en “Actualizar vista previa”.</value></data>
+  <data name="Receita_PreparoMantido" xml:space="preserve"><value>La preparación ya estaba completa — mantuve la actual.</value></data>
+  <data name="Receita_NenhumIngredienteTexto" xml:space="preserve"><value>No se encontraron ingredientes en el texto.</value></data>
+  <data name="Receita_ImagemGrande" xml:space="preserve"><value>Imagen demasiado grande. Máximo {0} MB.</value></data>
+  <data name="Receita_ImagemFalha" xml:space="preserve"><value>No se pudo procesar la imagen.</value></data>
+  <data name="Receita_FotoPronta" xml:space="preserve"><value>Foto lista. Haz clic en Guardar para confirmar.</value></data>
+  <data name="Receita_ArquivoIlegivel" xml:space="preserve"><value>No se pudo leer el archivo. Inténtalo de nuevo.</value></data>
+  <data name="Receita_LancadosMesclados" xml:space="preserve"><value>{0} agregado(s), {1} combinado(s) con elementos ya en la lista. Revisa antes de guardar.</value></data>
+  <data name="Receita_Lancados" xml:space="preserve"><value>{0} ingrediente(s) agregado(s). Revisa antes de guardar.</value></data>
+  <data name="Receita_TraducaoFalhou" xml:space="preserve"><value>No se pudo traducir el texto de la receta; se mantuvo el original.</value></data>
+  <data name="Receita_ComponenteDeSiMesma" xml:space="preserve"><value>Una receta no puede ser componente de sí misma.</value></data>
+  <data name="Receita_ComponenteDuplicado" xml:space="preserve"><value>Este componente ya está en la lista.</value></data>
+  <data name="Receita_ComponenteCriado" xml:space="preserve"><value>Componente &quot;{0}&quot; creado y agregado.</value></data>
+  <data name="Receita_MarqueParaExtrair" xml:space="preserve"><value>Marca al menos un ingrediente vinculado para extraer.</value></data>
+  <data name="Receita_ExtraidoComponente" xml:space="preserve"><value>&quot;{0}&quot; extraído como componente.</value></data>
+  <data name="Receita_Singular" xml:space="preserve"><value>Receta</value></data>
+  <data name="Receita_EditarTitle" xml:space="preserve"><value>Editar receta</value></data>
+  <data name="Receita_ErroSalvar" xml:space="preserve"><value>Error al guardar la receta: {0}</value></data>
+  <data name="Receita_IngredientesPratoCompleto" xml:space="preserve"><value>Ingredientes (plato completo)</value></data>
+  <data name="Receita_Opcional" xml:space="preserve"><value>opcional</value></data>
+  <data name="Receita_Original" xml:space="preserve"><value>Receta original</value></data>
+  <data name="Receita_NaoEncontrada" xml:space="preserve"><value>Receta no encontrada.</value></data>
+  <data name="Comp_NovoRapido" xml:space="preserve"><value>Nuevo componente rápido</value></data>
+  <data name="Comp_Nome" xml:space="preserve"><value>Nombre del componente</value></data>
+  <data name="Comp_IngredientesUmPorLinha" xml:space="preserve"><value>Ingredientes (uno por línea — pega de la receta):</value></data>
+  <data name="Comp_IngredientesPlaceholder" xml:space="preserve"><value>Ej.: 4 papas grandes en rodajas; 2 cucharadas de aceite de oliva; sal al gusto</value></data>
+  <data name="Comp_CriarAdicionar" xml:space="preserve"><value>Crear y agregar</value></data>
+  <data name="Comp_ExtrairAdicionar" xml:space="preserve"><value>Extraer y agregar</value></data>
+  <data name="Comp_SemIngredientes" xml:space="preserve"><value>Componente creado sin ingredientes — puedes completarlos después.</value></data>
+  <data name="Comp_ExtrairAjuda" xml:space="preserve"><value>Las {0} línea(s) marcada(s) se convierten en una nueva receta reutilizable, que entra en su lugar como componente.</value></data>
+  <data name="Lanc_Titulo" xml:space="preserve"><value>Agregar ingredientes desde texto</value></data>
+  <data name="Lanc_Ajuda" xml:space="preserve"><value>Ajusta la lista (un ingrediente por línea) y haz clic en Analizar. Revisa nombre, cantidad, unidad y nota de cada elemento — puedes editarlo todo. Los ingredientes con el mismo nombre que uno ya registrado se reutilizan; los demás se crean al agregar.</value></data>
+  <data name="Lanc_TextoLabel" xml:space="preserve"><value>Texto de los ingredientes</value></data>
+  <data name="Lanc_Traduzir" xml:space="preserve"><value>Traducir la receta a mi idioma ({0})</value></data>
+  <data name="Lanc_TraduzirAjuda" xml:space="preserve"><value>Traduce los ingredientes, el nombre y la preparación. Queda guardado en ese idioma — no se puede volver a traducir después.</value></data>
+  <data name="Lanc_Analisar" xml:space="preserve"><value>Analizar</value></data>
+  <data name="Lanc_Analisando" xml:space="preserve"><value>Analizando...</value></data>
+  <data name="Lanc_Resumo" xml:space="preserve"><value>{0} elemento(s) — {1} se creará(n) en el catálogo</value></data>
+  <data name="Lanc_NomeIngrediente" xml:space="preserve"><value>Nombre del ingrediente</value></data>
+  <data name="Lanc_ObsPreparo" xml:space="preserve"><value>Nota (preparación)</value></data>
+  <data name="Lanc_Novo" xml:space="preserve"><value>nuevo</value></data>
+  <data name="Lanc_Existente" xml:space="preserve"><value>existente</value></data>
+  <data name="Lanc_Lancando" xml:space="preserve"><value>Agregando...</value></data>
+  <data name="Lanc_LancarN" xml:space="preserve"><value>Agregar {0} ingrediente(s)</value></data>
+  <data name="Lanc_NenhumLancado" xml:space="preserve"><value>No se pudo agregar ningún ingrediente.</value></data>
+  <data name="Lanc_FalhaCriar" xml:space="preserve"><value>No se pudo crear &apos;{0}&apos;: {1}</value></data>
+  <data name="Cardapio_SemanaAnterior" xml:space="preserve"><value>Semana anterior</value></data>
+  <data name="Cardapio_ProximaSemana" xml:space="preserve"><value>Próxima semana</value></data>
+  <data name="Cardapio_Periodo" xml:space="preserve"><value>{0} al {1}</value></data>
+  <data name="Cardapio_SemanaCopiadaPara" xml:space="preserve"><value>¡Semana copiada al {0}!</value></data>
+  <data name="Cardapio_NomeModeloPadrao" xml:space="preserve"><value>Mi semana favorita</value></data>
+  <data name="Modelo_AplicadoSemana" xml:space="preserve"><value>¡Plantilla &apos;{0}&apos; aplicada a la semana del {1}!</value></data>
+  <data name="Agrupar_Titulo" xml:space="preserve"><value>Agrupar &quot;{0}&quot;</value></data>
+  <data name="Agrupar_Ajuda" xml:space="preserve"><value>Elige el producto base de compra. Los elementos agrupados se suman como uno solo en la lista — ej.: &quot;Cebolla picada&quot; y &quot;Cebollas grandes&quot; bajo &quot;Cebolla&quot;. Los cortes de carne diferentes (bistec, carne en cubos) deben quedar separados.</value></data>
+  <data name="Agrupar_ProdutoBase" xml:space="preserve"><value>Producto base</value></data>
+  <data name="Agrupar_Btn" xml:space="preserve"><value>Agrupar</value></data>
+  <data name="Agrupar_Ok" xml:space="preserve"><value>&quot;{0}&quot; agrupado bajo &quot;{1}&quot;.</value></data>
+  <data name="Agrupar_Falha" xml:space="preserve"><value>No se pudo agrupar.</value></data>
+  <data name="Compras_FalhaMarcar" xml:space="preserve"><value>No se pudo marcar el elemento.</value></data>
+  <data name="Compras_FalhaLimpar" xml:space="preserve"><value>No se pudo limpiar.</value></data>
+  <data name="Compras_FalhaMover" xml:space="preserve"><value>No se pudo mover el elemento.</value></data>
+  <data name="Compras_FalhaMoverPedido" xml:space="preserve"><value>No se pudo mover el pedido.</value></data>
+  <data name="Dashboard_SemResponsavel" xml:space="preserve"><value>Sin responsable</value></data>
+  <data name="Dashboard_ComprasDesc" xml:space="preserve"><value>Organiza las compras de la semana</value></data>
+  <data name="Dashboard_TarefasHoje" xml:space="preserve"><value>Tareas de hoy</value></data>
+  <data name="Dashboard_VerTodas" xml:space="preserve"><value>Ver todas</value></data>
+  <data name="Dashboard_SemTarefasHoje" xml:space="preserve"><value>No hay tareas programadas para hoy.</value></data>
+  <data name="Dashboard_NPendentes" xml:space="preserve"><value>{0} pendiente(s)</value></data>
+  <data name="App_FotoPerfil" xml:space="preserve"><value>Foto de perfil</value></data>
+  <data name="Recon_Reconectando" xml:space="preserve"><value>Reconectando…</value></data>
+  <data name="Recon_ReconectandoTexto" xml:space="preserve"><value>Se perdió la conexión. Intentando restablecerla automáticamente.</value></data>
+  <data name="Recon_SemConexao" xml:space="preserve"><value>Sin conexión</value></data>
+  <data name="Recon_SemConexaoTexto" xml:space="preserve"><value>No se pudo reconectar automáticamente.</value></data>
+  <data name="Recon_SessaoExpirada" xml:space="preserve"><value>Sesión expirada</value></data>
+  <data name="Recon_SessaoExpiradaTexto" xml:space="preserve"><value>Necesitamos recargar la página para continuar.</value></data>
+  <data name="Recon_TentarNovamente" xml:space="preserve"><value>Intentar de nuevo</value></data>
+  <data name="Recon_Recarregar" xml:space="preserve"><value>Recargar página</value></data>
+  <data name="Conta_AcessoNegado" xml:space="preserve"><value>Acceso denegado</value></data>
+  <data name="Conta_SemPermissao" xml:space="preserve"><value>No tienes permiso para acceder a esta página.</value></data>
+  <data name="Conta_ConfirmarEmail" xml:space="preserve"><value>Confirmar correo</value></data>
+  <data name="Conta_ConfirmacaoEmail" xml:space="preserve"><value>Confirmación de correo</value></data>
+  <data name="Conta_EntrarAgora" xml:space="preserve"><value>Entrar ahora</value></data>
+  <data name="Conta_RedefinirSenha" xml:space="preserve"><value>Restablecer contraseña</value></data>
+  <data name="Conta_EmailConfirmadoEntrar" xml:space="preserve"><value>¡Correo confirmado! Ya puedes entrar.</value></data>
+  <data name="Conta_ManterConectado" xml:space="preserve"><value>Mantener sesión iniciada</value></data>
+  <data name="Conta_AindaNaoTem" xml:space="preserve"><value>¿Aún no tienes cuenta?</value></data>
+  <data name="Conta_2FAAbraApp" xml:space="preserve"><value>Abre tu app autenticadora e ingresa el código de 6 dígitos.</value></data>
+  <data name="Conta_2FACodigoAutenticador" xml:space="preserve"><value>Código del autenticador</value></data>
+  <data name="Conta_2FALembrar" xml:space="preserve"><value>No pedir código en este dispositivo durante 30 días</value></data>
+  <data name="Conta_Verificar" xml:space="preserve"><value>Verificar</value></data>
+  <data name="Conta_CodigoRecuperacao" xml:space="preserve"><value>Código de recuperación</value></data>
+  <data name="Conta_RecuperacaoAjuda" xml:space="preserve"><value>Ingresa uno de los códigos de recuperación que guardaste al activar la verificación en dos pasos. Cada código solo se puede usar una vez.</value></data>
+  <data name="Conta_Saindo" xml:space="preserve"><value>Saliendo...</value></data>
+  <data name="Conta_CriarSenha" xml:space="preserve"><value>Crear contraseña</value></data>
+  <data name="Conta_NovaSenha" xml:space="preserve"><value>Nueva contraseña</value></data>
+  <data name="Conta_BemVindo" xml:space="preserve"><value>Bienvenido(a) a HomePlanner</value></data>
+  <data name="Conta_CriarNovaSenha" xml:space="preserve"><value>Crear nueva contraseña</value></data>
+  <data name="Conta_SenhaCriadaOk" xml:space="preserve"><value>¡Contraseña creada! Ya puedes entrar.</value></data>
+  <data name="Conta_SenhaRedefinidaOk" xml:space="preserve"><value>¡Contraseña restablecida!</value></data>
+  <data name="Conta_DefinaSenha" xml:space="preserve"><value>Define la contraseña que usarás para entrar en la cuenta de tu familia.</value></data>
+  <data name="Conta_SuaSenha" xml:space="preserve"><value>Tu contraseña</value></data>
+  <data name="Conta_ConfirmarSenha" xml:space="preserve"><value>Confirmar contraseña</value></data>
+  <data name="Conta_CriarSenhaEntrar" xml:space="preserve"><value>Crear contraseña y entrar</value></data>
+  <data name="Conta_CriarSuaConta" xml:space="preserve"><value>Crea tu cuenta</value></data>
+  <data name="Conta_PaisBR" xml:space="preserve"><value>Brasil</value></data>
+  <data name="Conta_PaisCA" xml:space="preserve"><value>Canadá</value></data>
+  <data name="Conta_AceiteParte1" xml:space="preserve"><value>He leído y acepto los</value></data>
+  <data name="Conta_AceiteTermos" xml:space="preserve"><value>términos de uso</value></data>
+  <data name="Conta_AceiteParte2" xml:space="preserve"><value>y la</value></data>
+  <data name="Conta_AceitePrivacidade" xml:space="preserve"><value>política de privacidad</value></data>
+  <data name="Conta_CriarContaGratis" xml:space="preserve"><value>Crear cuenta gratis</value></data>
+  <data name="Conta_JaTem" xml:space="preserve"><value>¿Ya tienes cuenta?</value></data>
+  <data name="Conta_VerifiqueEmail" xml:space="preserve"><value>Revisa tu correo</value></data>
+  <data name="Conta_QuaseLa" xml:space="preserve"><value>¡Casi listo!</value></data>
+  <data name="Conta_EnviamosConfirmacao" xml:space="preserve"><value>Enviamos un correo de confirmación a</value></data>
+  <data name="Conta_CliqueLink" xml:space="preserve"><value>Haz clic en el enlace del mensaje para activar tu cuenta.</value></data>
+  <data name="Conta_NaoRecebeu" xml:space="preserve"><value>¿No lo recibiste? Revisa la carpeta de spam o</value></data>
+  <data name="Conta_TenteNovamente" xml:space="preserve"><value>inténtalo de nuevo</value></data>
+  <data name="Conta_LinkInvalido" xml:space="preserve"><value>Enlace de confirmación no válido.</value></data>
+  <data name="Conta_UsuarioNaoEncontrado" xml:space="preserve"><value>Usuario no encontrado.</value></data>
+  <data name="Conta_EmailJaConfirmado" xml:space="preserve"><value>Tu correo ya estaba confirmado. Puedes entrar normalmente.</value></data>
+  <data name="Conta_EmailConfirmadoOk" xml:space="preserve"><value>¡Correo confirmado! Bienvenido(a) a HomePlanner.</value></data>
+  <data name="Conta_EmailNaoConfirmado" xml:space="preserve"><value>No se pudo confirmar el correo. Es posible que el enlace haya caducado.</value></data>
+  <data name="Conta_LinkInvalidoExpirado" xml:space="preserve"><value>Enlace de confirmación no válido o caducado.</value></data>
+  <data name="Conta_LoginInvalido" xml:space="preserve"><value>Correo o contraseña no válidos.</value></data>
+  <data name="Conta_Bloqueada" xml:space="preserve"><value>Cuenta bloqueada temporalmente tras varios intentos. Inténtalo de nuevo en 15 minutos.</value></data>
+  <data name="Conta_2FACodigoInvalido" xml:space="preserve"><value>Código no válido. Revisa la app autenticadora e inténtalo de nuevo.</value></data>
+  <data name="Conta_RecuperacaoInvalido" xml:space="preserve"><value>Código de recuperación no válido.</value></data>
+  <data name="Conta_ConviteInvalido" xml:space="preserve"><value>Esta invitación caducó o ya se usó. Pide una nueva a quien administra la familia.</value></data>
+  <data name="Conta_JaAtivada" xml:space="preserve"><value>Esta cuenta ya tiene contraseña. Usa &quot;Olvidé mi contraseña&quot; en la pantalla de inicio de sesión.</value></data>
+  <data name="Val_InformeEmail" xml:space="preserve"><value>Ingresa tu correo.</value></data>
+  <data name="Val_EmailInvalido" xml:space="preserve"><value>Correo no válido.</value></data>
+  <data name="Val_InformeSenha" xml:space="preserve"><value>Ingresa tu contraseña.</value></data>
+  <data name="Val_InformeCodigo" xml:space="preserve"><value>Ingresa el código.</value></data>
+  <data name="Val_InformeCodigoRecuperacao" xml:space="preserve"><value>Ingresa un código de recuperación.</value></data>
+  <data name="Val_InformeUmaSenha" xml:space="preserve"><value>Ingresa una contraseña.</value></data>
+  <data name="Val_SenhaMinimo" xml:space="preserve"><value>La contraseña debe tener al menos 8 caracteres.</value></data>
+  <data name="Val_SenhasNaoCoincidem" xml:space="preserve"><value>Las contraseñas no coinciden.</value></data>
+  <data name="Val_InformeNome" xml:space="preserve"><value>Ingresa tu nombre.</value></data>
+  <data name="Val_InformeUmEmail" xml:space="preserve"><value>Ingresa un correo.</value></data>
+  <data name="Val_AceitarTermos" xml:space="preserve"><value>Debes aceptar los términos.</value></data>
+  <data name="Un_g" xml:space="preserve"><value>g</value></data>
+  <data name="Un_kg" xml:space="preserve"><value>kg</value></data>
+  <data name="Un_ml" xml:space="preserve"><value>ml</value></data>
+  <data name="Un_l" xml:space="preserve"><value>l</value></data>
+  <data name="Un_xic" xml:space="preserve"><value>taza</value></data>
+  <data name="Un_cs" xml:space="preserve"><value>cda.</value></data>
+  <data name="Un_cc" xml:space="preserve"><value>cdta.</value></data>
+  <data name="Un_pitada" xml:space="preserve"><value>pizca</value></data>
+  <data name="Un_un" xml:space="preserve"><value>ud.</value></data>
+  <data name="Un_dente" xml:space="preserve"><value>diente</value></data>
+  <data name="Un_fatia" xml:space="preserve"><value>rebanada</value></data>
+  <data name="Un_pacote" xml:space="preserve"><value>paquete</value></data>
+  <data name="Un_oz" xml:space="preserve"><value>oz</value></data>
+  <data name="Un_lb" xml:space="preserve"><value>lb</value></data>
+  <data name="Un_floz" xml:space="preserve"><value>fl oz</value></data>
+  <data name="Un_cup" xml:space="preserve"><value>cup (EE. UU.)</value></data>
+  <data name="Un_pint" xml:space="preserve"><value>pinta</value></data>
+  <data name="Un_quart" xml:space="preserve"><value>cuarto de galón</value></data>
+  <data name="UnNome_g" xml:space="preserve"><value>Gramo</value></data>
+  <data name="UnNome_kg" xml:space="preserve"><value>Kilogramo</value></data>
+  <data name="UnNome_ml" xml:space="preserve"><value>Mililitro</value></data>
+  <data name="UnNome_l" xml:space="preserve"><value>Litro</value></data>
+  <data name="UnNome_xic" xml:space="preserve"><value>Taza (240 ml)</value></data>
+  <data name="UnNome_cs" xml:space="preserve"><value>Cucharada</value></data>
+  <data name="UnNome_cc" xml:space="preserve"><value>Cucharadita</value></data>
+  <data name="UnNome_pitada" xml:space="preserve"><value>Pizca</value></data>
+  <data name="UnNome_un" xml:space="preserve"><value>Unidad</value></data>
+  <data name="UnNome_dente" xml:space="preserve"><value>Diente</value></data>
+  <data name="UnNome_fatia" xml:space="preserve"><value>Rebanada</value></data>
+  <data name="UnNome_pacote" xml:space="preserve"><value>Paquete</value></data>
+  <data name="UnNome_oz" xml:space="preserve"><value>Onza</value></data>
+  <data name="UnNome_lb" xml:space="preserve"><value>Libra</value></data>
+  <data name="UnNome_floz" xml:space="preserve"><value>Onza líquida</value></data>
+  <data name="UnNome_cup" xml:space="preserve"><value>Taza (EE. UU., 237 ml)</value></data>
+  <data name="UnNome_pint" xml:space="preserve"><value>Pinta</value></data>
+  <data name="UnNome_quart" xml:space="preserve"><value>Cuarto de galón</value></data>
+  <data name="Identity_DefaultError" xml:space="preserve"><value>Ocurrió un error. Inténtalo de nuevo.</value></data>
+  <data name="Identity_PasswordMismatch" xml:space="preserve"><value>Contraseña incorrecta.</value></data>
+  <data name="Identity_InvalidToken" xml:space="preserve"><value>El enlace caducó o no es válido. Solicita uno nuevo.</value></data>
+  <data name="Identity_RecoveryCodeRedemptionFailed" xml:space="preserve"><value>Código de recuperación no válido.</value></data>
+  <data name="Identity_InvalidEmail" xml:space="preserve"><value>El correo &apos;{0}&apos; no es válido.</value></data>
+  <data name="Identity_DuplicateEmail" xml:space="preserve"><value>Ya existe una cuenta con este correo.</value></data>
+  <data name="Identity_DuplicateUserName" xml:space="preserve"><value>Ya existe una cuenta con este correo.</value></data>
+  <data name="Identity_UserAlreadyHasPassword" xml:space="preserve"><value>Esta cuenta ya tiene contraseña.</value></data>
+  <data name="Identity_PasswordTooShort" xml:space="preserve"><value>La contraseña debe tener al menos {0} caracteres.</value></data>
+  <data name="Identity_PasswordRequiresUniqueChars" xml:space="preserve"><value>La contraseña debe tener al menos {0} caracteres distintos.</value></data>
+  <data name="Identity_PasswordRequiresNonAlphanumeric" xml:space="preserve"><value>La contraseña debe contener al menos un carácter especial (ej.: ! @ #).</value></data>
+  <data name="Identity_PasswordRequiresDigit" xml:space="preserve"><value>La contraseña debe contener al menos un número.</value></data>
+  <data name="Identity_PasswordRequiresLower" xml:space="preserve"><value>La contraseña debe contener al menos una letra minúscula.</value></data>
+  <data name="Identity_PasswordRequiresUpper" xml:space="preserve"><value>La contraseña debe contener al menos una letra mayúscula.</value></data>
+  <data name="Email_Ola" xml:space="preserve"><value>¡Hola, {0}!</value></data>
+  <data name="Email_ConfirmacaoTexto" xml:space="preserve"><value>Bienvenido(a) a HomePlanner. Confirma tu correo para empezar a organizar la semana de tu familia.</value></data>
+  <data name="Email_ConfirmacaoBotao" xml:space="preserve"><value>Confirmar correo</value></data>
+  <data name="Email_ConfirmacaoAssunto" xml:space="preserve"><value>Confirma tu correo — HomePlanner</value></data>
+  <data name="Email_ResetTexto" xml:space="preserve"><value>Recibimos una solicitud para restablecer tu contraseña. Si fuiste tú, haz clic en el botón de abajo. Si no, ignora este correo.</value></data>
+  <data name="Email_ResetBotao" xml:space="preserve"><value>Restablecer contraseña</value></data>
+  <data name="Email_ResetAssunto" xml:space="preserve"><value>Restablecer contraseña — HomePlanner</value></data>
+  <data name="Email_SuaFamilia" xml:space="preserve"><value>Tu familia</value></data>
+  <data name="Email_ConviteTexto" xml:space="preserve"><value>{0} te invitó a HomePlanner — donde la familia organiza junta el menú de la semana, las tareas de casa y la lista de compras. Crea tu contraseña para entrar.</value></data>
+  <data name="Email_ConviteBotao" xml:space="preserve"><value>Crear mi contraseña</value></data>
+  <data name="Email_ConviteValidade" xml:space="preserve"><value>Esta invitación es válida por {0} días. Si caduca, pide una nueva a {1}.</value></data>
+  <data name="Email_ConviteAssunto" xml:space="preserve"><value>{0} te invitó a HomePlanner</value></data>
 </root>

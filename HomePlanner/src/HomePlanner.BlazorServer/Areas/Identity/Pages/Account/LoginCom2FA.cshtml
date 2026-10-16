@@ -1,13 +1,13 @@
 @page
 @model HomePlanner.BlazorServer.Areas.Identity.Pages.Account.LoginCom2FAModel
 @{
-    ViewData["Title"] = "Verificação em duas etapas";
+    ViewData["Title"] = L["Auth_2FATitulo"];
 }
 
-<h1 class="auth-title">Verificação em duas etapas</h1>
+<h1 class="auth-title">@L["Auth_2FATitulo"]</h1>
 
 <p class="auth-sub" style="margin-bottom:20px;">
-    Abra seu app autenticador e informe o código de 6 dígitos.
+    @L["Conta_2FAAbraApp"]
 </p>
 
 <form method="post">
@@ -16,7 +16,7 @@
     <input type="hidden" asp-for="RememberMe" />
 
     <div class="form-group">
-        <label asp-for="Codigo">Código do autenticador</label>
+        <label asp-for="Codigo">@L["Conta_2FACodigoAutenticador"]</label>
         <input asp-for="Codigo"
                type="text"
                inputmode="numeric"
@@ -31,17 +31,17 @@
     <div class="checkbox-row">
         <input asp-for="LembrarDispositivo" />
         <label asp-for="LembrarDispositivo" style="font-weight:400; margin:0;">
-            Não pedir mais código por 30 dias neste aparelho
+            @L["Conta_2FALembrar"]
         </label>
     </div>
 
-    <button type="submit" class="btn-primary">Verificar</button>
+    <button type="submit" class="btn-primary">@L["Conta_Verificar"]</button>
 </form>
 
 <div class="auth-links">
     <a asp-page="./LoginComCodigoRecuperacao"
        asp-route-returnUrl="@Model.ReturnUrl"
-       asp-route-rememberMe="@Model.RememberMe">Usar um código de recuperação</a>
+       asp-route-rememberMe="@Model.RememberMe">@L["Auth_2FAUsarRec"]</a>
     <br /><br />
-    <a asp-page="./Login">Voltar ao login</a>
+    <a asp-page="./Login">@L["Auth_VoltarLogin"]</a>
 </div>

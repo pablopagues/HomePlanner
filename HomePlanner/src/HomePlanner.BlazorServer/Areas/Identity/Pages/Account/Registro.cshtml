@@ -1,42 +1,42 @@
 @page
 @model HomePlanner.BlazorServer.Areas.Identity.Pages.Account.RegistroModel
 @{
-    ViewData["Title"] = "Criar conta";
+    ViewData["Title"] = L["Auth_RegistroTitulo"];
 }
 
-<h1 class="auth-title">Criar sua conta</h1>
+<h1 class="auth-title">@L["Conta_CriarSuaConta"]</h1>
 
 <form method="post">
     <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
 
     <div class="form-group">
-        <label asp-for="Input.NomeResponsavel">Seu nome</label>
+        <label asp-for="Input.NomeResponsavel">@L["Auth_SeuNome"]</label>
         <input asp-for="Input.NomeResponsavel" autocomplete="name" />
         <span asp-validation-for="Input.NomeResponsavel" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="Input.Email">E-mail</label>
+        <label asp-for="Input.Email">@L["Auth_Email"]</label>
         <input asp-for="Input.Email" autocomplete="email" />
         <span asp-validation-for="Input.Email" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="Input.PaisId">País</label>
+        <label asp-for="Input.PaisId">@L["Auth_Pais"]</label>
         <select asp-for="Input.PaisId">
-            <option value="BR">Brasil</option>
-            <option value="CA">Canadá</option>
+            <option value="BR">@L["Conta_PaisBR"]</option>
+            <option value="CA">@L["Conta_PaisCA"]</option>
         </select>
     </div>
 
     <div class="form-group">
-        <label asp-for="Input.Senha">Senha</label>
+        <label asp-for="Input.Senha">@L["Auth_Senha"]</label>
         <input asp-for="Input.Senha" autocomplete="new-password" />
         <span asp-validation-for="Input.Senha" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="Input.ConfirmacaoSenha">Confirmar senha</label>
+        <label asp-for="Input.ConfirmacaoSenha">@L["Conta_ConfirmarSenha"]</label>
         <input asp-for="Input.ConfirmacaoSenha" autocomplete="new-password" />
         <span asp-validation-for="Input.ConfirmacaoSenha" class="text-danger"></span>
     </div>
@@ -44,15 +44,15 @@
     <div class="checkbox-row">
         <input asp-for="Input.AceitaTermos" />
         <label asp-for="Input.AceitaTermos" style="font-weight:400; margin:0;">
-            Li e aceito os <a href="/termos" target="_blank">termos de uso</a>
-            e a <a href="/privacidade" target="_blank">política de privacidade</a>.
+            @L["Conta_AceiteParte1"] <a href="/termos" target="_blank">@L["Conta_AceiteTermos"]</a>
+            @L["Conta_AceiteParte2"] <a href="/privacidade" target="_blank">@L["Conta_AceitePrivacidade"]</a>.
         </label>
     </div>
     <span asp-validation-for="Input.AceitaTermos" class="text-danger"></span>
 
-    <button type="submit" class="btn-primary">Criar conta grátis</button>
+    <button type="submit" class="btn-primary">@L["Conta_CriarContaGratis"]</button>
 </form>
 
 <div class="auth-links">
-    Já tem conta? <a asp-page="./Login">Entrar</a>
+    @L["Conta_JaTem"] <a asp-page="./Login">@L["Auth_Entrar"]</a>
 </div>

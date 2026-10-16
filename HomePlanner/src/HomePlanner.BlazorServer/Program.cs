@@ -155,6 +155,8 @@ try
         })
         .AddEntityFrameworkStores<HomePlannerDbContext>()
         .AddDefaultTokenProviders()
+        // Mensagens do Identity (senha fraca, e-mail duplicado...) no idioma da requisição.
+        .AddErrorDescriber<Infrastructure.HomePlanner.Services.Identity.IdentityErrorDescriberLocalizado>()
         // Convite de membro usa provider próprio (validade de 7 dias, contra 1 dia do padrão).
         .AddTokenProvider<ConviteTokenProvider<Usuario>>(ConviteToken.Provider);
 
@@ -230,7 +232,11 @@ try
     builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
     // ── Razor Pages + Controllers + Blazor + MudBlazor ───────────────────────
-    builder.Services.AddRazorPages();
+    // DataAnnotations das páginas de conta: o ErrorMessage é uma chave do SharedResource.
+    builder.Services.AddRazorPages()
+        .AddDataAnnotationsLocalization(opts =>
+            opts.DataAnnotationLocalizerProvider = (_, fabrica) =>
+                fabrica.Create(typeof(Resources.HomePlanner.SharedResource)));
     // Controllers: webhook do Stripe + API mobile. Enums como string (JSON amigável para o app).
     builder.Services.AddControllers()
         .AddJsonOptions(opts =>
@@ -277,6 +283,8 @@ try
     builder.Services.AddScoped<IParserIngredientesIA, ParserIngredientesIAService>();
     builder.Services.AddScoped<ITradutorReceitaIA, TradutorReceitaIAService>();
     builder.Services.AddScoped<ICotaImportacaoService, CotaImportacaoService>();
+    builder.Services.AddScoped<IAssistenteReceitaIA, AssistenteReceitaIAService>();
+    builder.Services.AddScoped<ISugestaoReceitaService, SugestaoReceitaService>();
 
     // ── Lista de Compras ──────────────────────────────────────────────────────
     builder.Services.AddScoped<IListaComprasService, ListaComprasService>();

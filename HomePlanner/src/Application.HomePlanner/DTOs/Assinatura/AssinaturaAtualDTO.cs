@@ -25,6 +25,9 @@ public class AssinaturaAtualDTO
     /// <summary>Limite de importações de receita por mês no plano atual.</summary>
     public int LimiteImportacoesReceita { get; set; }
 
+    /// <summary>Limite de pedidos de sugestão de receitas (IA) por mês no plano atual.</summary>
+    public int LimiteSugestoesReceita { get; set; }
+
     /// <summary>Dias restantes no trial (null se já é paga).</summary>
     public int? DiasRestantesTrial { get; set; }
 
