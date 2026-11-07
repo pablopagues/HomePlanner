@@ -580,6 +580,9 @@ else if (_lista is not null)
         await JS.InvokeVoidAsync("appStorage.set", "hp_ocultar_comprados", valor ? "1" : "0");
     }
 
+    private string UrlReceita(int receitaId) =>
+        $"/receitas/{receitaId}?voltar={Uri.EscapeDataString(Lang.U("/compras") + $"/{_dataInicio:yyyy-MM-dd}")}";
+
     private void SemanaAnterior()
         => Nav.NavigateTo(Lang.U("/compras") + $"/{_dataInicio.AddDays(-7):yyyy-MM-dd}");
 
@@ -628,6 +631,23 @@ else if (_lista is not null)
                     <MudText Typo="Typo.caption" Color="Color.Secondary">
                         @L.FormatarQuantidade(item.Quantidade, item.CodigoUnidade)@(mostrarOrigem ? " · " + L["Compras_CategoriaCardapio"] : "")
                     </MudText>
+                    @if (item.Receitas.Count > 0)
+                    {
+                        <div style="display:flex; flex-wrap:wrap; column-gap:10px;">
+                            @foreach (var receita in item.Receitas)
+                            {
+                                @* /receitas não é rota liberada no Modo Mural: lá fica só o nome. *@
+                                @if (Mural.Ativo)
+                                {
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">@receita.Nome</MudText>
+                                }
+                                else
+                                {
+                                    <MudLink Typo="Typo.caption" Href="@UrlReceita(receita.Id)">@receita.Nome</MudLink>
+                                }
+                            }
+                        </div>
+                    }
                 </MudStack>
                 @if (!Mural.Ativo)
                 {

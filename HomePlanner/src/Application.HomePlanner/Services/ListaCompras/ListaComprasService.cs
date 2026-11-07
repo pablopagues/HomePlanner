@@ -107,6 +107,9 @@ public class ListaComprasService : IListaComprasService
 
                 // Agrega mesmo que a unidade de medida seja diferente (soma na base).
                 item.QtdBase += qtdBase;
+
+                // Origem é o prato do cardápio (a página dele lista também os ingredientes dos componentes).
+                item.Receitas[receitaId] = refeicao.ReceitaNome ?? string.Empty;
             }
         }
 
@@ -128,6 +131,8 @@ public class ListaComprasService : IListaComprasService
                 acumulador[info.BaseId] = alvo;
             }
             alvo.QtdBase += item.QtdBase;
+            foreach (var (receitaId, nome) in item.Receitas)
+                alvo.Receitas[receitaId] = nome;
         }
 
         // Loja padrão (preferência) de cada ingrediente para já posicionar o item na loja certa.
@@ -147,6 +152,10 @@ public class ListaComprasService : IListaComprasService
                     NomeUnidade     = nome,
                     Tipo            = a.Tipo,
                     ListaId         = preferencias.TryGetValue(a.IngredienteId, out var lid) ? lid : null,
+                    Receitas        = a.Receitas
+                        .Select(r => new ReceitaDoItemDTO { Id = r.Key, Nome = r.Value })
+                        .OrderBy(r => r.Nome)
+                        .ToList(),
                 };
             })
             .ToList();
@@ -254,5 +263,6 @@ public class ListaComprasService : IListaComprasService
         public string Nome { get; set; } = string.Empty;
         public TipoUnidadeMedida Tipo { get; set; }
         public decimal QtdBase { get; set; }
+        public Dictionary<int, string> Receitas { get; } = new();
     }
 }

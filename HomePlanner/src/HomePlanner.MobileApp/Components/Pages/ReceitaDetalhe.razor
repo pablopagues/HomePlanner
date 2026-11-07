@@ -4,7 +4,7 @@
 @inject IStringLocalizer<SharedResource> L
 @inject NavigationManager Nav
 
-<button class="link" style="text-align:left;width:auto" @onclick='() => Nav.NavigateTo("/receitas")'>‹ @L["Btn_Voltar"]</button>
+<button class="link" style="text-align:left;width:auto" @onclick='() => Nav.NavigateTo(Voltar ?? "/receitas")'>‹ @L["Btn_Voltar"]</button>
 
 @if (carregando)
 {
@@ -73,6 +73,9 @@ else if (r is not null)
 
 @code {
     [Parameter] public int Id { get; set; }
+
+    // Origem da navegação (ex.: a lista de compras da semana).
+    [SupplyParameterFromQuery(Name = "voltar")] public string? Voltar { get; set; }
 
     private ReceitaDetalheDTO? r;
     private bool carregando = true;

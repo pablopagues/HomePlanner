@@ -15,8 +15,17 @@ public class ItemComprasDTO
     /// <summary>Loja para onde o item foi remanejado (preferência do ingrediente; null = "Geral").</summary>
     public int? ListaId { get; set; }
 
+    /// <summary>Pratos do cardápio da semana que pedem este item (sem repetição, por nome).</summary>
+    public IReadOnlyList<ReceitaDoItemDTO> Receitas { get; init; } = [];
+
     public string QuantidadeFormatada =>
         Quantidade == Math.Floor(Quantidade)
             ? $"{(int)Quantidade} {CodigoUnidade}"
             : $"{Quantidade:G} {CodigoUnidade}";
+}
+
+public class ReceitaDoItemDTO
+{
+    public int Id { get; init; }
+    public string Nome { get; init; } = string.Empty;
 }

@@ -345,6 +345,13 @@ public class ItemComprasDTO
     public string? Categoria { get; set; }
     public string QuantidadeFormatada { get; set; } = string.Empty;
     public int? ListaId { get; set; }
+    public List<ReceitaDoItemDTO> Receitas { get; set; } = new();
+}
+
+public class ReceitaDoItemDTO
+{
+    public int Id { get; set; }
+    public string Nome { get; set; } = string.Empty;
 }
 
 public class PedidoMembroGrupoDTO

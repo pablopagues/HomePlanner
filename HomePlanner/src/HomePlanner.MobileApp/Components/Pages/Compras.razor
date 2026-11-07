@@ -2,6 +2,7 @@
 @using HomePlanner.MobileApp.Services
 @inject ApiClient Api
 @inject IStringLocalizer<SharedResource> L
+@inject NavigationManager Nav
 
 <div class="barra-topo">
     <button class="menu-btn" style="color:var(--hp-primary)" @onclick="() => MudarSemana(-7)">‹</button>
@@ -30,6 +31,11 @@ else
                     <div style="flex:1" class="@(comprado ? "riscado" : "")">
                         <div>@i.NomeIngrediente</div>
                         <div class="muted">@i.QuantidadeFormatada</div>
+                        @foreach (var receita in i.Receitas)
+                        {
+                            <button class="link" style="display:block;width:auto;padding:.1rem 0;font-size:.85rem;text-align:left"
+                                    @onclick="() => AbrirReceita(receita.Id)">@receita.Nome</button>
+                        }
                     </div>
                 </div>
             }
@@ -82,6 +88,9 @@ else
 }
 
 @code {
+    // Semana a reabrir ao voltar do detalhe da receita.
+    [SupplyParameterFromQuery(Name = "semana")] public string? Semana { get; set; }
+
     private DateOnly _segunda;
     private ListaComprasDTO? _lista;
     private Dictionary<int, bool> _marcacoes = new();
@@ -94,8 +103,16 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _segunda = SegundaDe(DateOnly.FromDateTime(DateTime.Today));
+        _segunda = DateOnly.TryParse(Semana, out var semana)
+            ? semana
+            : SegundaDe(DateOnly.FromDateTime(DateTime.Today));
         await CarregarAsync();
+    }
+
+    private void AbrirReceita(int receitaId)
+    {
+        var voltar = Uri.EscapeDataString($"/compras?semana={_segunda:yyyy-MM-dd}");
+        Nav.NavigateTo($"/receitas/{receitaId}?voltar={voltar}");
     }
 
     private async Task AdicionarPedido()
