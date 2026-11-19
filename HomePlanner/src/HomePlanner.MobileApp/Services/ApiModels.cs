@@ -308,6 +308,7 @@ public class TarefaListaDTO
     public string? ResponsavelUsuarioId { get; set; }
     public string? ResponsavelNome { get; set; }
     public bool NotificarResponsaveis { get; set; }
+    public int? MinutosAntecedenciaLembrete { get; set; }
 }
 
 public class TarefaPersistenciaRequest
@@ -322,6 +323,7 @@ public class TarefaPersistenciaRequest
     public string Visibilidade { get; set; } = "Familia";
     public string? ResponsavelUsuarioId { get; set; }
     public bool NotificarResponsaveis { get; set; }
+    public int? MinutosAntecedenciaLembrete { get; set; }
 }
 
 public class MembroSimplesDTO

@@ -1203,4 +1203,11 @@
   <data name="CardAuto_Descartado" xml:space="preserve"><value>Brouillon écarté.</value></data>
   <data name="Push_CardapioPronto_Titulo" xml:space="preserve"><value>Menu de la semaine prêt</value></data>
   <data name="Push_CardapioPronto_Corpo" xml:space="preserve"><value>L'IA a préparé le menu de la semaine du {0}. Touchez pour le vérifier.</value></data>
+  <data name="Planner_AlertaLabel" xml:space="preserve"><value>Alerte</value></data>
+  <data name="Alerta_PadraoFamilia" xml:space="preserve"><value>Par défaut de la famille</value></data>
+  <data name="Alerta_MinutosAntes" xml:space="preserve"><value>{0} minutes avant</value></data>
+  <data name="Alerta_HorasAntes" xml:space="preserve"><value>{0} heures avant</value></data>
+  <data name="Alerta_1Hora" xml:space="preserve"><value>1 heure avant</value></data>
+  <data name="Alerta_1Dia" xml:space="preserve"><value>1 jour avant</value></data>
+  <data name="Alerta_PrecisaHora" xml:space="preserve"><value>Indiquez l'heure de début pour recevoir l'alerte</value></data>
 </root>

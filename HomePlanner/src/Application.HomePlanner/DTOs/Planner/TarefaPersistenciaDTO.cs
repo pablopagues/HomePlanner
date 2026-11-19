@@ -14,4 +14,7 @@ public class TarefaPersistenciaDTO
     public VisibilidadeTarefa Visibilidade { get; set; } = VisibilidadeTarefa.Familia;
     public string? ResponsavelUsuarioId { get; set; }
     public bool NotificarResponsaveis { get; set; }
+
+    /// <summary>Antecedência do lembrete em minutos. Null = padrão da família.</summary>
+    public int? MinutosAntecedenciaLembrete { get; set; }
 }

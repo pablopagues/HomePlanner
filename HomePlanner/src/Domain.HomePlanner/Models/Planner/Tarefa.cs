@@ -27,6 +27,12 @@ public class Tarefa : ITenantEntity, IDeletableEntity, IAuditable
     /// </summary>
     public DateTime? LembreteEnviadoEm { get; set; }
 
+    /// <summary>
+    /// Antecedência (minutos) do lembrete desta tarefa. Null = usa o padrão da família
+    /// (<c>ConfiguracaoFamilia.MinutosAntecedenciaLembrete</c>).
+    /// </summary>
+    public int? MinutosAntecedenciaLembrete { get; set; }
+
     public Recorrencia Recorrencia { get; set; } = Recorrencia.Nenhuma;
     public VisibilidadeTarefa Visibilidade { get; set; } = VisibilidadeTarefa.Familia;
 

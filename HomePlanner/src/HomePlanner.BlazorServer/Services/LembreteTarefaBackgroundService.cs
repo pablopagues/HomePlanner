@@ -59,11 +59,11 @@ public class LembreteTarefaBackgroundService : BackgroundService
 
         if (!push.Habilitado) return; // sem chaves VAPID, nem varre
 
-        // Limita às tarefas em torno de "hoje" em UTC (cobre qualquer fuso ±). Sem contexto de tenant,
-        // por isso IgnoreQueryFilters em tudo.
+        // Limita às tarefas em torno de "hoje" em UTC (cobre qualquer fuso ±, mais 1 dia para a
+        // antecedência máxima de 1 dia). Sem contexto de tenant, por isso IgnoreQueryFilters em tudo.
         var hojeUtc = DateOnly.FromDateTime(DateTime.UtcNow);
         var deUtc = hojeUtc.AddDays(-1);
-        var ateUtc = hojeUtc.AddDays(1);
+        var ateUtc = hojeUtc.AddDays(2);
 
         var candidatas = await db.Tarefas
             .IgnoreQueryFilters()
@@ -94,7 +94,10 @@ public class LembreteTarefaBackgroundService : BackgroundService
         {
             configs.TryGetValue(tarefa.TenantId, out var config);
             var fuso = config?.FusoHorario ?? FusoPadrao;
-            var antecedencia = config?.MinutosAntecedenciaLembrete ?? AntecedenciaPadrao;
+            // A tarefa pode escolher a própria antecedência; senão vale a da família.
+            var antecedencia = tarefa.MinutosAntecedenciaLembrete
+                               ?? config?.MinutosAntecedenciaLembrete
+                               ?? AntecedenciaPadrao;
 
             TimeZoneInfo tz;
             try

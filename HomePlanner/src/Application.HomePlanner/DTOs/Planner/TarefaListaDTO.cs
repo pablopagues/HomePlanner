@@ -17,6 +17,9 @@ public class TarefaListaDTO
     public string? ResponsavelNome { get; init; }
     public bool NotificarResponsaveis { get; init; }
 
+    /// <summary>Antecedência do lembrete em minutos. Null = padrão da família.</summary>
+    public int? MinutosAntecedenciaLembrete { get; init; }
+
     /// <summary>Usuário que criou a tarefa. Permite à UI distinguir tarefas próprias.</summary>
     public string? CriadoPorUsuarioId { get; init; }
 

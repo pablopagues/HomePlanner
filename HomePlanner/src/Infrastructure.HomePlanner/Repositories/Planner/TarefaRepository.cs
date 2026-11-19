@@ -43,6 +43,7 @@ public class TarefaRepository : ITarefaRepository
                 ResponsavelUsuarioId = t.ResponsavelUsuarioId,
                 ResponsavelNome      = t.Responsavel != null ? t.Responsavel.NomeCompleto : null,
                 NotificarResponsaveis = t.NotificarResponsaveis,
+                MinutosAntecedenciaLembrete = t.MinutosAntecedenciaLembrete,
                 CriadoPorUsuarioId   = t.CriadoPorUsuarioId,
                 ResponsavelFotoAtualizadaEm = t.Responsavel != null ? t.Responsavel.FotoAtualizadaEm : null,
             })

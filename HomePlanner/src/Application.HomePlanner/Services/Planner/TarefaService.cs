@@ -89,6 +89,9 @@ public class TarefaService : ITarefaService
         if (dto.HoraInicio.HasValue && dto.HoraFim.HasValue && dto.HoraFim < dto.HoraInicio)
             return ResultadoOperacao<int>.Falha(ErrosApp.HoraFimAntesDoInicio);
 
+        if (dto.MinutosAntecedenciaLembrete is < 0 or > 1440)
+            return ResultadoOperacao<int>.Falha(ErrosApp.AntecedenciaInvalida);
+
         var restrito = _tenantContext.RestritoAsProprias;
 
         Tarefa entidade;
@@ -108,13 +111,16 @@ public class TarefaService : ITarefaService
         }
 
         var responsavelAnterior = entidade.ResponsavelUsuarioId;
-        var agendamentoMudou = entidade.DataPrevista != dto.DataPrevista || entidade.HoraInicio != dto.HoraInicio;
+        var agendamentoMudou = entidade.DataPrevista != dto.DataPrevista
+                               || entidade.HoraInicio != dto.HoraInicio
+                               || entidade.MinutosAntecedenciaLembrete != dto.MinutosAntecedenciaLembrete;
 
         entidade.Titulo               = dto.Titulo;
         entidade.Descricao            = dto.Descricao?.Trim();
         entidade.DataPrevista         = dto.DataPrevista;
         entidade.HoraInicio           = dto.HoraInicio;
-        // Reagendou? Esquece que já avisou, para o lembrete sair no novo horário.
+        entidade.MinutosAntecedenciaLembrete = dto.MinutosAntecedenciaLembrete;
+        // Reagendou (ou mudou a antecedência)? Esquece que já avisou, para o lembrete sair no novo horário.
         if (agendamentoMudou) entidade.LembreteEnviadoEm = null;
         entidade.HoraFim              = dto.HoraFim;
         entidade.Recorrencia          = dto.Recorrencia;

@@ -28,6 +28,19 @@ else
         </div>
     </div>
 
+    @* Antecedência do lembrete — só dispara em tarefa com hora. *@
+    <label>@L["Planner_AlertaLabel"]</label>
+    <select @bind="_antecedencia" disabled="@(!_dto.HoraInicio.HasValue)">
+        @foreach (var min in OpcoesAntecedencia)
+        {
+            <option value="@min">@TextoAntecedencia(min)</option>
+        }
+    </select>
+    @if (!_dto.HoraInicio.HasValue)
+    {
+        <div class="muted">@L["Alerta_PrecisaHora"]</div>
+    }
+
     <label>@L["Planner_ResponsavelLabel"]</label>
     <select @bind="_dto.ResponsavelUsuarioId">
         <option value="">@L["App_Ninguem"]</option>
@@ -63,6 +76,23 @@ else
     private bool ocupado;
     private string? erro;
 
+    /// <summary>-1 = padrão da família (null na API).</summary>
+    private const int PadraoFamilia = -1;
+    private static readonly int[] OpcoesFixas = { PadraoFamilia, 15, 30, 60, 480, 1440 };
+    private int _antecedencia = PadraoFamilia;
+
+    private IEnumerable<int> OpcoesAntecedencia =>
+        OpcoesFixas.Contains(_antecedencia) ? OpcoesFixas : OpcoesFixas.Append(_antecedencia).OrderBy(m => m);
+
+    private string TextoAntecedencia(int min) => min switch
+    {
+        PadraoFamilia => L["Alerta_PadraoFamilia"],
+        60 => L["Alerta_1Hora"],
+        1440 => L["Alerta_1Dia"],
+        _ when min >= 60 && min % 60 == 0 => string.Format(L["Alerta_HorasAntes"], min / 60),
+        _ => string.Format(L["Alerta_MinutosAntes"], min),
+    };
+
     protected override async Task OnParametersSetAsync()
     {
         carregando = true;
@@ -83,8 +113,10 @@ else
                     DataPrevista = t.DataPrevista, HoraInicio = t.HoraInicio, HoraFim = t.HoraFim,
                     Recorrencia = t.Recorrencia, Visibilidade = t.Visibilidade,
                     ResponsavelUsuarioId = t.ResponsavelUsuarioId, NotificarResponsaveis = t.NotificarResponsaveis,
+                    MinutosAntecedenciaLembrete = t.MinutosAntecedenciaLembrete,
                 };
             }
+            _antecedencia = _dto.MinutosAntecedenciaLembrete ?? PadraoFamilia;
         }
         else
         {
@@ -100,6 +132,7 @@ else
 
         // "" no dropdown vira null (ninguém)
         if (string.IsNullOrEmpty(_dto.ResponsavelUsuarioId)) _dto.ResponsavelUsuarioId = null;
+        _dto.MinutosAntecedenciaLembrete = _antecedencia == PadraoFamilia ? null : _antecedencia;
 
         ocupado = true;
         var (_, err) = await Api.SalvarTarefaAsync(_dto);

@@ -1226,4 +1226,11 @@
   <data name="CardAuto_Descartado" xml:space="preserve"><value>Rascunho descartado.</value></data>
   <data name="Push_CardapioPronto_Titulo" xml:space="preserve"><value>Cardápio da semana pronto</value></data>
   <data name="Push_CardapioPronto_Corpo" xml:space="preserve"><value>A IA preparou o cardápio da semana de {0}. Toque para revisar.</value></data>
+  <data name="Planner_AlertaLabel" xml:space="preserve"><value>Alerta</value></data>
+  <data name="Alerta_PadraoFamilia" xml:space="preserve"><value>Padrão da família</value></data>
+  <data name="Alerta_MinutosAntes" xml:space="preserve"><value>{0} minutos antes</value></data>
+  <data name="Alerta_HorasAntes" xml:space="preserve"><value>{0} horas antes</value></data>
+  <data name="Alerta_1Hora" xml:space="preserve"><value>1 hora antes</value></data>
+  <data name="Alerta_1Dia" xml:space="preserve"><value>1 dia antes</value></data>
+  <data name="Alerta_PrecisaHora" xml:space="preserve"><value>Defina a hora de início para receber o alerta</value></data>
 </root>

@@ -30,6 +30,17 @@
                                Class="flex-grow-1" />
             </MudStack>
 
+            @* Antecedência do lembrete — sempre visível; só habilita com hora de início
+               (sem hora o lembrete não dispara). *@
+            <MudSelect T="int" @bind-Value="_antecedencia" Label="@L["Planner_AlertaLabel"]"
+                       Variant="Variant.Outlined" Disabled="@(!_horaInicio.HasValue)"
+                       HelperText="@(_horaInicio.HasValue ? null : L["Alerta_PrecisaHora"].Value)">
+                @foreach (var min in OpcoesAntecedencia)
+                {
+                    <MudSelectItem T="int" Value="@min">@TextoAntecedencia(min)</MudSelectItem>
+                }
+            </MudSelect>
+
             @* Filho só atribui tarefas a si mesmo — o responsável é definido no servidor. *@
             @if (!Restrito)
             {
@@ -92,8 +103,27 @@
     private TimeSpan? _horaFim;
     private bool _privada;
 
+    /// <summary>-1 = padrão da família (null no DTO).</summary>
+    private const int PadraoFamilia = -1;
+    private static readonly int[] OpcoesFixas = { PadraoFamilia, 15, 30, 60, 480, 1440 };
+    private int _antecedencia = PadraoFamilia;
+
+    /// <summary>Opções do dropdown; inclui um valor fora da lista se a tarefa já tiver um (ex.: via API).</summary>
+    private IEnumerable<int> OpcoesAntecedencia =>
+        OpcoesFixas.Contains(_antecedencia) ? OpcoesFixas : OpcoesFixas.Append(_antecedencia).OrderBy(m => m);
+
+    private string TextoAntecedencia(int min) => min switch
+    {
+        PadraoFamilia => L["Alerta_PadraoFamilia"],
+        60 => L["Alerta_1Hora"],
+        1440 => L["Alerta_1Dia"],
+        _ when min >= 60 && min % 60 == 0 => string.Format(L["Alerta_HorasAntes"], min / 60),
+        _ => string.Format(L["Alerta_MinutosAntes"], min),
+    };
+
     protected override void OnInitialized()
     {
+        _antecedencia = Dto.MinutosAntecedenciaLembrete ?? PadraoFamilia;
         if (Mural) Dto.Visibilidade = VisibilidadeTarefa.Familia;
         _dataPrevista = Dto.DataPrevista?.ToDateTime(TimeOnly.MinValue);
         _horaInicio = Dto.HoraInicio?.ToTimeSpan();
@@ -108,6 +138,7 @@
             : null;
         Dto.HoraInicio = _horaInicio.HasValue ? TimeOnly.FromTimeSpan(_horaInicio.Value) : null;
         Dto.HoraFim = _horaFim.HasValue ? TimeOnly.FromTimeSpan(_horaFim.Value) : null;
+        Dto.MinutosAntecedenciaLembrete = _antecedencia == PadraoFamilia ? null : _antecedencia;
         MudDialog.Close(DialogResult.Ok(true));
     }
 
